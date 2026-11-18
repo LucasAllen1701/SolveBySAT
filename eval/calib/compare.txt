@@ -1,0 +1,19 @@
+120 goals; solve_by_sat outcome identical: 117
+goals with baselines: development 80, this machine 100
+
+STOP conditions (decoder bug, different proved N): 0
+
+resource differences (timeout / memout / crash on one side or at another N): 3
+   main:B/List.foldl_push_eq_append/4  |H| 4: dev crash(oom, last_N 10)  →  here no_proof_le_Nmax
+   main:B/UInt16.sizeOf/1  |H| 16: dev timeout(10, solver)  →  here timeout(9, solver)
+   main:B/String.Slice.sliceTo_sliceTo/12  |H| None: dev crash(oom, last_N 7)  →  here crash(oom, last_N 8)
+
+other solve_by_sat differences: 0
+
+baseline differences (sbe_default, library_search; both sides present): 0
+
+sbe_like changes (decision 3, expected): 4  heartbeats→closed 3, heartbeats→failed 1
+   main:A/Std.Sat.AIG.Ref.denote_not heartbeats closed
+   main:B/Std.DTreeMap.Internal.Impl.maxKey_erase_eq_of_not_compare_eq_maxKey/93 heartbeats failed
+   main:B/Vector.map_pop/2 heartbeats closed
+   main:B/Int.mem_toNat?/1 heartbeats closed

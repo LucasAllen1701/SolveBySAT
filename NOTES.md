@@ -1088,3 +1088,41 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
     (headroom 1,346 MB, exit 7, that goal's markers removed, `unfinished_rerun` logged);
     two SIGTERMs to the shard (two `crash(shard, signal 15)`, then exit 8). Outputs are
     under `eval/test_runs/stop_*`.
+- **Calibration (§10.5 decision 5), 19 November 2026. Passed; no stop condition.**
+  - Test suite: `Test/run_all.sh`, exit 0 (above).
+  - Named cases on the changed harness: 36 of 36 identical to the run on the committed
+    harness (`eval/calib/named/`).
+  - Pilot again: 120 goals with the new baseline order (`eval/calib/pilot/`), 38.0 min
+    wall in one driver run. The goal-by-goal comparison with the development machine's
+    `eval/pilot/` is `eval/calib/compare.txt`, from `Test/eval_compare.py`.
+    - 0 decoder bugs, solver errors or harness errors. **0 different proved N.** The same
+      20 goals are proved, at the same N.
+    - 117 of 120 `solve_by_sat` outcomes are identical. Three resource differences, all
+      at a limit, with identical CNFs at every N:
+      - `main:B/List.foldl_push_eq_append/4` (|H| 4): `crash(oom)` at N = 10 on the
+        development machine; `no_proof_le_Nmax` here. N = 10 has 9.93 M clauses; the
+        solver's peak is 1,324 MB and the shard's high-water mark 1,801 MB, so the slice
+        total sits at the 2,500 MB cap and the outcome flips with small changes in
+        timing or memory.
+      - `main:B/String.Slice.sliceTo_sliceTo/12`: `crash(oom)` with `last_N` 7 there, 8
+        here. Same cause; `A/Array.mem_of_mem_erase` in the OOM test moved 9 → 10 the
+        same way.
+      - `main:B/UInt16.sizeOf/1` (|H| 16): solver timeout at N = 10 there, at N = 9 here.
+        Its N = 9 solve took 19.6 s there, under the 20 s limit; this machine is slower
+        (N = 8: 9.5 s there, 11.1 s here; median loop time over the 63 goals that are
+        `no_proof_le_Nmax` on both is 1.11× there).
+    - Goals that hit a time limit: 1 (`UInt16.sizeOf/1`), as in the development pilot.
+    - Baselines: now present for all 100 main-run goals (80 in the development pilot,
+      where shard OOMs lost 20). `sbe_default` and `library_search` are identical on every
+      goal that has them in both runs. `sbe_like` changed on 4 goals, as decision 3
+      expects (it lost `rfl`, `trivial`, `congrFun` and `congrArg`): `heartbeats → closed`
+      3, `heartbeats → failed` 1. All 26 crashes are in the N loop (`phase: sat`); none
+      occurred during the baselines. Shard RSS grows over the baselines by a median of 0
+      and at most 79 MB.
+    - Outcomes here: main A proved 2, no proof 29, crash(oom) 13, goal rejected 6; main B
+      proved 16, no proof 24, crash(oom) 6, goal rejected 3, timeout(solver) 1; R1b
+      proved 2, no proof 11, crash(oom) 7.
+    - Warm-up: 21 shard starts, 727 ms on average, RSS 741 → 911 MB.
+  - Projection for the full run on this machine (`Test/eval_pilot.py eval/calib/pilot`):
+    **35.5 h** (main A 19.4 h, main B 14.8 h, R1b 1.4 h), against 30.6 h on the
+    development machine.

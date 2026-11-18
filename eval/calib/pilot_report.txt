@@ -1,0 +1,57 @@
+pilot: 120 specs, 120 results, missing 0
+
+## Outcomes (run / tier)
+  main  A: no_proof_le_Nmax 29, crash(oom) 13, goal_rejected 6, proved 2
+  main  B: no_proof_le_Nmax 24, proved 16, crash(oom) 6, goal_rejected 3, timeout(solver) 1
+  r1b   B: no_proof_le_Nmax 11, crash(oom) 7, proved 2
+  proved at N: [(1, 9), (2, 6), (3, 3), (4, 1), (6, 1)]
+
+## decoder_bug / harness_error / solver_error: 0
+
+## Baselines (main run)
+  Tier A (50 goals with baselines; median ms {'sbe_like': 25.0, 'sbe_default': 30.0, 'library_search': 20.0})
+    sbe_like     failed 19, heartbeats 16, closed 13, max_rec_depth 2
+    sbe_default  failed 19, heartbeats 17, closed 12, max_rec_depth 2
+    exact        closed_self 47, none 2, closed_other 1
+    apply        closed_self 47, partial 2, closed_other 1
+  Tier B (50 goals with baselines; median ms {'sbe_like': 2.0, 'sbe_default': 4.0, 'library_search': 20.0})
+    sbe_like     closed 37, failed 7, heartbeats 6
+    sbe_default  closed 34, heartbeats 10, failed 6
+    exact        closed_other 25, none 20, closed_self 5
+    apply        closed_other 25, partial 20, closed_self 5
+
+## Warm-up (librarySearch, untimed): 21 shard starts; ms mean 727 (max 749); RSS 741 → 911 MB
+
+## Time: pilot wall 38.0 min, goals 37.4 min, overhead 0.3 s per goal
+
+  by stratum: run tier |H_main| | pilot n, mean s | full n | projected h
+    main  A   0-5 |  27,     8.9 |  1606 |    4.1
+    main  A 11-20 |   8,    41.3 |   576 |    6.7
+    main  A  6-10 |  12,    35.4 |   597 |    5.9
+    main  A   >20 |   3,    43.8 |   221 |    2.7
+    main  B   0-5 |  41,     7.8 |  2239 |    5.1
+    main  B 11-20 |   3,    52.0 |   153 |    2.2
+    main  B  6-10 |   6,    48.7 |   523 |    7.1
+    main  B   >20 |   0,    15.4 (tier mean) |    85 |    0.4
+    r1b   B   0-5 |  13,    14.8 |   224 |    0.9
+    r1b   B 11-20 |   0,    17.4 (tier mean) |    14 |    0.1
+    r1b   B  6-10 |   7,    22.3 |    59 |    0.4
+    r1b   B   >20 |   0,    17.4 (tier mean) |     3 |    0.0
+
+  by run and tier: main A: 19.4 h, main B: 14.8 h, r1b B: 1.4 h
+
+  by outcome (share of the tier's pilot time, applied to its projection):
+    main  A crash(oom)             pilot n  13, mean   38.0 s →   8.5 h
+    main  A goal_rejected          pilot n   6, mean   16.9 s →   1.7 h
+    main  A no_proof_le_Nmax       pilot n  29, mean   17.0 s →   8.5 h
+    main  A proved                 pilot n   2, mean   18.8 s →   0.6 h
+    main  B crash(oom)             pilot n   6, mean   38.8 s →   4.5 h
+    main  B goal_rejected          pilot n   3, mean   19.5 s →   1.1 h
+    main  B no_proof_le_Nmax       pilot n  24, mean   16.7 s →   7.7 h
+    main  B proved                 pilot n  16, mean    0.3 s →   0.1 h
+    main  B timeout(solver)        pilot n   1, mean   71.3 s →   1.4 h
+    r1b   B crash(oom)             pilot n   7, mean   29.9 s →   0.8 h
+    r1b   B no_proof_le_Nmax       pilot n  11, mean   12.6 s →   0.6 h
+    r1b   B proved                 pilot n   2, mean    0.2 s →   0.0 h
+
+  PROJECTED FULL RUN: 35.5 h (6300 goals)

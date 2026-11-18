@@ -1,0 +1,30 @@
+120 specs, 0 done, 120 to run
+crash(shard, oom) on main:A/_private.Std.Data.DTreeMap.Internal.Zipper.0.Std.DTreeMap.Internal.toList_roiIter
+crash(shard, oom) on main:A/Nat.getElem!_toArray_rco_eq_zero_iff
+crash(shard, oom) on main:A/Std.TreeMap.Raw.equiv_iff_keys_unit_eq
+crash(shard, oom) on main:A/Array.foldl_toList_eq_flatMap
+crash(shard, oom) on main:A/Std.DHashMap.isEmpty_iff_forall_not_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.toList_insert_perm
+crash(shard, oom) on main:A/_private.Init.Grind.Ordered.Linarith.0.Lean.Grind.Linarith.Poly.denote'_go_eq_denote
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getD_modify_self
+crash(shard, oom) on main:A/Array.unattach_attachWith
+crash(shard, oom) on main:A/List.getLast?_drop
+crash(shard, oom) on main:A/Char.ordinal_ofOrdinal
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.mem_insertMany_of_mem
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.equiv_iff_toArray_eq
+shard 0: done; 50 results; 1148 s
+crash(shard, oom) on main:B/Std.ExtTreeMap.minKey?_eq_some_minKey!/0
+crash(shard, oom) on main:B/List.flatten_reverse/18
+crash(shard, oom) on main:B/Std.DTreeMap.Const.maxKey!_modify/0
+crash(shard, oom) on main:B/Array.append_eq_replicate_iff/12
+crash(shard, oom) on main:B/Std.IterM.stepAsHetT_filterMapWithPostcondition/15
+crash(shard, oom) on main:B/String.Slice.sliceTo_sliceTo/12
+shard 1: done; 100 results; 1927 s
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.mem_toList_iff_getKey?_eq_some_and_get?_eq_some/0
+crash(shard, oom) on r1b:B/Nat.toList_rcc_eq_cons/1
+crash(shard, oom) on r1b:B/List.foldr_cons_eq_append/0
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.mem_toList_iff_getKey?_eq_some_and_get?_eq_some/19
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/26
+crash(shard, oom) on r1b:B/ISize.toInt_div_of_ne_left/9
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.Const.get!_diff_of_contains_right/3
+shard 2: done; 120 results; 2281 s

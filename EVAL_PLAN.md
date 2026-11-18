@@ -2,7 +2,7 @@
 
 Lucas Allen · 18 November 2026
 
-**Status: 7a (corpus) done, including the H_main amendment. 7b (coverage harness) is next. Amendments made before 7b are in section 10.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
+**Status: 7a (corpus) and the 7b pilot are done. The full 7b run goes to a dedicated test machine under the decisions of section 10.5.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
 
 ## 1. Questions
 
@@ -291,3 +291,47 @@ Otherwise, record each closure as `closed_self` (the term mentions the goal's ow
 - 50 goals per tier with H_main, plus 20 goals of the R1b side run with H_full.
 - Break the projection down by tier, by outcome, and by |H_main| bucket (0–5, 6–10, 11–20, over 20).
 - After the pilot, only the sample sizes may change, as section 5 allows. Report the pilot's outcome counts, but do not tune anything on them.
+
+### 10.5 Decisions after the pilot (18 November 2026)
+
+**Pilot result.**
+
+- 120 goals: 50 Tier A, 50 Tier B and 20 R1b.
+- 0 decoder bugs. All 36 named cases agree with the test suite. The resume and forced-OOM checks pass.
+- Proved: Tier A 2 of 50, Tier B 16 of 50, R1b 2 of 20.
+- Crashes at the 2.5 GB cap: Tier A 13, Tier B 7, R1b 7.
+- Projected full run on the development machine: 30.6 hours.
+
+These numbers are for orientation only, and nothing is tuned on them.
+
+**Changes made during 7b, accepted.**
+
+- Solver timeouts. At its -t limit, CaDiCaL 2.1.2 prints the comment line c UNKNOWN and exits with 0. This counts as a timeout.
+- Memory cap. This follows a global out-of-memory incident when two runs overlapped.
+  - The 2.5 GB cap applies to the whole per-run slice: shard, solver and helper together.
+  - One driver runs at a time, and shards die with their driver.
+  - Solver files are written to disk, not to the /tmp tmpfs.
+- New outcomes.
+  - memout(N, spawn): ENOMEM when starting the solver.
+  - Heartbeat and recursion-depth exhaustion in the baselines.
+- exact? finding the goal itself. librarySearch cannot exclude constants, so closures are labelled closed_self or closed_other (10.4). In the pilot, 36 of the 37 Tier A closures by exact? were closed_self, so R4 compares against exact? on Tier B only.
+
+**Decisions.**
+
+1. No sample reduction. The full pre-registered run (3,000 Tier A, 3,000 Tier B and 300 R1b goals) goes ahead on a dedicated test machine, so the 8-hour rule of section 5 is waived.
+2. Baselines run before the solve_by_sat N loop, so that a memory crash no longer loses them. Each baseline still starts from a fresh state. Record the shard's RSS before and after the baselines. The calibration of item 5 checks that the new order changes no solve_by_sat outcome.
+3. Like-for-like solve_by_elim uses no default lemmas. As implemented in 7b, both configurations add rfl, trivial, congrFun and congrArg, which are not in H, and the pilot gave identical results for the two.
+   - Like-for-like now uses H_main and the local hypotheses only, with symm and exfalso off and maxDepth := 10.
+   - The default configuration is unchanged.
+
+   This corrects the definition of the baseline, as noticed in the 7b notes. It does not affect solve_by_sat.
+4. Parallel shards are allowed if the test machine has room, with P ≤ min(physical cores − 1, ⌊(RAM in GB − 2) / 2.6⌋).
+   - Each shard runs in its own slice capped at 2.5 GB.
+   - If P > 1, the resume and forced-OOM checks are repeated in parallel mode before the full run.
+   - P and the machine's specifications go into every output header and into NOTES.md.
+   - Only 1 of 120 pilot goals hit a time limit, so contention between shards should change little; report the count.
+5. Calibration on the test machine before the full run. Run the full test suite, then the 36 named cases, then the 120 pilot goals again with the new baseline order. Compare each goal with the development machine's pilot:
+   - a different proved N, or any decoder bug: stop;
+   - any other difference, such as a timeout or memory crash on one machine only: list and explain it, then continue.
+6. Results are pushed to the eval-m7 branch after each completed shard. No other machine pushes to that branch during the run.
+7. After the full run, stop and report. Stage 7c is planned separately.

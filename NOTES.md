@@ -1126,3 +1126,13 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
   - Projection for the full run on this machine (`Test/eval_pilot.py eval/calib/pilot`):
     **35.5 h** (main A 19.4 h, main B 14.8 h, R1b 1.4 h), against 30.6 h on the
     development machine.
+- **Full run started** 19 November 2026, 10:15, detached (`setsid nohup Test/eval_full.sh`),
+  P = 1, results in `eval/full/`.
+- **Commit author rewrite (owner-approved, 19 November).** This machine's global git
+  config used a private address, so GitHub refused the pushes (GH007, email privacy).
+  The repo now sets `user.email` to the noreply address of the earlier history. The 4
+  unpushed commits were re-created with that address: same trees, messages and dates,
+  built with `commit-tree`/`update-ref` so that the running driver's files were never
+  touched. Old → new hashes: 445f29a → 977c867, 1b777b2 → c81e323, 6ef9ea2 → c3a3ec8,
+  e9f77e7 → ef0c75b. `eval/full/header.json` records the start commit as `6ef9ea2`, which
+  is now `c3a3ec8` (same tree).

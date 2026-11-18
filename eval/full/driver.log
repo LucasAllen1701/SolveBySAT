@@ -1,0 +1,32 @@
+=== driver start 2026-11-19 10:15:33
+6300 specs, 0 done, 6300 to run
+crash(shard, oom) on main:A/Array.all_map'
+crash(shard, oom) on main:A/Array.anyM_loop_cons
+crash(shard, oom) on main:A/Array.any_append
+crash(shard, oom) on main:A/Array.any_replicate
+crash(shard, oom) on main:A/Array.append_eq_replicate_iff
+crash(shard, oom) on main:A/Array.append_inj
+crash(shard, oom) on main:A/Array.append_right_inj
+crash(shard, oom) on main:A/Array.attach_congr
+crash(shard, oom) on main:A/Array.attach_eq_empty_iff
+crash(shard, oom) on main:A/Array.contains_filter
+crash(shard, oom) on main:A/Array.count_flatMap
+crash(shard, oom) on main:A/Array.eq_iff_flatten_eq
+crash(shard, oom) on main:A/Array.eq_push_pop_back!_of_size_ne_zero
+crash(shard, oom) on main:A/Array.eraseP_eq_empty_iff
+crash(shard, oom) on main:A/Array.eraseP_filter
+crash(shard, oom) on main:A/Array.erase_of_not_mem
+crash(shard, oom) on main:A/Array.exists_of_findSome?_eq_some
+crash(shard, oom) on main:A/Array.extract_eq_extract_right
+crash(shard, oom) on main:A/Array.extract_size
+crash(shard, oom) on main:A/Array.extract_size_left
+crash(shard, oom) on main:A/Array.filterMap_some
+crash(shard, oom) on main:A/Array.filter_append
+crash(shard, oom) on main:A/Array.find?_map
+crash(shard, oom) on main:A/Array.findFinIdx?_toList
+crash(shard, oom) on main:A/Array.findIdx?_eq_none_of_findIdx?_eq_none
+crash(shard, oom) on main:A/Array.findIdx_eq_size
+crash(shard, oom) on main:A/Array.findSomeRev?_push_of_isNone
+crash(shard, oom) on main:A/Array.flatMap_def
+crash(shard, oom) on main:A/Array.flatten_filter_ne_empty
+shard 0: done; 50 results; 2201 s

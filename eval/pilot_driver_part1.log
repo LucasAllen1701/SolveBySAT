@@ -1,0 +1,23 @@
+120 specs, 0 done, 120 to run
+crash(shard, oom) on main:A/_private.Std.Data.DTreeMap.Internal.Zipper.0.Std.DTreeMap.Internal.toList_roiIter
+crash(shard, oom) on main:A/Nat.getElem!_toArray_rco_eq_zero_iff
+crash(shard, oom) on main:A/Std.TreeMap.Raw.equiv_iff_keys_unit_eq
+crash(shard, oom) on main:A/Array.foldl_toList_eq_flatMap
+crash(shard, oom) on main:A/Std.DHashMap.isEmpty_iff_forall_not_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.toList_insert_perm
+crash(shard, oom) on main:A/_private.Init.Grind.Ordered.Linarith.0.Lean.Grind.Linarith.Poly.denote'_go_eq_denote
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getD_modify_self
+crash(shard, oom) on main:A/Array.unattach_attachWith
+crash(shard, oom) on main:A/List.getLast?_drop
+crash(shard, oom) on main:A/Char.ordinal_ofOrdinal
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.mem_insertMany_of_mem
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.equiv_iff_toArray_eq
+shard 0: done; 50 results; 910 s
+crash(shard, oom) on main:B/Std.ExtTreeMap.minKey?_eq_some_minKey!/0
+crash(shard, oom) on main:B/List.flatten_reverse/18
+crash(shard, oom) on main:B/Std.DTreeMap.Const.maxKey!_modify/0
+crash(shard, oom) on main:B/List.foldl_push_eq_append/4
+crash(shard, oom) on main:B/Array.append_eq_replicate_iff/12
+crash(shard, oom) on main:B/Std.IterM.stepAsHetT_filterMapWithPostcondition/15
+STOP: "solver_error" on main:B/UInt16.sizeOf/1: "solver status 0: [memrun] peak 732 MB, wall 20.0 s, status 0\n"
+STOP: shard exited with 3 (decoder bug)

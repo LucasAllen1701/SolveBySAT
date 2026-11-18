@@ -1,0 +1,1 @@
+{"H": ["Array.mk", "Eq.trans", "List.erase_toArray", "List.mem_of_mem_erase", "List.mem_toArray", "congrArg", "congrFun'", "propext"], "H_main_size": 8, "baselines": true, "id": "A/Array.mem_of_mem_erase", "key": "main:A/Array.mem_of_mem_erase", "run": "main", "thm": "Array.mem_of_mem_erase", "tier": "A"}

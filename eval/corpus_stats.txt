@@ -1,0 +1,21 @@
+Tier A: constants in #[Init, Std]: 117002
+  dropped: not a theorem: 37224
+  dropped: equation lemma: 5331
+  dropped: internal auxiliary name: 22888
+  dropped: compiler-generated lemma: 3275
+  dropped: matcher-derived: 272
+  remaining after filters: 48012
+  Tier A sample (cap 3000, seed 70001): 3000
+  of which the proof uses an elimination constant: 1269
+  goals whose own declaration was in H (removed): 0
+Tier B: theorems sampled from Tier A (seed 70002): 1000
+  walks cut at the visit budget (20000): 13; walk errors: 0
+  candidates (proof-valued applications headed by a constant or hypothesis): 28189
+  dropped: duplicate within its theorem: 14217
+  dropped: duplicate of a goal from an earlier theorem: 22
+  dropped: over the per-theorem cap (10, seed 70003): 8049
+  goals before the total cap: 5901 (from 993 theorems)
+  Tier B sample (cap 3000, seed 70004): 3000
+  of which the oracle term uses an elimination constant: 534
+  goals whose source theorem was in H (removed): 0
+  sanity check (inferType of the oracle term defeq to the goal) failures: 0

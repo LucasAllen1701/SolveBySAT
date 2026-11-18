@@ -1,0 +1,20 @@
+{
+ "baseline_heartbeats": 200000,
+ "cap_mb": 1200,
+ "git_commit": "3fdb648c44a49095cdea6d2bf4ecc1468b92978b",
+ "git_dirty": true,
+ "loop_s": 120,
+ "n_specs": 1,
+ "nmax": 10,
+ "sbe_max_depth": 10,
+ "seeds": {
+  "pilot_A": 70006,
+  "pilot_B": 70007,
+  "r1b": 70005
+ },
+ "shard_size": 50,
+ "solver_s": 20,
+ "specs": "/home/tom/SolveBySAT/eval/test_runs/oom_specs.jsonl",
+ "toolchain": "4.36.0",
+ "watchdog_s": 300
+}

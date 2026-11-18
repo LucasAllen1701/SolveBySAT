@@ -1,0 +1,12 @@
+=== forced OOM: cap 1200 MB
+1 specs, 0 done, 1 to run
+crash(shard, oom) on main:A/Array.mem_of_mem_erase
+shard 0: done; 1 results; 10 s
+   main:A/Array.mem_of_mem_erase crash cause oom last_N 6 N None hwm_mb None
+{"hwm_mb":903,"ms":607,"rss_after_mb":903,"rss_before_mb":729,"specs":"eval/test_runs/oom_1200/shard_0000.jsonl"}
+=== the same goal alone at the real cap, 2500 MB
+1 specs, 0 done, 1 to run
+crash(shard, oom) on main:A/Array.mem_of_mem_erase
+shard 0: done; 1 results; 33 s
+   main:A/Array.mem_of_mem_erase crash cause oom last_N 9 N None hwm_mb None
+9

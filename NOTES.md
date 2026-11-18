@@ -576,3 +576,387 @@ Implementation notes and deviations:
     fires).
   - Test/M2, M3, M4Lean and M5Lean: no errors, with all `#guard_msgs` unchanged.
   - Each refinement alone: 0 mismatches in all three differentials.
+
+## Milestone 7: evaluation (EVAL_PLAN.md)
+
+The plan was read from `~/Downloads/EVAL_PLAN.md`. The copy at the repo root had been
+moved to the Trash (identical md5).
+
+### Pre-registration (fixed before the first run; constants in `Test/EvalCommon.lean`)
+
+- **Source.** `Init` + `Std` of Lean 4.36.0. Measured import cost, peak RSS: `Init`
+  456 MB, `Init`+`Std` 713 MB (668 / 1,167 modules, 79,778 theorems). Std fits, so both
+  are used. Std does not import `Lean`.
+- **Tier A filters, applied in order.** A theorem is dropped if:
+  1. it is not a theorem, or its type is not a proposition;
+  2. it has an internal auxiliary name: after stripping the `_private.…` prefix, some name
+     component starts with `_` (`_proof_N`, `_simp_N_N`, `_auxLemma`, `_unary`, …);
+  3. it is an equation lemma: `Meta.isEqnThm`, or last component `eq_N` / `eq_def` /
+     `eq_unfold`;
+  4. it is matcher-derived (some prefix of the name is a matcher), or a recursor;
+  5. *(decision, beyond the plan's list)* it is compiler-generated: last component one of
+     `inj`, `injEq`, `sizeOf_spec`, `congr_simp`, `induct`, `induct_unfolding`,
+     `mutual_induct`, `fun_cases`, `fun_cases_unfolding`, `splitter`. These are
+     auxiliary in the plan's sense, though not named in it. Names users also write, such
+     as `ext`, `ext_iff`, `eta` and `elim`, are kept.
+
+  *Decision:* private theorems with an ordinary name are user-written lemmas, so they are
+  kept as goals and as H constants. The plan's "internal names" is read as names with an
+  internal component.
+- **Tier A sample.** 3,000, seed 70001 (partial Fisher–Yates with the splitmix64 of
+  `Test/Util.lean`), over the remaining theorems in name order.
+- **Oracle H (§2.3), in order.** A constant is dropped if it is:
+  - a built-in rule;
+  - auxiliary (rule 2 above, a matcher or under one, a recursor, `casesOn`/`recOn`/
+    `brecOn`, `noConfusion`);
+  - an instance (`Meta.isInstance`).
+
+  Every constant whose type is a proposition is kept as `proof`. Any other constant is
+  kept as `data` unless it is a type former (`isTypeFormerType`).
+  *Deviation (fixed after inspecting the first extraction, before any coverage run):* the
+  plan keeps "a theorem or axiom whose type is a proposition". Read literally, that drops
+  the constructors of inductive propositions (`Eq.refl` 1,314 uses, `HEq.refl`,
+  `Nonempty.intro`, `WF.*`) and Prop-typed definitions (`rfl`, 393 uses). These are the
+  tactic's own test lemmas, so all proof constants are kept. The first version also
+  mislabelled the axiom `Classical.choice : Nonempty α → α`, which is a data constant by
+  SPEC 2.1.
+  *Decision:* "the constants in its proof term" looks through internal auxiliary theorems
+  (`_proof_N`, `_simp_N`, …). The elaborator abstracts these out of the proof, so they are
+  part of it; without this, many oracle Hs would be nearly empty. The same expanded set is
+  used to detect elimination constants. The auxiliary constants themselves are then
+  dropped by the filter.
+- **Elimination constants.** A recursor, an auxiliary recursor (`casesOn`, `recOn`,
+  `brecOn`), a matcher, `Eq.mpr`, `Eq.rec`, `Eq.ndrec`, `Eq.subst`, `False.elim`,
+  `absurd`.
+- **Tier B.**
+  - 1,000 theorems sampled from the Tier A sample, seed 70002.
+  - Walk: λ-bodies (binders entered as local declarations), `let` (zeta: the value is
+    walked, then the body with the value substituted), application heads and arguments,
+    `mdata`, `proj`. Binder types are not walked. The visit budget is 20,000 nodes per
+    theorem; a cut walk keeps the goals found so far, and cuts are counted.
+  - A goal is a proof-valued application with at least one argument whose head is a
+    constant or a local hypothesis. It is stored closed over its enclosing binders
+    (`∀ ctx, T`) as (theorem, position in walk order). The harness rebuilds it with the
+    same walker.
+  - Dedupe by (closed goal type up to α-equivalence, H): first within the theorem, then
+    against goals already taken from earlier theorems (name order). The per-theorem cap is
+    10 (seeded sample, stream seed 70003); the total cap is 3,000 (seed 70004).
+  - Sanity check: `isDefEq (inferType (fun ctx => e)) (∀ ctx, T)`.
+  - Node estimate: proof-valued spines headed by a constant or a local hypothesis inside
+    the oracle term.
+- **Heartbeats** for corpus MetaM work: 400,000 (`maxHeartbeats`).
+- **Coverage limits (§3, §5), fixed now.**
+  - Nmax = 10.
+  - Solver: CaDiCaL `-t 20` (wall-clock seconds; `cadical --help` in 2.1.2: `-t <sec>  set
+    wall clock time limit`).
+  - 120 s wall time per goal; each shard process under `ulimit -v` 2.5 GB.
+  - The baseline heartbeat budget will be fixed in 7b, before the pilot.
+- **Lean API checks (4.36.0).**
+  - `Expr.getUsedConstants : Expr → Array Name`, `Meta.isInstance : Name → CoreM Bool`,
+    `Meta.isEqnThm : Name → CoreM Bool`, `isMatcherCore`, `isRecCore`, `isAuxRecursor`,
+    `isCasesOnRecursor`, `isNoConfusion`, `privateToUserName?`, `Expr.eqv` (the `BEq Expr`
+    instance) all exist as expected.
+  - `solve_by_elim`'s configuration is `Lean.Meta.SolveByElim.SolveByElimConfig`. Its depth
+    is `maxDepth` (default 6 there, 50 in `ApplyRulesConfig`), and it also has `symm`,
+    `exfalso`, `intro`, `constructor` and `backtracking` (all default true).
+  - `exact?` and `apply?` are `Lean.Meta.LibrarySearch.librarySearch`.
+  - `maxHeartbeats` is a field of `Core.Context.Cold`, not of `Core.Context`; it is still
+    settable as `{ maxHeartbeats := … }`.
+  - `importModules (loadExts := true)` needs `enableInitializersExecution` (unsafe) first.
+- **Deviation: memory cap by cgroup, not `ulimit -v`.** `ulimit -v` limits address
+  space, and the import reserves more than 4 GB of it for 707 MB of RSS (mapped `.olean`
+  files, thread stacks). Under `ulimit -v` 2.5, 3 or 4 GB the process dies at start
+  ("failed to create thread"); at 6 GB it runs. The cap therefore uses a user cgroup:
+  `systemd-run --user --scope -p MemoryMax=2500M -p MemorySwapMax=0`, which limits
+  resident memory (checked: a 600 MB allocation under `MemoryMax=300M` is killed). The
+  2.5 GB figure is unchanged.
+
+### 7a: corpus extraction (results)
+
+`lake exe eval_corpus extract eval`, under the cgroup cap: 15 s, 778 MB peak. Two runs
+give byte-identical `corpus_A.jsonl`, `corpus_B.jsonl` and `corpus_stats.txt`.
+
+- **Tier A.** 117,002 constants in `Init`+`Std`. Dropped:
+  - not a theorem: 37,224
+  - internal auxiliary name: 22,888
+  - equation lemma: 5,331
+  - compiler-generated: 3,275
+  - matcher-derived: 272
+
+  48,012 remain, from which a sample of 3,000 is drawn. Of these, 1,176 (39%) have proofs
+  that use an elimination constant.
+- **Tier B.** 1,000 theorems; 13 walks cut at the budget; 0 walk errors. There are
+  28,189 candidates. Dropped:
+  - duplicates within a theorem: 14,217
+  - duplicates of earlier theorems' goals: 22
+  - over the per-theorem cap: 8,049
+
+  5,901 goals from 993 theorems remain, giving a sample of 3,000. Of these, 452 have
+  oracle terms that use an elimination constant. Sanity check failures: **0 / 3,000**.
+  Node estimate: 1 for 668 goals, 2–10 for 1,689, over 10 for 643.
+- **Oracle H.**
+  - Tier A: 42,923 constants kept. Dropped: type formers 20,635, instances 11,276,
+    auxiliary 3,248, built-in rules 663. 37 goals have an empty H.
+  - Tier B: 27,707 kept. Dropped: type formers 17,929, instances 9,585, auxiliary 1,543,
+    built-in rules 203. 23 goals have an empty H.
+- **Observation (no action).** By §2.3's rule, function symbols of the statement such as
+  `HAdd.hAdd`, `OfNat.ofNat` and `List.length` are kept as data constants, so they become
+  data clauses. This enlarges H beyond the lemmas actually applied. The effect will show
+  in 7b sizes.
+
+### Pre-registration amendment (after 7a)
+
+Follows EVAL_PLAN.md §10, which was added on 18 November 2026 after the 7a review and
+before any coverage run. From here on the plan is read from the repo root copy (identical
+to `~/Downloads/EVAL_PLAN(1).md`). §10.1 accepts the 7a deviations recorded above.
+
+- **H_main (§10.2), implemented in `Eval.splitH`.**
+  - Every proof constant is kept.
+  - A data constant is kept only if it occurs (`getUsedConstants`) neither in the goal's
+    closed type (Tier A: the theorem's type; Tier B: `∀ ctx, T`) nor in the type of any
+    proof constant kept in that goal's H.
+  - Each record also keeps the 7a set as `H_full`, plus `H_data_full` (its data
+    constants) and `H_data_dropped` (data constants of `H_full` not in `H_main`).
+  - The old field `H` is replaced by `H_main` and `H_full`. Main coverage runs use
+    `H_main`; the R1b side run (300 Tier B goals) uses `H_full`.
+- **Self-reference assertion.** No goal may have its own declaration (Tier A) or source
+  theorem (Tier B) in H; if one does, it is removed and the record is flagged
+  `self_in_H`. **Hits: 0 in Tier A, 0 in Tier B.**
+- **Regenerated under the cgroup cap.** 15.7 s, 779 MB peak. Two runs are byte-identical
+  (`corpus_A` 853c14cb7ed3, `corpus_B` cad3bf0fd2f4, `corpus_stats` 57719e399207).
+  The goal sets are unchanged from 7a: the same 3,000 + 3,000 ids, and `H_full` equals
+  7a's `H` on every goal.
+  *Decision:* Tier B dedupe stays on (goal, `H_full`), as in 7a, so the accepted goal set
+  does not move. Dedupe on (goal, `H_main`) would merge 0 further goals.
+- **Sizes (min / median / p90 / max).**
+
+  | tier | set | all | proof | data |
+  | --- | --- | --- | --- | --- |
+  | A | H_full | 0 / 10 / 30 / 129 | 0 / 4 / 16 / 91 | 0 / 5 / 16 / 67 |
+  | A | H_main | 0 / 6 / 19 / 98 | 0 / 4 / 16 / 91 | 0 / 1 / 3 / 24 |
+  | B | H_full | 0 / 7 / 18 / 84 | 0 / 2 / 9 / 51 | 0 / 4 / 11 / 37 |
+  | B | H_main | 0 / 2 / 10 / 56 | 0 / 2 / 9 / 51 | 0 / 0 / 2 / 21 |
+
+- **Data constants dropped.**
+  - Tier A: 2,625 of 3,000 goals lost data constants (16,185 of 20,232 dropped).
+  - Tier B: 2,642 goals lost data constants (13,616 of 14,908 dropped).
+  - Most often dropped (Tier A): `OfNat.ofNat` 976, `Bool.true` 650, `HAdd.hAdd` 486,
+    `Array.size` 339, `Option.some` 335, `Bool.false` 304, `List.cons` 270, `HSub.hSub`
+    267, `Decidable.decide` 245, `Option.none` 223, `Neg.neg` 217, `ite` 201, `List.nil`
+    190, `Nat.cast` 182, `HMul.hMul` 165, `Subtype.val` 156, `Std.DHashMap.Raw.buckets`
+    155, `BEq.beq` 138, `List.length` 136, `Ord.mk` 135.
+  - Tier B is nearly the same, with `HAppend.hAppend` in place of `Ord.mk`.
+  - Goals with an empty `H_main`: A 50, B 62. With an empty `H_full`: A 37, B 23.
+- **Data constants kept.** At least one is kept in 1,615 Tier A goals and 619 Tier B goals.
+  Examples:
+  - `A/Array.all_map'`: `Array.mk`
+  - `A/List.mapM_subtype`: `List.cons`, `List.nil`
+  - `A/Std.TreeMap.minKey!_modify_eq_minKey!`: `Std.TreeMap.inner`
+  - `A/Std.IterM.TerminationMeasures.Finite.rel_of_skip`: `Option.some`,
+    `Std.IterStep.successor`
+  - `A/…Option.any_dmap`: `Option.none`
+- **Open point for review (no change made).** Most kept data constants are not witnesses.
+  They are polymorphic combinators whose result type is a type variable, so SPEC 2.1
+  calls them data: `id` (A 955, B 450), `Eq.mpr` (809 / 200), `Eq.mp` (304 / 158),
+  `False.elim`, `dite`. Of the goals that keep any data constant, 660 / 1,615 (A) and
+  392 / 619 (B) keep *only* such combinators (`id`, `Eq.mp`, `Eq.mpr`, `Eq.ndrec`,
+  `Eq.rec`, `False.elim`, `absurd`, `cast`, `dite`, `ite`).
+  - `id` usually comes from `show`/type ascriptions in the proof.
+  - `Eq.mpr`, `False.elim` and the others are elimination constants, which 3.3 rule 3
+    already catches.
+
+  The rule of §10.2 was applied as written.
+
+### 7b step 0: combinator rules of EVAL_PLAN §10.4 (corpus)
+
+- **Implemented in `Eval.splitH`.** After the §10.2 data rule, `id` (transparent) and
+  every elimination constant are removed from `H_main` and listed in `H_main_removed`
+  with the reason (`id` or `elimination`).
+  - Elimination constants here are those of §2.1, plus `Eq.mp`, `cast`, `dite` and `ite`
+    when they survive the data rule. That is exactly when they are still in `H_main`
+    after it, so an `ite` that occurs in the statement or in a kept lemma's type is never
+    touched.
+  - The four §10.4 constants are added to the record's `elim` list, and therefore to
+    `uses_elim`.
+  - `H_full` is unchanged: it is the 7a set used by R1b.
+- **Compiler check.** Each of the 8 distinct constants removed in the corpus (`id`,
+  `Eq.mpr`, `Eq.mp`, `False.elim`, `dite`, `absurd`, `ite`, `cast`), compiled alone with
+  the goal `True`, is rejected, so the change affects classification only. **The compiler
+  accepts none of them.** In every case the message is "the result type of `c` … has the
+  clause variable … as its head symbol".
+- **Regenerated under the cgroup cap.** 16.5 s, 777 MB peak. Two runs are byte-identical
+  (`corpus_A` e108aab72d74, `corpus_B` 10a93687d7fe, `corpus_stats` a332af976598). Goal ids
+  and `H_full` are unchanged.
+- **Removed by §10.4.**
+  - Tier A: 2,257 removals in 1,099 goals: `id` 955, `Eq.mpr` 809, `Eq.mp` 304, `dite` 91,
+    `False.elim` 88, `absurd` 6, `ite` 2, `cast` 2.
+  - Tier B: 871 removals in 546 goals: `id` 450, `Eq.mpr` 200, `Eq.mp` 158, `False.elim` 49,
+    `dite` 14.
+- **New `H_main` sizes (min / median / p90 / max).**
+
+  | tier | all | proof | data |
+  | --- | --- | --- | --- |
+  | A | 0 / 5 / 17 / 94 (was 0 / 6 / 19 / 98) | 0 / 4 / 16 / 91 | 0 / 0 / 2 / 21 |
+  | B | 0 / 2 / 10 / 53 (was 0 / 2 / 10 / 56) | 0 / 2 / 9 / 51 | 0 / 0 / 0 / 19 |
+
+  - Goals keeping at least one data constant: A 955, B 227.
+  - Goals with an empty `H_main`: A 51, B 66.
+  - The most frequent data constants left are witness-like: `List.nil`,
+    `Lean.Omega.LinearCombo.mk`, `Subtype.mk`, `Array.mk`, `…TreeMap.inner`,
+    `Option.none`.
+- **New elimination counts.**
+  - Tier A: 1,269 (was 1,176). The 93 new ones are goals whose only elimination is one
+    of the four §10.4 constants (`Eq.mp` 304 uses, `dite` 91, `ite` 2, `cast` 2).
+  - Tier B: 534 (was 452), with 82 new (`Eq.mp` 158, `dite` 14).
+
+### 7b: the coverage harness (EVAL_PLAN §3.1, §3.2, §5, §10.3, §10.4)
+
+- **Files.**
+  - `Test/EvalRun.lean` (`lake exe eval_run`): one process per shard.
+  - `Test/eval_driver.py`: spec files, shards, cap, watchdog, crash records, resume.
+  - `Test/EvalNamed.lean`: the SPEC 9.1 named tests as closed goals.
+  - `Test/eval_pilot.py`: the pilot report and projection.
+  - Spec files: `eval/specs_{named,pilot,full}.jsonl`. They are deterministic and contain
+    120 pilot specs and 6,300 full-run specs (3,000 A, 3,000 B, 300 R1b).
+- **The tactic is unchanged.** The harness calls the library's `compile`, `encode` (default
+  `EncodeOptions`, as the tactic) and `decode`. Its only own code on that path is the solver
+  call. That call writes the same DIMACS file and runs CaDiCaL with `-q -t <s>` through
+  `Test/memrun.py`, which gives the solver's peak RSS. It parses the output with the
+  library's `parseSolverOutput` and checks the model against every clause.
+- **Per goal (§3.1).**
+  1. `compile goal []`; on failure, `goal_rejected(reason)`.
+  2. `compile goal [c]` for each c in H (`H_main`, or `H_full` for R1b), recording
+     accepted and rejected constants with the message.
+  3. `compile goal accepted`, then N = 1 … 10.
+     - The loop has 120 s in total, and each solver call is limited to
+       `min(20 s, remaining)`. It stops at the first timeout or memout.
+     - SAT is decoded, checked with `isDefEq` and kernel-checked (`Kernel.Environment.addDecl`
+       on a copy of the environment). A failure is a `decoder_bug` and stops the run (exit 3).
+     - The documented-limitation message gives `limitation`.
+  4. At the final N (also for `no_proof_le_Nmax`): variables, clauses, per-family counts,
+     encode ms, solve s and solver peak MB. Each N's sizes and times are also logged.
+- **Outcomes.** `proved(N)`, `no_proof_le_Nmax`, `timeout(N, solver|loop)`,
+  `memout(N, solver|spawn)`, `limitation`, `goal_rejected`, `compile_error`,
+  `crash(shard, oom|watchdog|signal|unknown)`. `decoder_bug`, `solver_error` and
+  `harness_error` stop the run.
+  *Decision:* `memout(N, spawn)` covers ENOMEM when spawning the solver near the cap. That
+  is a resource limit, not a harness error, and it was seen in testing.
+- **Baselines (§3.2, §10.3, §10.4).** Each runs from a fresh state (`saveState`/`restore`)
+  with 200,000 heartbeats (`maxHeartbeats`, `withCurrHeartbeats`), with its wall time
+  recorded. Tier B goals are run after `introNP nctx`, in the goal's context.
+  - `solve_by_elim` reproduces `solve_by_elim [H]` exactly: `mkAssumptionSet` gives H plus
+    the defaults `rfl`, `trivial`, `congrFun`, `congrArg` and the local hypotheses.
+    Like-for-like is `{ maxDepth := 10, symm := false, exfalso := false }` (intro and
+    constructor on); default is `{ maxDepth := 10 }`.
+    *Decision:* the baselines get all of `H_main`, not only the constants our compiler
+    accepts.
+  - `exact?` / `apply?` are one call, since they are the same search in 4.36 (`intros`, then
+    `librarySearch` with `solveByElim` depth 6, `star := true`, `all := false`). The result
+    `none` means closed; `some []` is none; otherwise `exact?` has not closed and `apply?`
+    is `partial`, with the suggestion count and the fewest remaining goals.
+  - **`librarySearch` cannot exclude constants.** Candidates come from the discrimination
+    tree; neither the `tactic` nor the `allowFailure` hook sees the lemma. So each closure
+    is `closed_self` (the term mentions the goal's own declaration or source theorem) or
+    `closed_other` (§10.4).
+  - Heartbeat and recursion-depth exhaustion are outcomes (`heartbeats`, `max_rec_depth`).
+    This needs `tryCatchRuntimeEx`: in 4.36 a plain `try … catch` in `MetaM` does not catch
+    runtime exceptions. The first version missed this and stopped a test run with a
+    harness error.
+  - Warm-up: one untimed `librarySearch` on `True` per shard process, before its first
+    goal; time and RSS go to `warmup.jsonl`. It costs about 0.6 s, with RSS 730 → 905 MB.
+- **Crashes, watchdog, resume (§10.3, §10.4).**
+  - Before each goal the shard appends a started marker, and before each N a progress
+    marker `{key, N}`. A goal with markers and no result is `crash(shard, cause)` with
+    `last_N` and `elapsed_s`, and the shard restarts on the remaining goals.
+  - The cause is `watchdog` (the driver killed the shard after 300 s on one goal), `oom`
+    (the run slice's `memory.events` `oom_kill` count rose), `signal N`, or `unknown` (a
+    marker found when a new driver starts).
+  - Results are appended one line at a time. A trailing partial line is dropped before
+    every shard start, and a rerun skips every key with a result.
+- **Memory incident (18 November, before the fixes below).** Two test runs overlapped. A
+  test command was killed, but its driver's shard survived, and the next test started a
+  second run. Two 2.5 GB-capped shards plus VS Code exhausted RAM: the journal shows a
+  *global* OOM that killed VS Code's electron processes and the agent's shell, and the
+  machine was restarted. No data was affected. Fixes:
+  - one driver at a time (`eval/.driver.lock`, `flock`);
+  - shards and the cgroup keeper get `PR_SET_PDEATHSIG = SIGKILL`, so they die with the
+    driver;
+  - *deviation from the 7a record:* the 2.5 GB cap is now on the whole per-run slice
+    (`systemctl --user set-property --runtime evalrunPID.slice MemoryMax=2500M
+    MemorySwapMax=0`), so shard, solver and keeper share one cap. Per-shard scopes remain
+    inside it;
+  - solver inputs go to `OUTDIR/tmp` on disk (`TMPDIR`), cleared after every shard: `/tmp`
+    is a tmpfs, so files left by killed solvers would hold RAM. Lean's `createTempFile`
+    follows `TMPDIR` (checked).
+- **Acceptance before the pilot.**
+  - **Named tests:** all 36 cases of L1 to D7 (including the two-part rows, G2 with the
+    static filter off, and U1 with `forgetTypes`) give the test suite's result through the
+    harness. Every `min k` is proved at exactly k; F1–F3, G2, A3a, D2b, D5 and D6 give
+    `no_proof_le_Nmax` (no proof up to 10, so none at 6); F4 is proved at 5 (none at 4);
+    U1 gives `limitation`.
+  - **Resume:** 12 Tier A specs in shards of 5.
+    - (a) SIGKILL to the shard alone, during goal 3: `crash(shard, signal 9)`, and the
+      shard restarts.
+    - (b) SIGKILL to the driver during goal 8: its shard died with it. The rerun recorded
+      that goal as `crash(shard, unknown)` and finished the rest.
+    - Result: 12 specs, 12 distinct started keys, 12 result lines, 0 missing, 0
+      duplicated, 0 extra.
+  - **Forced OOM:** `A/Array.mem_of_mem_erase` under a 1,200 MB cap gives
+    `crash(shard, oom)` at `last_N` 6, after the warm-up (peak 903 MB). At the real 2,500 MB
+    cap it also gives `crash(shard, oom)`, at N = 9 after 33 s. In the resume test, 8 of 12
+    Tier A goals (|H_main| 8–9) ran out of memory at 2.5 GB.
+- **Fixed before the pilot (pre-registered).**
+  - Shard size 50.
+  - R1b sample: 300 Tier B goals, `random.Random(70005).sample` over corpus order.
+  - Pilot: 50 Tier A goals (seed 70006), 50 Tier B goals (seed 70007), and the first 20 of
+    the R1b sample.
+  - The limits are those above.
+- **Pilot interruption: CaDiCaL's timeout output (spec check corrected).** At its `-t`
+  limit, CaDiCaL 2.1.2 prints the *comment* line `c UNKNOWN` (not `s UNKNOWN`) and exits 0.
+  This was checked with a 13-into-12 pigeonhole under `-t 1`, with and without `-q`. The
+  harness looked for `s UNKNOWN`, so the first solver timeout of the pilot
+  (`main:B/UInt16.sizeOf/1`, 20.0 s) was reported as `solver_error` and stopped the run
+  after 81 of 120 goals.
+  - Fixed: exit 0 with `UNKNOWN` in the output is a timeout.
+  - Only that goal was affected, because any earlier timeout would have stopped the run
+    the same way. Its result line and markers were removed, and the pilot was resumed;
+    the 80 results before it stand.
+  - No filter or limit changed.
+
+### 7b: pilot (120 goals; `eval/pilot/`, report by `Test/eval_pilot.py eval/pilot`)
+
+- **Completion.** 120 of 120 results. 0 `decoder_bug`, 0 harness or solver errors after the
+  timeout fix above. Wall time 33.4 min in total (two driver runs).
+- **Outcomes.**
+
+  | run | tier | proved | no proof ≤ 10 | crash (oom) | goal rejected | timeout |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | main | A (50) | 2 | 29 | 13 | 6 | 0 |
+  | main | B (50) | 16 | 23 | 7 | 3 | 1 (solver) |
+  | R1b | B (20) | 2 | 11 | 7 | 0 | 0 |
+
+  Proofs were found at N = 1 (9), 2 (6), 3 (3), 4 (1), 6 (1). No watchdog crash occurred:
+  every crash was the 2.5 GB cap.
+- **Baselines** (only for goals whose shard did not crash: 37 of 50 in Tier A, 43 of 50 in
+  Tier B).
+  - `solve_by_elim`, like-for-like and default alike: Tier A closed 12, heartbeats 12,
+    failed 12, max_rec_depth 1; Tier B closed 29, heartbeats 8, failed 6.
+  - `exact?`: Tier A `closed_self` 36, `closed_other` 1; Tier B `closed_other` 21, `none`
+    17, `closed_self` 5. `apply?`: the same closures, with `partial` in place of `none`.
+- **Warm-up.** 23 shard starts (one per crash restart); 589 ms on average (max 612); RSS
+  729 → 905 MB.
+- **Time.** About 16 s per goal on average, plus 0.8 s overhead per goal. By |H_main|
+  bucket: 0–5 about 7–8 s (13 s in R1b with H_full); 6–10 32–44 s; 11–20 30–50 s.
+- **Projection of the full run (6,300 goals): 30.6 h.**
+  - By run and tier: main A 15.4 h, main B 13.9 h, R1b 1.3 h.
+  - By outcome:
+    - main A: no proof 8.2 h, oom 4.9 h, rejected 1.8 h, proved 0.6 h;
+    - main B: no proof 7.0 h, oom 3.6 h, timeout 1.8 h, rejected 1.4 h, proved 0.1 h;
+    - R1b: oom 0.8 h, no proof 0.5 h.
+  - This is over the 8 h of §5, so a sample-size reduction is proposed and awaits approval
+    (§10.3). Nothing has been tuned on the pilot.
+- **Gap found by the pilot (not yet changed).** A shard OOM during the `solve_by_sat` N loop
+  also loses that goal's baselines, because they run after it. That is 13 of 50 Tier A
+  goals and 7 of 50 Tier B goals in the pilot, so R4 would miss them. Proposed fix: run the
+  baselines first. They take milliseconds and start from a fresh state, so the order
+  changes no result.

@@ -10,6 +10,10 @@ name = "TestUtil"
 roots = ["Test.Util"]
 
 [[lean_lib]]
+name = "EvalLib"
+roots = ["Test.EvalCommon", "Test.EvalNamed"]
+
+[[lean_lib]]
 name = "LeanTests"
 roots = ["Test.M2", "Test.M3", "Test.M4Lean", "Test.M5Lean"]
 
@@ -32,4 +36,14 @@ root = "Test.M5"
 [[lean_exe]]
 name = "bench"
 root = "Test.Bench"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_corpus"
+root = "Test.EvalCorpus"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_run"
+root = "Test.EvalRun"
 supportInterpreter = true

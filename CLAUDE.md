@@ -41,6 +41,7 @@ lake build                         # library
 Test/run_all.sh                    # milestones 0-6 acceptance (several minutes)
 Test/refinements.sh                # each SPEC 6.10 refinement alone (long)
 lake build eval_corpus eval_run    # milestone 7 executables
+lake build Test.EvalNamed          # loaded at run time by the named harness
 ```
 
 ## Setting up a test machine for milestone 7
@@ -55,7 +56,9 @@ Requirements:
   1.5 GB more for everything else on the machine.
 
 Check the machine before any run:
-1. `lake build eval_corpus eval_run`.
+1. `lake build eval_corpus eval_run Test.EvalNamed`. Set `vm.overcommit_memory = 1`
+   (NOTES.md, "7b: full run on the test machine"): in heuristic mode, forks of `lake` and of
+   the shard are refused with ENOMEM.
 2. **Corpus determinism.** Run `Test/capped.sh .lake/build/bin/eval_corpus extract eval/corpus_check`
    and compare `eval/corpus_check/` with the committed corpus. Ignore the first line of each file, the header,
    which records the git commit. The rest must be byte-identical:

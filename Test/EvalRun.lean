@@ -266,13 +266,18 @@ def baseline (x : MetaM (List (String × Json))) : MetaM Json := do
   s.restore
   return Json.mkObj (r ++ [("ms", toJson ms)])
 
-def sbe (goal : Expr) (nctx : Nat) (H : Array Name) (cfg : SolveByElim.SolveByElimConfig) :
-    MetaM (List (String × Json)) := do
+/-- `solve_by_elim [H]` on the goal. With `useDefaults := false` (like-for-like, §10.5
+decision 3) the lemmas are `H` alone: `rfl`, `trivial`, `congrFun` and `congrArg` are left out.
+The local hypotheses are kept in both cases. `mkAssumptionSet true …` (`only`) is not used
+because in 4.36 it also drops the local hypotheses. -/
+def sbe (goal : Expr) (nctx : Nat) (H : Array Name) (cfg : SolveByElim.SolveByElimConfig)
+    (useDefaults : Bool) : MetaM (List (String × Json)) := do
   let m ← mkFreshExprMVar goal
   let (_, g) ← m.mvarId!.introNP nctx
   g.withContext do
     let ⟨defaults, ctx⟩ ← SolveByElim.mkAssumptionSet false false [] [] #[]
-    let lemmas := H.toList.map (fun c => (mkConstWithFreshMVarLevels c : Elab.TermElabM Expr)) ++ defaults
+    let lemmas := H.toList.map (fun c => (mkConstWithFreshMVarLevels c : Elab.TermElabM Expr)) ++
+      (if useDefaults then defaults else [])
     let rest ← SolveByElim.solveByElim cfg lemmas ctx [g]
     let closed := rest.isEmpty && !(← instantiateMVars m).hasExprMVar
     return [("outcome", jStr (if closed then "closed" else "open"))]
@@ -295,13 +300,18 @@ def libSearch (goal : Expr) (nctx : Nat) (self : Name) : MetaM (List (String × 
       return [("exact", jStr "none"), ("apply", jStr "partial"), ("suggestions", toJson sugg.size),
               ("min_remaining", toJson minRest)]
 
-def runBaselines (goal : Expr) (nctx : Nat) (H : Array Name) (self : Name) : MetaM Json := do
+/-- The three baselines. They run before the `solve_by_sat` N loop (§10.5 decision 2). Each one
+is a separate `MetaM` run that rebuilds the goal, so it starts from a fresh Core and Meta state
+(`SavedState.restore` would keep `Meta.Cache`), and the N loop after them also starts fresh. -/
+def runBaselines (env : Environment) (s : Spec) : IO Json := do
   let like : SolveByElim.SolveByElimConfig := { maxDepth := sbeDepth, symm := false, exfalso := false }
   let dflt : SolveByElim.SolveByElimConfig := { maxDepth := sbeDepth }
+  let one (x : Expr → Nat → MetaM (List (String × Json))) : IO Json :=
+    runMeta env do let (goal, nctx) ← goalOf s; baseline (x goal nctx)
   return Json.mkObj [
-    ("sbe_like", ← baseline (sbe goal nctx H like)),
-    ("sbe_default", ← baseline (sbe goal nctx H dflt)),
-    ("library_search", ← baseline (libSearch goal nctx self))]
+    ("sbe_like", ← one fun g n => sbe g n s.H like false),
+    ("sbe_default", ← one fun g n => sbe g n s.H dflt true),
+    ("library_search", ← one fun g n => libSearch g n s.thm)]
 
 /-! ## Main -/
 
@@ -326,6 +336,7 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
   let done ← readKeys results
   let todo := specs.filter (!done.contains ·.key)
   if todo.isEmpty then return 0
+  let blPath := (results.parent.getD ".") / "baselines.jsonl"
   -- warm-up for exact?/apply? (§10.3): one untimed librarySearch, before the first goal
   if todo.any (·.baselines) then
     let t0 ← IO.monoMsNow
@@ -339,20 +350,35 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
   for s in todo do
     appendLine started (Json.mkObj [("key", s.key)]).compress
     let t0 ← IO.monoMsNow
-    let r ← (runMeta env do
-      let (goal, nctx) ← goalOf s
-      let progress := fun (N : Nat) =>
-        appendLine started (Json.mkObj [("key", jStr s.key), ("N", toJson N)]).compress
-      let (sat, bug) ← runSat goal s.H s.opts progress
-      let bl ← if s.baselines && !bug then runBaselines goal nctx s.H s.thm else pure Json.null
-      return (sat, bl, bug)).toBaseIO
+    let phase := fun (p : String) =>
+      appendLine started (Json.mkObj [("key", jStr s.key), ("phase", jStr p)]).compress
+    let r ← (do
+      -- baselines first (§10.5 decision 2), with the shard's RSS before and after them
+      let mut blInfo : List (String × Json) := [("baselines", Json.null)]
+      if s.baselines then
+        phase "baselines"
+        let (rssB0, _) ← memMB
+        let bl ← runBaselines env s
+        let (rssB1, hwmB1) ← memMB
+        blInfo := [("baselines", bl), ("rss_before_baselines_mb", toJson rssB0),
+                   ("rss_after_baselines_mb", toJson rssB1), ("hwm_after_baselines_mb", toJson hwmB1)]
+        -- written now, so that a crash in the N loop keeps them (the driver merges this line
+        -- into the crash record)
+        appendLine blPath (Json.mkObj ([("key", jStr s.key)] ++ blInfo)).compress
+      phase "sat"
+      let (sat, bug) ← runMeta env do
+        let (goal, _) ← goalOf s
+        let progress := fun (N : Nat) =>
+          appendLine started (Json.mkObj [("key", jStr s.key), ("N", toJson N)]).compress
+        runSat goal s.H s.opts progress
+      return (sat, Json.mkObj blInfo, bug)).toBaseIO
     let (rss, hwm) ← memMB
     let head := [("key", jStr s.key), ("id", jStr s.id), ("run", jStr s.run), ("tier", jStr s.tier),
                  ("H_size", Json.num s.H.size), ("expect", jStr s.expect)]
     match r with
     | .ok (sat, bl, bug) =>
-      let j := (Json.mkObj head).mergeObj sat |>.mergeObj
-        (Json.mkObj [("baselines", bl), ("total_ms", Json.num (← msSince t0)),
+      let j := (Json.mkObj head).mergeObj sat |>.mergeObj bl |>.mergeObj
+        (Json.mkObj [("total_ms", Json.num (← msSince t0)),
                      ("rss_mb", Json.num rss), ("hwm_mb", Json.num hwm)])
       appendLine results j.compress
       if bug then

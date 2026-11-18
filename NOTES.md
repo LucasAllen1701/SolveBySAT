@@ -960,3 +960,131 @@ to `~/Downloads/EVAL_PLAN(1).md`). §10.1 accepts the 7a deviations recorded abo
   goals and 7 of 50 Tier B goals in the pilot, so R4 would miss them. Proposed fix: run the
   baselines first. They take milliseconds and start from a fresh state, so the order
   changes no result.
+
+### 7b: full run on the test machine (EVAL_PLAN §10.5)
+
+EVAL_PLAN §10.5 was added on 18 November 2026. It sets out the decisions taken after the
+pilot: no sample reduction, baselines first, like-for-like `solve_by_elim` without default
+lemmas, a rule for parallel shards, calibration, and a push after each shard.
+
+- **Test machine (recorded 19 November 2026).**
+  - CPU: Intel Core i7-10510U @ 1.80 GHz, 4 physical cores (8 threads), 1 socket.
+  - RAM: 7,735 MiB (7.55 GiB) in total, about 2.2 GiB already in use before any run
+    (mostly a Firefox session, about 1.6 GiB, plus the Claude Code session).
+  - Swap: 2 GiB partition (`/dev/nvme0n1p2`). The original machine had none. The
+    evaluation slices set `MemorySwapMax=0`, so the cap still bounds resident memory.
+  - OS: Arch Linux, kernel 7.3.4-arch1-2; systemd 262 (262.2-1-arch).
+  - cgroup v2; the user manager delegates `cpu memory pids`.
+  - Disk: 419 GB free on `/`. `/tmp` is a tmpfs (3.8 GiB), so solver inputs stay in
+    `OUTDIR/tmp` as before.
+- **Parallel shards (§10.5 decision 4).** The rule allows
+  P ≤ min(4 − 1, ⌊(7.55 − 2) / 2.6⌋) = min(3, 2) = 2. Counting RAM as 8.11 GB gives the
+  same. *Decision (owner):* **P = 1**. With about 2.2 GB already in use, two 2.5 GB shards
+  would leave too little headroom. The parallel-mode resume and OOM checks are therefore
+  not needed.
+- **Environment check failed at first: the build. Fixed by setting `vm.overcommit_memory = 1` (deviation).**
+  - After the toolchain was installed, `lake build eval_corpus eval_run` sometimes failed:
+    `lake` could not spawn `clang` and `lean` ("resource exhausted (error code: 12, not
+    enough memory)"). A clean rebuild reproduced it with 6 failed spawns, with about
+    4.4 GiB free, no cgroup limit and `ulimit -v` unlimited.
+  - Cause, from the kernel log: `__vm_enough_memory: … comm: lake, bytes: 10737459200 not
+    enough memory for the allocation` (also 11811205120). In heuristic mode
+    (`vm.overcommit_memory = 0`) the kernel refuses any single commit larger than RAM +
+    swap, which is 9.55 GiB here. `lake` holds about 10 to 11 GiB of accounted private
+    arenas (1 to 4 GiB each, flag `ac` in `smaps`) for about 128 MB resident. When it
+    forks to spawn a child, that whole amount is charged at once and refused. This is
+    reserved address space, not memory pressure.
+  - The development machine had the same failure: the intermittent `lake` ENOMEM of
+    milestone 5 and the solver-spawn ENOMEM of milestone 1. It most likely also explains
+    the spawn ENOMEM seen there in 7b testing. The pilot has 0 `memout(N, spawn)`
+    outcomes, so no pilot result depends on it.
+  - The shard is also a forking process with a large reserved address space, so under
+    mode 0 `memout(N, spawn)` would measure a kernel heuristic, not the pre-registered
+    2.5 GB cap.
+  - *Fix (owner-approved, 19 November 2026):* `vm.overcommit_memory = 1`, made persistent
+    in `/etc/sysctl.d/99-solvebysat-eval.conf`. Resident memory is still bounded by the
+    cgroup slices, so the cap is unchanged. Two clean rebuilds after the change: 0 ENOMEM,
+    0 kernel refusals. No code, filter or limit changed.
+- **Environment checks (after the fix), 19 November 2026. All pass.**
+  - Build: two clean rebuilds, `lake build` then `lake build eval_corpus eval_run`, give 0
+    errors. *Gap in CLAUDE.md's check list:* the named harness also needs
+    `lake build Test.EvalNamed`. It is loaded at run time, not linked, so a clean build
+    does not produce it, and the first named run stopped with "object file … EvalNamed.olean
+    does not exist". CLAUDE.md now lists it.
+  - Corpus determinism: the rebuild under the cap (16.1 s, 788 MB peak) is byte-identical
+    after the header: `corpus_A` 82c42f9261ad, `corpus_B` e74e5dd25bd8, `corpus_stats`
+    a332af976598.
+  - `Test/run_all.sh`: exit 0 in 15 min 17 s (log `eval/calib/run_all.log`). M0 902/902;
+    M1 19/19 (differentials: 7,500 comparisons with 2,551 provable and 0 mismatches; with
+    binders 7,500 / 2,346 / 0; with data 15,000 / 3,854 / 0); M4 unit 4/4; M5 10/10; every
+    `#guard_msgs` and expected-error check as before.
+  - Named cases through the harness, on the committed (pre-step-3) harness: 36 of 36
+    agree with the test suite. Every `min k` is proved at k; F1–F3, G2, G2-nostatic, A3a,
+    D2b, D5 and D6 give `no_proof_le_Nmax`; F4 is proved at 5; U1 gives `limitation`.
+  - Memory cap: `systemd-run --user --scope -p MemoryMax=300M -p MemorySwapMax=0` kills a
+    600 MB allocation (exit 137) and lets a 100 MB one finish.
+- **Harness changes (step 3; EVAL_PLAN §10.5 decisions 2–4).** The tactic, encoder,
+  decoder, corpus, filters and limits are unchanged.
+  - *Baselines first (decision 2).* Per goal, `Test/EvalRun.lean` now runs the three
+    baselines, then the `solve_by_sat` N loop.
+    - Each baseline, and the N loop after them, is its own `runMeta` call, which rebuilds
+      the goal. Each therefore starts from a fresh Core and Meta state.
+      *Decision:* this is stricter than `saveState`/`restore`, because in 4.36
+      `SavedState.restore` keeps `Meta.Cache` ("`Meta.Cache` is kept, except for the type
+      class resolution cache"). Running the baselines first in a shared MetaM could then
+      warm caches for the N loop.
+    - The shard records `rss_before_baselines_mb`, `rss_after_baselines_mb` and
+      `hwm_after_baselines_mb`.
+    - The baselines are written to `OUTDIR/baselines.jsonl` as soon as they finish. The
+      driver merges that line into the goal's crash record (`oom`, `watchdog`, `signal`,
+      or `unknown` on resume). *Found while testing:* without this, the baselines lived
+      only in the shard's final result line, so a crash in the N loop still lost them.
+      The first version of the change had this gap; the forced-OOM test showed it.
+    - Started markers also carry the phase (`{key, phase: baselines|sat}`), and crash
+      records get `phase`. A crash during the baselines (`phase: baselines`) loses the
+      N loop instead.
+    - Baselines no longer depend on the N loop's result. Before, a decoder bug skipped
+      them; a decoder bug still stops the run.
+  - *Like-for-like `solve_by_elim` (decision 3).* The lemmas are `H_main` alone, with the
+    local hypotheses, `symm := false`, `exfalso := false`, `maxDepth := 10`. The default
+    configuration still adds `rfl`, `trivial`, `congrFun` and `congrArg`.
+    *API check (4.36.0):* `mkAssumptionSet (noDefaults := true)`, which is `only`, also
+    drops the local hypotheses (`if noDefaults && !star then pure []`). So it is called
+    with `false`, and the four defaults are left out of the lemma list instead.
+  - *Header (decision 4).* `header.json` now records `parallel_shards` (1), `machine`
+    (CPU, physical cores, threads, RAM, swap, OS, kernel, systemd,
+    `vm_overcommit_memory`), `min_free_mb`, the baseline order and the like-for-like
+    definition. P = 1, so there is no parallel mode and no parallel-mode checks.
+  - *Stop conditions of the full-run instructions, in `Test/eval_driver.py`.*
+    - Exit 7: the memory outside the run slice falls below 1,024 MB. This is measured as
+      `MemAvailable` minus what the slice may still take (cap − `memory.current`), so it
+      counts the slice at its full cap and only falls when the rest of the machine
+      grows. At the start it is about 2,860 MB. The shard is killed, the unfinished
+      goal's markers are removed so that a rerun runs it again (an external stop, not a
+      property of the goal), and the stop goes to `driver.jsonl`.
+    - Exit 8: a crash cause other than `oom` or `watchdog` occurs a second time in OUTDIR.
+  - *Publishing (decision 6).*
+    - `--after-shard CMD` runs `Test/eval_publish.sh` after each completed shard. That
+      script writes `STATUS.md` with `Test/eval_status.py`, commits OUTDIR and pushes to
+      `eval-m7` (3 tries; a failed push is retried after the next shard).
+    - `Test/eval_full.sh` is the detached wrapper. On a stop it appends a short record to
+      NOTES.md and pushes; on completion it appends the outcome tables.
+    - The status projection uses the pilot's per-stratum mean times until a stratum has 5
+      finished goals in the full run, plus the pilot's 0.8 s overhead per goal, and shows
+      the observed throughput too.
+- **Acceptance after the changes.**
+  - *Resume* (`eval/test_runs/resume_test.sh`, 12 Tier A specs, shards of 5): (a) SIGKILL
+    to the shard gives `crash(shard, signal 9)` and a restart; (b) SIGKILL to the driver
+    kills its shard too ("still alive? no"), and the rerun records `crash(shard, unknown)`.
+    12 specs, 12 distinct started keys, 12 result lines, 0 missing, 0 duplicated,
+    0 extra. Every crash record has its baselines.
+  - *Forced OOM* (`eval/test_runs/oom_test.sh`): at a 1,200 MB cap, `crash(shard, oom)` at
+    `last_N` 6, as on the development machine. At the real 2,500 MB cap, `crash(shard, oom)`
+    at `last_N` 10. The development machine gave 9, and so did a run here earlier today
+    with the first version of the change. So the exact N at which this goal reaches the
+    cap varies by one between runs. Both records carry the baselines.
+  - *Stops:* forced low-memory threshold before any goal (exit 7, no markers left); during
+    a goal, with 1.5 GB allocated outside the slice and the threshold at 2,000 MB
+    (headroom 1,346 MB, exit 7, that goal's markers removed, `unfinished_rerun` logged);
+    two SIGTERMs to the shard (two `crash(shard, signal 15)`, then exit 8). Outputs are
+    under `eval/test_runs/stop_*`.

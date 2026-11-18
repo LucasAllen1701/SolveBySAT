@@ -1,8 +1,2 @@
 12 specs, 0 done, 12 to run
-crash(shard, oom) on main:A/Array.mem_of_mem_erase
-crash(shard, oom) on main:A/Array.mem_replicate
-crash(shard, signal 9) on main:A/Array.min_le_of_mem
-crash(shard, oom) on main:A/Array.mkSlice_rio_eq_mkSlice_rio_min
-shard 0: done; 5 results; 476 s
-crash(shard, oom) on main:A/Array.ofFn_succ'
-crash(shard, oom) on main:A/Array.of_push_eq_push
+crash(shard, signal 9) on main:A/Array.mem_of_mem_erase

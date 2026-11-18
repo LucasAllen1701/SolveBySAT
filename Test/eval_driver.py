@@ -3,12 +3,15 @@
 
   eval_driver.py specs named|pilot|full OUT.jsonl     write a spec file
   eval_driver.py run SPECS.jsonl OUTDIR [--shard-size K] [--cap-mb M] [--watchdog S]
+                [--after-shard CMD] [--min-free-mb F]
 
 `run` executes the specs in shards of K goals, one shard process at a time, in a per-run
 slice whose memory cap (MemoryMax=M, MemorySwapMax=0) covers the shard, the solver and
 everything else of the run together. Only one driver may run at a time (eval/.driver.lock);
 shards die with the driver (PR_SET_PDEATHSIG); solver inputs go to OUTDIR/tmp on disk. OUTDIR gets results.jsonl (one line per goal), started.jsonl (a marker per
-goal, written by the shard before it starts the goal), warmup.jsonl and header.json.
+goal, written by the shard before it starts the goal), baselines.jsonl (each goal's baselines,
+written before its N loop and merged into its crash record if it crashes), warmup.jsonl and
+header.json.
 
 Crashes (§10.4): if a shard dies with a goal started and no result, that goal is recorded
 as crash(shard, cause) and the shard is restarted with the remaining goals:
@@ -18,6 +21,16 @@ as crash(shard, cause) and the shard is restarted with the remaining goals:
   cause "unknown"   found on resume: a marker without a result from an earlier driver.
 Resume: rerunning `run` skips every key that has a result line; a trailing partial line
 (the shard was killed while writing) is removed first.
+
+Stops (§10.5, full-run instructions), besides exit 3 and 4 from the shard:
+  exit 7  the machine's memory outside the run slice fell below --min-free-mb (1024):
+          MemAvailable minus what the slice may still take (cap - memory.current). The
+          shard is killed and the unfinished goal's markers are removed, so a rerun runs it
+          again (this is an external stop, not a property of the goal);
+  exit 8  a crash cause other than oom or watchdog occurred a second time in OUTDIR.
+--after-shard CMD is run (through the shell, with OUTDIR as $1) after each completed shard
+(the final status after a stop is written by the wrapper, Test/eval_full.sh); a failing
+hook is logged and does not stop the run.
 """
 import ctypes, fcntl, json, os, random, re, shutil, signal, subprocess, sys, time
 
@@ -29,6 +42,8 @@ CG = "/sys/fs/cgroup/user.slice/user-%d.slice/user@%d.service" % (os.getuid(), o
 SEED_R1B, N_R1B = 70005, 300
 SEED_PILOT_A, SEED_PILOT_B, PILOT_PER_TIER, PILOT_R1B = 70006, 70007, 50, 20
 SHARD_SIZE, CAP_MB, WATCHDOG_S = 50, 2500, 300
+PARALLEL_SHARDS = 1          # P of §10.5 decision 4 (owner's choice for the test machine)
+MIN_FREE_MB = 1024           # stop condition: memory outside the evaluation slice
 
 
 def die_with_parent():
@@ -107,6 +122,52 @@ def git_commit():
     return h, d
 
 
+def machine():
+    """The machine's specifications, for the output header (§10.5 decision 4)."""
+    def sh(*cmd):
+        try:
+            return subprocess.run(cmd, capture_output=True, text=True).stdout.strip()
+        except OSError:
+            return None
+    lscpu = dict(l.split(":", 1) for l in sh("lscpu").splitlines() if ":" in l)
+    mi = {l.split(":")[0]: int(l.split()[1]) for l in open("/proc/meminfo") if l.split()[1].isdigit()}
+    cores = int(lscpu.get("Core(s) per socket", "0").strip() or 0) * int(lscpu.get("Socket(s)", "1").strip() or 1)
+    return {"cpu": lscpu.get("Model name", "").strip(), "physical_cores": cores,
+            "threads": os.cpu_count(), "ram_mib": mi.get("MemTotal", 0) // 1024,
+            "swap_mib": mi.get("SwapTotal", 0) // 1024, "kernel": os.uname().release,
+            "os": sh("sh", "-c", ". /etc/os-release; echo $PRETTY_NAME"),
+            "systemd": (sh("systemctl", "--version") or "").splitlines()[0:1],
+            "vm_overcommit_memory": open("/proc/sys/vm/overcommit_memory").read().strip()}
+
+
+def headroom_mb(slice_name, cap_mb):
+    """MemAvailable minus what the run slice may still take: memory left for the rest of
+    the machine even if the slice grows to its cap."""
+    avail = next(int(l.split()[1]) for l in open("/proc/meminfo") if l.startswith("MemAvailable:")) // 1024
+    try:
+        cur = int(open(os.path.join(CG, slice_name, "memory.current")).read()) // (1024 * 1024)
+    except (OSError, ValueError):
+        cur = 0
+    return avail - max(0, cap_mb - cur)
+
+
+def drop_markers(path, key):
+    if not os.path.exists(path):
+        return
+    with open(path) as f:
+        keep = [l for l in f if l.strip() and json.loads(l).get("key") != key]
+    with open(path, "w") as f:
+        f.writelines(keep)
+
+
+def after_shard(cmd, outdir):
+    if not cmd:
+        return
+    r = subprocess.run(["sh", "-c", cmd, "after-shard", outdir], cwd=ROOT)
+    if r.returncode != 0:
+        print(f"after-shard hook failed with {r.returncode} (run continues)", flush=True)
+
+
 def fix_trailing(path):
     """Drop a trailing partial line (a shard killed while writing)."""
     if not os.path.exists(path):
@@ -128,13 +189,22 @@ def oom_kills(slice_name):
     return 0
 
 
+def with_baselines(outdir, rec):
+    """A crash record gets the goal's baselines if the shard wrote them before it died
+    (baselines run before the N loop, EVAL_PLAN 10.5 decision 2)."""
+    for b in load(os.path.join(outdir, "baselines.jsonl")):
+        if b.get("key") == rec["key"]:
+            rec.update({k: v for k, v in b.items() if k != "key"})
+    return rec
+
+
 def append(path, obj):
     with open(path, "a") as f:
         f.write(json.dumps(obj, sort_keys=True) + "\n")
         f.flush()
 
 
-def run(specs_path, outdir, shard_size, cap_mb, watchdog):
+def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MIN_FREE_MB):
     os.makedirs(outdir, exist_ok=True)
     results, started, warmup = (os.path.join(outdir, f) for f in ("results.jsonl", "started.jsonl", "warmup.jsonl"))
     specs = load(specs_path)
@@ -143,7 +213,10 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog):
            "git_commit": commit, "git_dirty": dirty, "shard_size": shard_size, "cap_mb": cap_mb,
            "watchdog_s": watchdog, "nmax": 10, "solver_s": 20, "loop_s": 120,
            "baseline_heartbeats": 200000, "sbe_max_depth": 10,
-           "seeds": {"r1b": SEED_R1B, "pilot_A": SEED_PILOT_A, "pilot_B": SEED_PILOT_B}}
+           "seeds": {"r1b": SEED_R1B, "pilot_A": SEED_PILOT_A, "pilot_B": SEED_PILOT_B},
+           "parallel_shards": PARALLEL_SHARDS, "machine": machine(), "min_free_mb": min_free,
+           "baseline_order": "before the solve_by_sat N loop (10.5 decision 2)",
+           "sbe_like": "H + local hypotheses, no default lemmas, symm/exfalso off (10.5 decision 3)"}
     hpath = os.path.join(outdir, "header.json")
     if not os.path.exists(hpath):
         json.dump(hdr, open(hpath, "w"), indent=1, sort_keys=True)
@@ -153,8 +226,8 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog):
     for r in load(started):
         if r["key"] not in done:
             last = max((x.get("N", 0) for x in load(started) if x["key"] == r["key"]), default=0)
-            append(results, {"key": r["key"], "outcome": "crash", "cause": "unknown", "found": "on resume",
-                             "last_N": last or None})
+            append(results, with_baselines(outdir, {"key": r["key"], "outcome": "crash", "cause": "unknown",
+                                                    "found": "on resume", "last_N": last or None}))
             done.add(r["key"])
             print(f"resume: {r['key']} started earlier with no result: crash(shard, unknown)", flush=True)
     pending = [s for s in specs if s["key"] not in done]
@@ -199,12 +272,17 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog):
                                       EXE, "run", shard_file, results, started, warmup],
                                      cwd=ROOT, env=env, start_new_session=True,
                                      preexec_fn=die_with_parent)
-                cur, since, killed = None, None, False
+                cur, since, killed, lowmem = None, None, False, None
                 while p.poll() is None:
                     time.sleep(0.5)
                     st = load(started)
                     if len(st) > n_started0 and st[-1]["key"] != cur:
                         cur, since = st[-1]["key"], time.monotonic()
+                    hr = headroom_mb(slice_name, cap_mb)
+                    if hr < min_free and lowmem is None:
+                        lowmem = hr
+                        print(f"STOP: memory outside the run slice is {hr} MB (< {min_free}); killing the shard", flush=True)
+                        os.killpg(p.pid, signal.SIGKILL)
                     if (cur and since and time.monotonic() - since > watchdog and not killed
                             and cur not in {r["key"] for r in load(results)}):
                         print(f"watchdog: {cur} over {watchdog} s, killing the shard", flush=True)
@@ -213,6 +291,16 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog):
                 rc = p.returncode
                 shutil.rmtree(tmpdir, ignore_errors=True)   # inputs left by a killed solver
                 os.makedirs(tmpdir, exist_ok=True)
+                if lowmem is not None:
+                    fix_trailing(results)
+                    done = {r["key"] for r in load(results)}
+                    unfinished = sorted({r["key"] for r in load(started)[n_started0:]} - done)
+                    for k in unfinished:
+                        drop_markers(started, k)
+                    append(os.path.join(outdir, "driver.jsonl"),
+                           {"stop": "low_memory", "headroom_mb": lowmem, "unfinished_rerun": unfinished,
+                            "time": time.strftime("%Y-%m-%d %H:%M:%S")})
+                    return 7
                 if rc == 0:
                     continue
                 if rc in (3, 4):
@@ -239,13 +327,24 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog):
                 if not lost:
                     print(f"STOP: shard died ({cause}) with no started goal unfinished", flush=True)
                     return 5
+                phases = {}
+                for r in load(started)[n_started0:]:
+                    if "phase" in r:
+                        phases[r["key"]] = r["phase"]
                 for k in lost:
                     el = round(time.monotonic() - since, 1) if (k == cur and since) else None
-                    append(results, {"key": k, "outcome": "crash", "cause": cause, "last_N": last_n.get(k),
-                                     "elapsed_s": el})
+                    append(results, with_baselines(outdir, {"key": k, "outcome": "crash", "cause": cause,
+                                                            "last_N": last_n.get(k), "phase": phases.get(k),
+                                                            "elapsed_s": el}))
                     print(f"crash(shard, {cause}) on {k}", flush=True)
+                if cause not in ("oom", "watchdog"):
+                    n_same = sum(1 for r in load(results) if r.get("outcome") == "crash" and r.get("cause") == cause)
+                    if n_same >= 2:
+                        print(f"STOP: crash cause {cause!r} repeated ({n_same} times)", flush=True)
+                        return 8
             n_done = len({r['key'] for r in load(results)})
             print(f"shard {i // shard_size}: done; {n_done} results; {time.monotonic() - t_start:.0f} s", flush=True)
+            after_shard(hook, outdir)
     finally:
         os.killpg(keeper.pid, signal.SIGKILL)
         append(os.path.join(outdir, "driver.jsonl"),
@@ -265,7 +364,8 @@ def main():
     if a[:1] == ["run"]:
         opts = dict(zip(a[3::2], a[4::2]))
         return run(a[1], a[2], int(opts.get("--shard-size", SHARD_SIZE)),
-                   int(opts.get("--cap-mb", CAP_MB)), int(opts.get("--watchdog", WATCHDOG_S)))
+                   int(opts.get("--cap-mb", CAP_MB)), int(opts.get("--watchdog", WATCHDOG_S)),
+                   opts.get("--after-shard"), int(opts.get("--min-free-mb", MIN_FREE_MB)))
     print(__doc__)
     return 2
 

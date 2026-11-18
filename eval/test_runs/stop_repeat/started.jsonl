@@ -1,0 +1,10 @@
+{"key":"main:A/Array.mem_of_mem_erase"}
+{"key":"main:A/Array.mem_of_mem_erase","phase":"baselines"}
+{"key":"main:A/Array.mem_of_mem_erase","phase":"sat"}
+{"N":1,"key":"main:A/Array.mem_of_mem_erase"}
+{"N":2,"key":"main:A/Array.mem_of_mem_erase"}
+{"key":"main:A/Array.mem_replicate"}
+{"key":"main:A/Array.mem_replicate","phase":"baselines"}
+{"key":"main:A/Array.mem_replicate","phase":"sat"}
+{"N":1,"key":"main:A/Array.mem_replicate"}
+{"N":2,"key":"main:A/Array.mem_replicate"}

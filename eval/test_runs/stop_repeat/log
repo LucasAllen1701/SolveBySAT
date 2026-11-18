@@ -1,0 +1,4 @@
+3 specs, 0 done, 3 to run
+crash(shard, signal 15) on main:A/Array.mem_of_mem_erase
+crash(shard, signal 15) on main:A/Array.mem_replicate
+STOP: crash cause 'signal 15' repeated (2 times)

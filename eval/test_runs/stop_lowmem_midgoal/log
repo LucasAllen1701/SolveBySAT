@@ -1,0 +1,2 @@
+3 specs, 0 done, 3 to run
+STOP: memory outside the run slice is 1346 MB (< 2000); killing the shard

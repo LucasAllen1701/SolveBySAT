@@ -1,34 +1,33 @@
-(a) at kill: results 2, started 3, running {"key":"main:A/Array.min_le_of_mem"}
-(a) SIGKILL sent to the shard process 7302 only
-eval/test_runs/resume_test.sh: line 16:  5509 Killed                     python3 Test/eval_driver.py run $T/resume_specs.jsonl $R --shard-size 5 > $T/resume_a.log 2>&1
-(b) SIGKILL sent to the driver 5509: results 7, started 8, running {"key":"main:A/Array.pmap_pmap"}
-shard 12279 still alive after the driver died? no
+(a) at kill: results 0, started 5, running {"N":2,"key":"main:A/Array.mem_of_mem_erase"}
+(a) SIGKILL sent to the shard process 336705 only
+eval/test_runs/resume_test.sh: line 16: 336694 Killed                     python3 Test/eval_driver.py run $T/resume_specs.jsonl $R --shard-size 5 > $T/resume_a.log 2>&1
+(b) SIGKILL sent to the driver 336694: results 1, started 10, running {"N":2,"key":"main:A/Array.mem_replicate"}
+shard 336746 still alive after the driver died? no
 --- driver log up to (b):
 12 specs, 0 done, 12 to run
-crash(shard, oom) on main:A/Array.mem_of_mem_erase
-crash(shard, oom) on main:A/Array.mem_replicate
-crash(shard, signal 9) on main:A/Array.min_le_of_mem
+crash(shard, signal 9) on main:A/Array.mem_of_mem_erase
+--- rerun of the driver:
+resume: main:A/Array.mem_replicate started earlier with no result: crash(shard, unknown)
+12 specs, 2 done, 10 to run
+crash(shard, oom) on main:A/Array.min_le_of_mem
 crash(shard, oom) on main:A/Array.mkSlice_rio_eq_mkSlice_rio_min
-shard 0: done; 5 results; 476 s
 crash(shard, oom) on main:A/Array.ofFn_succ'
 crash(shard, oom) on main:A/Array.of_push_eq_push
---- rerun of the driver:
-resume: main:A/Array.pmap_pmap started earlier with no result: crash(shard, unknown)
-12 specs, 8 done, 4 to run
+shard 0: done; 7 results; 209 s
 crash(shard, oom) on main:A/Array.push_ne_self
 crash(shard, oom) on main:A/Array.range'_append
 crash(shard, oom) on main:A/Array.replicate_append_replicate
-shard 0: done; 12 results; 107 s
-specs 12, started markers 12 (12 distinct), result lines 12, distinct keys 12
+shard 1: done; 12 results; 466 s
+specs 12, started markers 104 (12 distinct), result lines 12, distinct keys 12
 missing [], duplicated [], extra []
-   main:A/Array.mem_of_mem_erase crash oom   
-   main:A/Array.mem_replicate crash oom   
-   main:A/Array.min_le_of_mem crash signal 9   
+   main:A/Array.mem_of_mem_erase crash signal 9   
+   main:A/Array.mem_replicate crash unknown on resume  
+   main:A/Array.min_le_of_mem crash oom   
    main:A/Array.mkEmpty_eq no_proof_le_Nmax   10 
    main:A/Array.mkSlice_rio_eq_mkSlice_rio_min crash oom   
    main:A/Array.ofFn_succ' crash oom   
    main:A/Array.of_push_eq_push crash oom   
-   main:A/Array.pmap_pmap crash unknown on resume  
+   main:A/Array.pmap_pmap goal_rejected    
    main:A/Array.push_ne_self crash oom   
    main:A/Array.range'_append crash oom   
    main:A/Array.range'_eq_empty_iff no_proof_le_Nmax   10 

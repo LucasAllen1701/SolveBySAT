@@ -1,0 +1,3 @@
+{"hwm_mb":912,"ms":734,"rss_after_mb":912,"rss_before_mb":742,"specs":"eval/test_runs/stop_lowmem/shard_0000.jsonl"}
+{"hwm_mb":910,"ms":729,"rss_after_mb":910,"rss_before_mb":740,"specs":"eval/test_runs/stop_lowmem/shard_0000.jsonl"}
+{"hwm_mb":913,"ms":735,"rss_after_mb":913,"rss_before_mb":740,"specs":"eval/test_runs/stop_lowmem/shard_0000.jsonl"}

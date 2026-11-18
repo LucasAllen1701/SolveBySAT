@@ -1,0 +1,35 @@
+name = "SolveBySat"
+version = "0.1.0"
+defaultTargets = ["SolveBySat"]
+
+[[lean_lib]]
+name = "SolveBySat"
+
+[[lean_lib]]
+name = "TestUtil"
+roots = ["Test.Util"]
+
+[[lean_lib]]
+name = "LeanTests"
+roots = ["Test.M2", "Test.M3", "Test.M4Lean", "Test.M5Lean"]
+
+[[lean_exe]]
+name = "test_m0"
+root = "Test.M0"
+
+[[lean_exe]]
+name = "test_m1"
+root = "Test.M1"
+
+[[lean_exe]]
+name = "test_m4"
+root = "Test.M4"
+
+[[lean_exe]]
+name = "test_m5"
+root = "Test.M5"
+
+[[lean_exe]]
+name = "bench"
+root = "Test.Bench"
+supportInterpreter = true

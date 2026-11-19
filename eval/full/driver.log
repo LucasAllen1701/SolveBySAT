@@ -685,3 +685,24 @@ crash(shard, oom) on main:A/Std.Rco.toArray_eq_ite_rco
 crash(shard, oom) on main:A/Std.Ric.forIn'_eq_forIn'_toList
 crash(shard, oom) on main:A/Std.Rii.forIn'_eq_forIn'_toList
 shard 27: done; 2173 results; 32301 s
+crash(shard, oom) on main:A/Std.Rio.toList_succ_eq_map
+crash(shard, oom) on main:A/Std.Rxc.Iterator.Monadic.isPlausibleOutput_next
+crash(shard, oom) on main:A/Std.Rxc.Iterator.isPlausibleOutput_next
+crash(shard, oom) on main:A/Std.Rxc.Iterator.toArray_eq_match
+crash(shard, oom) on main:A/Std.Rxc.Iterator.upwardEnumerableLe_of_isPlausibleIndirectOutput
+crash(shard, oom) on main:A/Std.Rxi.Iterator.instLawfulDeterministicIterator
+crash(shard, oom) on main:A/Std.Rxi.Iterator.toArray_eq_match
+crash(shard, oom) on main:A/Std.Rxi.LawfulHasSize.ofMap
+crash(shard, oom) on main:A/Std.Sat.AIG.BinaryInput.each_cast
+crash(shard, oom) on main:A/Std.Sat.AIG.LawfulVecOperator.lt_size
+crash(shard, oom) on main:A/Std.Sat.AIG.RefVec.map_decl_eq
+crash(shard, oom) on main:A/Std.Sat.AIG.denote_mkOrCached
+crash(shard, oom) on main:A/Std.Sat.CNF.Clause.append_eq_empty_iff
+crash(shard, oom) on main:A/Std.Sat.CNF.not_sat_iff_exists_mem_not_sat
+crash(shard, oom) on main:A/Std.Sat.CNF.unsat_append_left
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastArithShiftRight.go_denote_eq
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastRotateRight.go_get
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastShiftLeftConst.go_denote_mem_prefix
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastShiftRightConst.go_denote_mem_prefix
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastUdiv.blastDivSubtractShift_decl_eq
+shard 28: done; 2223 results; 33759 s

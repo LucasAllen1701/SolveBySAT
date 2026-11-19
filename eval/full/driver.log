@@ -187,3 +187,8 @@ crash(shard, oom) on main:A/Int.toList_rcc_succ_right_eq_cons_map
 crash(shard, oom) on main:A/Int.toList_roo_add_right_eq_map
 crash(shard, oom) on main:A/Int.toList_roo_eq_cons_iff
 shard 8: done; 450 results; 15122 s
+crash(shard, oom) on main:A/Int16.shiftLeft_xor
+crash(shard, oom) on main:A/Int32.or_eq_zero_iff
+crash(shard, oom) on main:A/Int32.shiftLeft_or
+crash(shard, oom) on main:A/Int32.shiftRight_or
+shard 9: done; 500 results; 16248 s

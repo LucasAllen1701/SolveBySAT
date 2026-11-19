@@ -491,3 +491,27 @@ crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.constMaxEntryD_eq
 crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.constMinEntry?_eq
 crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.getKeyGE_eq
 shard 11: done; 1373 results; 17612 s
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.getKeyLE_eq
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.inter_left
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.inter_right
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.applyPartition_eq_apply_toListModel'
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.balanceLErasePrecond_zero_iff'
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.balance_eq_inner
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.balanced_balanceL!
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.containsThenInsertIfNew!_fst_eq_containsThenInsertIfNew_fst
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.containsThenInsertIfNew_snd
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.contains_alter
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.contains_union!_iff
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.filterMap_eq_filterMap!
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.get!_alter_self
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.get?_insertIfNew
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.get?_union_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getD_diff_of_contains_right
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getD_inter_of_contains_eq_false_right
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getEntryGE?_eq_find?
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_right
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKeyD_filterMap
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKeyD_filter_key
+shard 12: done; 1423 results; 18981 s

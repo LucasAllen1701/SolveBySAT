@@ -915,3 +915,16 @@ crash(shard, oom) on main:B/Array.append_inj/20
 crash(shard, oom) on main:B/Array.append_right_inj/0
 crash(shard, oom) on main:B/Array.contains_filter/3
 shard 44: done; 3023 results; 54574 s
+crash(shard, oom) on main:B/Array.eq_iff_flatten_eq/10
+crash(shard, oom) on main:B/Array.eq_iff_flatten_eq/44
+crash(shard, oom) on main:B/Array.eraseP_filter/5
+crash(shard, oom) on main:B/Array.filter_append/3
+crash(shard, oom) on main:B/Array.getElem_append_right'/0
+crash(shard, oom) on main:B/Array.getElem_append_right'/24
+crash(shard, oom) on main:B/Array.getElem_insertIdx_of_gt/5
+crash(shard, oom) on main:B/Array.getElem_insertIdx_of_gt/9
+crash(shard, oom) on main:B/Array.getElem_insertIdx_of_gt/40
+crash(shard, oom) on main:B/Array.getElem_insertIdx_of_gt/53
+crash(shard, oom) on main:B/Array.getElem_insertIdx_of_gt/96
+crash(shard, oom) on main:B/Array.getElem_swapIfInBounds/35
+shard 45: done; 3073 results; 55887 s

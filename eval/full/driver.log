@@ -956,3 +956,21 @@ crash(shard, oom) on main:B/Array.unattach_attachWith/8
 crash(shard, oom) on main:B/BitVec.getElem_shiftConcat_succ/9
 crash(shard, oom) on main:B/BitVec.getElem_shiftConcat_succ/23
 shard 47: done; 3173 results; 58174 s
+crash(shard, oom) on main:B/BitVec.getMsbD_rotateRight/58
+crash(shard, oom) on main:B/BitVec.neg_mul_neg/0
+crash(shard, oom) on main:B/BitVec.neg_mul_neg/1
+crash(shard, oom) on main:B/BitVec.neg_mul_neg/2
+crash(shard, oom) on main:B/BitVec.neg_mul_neg/3
+crash(shard, oom) on main:B/BitVec.not_lt/0
+crash(shard, oom) on main:B/BitVec.not_lt/1
+crash(shard, oom) on main:B/BitVec.not_lt/2
+crash(shard, oom) on main:B/BitVec.not_not/1
+crash(shard, oom) on main:B/BitVec.not_not/3
+crash(shard, oom) on main:B/BitVec.or_append/40
+crash(shard, oom) on main:B/BitVec.or_append/176
+crash(shard, oom) on main:B/BitVec.signExtend_neg_of_ne_intMin/21
+crash(shard, oom) on main:B/BitVec.signExtend_or/0
+crash(shard, oom) on main:B/BitVec.sshiftRight_add/8
+crash(shard, oom) on main:B/BitVec.sshiftRight_add/22
+crash(shard, oom) on main:B/BitVec.sshiftRight_add/216
+shard 48: done; 3223 results; 59570 s

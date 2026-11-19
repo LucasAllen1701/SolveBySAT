@@ -602,3 +602,7 @@ crash(shard, oom) on main:A/Std.ExtHashSet.insertMany_cons
 crash(shard, oom) on main:A/Std.ExtHashSet.ofList_cons
 crash(shard, oom) on main:A/Std.ExtHashSet.ofList_eq_insertMany_empty
 shard 20: done; 1823 results; 24867 s
+crash(shard, oom) on main:A/Std.ExtTreeMap.getElem!_filter'
+crash(shard, oom) on main:A/Std.ExtTreeMap.getElem!_insertMany_list_of_contains_eq_false
+crash(shard, oom) on main:A/Std.ExtTreeMap.ofList_eq_empty_iff
+shard 21: done; 1873 results; 25351 s

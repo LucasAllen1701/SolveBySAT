@@ -562,3 +562,7 @@
 {"hwm_mb":907,"ms":701,"rss_after_mb":907,"rss_before_mb":739,"specs":"eval/full/shard_0020.jsonl"}
 {"hwm_mb":906,"ms":728,"rss_after_mb":906,"rss_before_mb":738,"specs":"eval/full/shard_0020.jsonl"}
 {"hwm_mb":907,"ms":704,"rss_after_mb":907,"rss_before_mb":738,"specs":"eval/full/shard_0020.jsonl"}
+{"hwm_mb":907,"ms":719,"rss_after_mb":907,"rss_before_mb":739,"specs":"eval/full/shard_0021.jsonl"}
+{"hwm_mb":906,"ms":703,"rss_after_mb":906,"rss_before_mb":738,"specs":"eval/full/shard_0021.jsonl"}
+{"hwm_mb":907,"ms":698,"rss_after_mb":907,"rss_before_mb":738,"specs":"eval/full/shard_0021.jsonl"}
+{"hwm_mb":905,"ms":709,"rss_after_mb":905,"rss_before_mb":739,"specs":"eval/full/shard_0021.jsonl"}

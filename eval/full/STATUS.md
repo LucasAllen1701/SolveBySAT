@@ -1,27 +1,27 @@
 # 7b full run: status
 
-Updated 2026-11-20 06:47 (machine time). Specs: `/home/tom/SolveBySAT/eval/specs_full.jsonl`; P = 1; commit at start `6ef9ea207a`.
+Updated 2026-11-20 07:03 (machine time). Specs: `/home/tom/SolveBySAT/eval/specs_full.jsonl`; P = 1; commit at start `6ef9ea207a`.
 
-- Shards done: 54 of 126 (shard size 50)
-- Goals done: 2723 of 6300
+- Shards done: 55 of 126 (shard size 50)
+- Goals done: 2773 of 6300
 - decoder_bug / solver_error / harness_error: 0
-- Goals that hit a time limit (solver or loop timeout, watchdog): 49
-- Crashes by cause: oom 745
+- Goals that hit a time limit (solver or loop timeout, watchdog): 51
+- Crashes by cause: oom 747
 - Driver wall time of finished driver runs: 6.75 h
-- Remaining: 3577 goals, projected 17.7 h → finish about 2026-11-21 00:28; observed throughput 26.8 s per goal → about 2026-11-21 09:26
+- Remaining: 3527 goals, projected 17.3 h → finish about 2026-11-21 00:23; observed throughput 26.7 s per goal → about 2026-11-21 09:11
 
 ## Outcomes so far
 
 | run | tier | goals | crash(oom) | goal_rejected | no_proof_le_Nmax | proved | timeout(solver) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| main | A | 2723 | 745 | 261 | 1540 | 128 | 49 |
+| main | A | 2773 | 747 | 261 | 1583 | 131 | 51 |
 
-Proved at N: 1: 15, 2: 22, 3: 34, 4: 19, 5: 20, 6: 6, 7: 6, 8: 4, 9: 2
+Proved at N: 1: 16, 2: 23, 3: 34, 4: 19, 5: 20, 6: 6, 7: 7, 8: 4, 9: 2
 
 ## Baselines so far
 
-- Tier A (2723 goals with baselines):
-  - sbe_like: failed 1082, closed 878, heartbeats 756, max_rec_depth 7
-  - sbe_default: failed 1029, closed 845, heartbeats 843, max_rec_depth 6
-  - exact: closed_self 2450, closed_other 139, none 133, heartbeats 1
-  - apply: closed_self 2450, closed_other 139, partial 133, heartbeats 1
+- Tier A (2773 goals with baselines):
+  - sbe_like: failed 1090, closed 905, heartbeats 769, max_rec_depth 9
+  - sbe_default: failed 1037, closed 871, heartbeats 857, max_rec_depth 8
+  - exact: closed_self 2498, closed_other 141, none 133, heartbeats 1
+  - apply: closed_self 2498, closed_other 141, partial 133, heartbeats 1

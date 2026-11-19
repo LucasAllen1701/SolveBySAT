@@ -824,3 +824,6 @@ shard 37: done; 2673 results; 44365 s
 crash(shard, oom) on main:A/UInt32.shiftLeft_add
 crash(shard, oom) on main:A/UInt64.not_eq_comm
 shard 38: done; 2723 results; 45503 s
+crash(shard, oom) on main:A/UInt64.toUInt16_shiftLeft
+crash(shard, oom) on main:A/UInt8.add_eq_left
+shard 39: done; 2773 results; 46462 s

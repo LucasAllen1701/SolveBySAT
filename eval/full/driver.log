@@ -928,3 +928,17 @@ crash(shard, oom) on main:B/Array.getElem_insertIdx_of_gt/53
 crash(shard, oom) on main:B/Array.getElem_insertIdx_of_gt/96
 crash(shard, oom) on main:B/Array.getElem_swapIfInBounds/35
 shard 45: done; 3073 results; 55887 s
+crash(shard, oom) on main:B/Array.getElem_swapIfInBounds/279
+crash(shard, oom) on main:B/Array.isEqv_toList/190
+crash(shard, oom) on main:B/Array.map_pmap/2
+crash(shard, oom) on main:B/Array.map_pmap/11
+crash(shard, oom) on main:B/Array.map_pmap/17
+crash(shard, oom) on main:B/Array.mem_replicate/4
+crash(shard, oom) on main:B/Array.mkSlice_rio_eq_mkSlice_rio_min/0
+crash(shard, oom) on main:B/Array.mkSlice_rio_eq_mkSlice_rio_min/2
+crash(shard, oom) on main:B/Array.ofFn_succ'/18
+crash(shard, oom) on main:B/Array.replicate_append_replicate/1
+crash(shard, oom) on main:B/Array.replicate_append_replicate/2
+crash(shard, oom) on main:B/Array.replicate_append_replicate/7
+crash(shard, oom) on main:B/Array.setIfInBounds_eq_empty_iff/2
+shard 46: done; 3123 results; 56698 s

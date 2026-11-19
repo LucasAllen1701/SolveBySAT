@@ -271,3 +271,22 @@ crash(shard, oom) on main:A/List.getLast?_drop
 STOP: "decoder_bug" on main:A/List.getLast_eq_head_reverse: "solve_by_sat: decoder failed on a satisfiable CNF (bug).\nskeleton: fun α#0 l#1 h => Eq.symm(List.head_reverse(fun a0@g5 => h(List.reverse_eq_nil_iff.mp(a0@g5))))\nerror: Tactic `introN` failed: The metavariable below has already been assigned\n\nNote: This likely indicates an internal error in this tactic or a prior one\n\ncase h\nα✝ : Type u_1\nl✝ : List α✝\nh✝ : l✝ = [] → False\n⊢ l✝.reverse = [] → False"
 STOP: shard exited with 3 (decoder bug or solver error; see results.jsonl)
 === driver exit 3 2026-11-19 17:00:25
+=== driver start 2026-11-19 18:08:48
+6300 specs, 773 done, 5527 to run
+crash(shard, oom) on main:A/List.getLast_ofFn
+crash(shard, oom) on main:A/List.gt_of_range'_eq_append_cons
+crash(shard, oom) on main:A/List.head?_scanr
+crash(shard, oom) on main:A/List.insert_append_of_not_mem_left
+crash(shard, oom) on main:A/List.lt_of_range'_eq_append_cons
+crash(shard, oom) on main:A/List.mapFinIdx_toArray
+crash(shard, oom) on main:A/List.mapIdx_eq_cons_iff
+crash(shard, oom) on main:A/List.map_eq_append_iff
+crash(shard, oom) on main:A/List.map_inj_right
+crash(shard, oom) on main:A/List.max?_eq_max?_attach
+crash(shard, oom) on main:A/List.mem_flatMap
+crash(shard, oom) on main:A/List.mergeSort_pair
+crash(shard, oom) on main:A/List.mergeSort_perm
+crash(shard, oom) on main:A/List.min?_eq_head?
+crash(shard, oom) on main:A/List.min_le_of_mem
+crash(shard, oom) on main:A/List.min_map
+shard 0: done; 823 results; 1667 s

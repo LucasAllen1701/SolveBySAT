@@ -154,3 +154,11 @@ crash(shard, oom) on main:A/ByteArray.extract_add_four
 crash(shard, oom) on main:A/ByteArray.extract_append_eq_left
 crash(shard, oom) on main:A/Char.ordinal_ofOrdinal
 shard 4: done; 250 results; 10630 s
+crash(shard, oom) on main:A/Dyadic.toDyadic_toRat
+crash(shard, oom) on main:A/Fin.add_one_lt_iff
+crash(shard, oom) on main:A/Fin.add_one_pos
+crash(shard, oom) on main:A/Fin.foldr_rev
+crash(shard, oom) on main:A/Fin.instLawfulUpwardEnumerableLeast?
+crash(shard, oom) on main:A/Fin.one_mul
+crash(shard, oom) on main:A/Fin.succ_le_succ_iff
+shard 5: done; 300 results; 11368 s

@@ -176,3 +176,14 @@ crash(shard, oom) on main:A/Int.gcd_le_left
 crash(shard, oom) on main:A/Int.le_mul_iff_le_left
 crash(shard, oom) on main:A/Int.le_shiftRight_of_nonneg
 shard 7: done; 400 results; 13838 s
+crash(shard, oom) on main:A/Int.natCast_toNat_eq_self
+crash(shard, oom) on main:A/Int.self_le_ediv_of_nonpos_of_nonneg
+crash(shard, oom) on main:A/Int.sub_min_sub_right
+crash(shard, oom) on main:A/Int.tdiv_nonneg_of_nonpos_of_nonpos
+crash(shard, oom) on main:A/Int.toArray_rco_append_toArray_rco
+crash(shard, oom) on main:A/Int.toArray_rco_eq_singleton_append_iff
+crash(shard, oom) on main:A/Int.toArray_roc_eq_singleton_append
+crash(shard, oom) on main:A/Int.toList_rcc_succ_right_eq_cons_map
+crash(shard, oom) on main:A/Int.toList_roo_add_right_eq_map
+crash(shard, oom) on main:A/Int.toList_roo_eq_cons_iff
+shard 8: done; 450 results; 15122 s

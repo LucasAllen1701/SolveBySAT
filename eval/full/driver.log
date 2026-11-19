@@ -747,3 +747,12 @@ crash(shard, oom) on main:A/Std.TreeMap.mem_map
 crash(shard, oom) on main:A/Std.TreeMap.mem_modify
 crash(shard, oom) on main:A/Std.TreeMap.mem_toList_iff_getElem?_eq_some
 shard 31: done; 2373 results; 36738 s
+crash(shard, oom) on main:A/Std.TreeSet.Equiv.eraseMany_list
+crash(shard, oom) on main:A/Std.TreeSet.Raw.equiv_iff_toList_eq
+crash(shard, oom) on main:A/Std.TreeSet.Raw.max?_eq_some_iff_get?_eq_self_and_forall
+crash(shard, oom) on main:A/Std.TreeSet.Raw.mem_insertMany_list
+crash(shard, oom) on main:A/Std.TreeSet.Raw.min?_eq_some_iff_get?_eq_self_and_forall
+crash(shard, oom) on main:A/Std.TreeSet.Raw.toList_rci
+crash(shard, oom) on main:A/Std.TreeSet.isEmpty_diff_iff
+crash(shard, oom) on main:A/Std.TreeSet.isEmpty_iff_forall_not_mem
+shard 32: done; 2423 results; 37387 s

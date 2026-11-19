@@ -888,3 +888,18 @@ crash(shard, oom) on main:A/_private.Init.Data.List.MinMaxIdx.0.List.minIdxOn.go
 crash(shard, oom) on main:A/_private.Init.Data.List.Nat.Perm.0.List.set_set_perm'
 crash(shard, oom) on main:A/_private.Init.Data.List.Sort.Impl.0.List.MergeSort.Internal.mergeSortTR_run_eq_mergeSort
 shard 42: done; 2923 results; 52118 s
+crash(shard, oom) on main:A/_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₄_eq_some_iff_utf8EncodeChar_eq
+crash(shard, oom) on main:A/_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.helper₃
+crash(shard, oom) on main:A/_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.isUTF8ContinuationByte_of_assemble₃_eq_some_right
+crash(shard, oom) on main:A/_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.toBitVec_assemble₃Unchecked
+crash(shard, oom) on main:A/_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.verify₃_eq_isSome_assemble₃
+crash(shard, oom) on main:A/_private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.PartialMatch.le_prefixFunction
+crash(shard, oom) on main:A/_private.Init.Grind.Ordered.Linarith.0.Lean.Grind.Linarith.Poly.denote'_go_eq_denote
+crash(shard, oom) on main:A/_private.Init.Omega.IntList.0.List.getElem?_zipWith
+crash(shard, oom) on main:A/_private.Std.Data.DHashMap.Internal.RawLemmas.0.Std.DHashMap.Internal.Raw₀.perm_keys_congr_left
+crash(shard, oom) on main:A/_private.Std.Data.DTreeMap.Internal.Zipper.0.Std.DTreeMap.Internal.toList_rcoIter
+crash(shard, oom) on main:A/_private.Std.Data.DTreeMap.Internal.Zipper.0.Std.DTreeMap.Internal.toList_roiIter
+crash(shard, oom) on main:A/_private.Std.Data.Internal.List.Associative.0.Std.Internal.List.le_min_iff
+crash(shard, oom) on main:A/_private.Std.Sat.AIG.CNF.0.Std.Sat.AIG.Decl.iteToCNF_eval
+crash(shard, oom) on main:A/_private.Std.Tactic.BVDecide.Bitblast.BVExpr.Circuit.Lemmas.Operations.Cpop.0.Std.Tactic.BVDecide.BVExpr.bitblast.denote_blastExtractAndExtend.go
+shard 43: done; 2973 results; 53635 s

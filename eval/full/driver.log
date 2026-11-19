@@ -536,3 +536,20 @@ crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.some_getEntryGT_eq_getEnt
 crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.toListModel_maxView
 crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.valuesArray_eq_toArray_map
 shard 13: done; 1473 results; 20197 s
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.toList_rcc
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.toList_rco
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.equiv_iff_toArray_eq
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.get!_filterMap'
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.get!_inter_of_not_mem_left
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.get?_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.getD_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.get_diff
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.isEmpty_filter_iff
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.mem_iff_isSome_get?
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.mem_toArray_iff_get?_eq_some
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.minKey?_alter_eq_self
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Equiv.insertMany_list
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Equiv.of_forall_getKey_eq_of_forall_constGet?_eq
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.contains_eq_false_iff_not_mem
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.get?_diff_of_not_mem_right
+shard 14: done; 1523 results; 21173 s

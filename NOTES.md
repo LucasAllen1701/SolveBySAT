@@ -1223,3 +1223,12 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
   that goal's markers from `eval/full/`, as was done in the pilot for the `solver_error`
   goal, so that the resumed run recomputes it with the fix. Then resume
   `Test/eval_full.sh`, recording the fix commit as the commit of the resumed part.
+- **Resumed (owner-approved, 19 November 2026).** The `decoder_bug` result line of
+  `main:A/List.getLast_eq_head_reverse`, its 8 started and progress markers and its
+  baselines line were removed from `eval/full/`. The removed lines stay in git history at
+  `ef9805f`. `results.jsonl` went from 774 to 773 lines. The run resumed with the same
+  wrapper (`Test/eval_full.sh`) on commit `2394acf`, which has the decoder fix.
+  `eval/full/header.json` is kept as written at the start: commit `6ef9ea2`, now
+  `c3a3ec8`. Results written after the resume come from the fixed decoder; per the check
+  above, that differs from the start commit only on goals whose CNF is SAT, and there
+  only in being able to decode the case of this bug. No filter, seed or limit changed.

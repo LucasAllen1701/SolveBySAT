@@ -8622,11 +8622,3 @@
 {"N":8,"key":"main:A/List.getLast?_filter"}
 {"N":9,"key":"main:A/List.getLast?_filter"}
 {"N":10,"key":"main:A/List.getLast?_filter"}
-{"key":"main:A/List.getLast_eq_head_reverse"}
-{"key":"main:A/List.getLast_eq_head_reverse","phase":"baselines"}
-{"key":"main:A/List.getLast_eq_head_reverse","phase":"sat"}
-{"N":1,"key":"main:A/List.getLast_eq_head_reverse"}
-{"N":2,"key":"main:A/List.getLast_eq_head_reverse"}
-{"N":3,"key":"main:A/List.getLast_eq_head_reverse"}
-{"N":4,"key":"main:A/List.getLast_eq_head_reverse"}
-{"N":5,"key":"main:A/List.getLast_eq_head_reverse"}

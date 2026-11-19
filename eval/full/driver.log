@@ -818,3 +818,6 @@ crash(shard, oom) on main:A/Sum.elim_eq_iff
 crash(shard, oom) on main:A/Sum.lex_wf
 crash(shard, oom) on main:A/UInt16.add_eq_left
 shard 36: done; 2623 results; 43504 s
+crash(shard, oom) on main:A/UInt16.toUInt64_shiftRight
+crash(shard, oom) on main:A/UInt32.mul_add
+shard 37: done; 2673 results; 44365 s

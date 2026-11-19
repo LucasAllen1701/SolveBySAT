@@ -771,3 +771,22 @@ crash(shard, oom) on main:A/Std.WP.WPMonad.map_le_wp_map
 crash(shard, oom) on main:A/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq
 crash(shard, oom) on main:A/Std.instLawfulOrderMaxOfIsLinearPreorderOfLawfulOrderLeftLeaningMax
 shard 33: done; 2473 results; 38352 s
+crash(shard, oom) on main:A/String.Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar?
+crash(shard, oom) on main:A/String.Pos.eq_copy_sliceTo_append_get
+crash(shard, oom) on main:A/String.Pos.next_le_of_lt
+crash(shard, oom) on main:A/String.Pos.ofSliceFrom_le_ofSliceFrom_iff
+crash(shard, oom) on main:A/String.Pos.ofSliceFrom_ne_startPos
+crash(shard, oom) on main:A/String.Pos.posLT_offset
+crash(shard, oom) on main:A/String.Pos.prev_le
+crash(shard, oom) on main:A/String.Pos.startPos_lt_iff
+crash(shard, oom) on main:A/String.Pos.toSlice_le
+crash(shard, oom) on main:A/String.Slice.Model.map_get_positionsFrom_of_splits
+crash(shard, oom) on main:A/String.Slice.Pattern.ForwardSliceSearcher.getElem_buildTable_le
+crash(shard, oom) on main:A/String.Slice.Pattern.Model.Char.isLongestMatchAtChain_iff_isLongestMatchAtChain_beq
+crash(shard, oom) on main:A/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff
+crash(shard, oom) on main:A/String.Slice.Pattern.Model.ForwardStringSearcher.exists_revMatchesAt_iff_eq_append
+crash(shard, oom) on main:A/String.Slice.Pattern.Model.ForwardStringSearcher.isLongestRevMatchAt_iff_splits
+crash(shard, oom) on main:A/String.Slice.Pattern.Model.ForwardStringSearcher.matchesAt_iff_splits
+crash(shard, oom) on main:A/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or
+crash(shard, oom) on main:A/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo
+shard 34: done; 2523 results; 40173 s

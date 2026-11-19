@@ -706,3 +706,18 @@ crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastShiftLeftCo
 crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastShiftRightConst.go_denote_mem_prefix
 crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastUdiv.blastDivSubtractShift_decl_eq
 shard 28: done; 2223 results; 33759 s
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastUdiv.denote_blastDivSubtractShift_r
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastUmod.denote_go
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.denote_blastNeg
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.go_denote_mem_prefix
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.instLawfulVecOperatorReplicateTargetBlastReplicate
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.mkOverflowBit.go_decl_eq
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast_aig_IsPrefix
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.Frontend.Normalize.BitVec.not_eq_comm
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.LRAT.Internal.State.ofCNF_toCNF_eq
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.Normalize.BitVec.beq_not_ite'
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.Normalize.BitVec.carry_eq_ite_le_lt
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.Normalize.BitVec.not_neg''
+crash(shard, oom) on main:A/Std.TreeMap.Equiv.of_forall_mem_unit_iff
+crash(shard, oom) on main:A/Std.TreeMap.Raw.Equiv.getElem?_eq
+shard 29: done; 2273 results; 35006 s

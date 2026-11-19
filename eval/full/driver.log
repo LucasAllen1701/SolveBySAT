@@ -349,3 +349,18 @@ crash(shard, oom) on main:A/Option.min_pfilter_right
 crash(shard, oom) on main:A/Option.unattach_eq_none_iff
 crash(shard, oom) on main:A/Prod.ext_iff
 shard 5: done; 1073 results; 9894 s
+crash(shard, oom) on main:A/Rat.le_iff_sub_nonneg
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_diff_of_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_filter'
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_filterMap'
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_insertIfNew
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_inter
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_union
+crash(shard, oom) on main:A/Std.DHashMap.Const.getD_filter'
+crash(shard, oom) on main:A/Std.DHashMap.Const.getKey_alter_self
+crash(shard, oom) on main:A/Std.DHashMap.Const.get_eq_get_get?
+crash(shard, oom) on main:A/Std.DHashMap.Const.get_insertMany_list_of_contains_eq_false
+crash(shard, oom) on main:A/Std.DHashMap.Const.insertMany_list_equiv_foldl
+crash(shard, oom) on main:A/Std.DHashMap.Const.isEmpty_toList
+crash(shard, oom) on main:A/Std.DHashMap.Const.mem_alter
+shard 6: done; 1123 results; 11421 s

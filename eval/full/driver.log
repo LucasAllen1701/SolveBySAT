@@ -170,3 +170,9 @@ crash(shard, oom) on main:A/Int.bmod_add_cancel_left
 crash(shard, oom) on main:A/Int.bmod_self_add_one
 crash(shard, oom) on main:A/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos
 shard 6: done; 350 results; 12762 s
+crash(shard, oom) on main:A/Int.exists_add_of_le
+crash(shard, oom) on main:A/Int.fdiv_nonneg_of_nonpos_of_nonpos
+crash(shard, oom) on main:A/Int.gcd_le_left
+crash(shard, oom) on main:A/Int.le_mul_iff_le_left
+crash(shard, oom) on main:A/Int.le_shiftRight_of_nonneg
+shard 7: done; 400 results; 13838 s

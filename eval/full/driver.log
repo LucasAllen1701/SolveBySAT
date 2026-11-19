@@ -214,3 +214,17 @@ crash(shard, oom) on main:A/Lean.Grind.CommRing.Stepwise.d_step1C
 crash(shard, oom) on main:A/Lean.Grind.CommRing.le_norm_tight_expr
 crash(shard, oom) on main:A/Lean.Grind.Field.NormNum.ofRat_zpow
 shard 11: done; 600 results; 19120 s
+crash(shard, oom) on main:A/Lean.Grind.Field.NormNum.sub_eq
+crash(shard, oom) on main:A/Lean.Grind.Field.intCast_div_of_dvd
+crash(shard, oom) on main:A/Lean.Grind.Field.of_mul_eq_zero
+crash(shard, oom) on main:A/Lean.Grind.Field.zero_eq_inv_iff
+crash(shard, oom) on main:A/Lean.Grind.Field.zpow_add_one
+crash(shard, oom) on main:A/Lean.Grind.IntModule.neg_zsmul
+crash(shard, oom) on main:A/Lean.Grind.Linarith.Poly.denote_mul
+crash(shard, oom) on main:A/Lean.Grind.Linarith.eq_norm
+crash(shard, oom) on main:A/Lean.Grind.Linarith.zero_ne_one_of_field
+crash(shard, oom) on main:A/Lean.Grind.Nat.of_lo_eq_false_1
+crash(shard, oom) on main:A/Lean.Grind.Ring.OfSemiring.left_distrib
+crash(shard, oom) on main:A/Lean.Grind.Ring.intCast_mul_comm
+crash(shard, oom) on main:A/Lean.Omega.Constraint.div_sat
+shard 12: done; 650 results; 20418 s

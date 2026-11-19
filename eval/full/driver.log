@@ -228,3 +228,10 @@ crash(shard, oom) on main:A/Lean.Grind.Ring.OfSemiring.left_distrib
 crash(shard, oom) on main:A/Lean.Grind.Ring.intCast_mul_comm
 crash(shard, oom) on main:A/Lean.Omega.Constraint.div_sat
 shard 12: done; 650 results; 20418 s
+crash(shard, oom) on main:A/Lean.Order.Option.monotone_bindM
+crash(shard, oom) on main:A/Lean.Order.himp_apply
+crash(shard, oom) on main:A/List.IsSuffix.filterMap
+crash(shard, oom) on main:A/List.MergeSort.Internal.splitInTwo_snd_pairwise
+crash(shard, oom) on main:A/List.Perm.mem_iff
+crash(shard, oom) on main:A/List.Perm.rec_heq
+shard 13: done; 700 results; 21437 s

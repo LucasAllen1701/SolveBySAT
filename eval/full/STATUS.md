@@ -1,27 +1,27 @@
 # 7b full run: status
 
-Updated 2026-11-19 12:13 (machine time). Specs: `/home/tom/SolveBySAT/eval/specs_full.jsonl`; P = 1; commit at start `6ef9ea207a`.
+Updated 2026-11-19 12:48 (machine time). Specs: `/home/tom/SolveBySAT/eval/specs_full.jsonl`; P = 1; commit at start `6ef9ea207a`.
 
-- Shards done: 3 of 126 (shard size 50)
-- Goals done: 150 of 6300
+- Shards done: 4 of 126 (shard size 50)
+- Goals done: 200 of 6300
 - decoder_bug / solver_error / harness_error: 0
-- Goals that hit a time limit (solver or loop timeout, watchdog): 2
-- Crashes by cause: oom 91
+- Goals that hit a time limit (solver or loop timeout, watchdog): 3
+- Crashes by cause: oom 119
 - Driver wall time of finished driver runs: 0.00 h
-- Remaining: 6150 goals, projected 38.5 h → finish about 2026-11-21 02:41; observed throughput 48.9 s per goal → about 2026-11-22 23:46
+- Remaining: 6100 goals, projected 37.6 h → finish about 2026-11-21 02:27; observed throughput 46.6 s per goal → about 2026-11-22 19:45
 
 ## Outcomes so far
 
 | run | tier | goals | crash(oom) | goal_rejected | no_proof_le_Nmax | proved | timeout(solver) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| main | A | 150 | 91 | 7 | 44 | 6 | 2 |
+| main | A | 200 | 119 | 7 | 60 | 11 | 3 |
 
-Proved at N: 2: 4, 4: 2
+Proved at N: 1: 1, 2: 4, 3: 1, 4: 2, 5: 2, 7: 1
 
 ## Baselines so far
 
-- Tier A (150 goals with baselines):
-  - sbe_like: heartbeats 99, failed 30, closed 21
-  - sbe_default: heartbeats 105, failed 28, closed 17
-  - exact: closed_self 143, closed_other 7
-  - apply: closed_self 143, closed_other 7
+- Tier A (200 goals with baselines):
+  - sbe_like: heartbeats 129, failed 38, closed 33
+  - sbe_default: heartbeats 139, failed 35, closed 26
+  - exact: closed_self 192, closed_other 8
+  - apply: closed_self 192, closed_other 8

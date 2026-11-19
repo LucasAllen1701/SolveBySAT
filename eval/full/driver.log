@@ -114,3 +114,32 @@ crash(shard, oom) on main:A/BitVec.getElem_rev
 crash(shard, oom) on main:A/BitVec.getElem_shiftConcat_succ
 crash(shard, oom) on main:A/BitVec.getElem_smod
 shard 2: done; 150 results; 7092 s
+crash(shard, oom) on main:A/BitVec.getLsbD_add_add_bool
+crash(shard, oom) on main:A/BitVec.getLsbD_replicate
+crash(shard, oom) on main:A/BitVec.getLsbD_sub
+crash(shard, oom) on main:A/BitVec.getMsbD_eq_getMsb?_getD
+crash(shard, oom) on main:A/BitVec.getMsbD_rotateRight
+crash(shard, oom) on main:A/BitVec.getMsbD_rotateRightAux_of_lt
+crash(shard, oom) on main:A/BitVec.msb_umod
+crash(shard, oom) on main:A/BitVec.neg_mul_neg
+crash(shard, oom) on main:A/BitVec.not_lt
+crash(shard, oom) on main:A/BitVec.not_not
+crash(shard, oom) on main:A/BitVec.one_mul
+crash(shard, oom) on main:A/BitVec.or_append
+crash(shard, oom) on main:A/BitVec.reverse_reverse_eq
+crash(shard, oom) on main:A/BitVec.signExtend_neg_of_ne_intMin
+crash(shard, oom) on main:A/BitVec.signExtend_or
+crash(shard, oom) on main:A/BitVec.slt_eq_ult_of_msb_eq
+crash(shard, oom) on main:A/BitVec.srem_one
+crash(shard, oom) on main:A/BitVec.srem_zero
+crash(shard, oom) on main:A/BitVec.sshiftRight_add
+crash(shard, oom) on main:A/BitVec.sshiftRight_or_distrib
+crash(shard, oom) on main:A/BitVec.sub_le_sub_iff_le
+crash(shard, oom) on main:A/BitVec.toInt_append
+crash(shard, oom) on main:A/BitVec.toInt_dvd_toInt_iff_of_msb_false_msb_true
+crash(shard, oom) on main:A/BitVec.toInt_ediv_toInt_lt_of_nonneg_of_nonneg
+crash(shard, oom) on main:A/BitVec.toInt_shiftLeftZeroExtend
+crash(shard, oom) on main:A/BitVec.toInt_sshiftRight
+crash(shard, oom) on main:A/BitVec.toNat_div_toNat_lt
+crash(shard, oom) on main:A/BitVec.toNat_mul_toNat_lt
+shard 3: done; 200 results; 9189 s

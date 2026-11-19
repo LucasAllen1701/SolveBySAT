@@ -833,3 +833,31 @@ crash(shard, oom) on main:A/USize.xor_not
 crash(shard, oom) on main:A/Vector.Perm.push_comm
 crash(shard, oom) on main:A/Vector.attach_congr
 shard 40: done; 2823 results; 47722 s
+crash(shard, oom) on main:A/Vector.countP_eq_zero
+crash(shard, oom) on main:A/Vector.count_eq_size
+crash(shard, oom) on main:A/Vector.exists_push
+crash(shard, oom) on main:A/Vector.extract_push
+crash(shard, oom) on main:A/Vector.extract_succ_right
+crash(shard, oom) on main:A/Vector.flatten_push
+crash(shard, oom) on main:A/Vector.foldlM_attachWith
+crash(shard, oom) on main:A/Vector.foldl_attach
+crash(shard, oom) on main:A/Vector.forall_mem_iff_forall_getElem
+crash(shard, oom) on main:A/Vector.getElem?_extract_of_lt
+crash(shard, oom) on main:A/Vector.getElem?_extract_of_succ
+crash(shard, oom) on main:A/Vector.getElem?_insertIdx
+crash(shard, oom) on main:A/Vector.getElem?_set!_ne
+crash(shard, oom) on main:A/Vector.getElem?_setIfInBounds_ne
+crash(shard, oom) on main:A/Vector.getElem?_unattach
+crash(shard, oom) on main:A/Vector.getElem?_zero_flatten
+crash(shard, oom) on main:A/Vector.getElem_eraseIdx_of_ge
+crash(shard, oom) on main:A/Vector.getElem_swap_right
+crash(shard, oom) on main:A/Vector.getElem_zipIdx
+crash(shard, oom) on main:A/Vector.idRun_ofFnM
+crash(shard, oom) on main:A/Vector.instNoNatZeroDivisors
+crash(shard, oom) on main:A/Vector.mapFinIdx_eq_mapFinIdx_iff
+crash(shard, oom) on main:A/Vector.mapIdx_eq_push_iff
+crash(shard, oom) on main:A/Vector.map_extract
+crash(shard, oom) on main:A/Vector.map_findSome?
+crash(shard, oom) on main:A/Vector.mem_flatten
+crash(shard, oom) on main:A/Vector.mem_ofFn
+shard 41: done; 2873 results; 50074 s

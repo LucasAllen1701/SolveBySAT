@@ -594,3 +594,11 @@ crash(shard, oom) on main:A/Std.ExtDTreeMap.getKeyD_minKeyD
 crash(shard, oom) on main:A/Std.ExtDTreeMap.insertMany_list_singleton
 crash(shard, oom) on main:A/Std.ExtDTreeMap.minKey_insertIfNew_le_minKey
 shard 19: done; 1773 results; 24381 s
+crash(shard, oom) on main:A/Std.ExtHashMap.getElem!_filter
+crash(shard, oom) on main:A/Std.ExtHashMap.getElem?_insertIfNew
+crash(shard, oom) on main:A/Std.ExtHashMap.insertMany_list_eq_foldl
+crash(shard, oom) on main:A/Std.ExtHashMap.instLawfulGetElemMem
+crash(shard, oom) on main:A/Std.ExtHashSet.insertMany_cons
+crash(shard, oom) on main:A/Std.ExtHashSet.ofList_cons
+crash(shard, oom) on main:A/Std.ExtHashSet.ofList_eq_insertMany_empty
+shard 20: done; 1823 results; 24867 s

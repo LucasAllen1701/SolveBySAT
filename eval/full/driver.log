@@ -310,3 +310,13 @@ crash(shard, oom) on main:A/List.zipWithAll_map
 crash(shard, oom) on main:A/ListSlice.size_mkSlice_rco
 crash(shard, oom) on main:A/ListSlice.toList_mkSlice_roi_eq_toList_mkSlice_roo
 shard 1: done; 873 results; 3843 s
+crash(shard, oom) on main:A/Nat.Internal.Linear.Poly.denote_eq_cancelAux
+crash(shard, oom) on main:A/Nat.add_eq_one_iff
+crash(shard, oom) on main:A/Nat.add_eq_zero
+crash(shard, oom) on main:A/Nat.all_succ
+crash(shard, oom) on main:A/Nat.exists_coprime
+crash(shard, oom) on main:A/Nat.gcd_eq_one_iff
+crash(shard, oom) on main:A/Nat.getD_toArray_rcc
+crash(shard, oom) on main:A/Nat.getElem!_toArray_rco_eq_zero_iff
+crash(shard, oom) on main:A/Nat.getElem!_toList_rcc_eq_zero_iff
+shard 2: done; 923 results; 5391 s

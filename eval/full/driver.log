@@ -670,3 +670,18 @@ crash(shard, oom) on main:A/Std.Iter.toArray_drop
 crash(shard, oom) on main:A/Std.Iter.toArray_filter
 crash(shard, oom) on main:A/Std.Iter.toListRev_dropWhile_of_finite
 shard 26: done; 2123 results; 30989 s
+crash(shard, oom) on main:A/Std.IterM.length_map
+crash(shard, oom) on main:A/Std.IterM.stepAsHetT_filterMapWithPostcondition
+crash(shard, oom) on main:A/Std.IterM.step_append
+crash(shard, oom) on main:A/Std.IterM.step_drop
+crash(shard, oom) on main:A/Std.IterM.step_dropWhileM
+crash(shard, oom) on main:A/Std.IterM.step_flatMap
+crash(shard, oom) on main:A/Std.IterM.step_takeWhileWithPostcondition
+crash(shard, oom) on main:A/Std.IterM.toArray_filterMapM_eq_toArray_filterMapWithPostcondition
+crash(shard, oom) on main:A/Std.IterM.toListRev_filterMapM_map
+crash(shard, oom) on main:A/Std.Iterators.Types.Flatten.ext_iff
+crash(shard, oom) on main:A/Std.OppositeOrderInstances.instLawfulOrderBEqOpposite
+crash(shard, oom) on main:A/Std.Rco.toArray_eq_ite_rco
+crash(shard, oom) on main:A/Std.Ric.forIn'_eq_forIn'_toList
+crash(shard, oom) on main:A/Std.Rii.forIn'_eq_forIn'_toList
+shard 27: done; 2173 results; 32301 s

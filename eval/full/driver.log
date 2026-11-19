@@ -341,3 +341,11 @@ crash(shard, oom) on main:A/Nat.toList_roc_eq_append
 crash(shard, oom) on main:A/Option.all_attachWith
 crash(shard, oom) on main:A/Option.eq_none_iff_forall_not_mem
 shard 4: done; 1023 results; 8482 s
+crash(shard, oom) on main:A/Option.isNone_pfilter_iff
+crash(shard, oom) on main:A/Option.mem_ite_none_left
+crash(shard, oom) on main:A/Option.mem_toArray
+crash(shard, oom) on main:A/Option.min_filter_left
+crash(shard, oom) on main:A/Option.min_pfilter_right
+crash(shard, oom) on main:A/Option.unattach_eq_none_iff
+crash(shard, oom) on main:A/Prod.ext_iff
+shard 5: done; 1073 results; 9894 s

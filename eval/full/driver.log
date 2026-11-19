@@ -790,3 +790,18 @@ crash(shard, oom) on main:A/String.Slice.Pattern.Model.ForwardStringSearcher.mat
 crash(shard, oom) on main:A/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or
 crash(shard, oom) on main:A/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo
 shard 34: done; 2523 results; 40173 s
+crash(shard, oom) on main:A/String.Slice.Pos.instLawfulOrderBEq
+crash(shard, oom) on main:A/String.Slice.Pos.ofSliceFrom_endPos
+crash(shard, oom) on main:A/String.Slice.Pos.ofSliceTo_inj
+crash(shard, oom) on main:A/String.Slice.Pos.ofSliceTo_lt_iff
+crash(shard, oom) on main:A/String.Slice.Pos.revSkip?_cast
+crash(shard, oom) on main:A/String.Slice.Pos.skipWhile_copy
+crash(shard, oom) on main:A/String.Slice.Pos.startPos_lt_iff
+crash(shard, oom) on main:A/String.Slice.all_slice_iff
+crash(shard, oom) on main:A/String.Slice.contains_prop_eq_contains_decide
+crash(shard, oom) on main:A/String.Slice.endsWith_slice_iff
+crash(shard, oom) on main:A/String.Slice.skipPrefix?_slice_eq_some_iff
+crash(shard, oom) on main:A/String.Slice.skipPrefix?_string_eq_some_iff
+crash(shard, oom) on main:A/String.Slice.sliceTo_sliceTo
+crash(shard, oom) on main:A/String.Slice.utf8ByteSize_slice
+shard 35: done; 2573 results; 41888 s

@@ -618,3 +618,13 @@ crash(shard, oom) on main:A/Std.HashMap.Raw.getElem!_diff_of_not_mem_right
 crash(shard, oom) on main:A/Std.HashMap.Raw.getElem!_union_of_not_mem_right
 crash(shard, oom) on main:A/Std.HashMap.Raw.getElem?_insertMany_list_of_contains_eq_false
 shard 22: done; 1923 results; 26035 s
+crash(shard, oom) on main:A/Std.HashMap.Raw.getElem_eq_getElem!
+crash(shard, oom) on main:A/Std.HashMap.Raw.getKey?_insertIfNew
+crash(shard, oom) on main:A/Std.HashMap.getD_insertIfNew
+crash(shard, oom) on main:A/Std.HashMap.getElem!_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.HashMap.getElem!_inter_of_mem_right
+crash(shard, oom) on main:A/Std.HashMap.getElem?_filter
+crash(shard, oom) on main:A/Std.HashMap.getKey_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.HashMap.instLawfulGetElemMemOfEquivBEqOfLawfulHashable
+crash(shard, oom) on main:A/Std.HashMap.isEmpty_diff_iff
+shard 23: done; 1973 results; 27056 s

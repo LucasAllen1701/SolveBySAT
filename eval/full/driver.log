@@ -235,3 +235,23 @@ crash(shard, oom) on main:A/List.MergeSort.Internal.splitInTwo_snd_pairwise
 crash(shard, oom) on main:A/List.Perm.mem_iff
 crash(shard, oom) on main:A/List.Perm.rec_heq
 shard 13: done; 700 results; 21437 s
+crash(shard, oom) on main:A/List.Sublist.middle
+crash(shard, oom) on main:A/List.append_eq_filter_iff
+crash(shard, oom) on main:A/List.append_right_inj
+crash(shard, oom) on main:A/List.append_right_le_iff_of_length_eq
+crash(shard, oom) on main:A/List.append_right_sublist_self
+crash(shard, oom) on main:A/List.beq_eq_decide
+crash(shard, oom) on main:A/List.beq_eq_isEqv
+crash(shard, oom) on main:A/List.compareLex_append_append_of_length_eq
+crash(shard, oom) on main:A/List.cons_subset_cons
+crash(shard, oom) on main:A/List.drop_eq_getElem?_toList_append
+crash(shard, oom) on main:A/List.elem_cons_self
+crash(shard, oom) on main:A/List.erase_append
+crash(shard, oom) on main:A/List.ext_getElem
+crash(shard, oom) on main:A/List.filterMap_flatMap
+crash(shard, oom) on main:A/List.filterMap_flatten
+crash(shard, oom) on main:A/List.find?_eq_some_iff_append
+crash(shard, oom) on main:A/List.findIdx?_flatten
+crash(shard, oom) on main:A/List.findIdx_subtype
+crash(shard, oom) on main:A/List.findSome?_isSome_iff
+shard 14: done; 750 results; 23247 s

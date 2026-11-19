@@ -827,3 +827,9 @@ shard 38: done; 2723 results; 45503 s
 crash(shard, oom) on main:A/UInt64.toUInt16_shiftLeft
 crash(shard, oom) on main:A/UInt8.add_eq_left
 shard 39: done; 2773 results; 46462 s
+crash(shard, oom) on main:A/USize.instLawfulHasSize
+crash(shard, oom) on main:A/USize.toUInt8_shiftLeft
+crash(shard, oom) on main:A/USize.xor_not
+crash(shard, oom) on main:A/Vector.Perm.push_comm
+crash(shard, oom) on main:A/Vector.attach_congr
+shard 40: done; 2823 results; 47722 s

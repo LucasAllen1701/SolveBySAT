@@ -515,3 +515,24 @@ crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains
 crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKeyD_filterMap
 crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKeyD_filter_key
 shard 12: done; 1423 results; 18981 s
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKeyD_maxKey!
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKeyD_minKeyD
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.get_diff!
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.get_eq_get?
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.get_map
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.isSome_maxKey?_insertIfNew
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.isSome_minKey?_insert
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minEntry?ₘ_eq_minEntry?
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minKey!_insertIfNew
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minKey!_insert_le_self
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minKey!_le_of_contains
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minKey?_eq_some_iff_getKey?_eq_self_and_forall
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minKey?_mem
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minKeyD_erase!_eq_iff_not_compare_minKeyD_eq
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minKeyD_insertIfNew_le_minKeyD
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minKeyD_insert_le_minKeyD
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minView_k_eq_minView!
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.some_getEntryGT_eq_getEntryGT?
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.toListModel_maxView
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.valuesArray_eq_toArray_map
+shard 13: done; 1473 results; 20197 s

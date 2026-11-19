@@ -425,3 +425,34 @@ crash(shard, oom) on main:A/Std.DHashMap.Raw.contains_modify
 crash(shard, oom) on main:A/Std.DHashMap.Raw.contains_of_contains_insertIfNew
 crash(shard, oom) on main:A/Std.DHashMap.Raw.get?_alter
 shard 8: done; 1223 results; 14053 s
+crash(shard, oom) on main:A/Std.DHashMap.Raw.get?_inter_of_not_mem_left
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getD_alter_self
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getD_eq_fallback
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey!_eq_of_contains
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey?_diff_of_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey?_modify_self
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_diff
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_diff_of_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_eq_fallback
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_of_isEmpty
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey_insertMany_list_of_contains_eq_false
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey_insert_self
+crash(shard, oom) on main:A/Std.DHashMap.Raw.isEmpty_erase
+crash(shard, oom) on main:A/Std.DHashMap.Raw.isEmpty_iff_forall_not_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.isSome_apply_of_mem_filterMap
+crash(shard, oom) on main:A/Std.DHashMap.Raw.isSome_getKey?_iff_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.size_add_size_eq_size_union_add_size_inter
+crash(shard, oom) on main:A/Std.DHashMap.Raw.size_alter
+crash(shard, oom) on main:A/Std.DHashMap.Raw.size_erase_le
+crash(shard, oom) on main:A/Std.DHashMap.Raw.size_insertIfNew_le
+crash(shard, oom) on main:A/Std.DHashMap.Raw.size_modify
+crash(shard, oom) on main:A/Std.DHashMap.emptyWithCapacity_equiv_iff_isEmpty
+crash(shard, oom) on main:A/Std.DHashMap.equiv_emptyWithCapacity_iff_isEmpty
+crash(shard, oom) on main:A/Std.DHashMap.find?_toArray_eq_none_iff_contains_eq_false
+crash(shard, oom) on main:A/Std.DHashMap.find?_toList_eq_none_iff_not_mem
+crash(shard, oom) on main:A/Std.DHashMap.get!_insertIfNew
+crash(shard, oom) on main:A/Std.DHashMap.get!_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.get?_insertIfNew
+crash(shard, oom) on main:A/Std.DHashMap.getKey!_diff
+shard 9: done; 1273 results; 15273 s

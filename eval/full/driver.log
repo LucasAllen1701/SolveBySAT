@@ -143,3 +143,14 @@ crash(shard, oom) on main:A/BitVec.toInt_sshiftRight
 crash(shard, oom) on main:A/BitVec.toNat_div_toNat_lt
 crash(shard, oom) on main:A/BitVec.toNat_mul_toNat_lt
 shard 3: done; 200 results; 9189 s
+crash(shard, oom) on main:A/BitVec.toNat_rotateRight
+crash(shard, oom) on main:A/BitVec.uaddOverflow_eq
+crash(shard, oom) on main:A/BitVec.udiv_eq_of_mul_add_toNat
+crash(shard, oom) on main:A/BitVec.udiv_eq_zero_iff_eq_zero_or_lt
+crash(shard, oom) on main:A/BitVec.ushiftRight_xor_distrib
+crash(shard, oom) on main:A/BitVec.zero_udiv
+crash(shard, oom) on main:A/ByteArray.append_left_inj
+crash(shard, oom) on main:A/ByteArray.extract_add_four
+crash(shard, oom) on main:A/ByteArray.extract_append_eq_left
+crash(shard, oom) on main:A/Char.ordinal_ofOrdinal
+shard 4: done; 250 results; 10630 s

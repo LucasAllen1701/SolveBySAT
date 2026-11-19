@@ -733,3 +733,17 @@ crash(shard, oom) on main:A/Std.TreeMap.Raw.mem_insertMany_list
 crash(shard, oom) on main:A/Std.TreeMap.Raw.size_insertMany_list_le
 crash(shard, oom) on main:A/Std.TreeMap.Raw.unitOfList_cons
 shard 30: done; 2323 results; 35831 s
+crash(shard, oom) on main:A/Std.TreeMap.find?_toList_eq_some_iff_getKey?_eq_some_and_getElem?_eq_some
+crash(shard, oom) on main:A/Std.TreeMap.getElem!_diff_of_not_mem_right
+crash(shard, oom) on main:A/Std.TreeMap.getElem!_union_of_not_mem_left
+crash(shard, oom) on main:A/Std.TreeMap.getElem_eq_getElem!
+crash(shard, oom) on main:A/Std.TreeMap.inter_equiv_empty_comm
+crash(shard, oom) on main:A/Std.TreeMap.isEmpty_filterMap_iff
+crash(shard, oom) on main:A/Std.TreeMap.keys_filter
+crash(shard, oom) on main:A/Std.TreeMap.maxKeyD_eq_iff_getKey?_eq_self_and_forall
+crash(shard, oom) on main:A/Std.TreeMap.mem_alter_self
+crash(shard, oom) on main:A/Std.TreeMap.mem_iff_contains
+crash(shard, oom) on main:A/Std.TreeMap.mem_map
+crash(shard, oom) on main:A/Std.TreeMap.mem_modify
+crash(shard, oom) on main:A/Std.TreeMap.mem_toList_iff_getElem?_eq_some
+shard 31: done; 2373 results; 36738 s

@@ -162,3 +162,11 @@ crash(shard, oom) on main:A/Fin.instLawfulUpwardEnumerableLeast?
 crash(shard, oom) on main:A/Fin.one_mul
 crash(shard, oom) on main:A/Fin.succ_le_succ_iff
 shard 5: done; 300 results; 11368 s
+crash(shard, oom) on main:A/ISize.toInt16_ofIntClamp
+crash(shard, oom) on main:A/ISize.toInt_div_of_ne_left
+crash(shard, oom) on main:A/Int.Internal.Linear.cooper_dvd_right
+crash(shard, oom) on main:A/Int.add_ediv_of_pos
+crash(shard, oom) on main:A/Int.bmod_add_cancel_left
+crash(shard, oom) on main:A/Int.bmod_self_add_one
+crash(shard, oom) on main:A/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos
+shard 6: done; 350 results; 12762 s

@@ -364,3 +364,34 @@ crash(shard, oom) on main:A/Std.DHashMap.Const.insertMany_list_equiv_foldl
 crash(shard, oom) on main:A/Std.DHashMap.Const.isEmpty_toList
 crash(shard, oom) on main:A/Std.DHashMap.Const.mem_alter
 shard 6: done; 1123 results; 11421 s
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw.Const.toArray_eq_toArray_map_toListModel
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.contains_of_contains_insertMany_list
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get!_diff_of_contains_right
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get!_emptyWithCapacity
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get!_eq_get!_get?
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get?_diff_of_contains_eq_false_right
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get?_emptyWithCapacity
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get?_filter
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get?_union_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.getD_diff_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.getD_diff_of_contains_eq_false_right
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get_congr
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get_union_of_contains_eq_false_right
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.modify_eq_alter
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.size_alter
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.toListModel_insertListₘ
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.wfImp_modify
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Equiv.union_right
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.contains_diff
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.contains_inter_eq_false_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.contains_of_mem_keysArray
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.get!_diff
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.get!_modify
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getD_modify_self
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getKey!_map
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getKey?_insert
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getKey?_union_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getKeyD_insert
+shard 7: done; 1173 results; 12703 s

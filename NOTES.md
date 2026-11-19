@@ -1147,3 +1147,79 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
   === driver exit 3 2026-11-19 17:00:25
   ```
   - Goals done: 774 of 6300 - Crashes by cause: oom 233 
+
+### 7b: decoder bug in the full run (`List.getLast_eq_head_reverse`), found and fixed
+
+- **Stop.** The full run stopped at 17:00 on 19 November after 774 of 6,300 goals (all Tier
+  A), with `decoder_bug` on `main:A/List.getLast_eq_head_reverse`. At N = 5 (429,047
+  variables, 3,120,313 clauses) the CNF was SAT, with skeleton
+  `fun α l h => Eq.symm (List.head_reverse (fun a0 => h (List.reverse_eq_nil_iff.mp a0)))`.
+  The replay failed: "`introN` failed: The metavariable below has already been
+  assigned", on goal `l.reverse = [] → False`.
+- **Reproduced with the tactic alone**, outside the harness:
+  `solve_by_sat [Eq.symm, List.head_reverse, List.reverse_eq_nil_iff] (nodes := 5)` on
+  `type_of% @List.getLast_eq_head_reverse` gives the same error and skeleton (75 s). A
+  3-node problem reproduces it in 1.5 s: `lem : ∀ n (h : P n → False), f n h = 0`, with
+  hypothesis `hp : P n → False`, on the goal `f n hp = 0`.
+- **Cause: the decoder (SPEC §8 replay), not the compiler or the encoder.**
+  - `List.head_reverse : (h : l.reverse ≠ []) → l.reverse.head h = l.getLast _` has a
+    head that mentions its own premise.
+  - A proof inside a term compiles to `⟨proof⟩` (SPEC §4.4). SPEC §2 rejects a premise
+    mentioned in a *binder type*, but not one mentioned in the *head*. So the clause is
+    in the class, and the encoding is right: `⟨proof⟩` in the head matches `⟨proof⟩` in
+    the target.
+  - The replay opens the premise as a natural metavariable `?h`. Unifying the head with
+    the target (`… head ?h =?= … head (_proof_1 h✝)`) then *assigns* `?h` to the target's
+    proof. Replaying the child on `?h` afterwards breaks SPEC §8's assumption that each
+    premise is filled by its child.
+  - When the premise has binders, `introN` refuses the assigned metavariable: this bug.
+    When it has none, `introN 0` does not check, and the child's `assign` silently
+    overwrote the earlier assignment. That gave a correct term by proof irrelevance,
+    which is why no earlier test caught it.
+  - The compiler's `⟨proof⟩` erasure and the encoder are unchanged and correct. Only the
+    decoder is at fault: it relied on an invariant (premise metavariables are unassigned
+    until their child is replayed) that the class does not guarantee.
+- **Fix (`SolveBySat/Decode.lean`, `instantiateClause`).** Premise metavariables, both
+  binder premises and the `Iff.mp`/`Iff.mpr` premise, are created as synthetic opaque.
+  - Head unification can then no longer assign them. It compares a premise with the
+    target's proof by proof irrelevance, which still unifies their *types*, so clause
+    variables determined through the premise are still determined.
+  - Only the child fills the premise. `MVarId.assign`, used by the replay, and `introN`
+    both work on synthetic opaque metavariables.
+  - Built-in rules (`And.intro` and the others) are unaffected: their premises never
+    occur in a head.
+  - Deviation from the SPEC §8 text: "open its binders as metavariables" now reads
+    "… premises as synthetic opaque metavariables".
+- **Regression tests: `Test/M7Lean.lean`, added to `Test/run_all.sh` and the
+  `LeanTests` lib.** Each success has its minimality check.
+  - R1a: a premise with a binder, 3 nodes, with the printed term
+    `fun P f lem n hp => lem n fun a => hp a`.
+  - R1b: the same with `¬`.
+  - R1c: a premise without binders, 2 nodes.
+  - R1d: a premise without binders, where the target holds a different proof (`q r`)
+    from the child's (`hq`). The term `lem n hq` is accepted by the kernel by proof
+    irrelevance.
+  - R1e: the full-run goal itself, at 5 nodes, with no proof at 4 (about 2 min).
+  - With the fix reverted, R1a, R1b and R1e fail with "decoder failed on a satisfiable
+    CNF". R1c and R1d pass either way: they guard the silent-overwrite path.
+- **Regression (after the fix):** `Test/run_all.sh` exit 0 in 17 min 21 s
+  (`eval/calib/run_all_fix.log`). M0 902/902; M1 19/19 (differentials 7,500 / 2,551 / 0
+  mismatches; with binders 7,500 / 2,346 / 0); M4 unit 4/4; M5 10/10 (with data
+  15,000 / 3,854 / 0); `Test/M2.lean`, `M3.lean`, `M4Lean.lean`, `M5Lean.lean` and the
+  new `M7Lean.lean` all pass. Named cases through the harness: 36 of 36 identical to
+  before the fix (outcome, N and skeleton; `eval/fix_check/named/`).
+- **Effect on results so far.** The changed code runs only after a SAT answer, and the N
+  loop stops at its first SAT. So the only results it can affect are the goals that
+  reached SAT. The CNFs, solver calls, crashes, timeouts, rejections and baselines are
+  untouched. Check (`eval/fix_check/`, `compare.txt`): the 64 full-run goals that
+  reached SAT (63 `proved` plus the bug) and the 20 proved goals of the calibration pilot
+  were rerun with the fix. That is 83 distinct goals; `A/Int16.le_of_lt` is in both sets.
+  - 82 of 83 are identical in outcome, N and skeleton.
+  - The bug goal is now `proved` at N = 5.
+  - No goal changes N or skeleton.
+  - The 773 other results of `eval/full/` and the calibration therefore stand as
+    computed.
+- **Not yet resumed: waiting for the owner.** Proposal: remove the `decoder_bug` line and
+  that goal's markers from `eval/full/`, as was done in the pilot for the `solver_error`
+  goal, so that the resumed run recomputes it with the fix. Then resume
+  `Test/eval_full.sh`, recording the fix commit as the commit of the resumed part.

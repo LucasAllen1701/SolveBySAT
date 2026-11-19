@@ -1,0 +1,4 @@
+specs 84 distinct 83 duplicates ['main:A/Int16.le_of_lt']
+identical (outcome, N, skeleton): 82
+DIFF ('full', 'main:A/List.getLast_eq_head_reverse', ('decoder_bug', 5), ('proved', 5), False)
+outcomes now: Counter({'proved': 83})

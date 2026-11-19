@@ -1,0 +1,37 @@
+{
+ "baseline_heartbeats": 200000,
+ "baseline_order": "before the solve_by_sat N loop (10.5 decision 2)",
+ "cap_mb": 2500,
+ "git_commit": "ef9805f39455420695f6d74711cdd6bff5a5e9f5",
+ "git_dirty": true,
+ "loop_s": 120,
+ "machine": {
+  "cpu": "Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz",
+  "kernel": "7.3.4-arch1-2",
+  "os": "Arch Linux",
+  "physical_cores": 4,
+  "ram_mib": 7735,
+  "swap_mib": 2047,
+  "systemd": [
+   "systemd 262 (262.2-1-arch)"
+  ],
+  "threads": 8,
+  "vm_overcommit_memory": "1"
+ },
+ "min_free_mb": 1024,
+ "n_specs": 84,
+ "nmax": 10,
+ "parallel_shards": 1,
+ "sbe_like": "H + local hypotheses, no default lemmas, symm/exfalso off (10.5 decision 3)",
+ "sbe_max_depth": 10,
+ "seeds": {
+  "pilot_A": 70006,
+  "pilot_B": 70007,
+  "r1b": 70005
+ },
+ "shard_size": 50,
+ "solver_s": 20,
+ "specs": "/home/tom/SolveBySAT/eval/fix_check/specs.jsonl",
+ "toolchain": "4.36.0",
+ "watchdog_s": 300
+}

@@ -12,7 +12,7 @@ for t in test_m0 test_m1 test_m4 test_m5; do
   echo "== $t"
   ".lake/build/bin/$t" || status=1
 done
-for f in Test/M2.lean Test/M3.lean Test/M4Lean.lean Test/M5Lean.lean; do
+for f in Test/M2.lean Test/M3.lean Test/M4Lean.lean Test/M5Lean.lean Test/M7Lean.lean; do
   echo "== $f"
   lake env lean "$f" || status=1
 done

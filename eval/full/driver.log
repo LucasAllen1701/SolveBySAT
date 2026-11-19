@@ -635,3 +635,17 @@ crash(shard, oom) on main:A/Std.HashSet.Raw.get_insertMany_list_of_not_mem_of_me
 crash(shard, oom) on main:A/Std.HashSet.get_insertMany_list_of_mem
 crash(shard, oom) on main:A/Std.HashSet.mem_erase
 shard 24: done; 2023 results; 27728 s
+crash(shard, oom) on main:A/Std.Internal.ForIn.toList_array
+crash(shard, oom) on main:A/Std.Internal.ForIn.toList_rcc
+crash(shard, oom) on main:A/Std.Internal.List.Const.getValue?_map
+crash(shard, oom) on main:A/Std.Internal.List.Const.map_insertEntry_perm_filter_map
+crash(shard, oom) on main:A/Std.Internal.List.Const.minKey!_modifyKey
+crash(shard, oom) on main:A/Std.Internal.List.Const.minKeyD_modifyKey_eq_minKeyD
+crash(shard, oom) on main:A/Std.Internal.List.List.getValue?_filter_containsKey
+crash(shard, oom) on main:A/Std.Internal.List.foldrM_eq_foldrM_toProd'
+crash(shard, oom) on main:A/Std.Internal.List.getEntry?_insertList_of_contains_left_eq_false
+crash(shard, oom) on main:A/Std.Internal.List.getKey_insertEntry
+crash(shard, oom) on main:A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right
+crash(shard, oom) on main:A/Std.Internal.List.insertEntry_append_of_not_contains_right
+crash(shard, oom) on main:A/Std.Internal.List.length_insertList
+shard 25: done; 2073 results; 29649 s

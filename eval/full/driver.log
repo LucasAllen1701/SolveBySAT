@@ -805,3 +805,16 @@ crash(shard, oom) on main:A/String.Slice.skipPrefix?_string_eq_some_iff
 crash(shard, oom) on main:A/String.Slice.sliceTo_sliceTo
 crash(shard, oom) on main:A/String.Slice.utf8ByteSize_slice
 shard 35: done; 2573 results; 41888 s
+crash(shard, oom) on main:A/String.eq_singleton_append
+crash(shard, oom) on main:A/String.isNat_iff
+crash(shard, oom) on main:A/String.join_append
+crash(shard, oom) on main:A/String.revSkip?_toSlice
+crash(shard, oom) on main:A/String.singleton_append_inj
+crash(shard, oom) on main:A/String.skipSuffixWhile_eq_endPos_iff
+crash(shard, oom) on main:A/String.splits_prev_endPos
+crash(shard, oom) on main:A/Subarray.getElem_toList
+crash(shard, oom) on main:A/Subarray.mkSlice_roc_eq_mkSlice_rcc
+crash(shard, oom) on main:A/Sum.elim_eq_iff
+crash(shard, oom) on main:A/Sum.lex_wf
+crash(shard, oom) on main:A/UInt16.add_eq_left
+shard 36: done; 2623 results; 43504 s

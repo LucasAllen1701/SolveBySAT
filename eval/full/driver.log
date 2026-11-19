@@ -942,3 +942,17 @@ crash(shard, oom) on main:B/Array.replicate_append_replicate/2
 crash(shard, oom) on main:B/Array.replicate_append_replicate/7
 crash(shard, oom) on main:B/Array.setIfInBounds_eq_empty_iff/2
 shard 46: done; 3123 results; 56698 s
+crash(shard, oom) on main:B/Array.size_eq_of_beq/3
+crash(shard, oom) on main:B/Array.size_eq_of_beq/8
+crash(shard, oom) on main:B/Array.toList_mkSlice_ric/1
+crash(shard, oom) on main:B/Array.toList_mkSlice_ric/3
+crash(shard, oom) on main:B/Array.unattach_append/1
+crash(shard, oom) on main:B/Array.unattach_append/6
+crash(shard, oom) on main:B/Array.unattach_append/7
+crash(shard, oom) on main:B/Array.unattach_attachWith/4
+crash(shard, oom) on main:B/Array.unattach_attachWith/5
+crash(shard, oom) on main:B/Array.unattach_attachWith/6
+crash(shard, oom) on main:B/Array.unattach_attachWith/8
+crash(shard, oom) on main:B/BitVec.getElem_shiftConcat_succ/9
+crash(shard, oom) on main:B/BitVec.getElem_shiftConcat_succ/23
+shard 47: done; 3173 results; 58174 s

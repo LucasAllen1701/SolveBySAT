@@ -588,3 +588,9 @@ crash(shard, oom) on main:A/Std.ExtDTreeMap.Const.size_insertMany_list_le
 crash(shard, oom) on main:A/Std.ExtDTreeMap.forIn_eq_forIn_toList
 crash(shard, oom) on main:A/Std.ExtDTreeMap.getD_insertMany_list_of_mem
 shard 18: done; 1723 results; 23922 s
+crash(shard, oom) on main:A/Std.ExtDTreeMap.getKey!_maxKey!
+crash(shard, oom) on main:A/Std.ExtDTreeMap.getKey?_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.ExtDTreeMap.getKeyD_minKeyD
+crash(shard, oom) on main:A/Std.ExtDTreeMap.insertMany_list_singleton
+crash(shard, oom) on main:A/Std.ExtDTreeMap.minKey_insertIfNew_le_minKey
+shard 19: done; 1773 results; 24381 s

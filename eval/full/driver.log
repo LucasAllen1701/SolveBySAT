@@ -628,3 +628,10 @@ crash(shard, oom) on main:A/Std.HashMap.getKey_insertMany_list_of_mem
 crash(shard, oom) on main:A/Std.HashMap.instLawfulGetElemMemOfEquivBEqOfLawfulHashable
 crash(shard, oom) on main:A/Std.HashMap.isEmpty_diff_iff
 shard 23: done; 1973 results; 27056 s
+crash(shard, oom) on main:A/Std.HashMap.mem_iff_isSome_getElem?
+crash(shard, oom) on main:A/Std.HashMap.mem_insert
+crash(shard, oom) on main:A/Std.HashSet.Raw.get_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.HashSet.Raw.get_insertMany_list_of_not_mem_of_mem
+crash(shard, oom) on main:A/Std.HashSet.get_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.HashSet.mem_erase
+shard 24: done; 2023 results; 27728 s

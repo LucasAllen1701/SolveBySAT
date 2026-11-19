@@ -582,3 +582,9 @@ crash(shard, oom) on main:A/Std.ExtDHashMap.Const.get?_insertMany_list_of_mem
 crash(shard, oom) on main:A/Std.ExtDHashMap.Const.size_insertManyIfNewUnit_list_le
 crash(shard, oom) on main:A/Std.ExtDHashMap.get!_insertIfNew
 shard 17: done; 1673 results; 23559 s
+crash(shard, oom) on main:A/Std.ExtDHashMap.getKey?_insertMany_list_of_contains_eq_false
+crash(shard, oom) on main:A/Std.ExtDTreeMap.Const.getD_filter
+crash(shard, oom) on main:A/Std.ExtDTreeMap.Const.size_insertMany_list_le
+crash(shard, oom) on main:A/Std.ExtDTreeMap.forIn_eq_forIn_toList
+crash(shard, oom) on main:A/Std.ExtDTreeMap.getD_insertMany_list_of_mem
+shard 18: done; 1723 results; 23922 s

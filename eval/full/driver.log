@@ -199,3 +199,18 @@ crash(shard, oom) on main:A/Int64.add_eq_left
 crash(shard, oom) on main:A/Int64.neg_inj
 crash(shard, oom) on main:A/Int8.not_inj
 shard 10: done; 550 results; 17392 s
+crash(shard, oom) on main:A/Int8.right_eq_add
+crash(shard, oom) on main:A/Int8.toInt32_ne_minValue
+crash(shard, oom) on main:A/Lean.Grind.AC.Seq.denote_insert_of_contains
+crash(shard, oom) on main:A/Lean.Grind.AddCommGroup.add_left_inj
+crash(shard, oom) on main:A/Lean.Grind.CommRing.Expr.denoteAsRing_eq
+crash(shard, oom) on main:A/Lean.Grind.CommRing.Mon.denote_cancelInv
+crash(shard, oom) on main:A/Lean.Grind.CommRing.Poly.denoteS_concat
+crash(shard, oom) on main:A/Lean.Grind.CommRing.Poly.denoteS_mul
+crash(shard, oom) on main:A/Lean.Grind.CommRing.Poly.denote_mul
+crash(shard, oom) on main:A/Lean.Grind.CommRing.Poly.denote_mulMon_nc_go
+crash(shard, oom) on main:A/Lean.Grind.CommRing.Poly.denote_toPolyQ
+crash(shard, oom) on main:A/Lean.Grind.CommRing.Stepwise.d_step1C
+crash(shard, oom) on main:A/Lean.Grind.CommRing.le_norm_tight_expr
+crash(shard, oom) on main:A/Lean.Grind.Field.NormNum.ofRat_zpow
+shard 11: done; 600 results; 19120 s

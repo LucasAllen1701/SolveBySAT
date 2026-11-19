@@ -756,3 +756,18 @@ crash(shard, oom) on main:A/Std.TreeSet.Raw.toList_rci
 crash(shard, oom) on main:A/Std.TreeSet.isEmpty_diff_iff
 crash(shard, oom) on main:A/Std.TreeSet.isEmpty_iff_forall_not_mem
 shard 32: done; 2423 results; 37387 s
+crash(shard, oom) on main:A/Std.TreeSet.toList_ric
+crash(shard, oom) on main:A/Std.WP.Assertion.NondetFun.evalsTo_apply_2
+crash(shard, oom) on main:A/Std.WP.Spec.Iter.forIn_filterM
+crash(shard, oom) on main:A/Std.WP.Spec.Iter.forIn_mapWithPostcondition
+crash(shard, oom) on main:A/Std.WP.Spec.IterM.foldM_filterWithPostcondition
+crash(shard, oom) on main:A/Std.WP.Spec.IterM.forIn_map
+crash(shard, oom) on main:A/Std.WP.Spec.IterM.forIn_mapM
+crash(shard, oom) on main:A/Std.WP.Spec.forInPure
+crash(shard, oom) on main:A/Std.WP.Spec.tryCatch_StateT
+crash(shard, oom) on main:A/Std.WP.Variant.evalsTo_ofMeasure_apply_2
+crash(shard, oom) on main:A/Std.WP.WPMonad.le_wp_monadLift_OptionT_apply
+crash(shard, oom) on main:A/Std.WP.WPMonad.map_le_wp_map
+crash(shard, oom) on main:A/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq
+crash(shard, oom) on main:A/Std.instLawfulOrderMaxOfIsLinearPreorderOfLawfulOrderLeftLeaningMax
+shard 33: done; 2473 results; 38352 s

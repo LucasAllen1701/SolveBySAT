@@ -81,3 +81,36 @@ crash(shard, oom) on main:A/Array.map_push
 crash(shard, oom) on main:A/Array.map_zipWith
 crash(shard, oom) on main:A/Array.max?_eq_none_iff
 shard 1: done; 100 results; 4653 s
+crash(shard, oom) on main:A/Array.mem_of_mem_erase
+crash(shard, oom) on main:A/Array.mem_replicate
+crash(shard, oom) on main:A/Array.min_le_of_mem
+crash(shard, oom) on main:A/Array.mkSlice_rio_eq_mkSlice_rio_min
+crash(shard, oom) on main:A/Array.ofFn_succ'
+crash(shard, oom) on main:A/Array.of_push_eq_push
+crash(shard, oom) on main:A/Array.push_ne_self
+crash(shard, oom) on main:A/Array.range'_append
+crash(shard, oom) on main:A/Array.replicate_append_replicate
+crash(shard, oom) on main:A/Array.setIfInBounds_eq_empty_iff
+crash(shard, oom) on main:A/Array.set_eq_push_extract_append_extract
+crash(shard, oom) on main:A/Array.size_insertIdx
+crash(shard, oom) on main:A/Array.snd_lt_add_of_mem_zipIdx
+crash(shard, oom) on main:A/Array.sum_push
+crash(shard, oom) on main:A/Array.toList_fst_unzip
+crash(shard, oom) on main:A/Array.toList_mkSlice_rcc
+crash(shard, oom) on main:A/Array.toList_mkSlice_ric
+crash(shard, oom) on main:A/Array.unattach_append
+crash(shard, oom) on main:A/Array.unattach_attachWith
+crash(shard, oom) on main:A/Array.zipIdx_map_fst
+crash(shard, oom) on main:A/Array.zip_eq_append_iff
+crash(shard, oom) on main:A/Array.zip_eq_empty_iff
+crash(shard, oom) on main:A/Array.zip_replicate
+crash(shard, oom) on main:A/BitVec.DivModState.lawful_init
+crash(shard, oom) on main:A/BitVec.DivModState.umod_eq_of_lawful
+crash(shard, oom) on main:A/BitVec.allOnes_or
+crash(shard, oom) on main:A/BitVec.append_lt_append_iff
+crash(shard, oom) on main:A/BitVec.extractLsb'_append_eq_of_add_le
+crash(shard, oom) on main:A/BitVec.getElem_fill
+crash(shard, oom) on main:A/BitVec.getElem_rev
+crash(shard, oom) on main:A/BitVec.getElem_shiftConcat_succ
+crash(shard, oom) on main:A/BitVec.getElem_smod
+shard 2: done; 150 results; 7092 s

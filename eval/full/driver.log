@@ -721,3 +721,15 @@ crash(shard, oom) on main:A/Std.Tactic.BVDecide.Normalize.BitVec.not_neg''
 crash(shard, oom) on main:A/Std.TreeMap.Equiv.of_forall_mem_unit_iff
 crash(shard, oom) on main:A/Std.TreeMap.Raw.Equiv.getElem?_eq
 shard 29: done; 2273 results; 35006 s
+crash(shard, oom) on main:A/Std.TreeMap.Raw.equiv_iff_keys_unit_eq
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getD_filter'
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getElem!_filterMap'
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getElem?_filter
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getElem_union_of_mem_right
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getKeyD_insertMany_list_of_contains_eq_false
+crash(shard, oom) on main:A/Std.TreeMap.Raw.mem_alter
+crash(shard, oom) on main:A/Std.TreeMap.Raw.mem_alter_of_compare_eq
+crash(shard, oom) on main:A/Std.TreeMap.Raw.mem_insertMany_list
+crash(shard, oom) on main:A/Std.TreeMap.Raw.size_insertMany_list_le
+crash(shard, oom) on main:A/Std.TreeMap.Raw.unitOfList_cons
+shard 30: done; 2323 results; 35831 s

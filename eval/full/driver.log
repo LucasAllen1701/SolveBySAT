@@ -565,3 +565,10 @@ crash(shard, oom) on main:A/Std.DTreeMap.get!_diff_of_not_mem_left
 crash(shard, oom) on main:A/Std.DTreeMap.get!_inter_of_not_mem_right
 crash(shard, oom) on main:A/Std.DTreeMap.get?_insertMany_list_of_mem
 shard 15: done; 1573 results; 21969 s
+crash(shard, oom) on main:A/Std.DTreeMap.getKey?_diff_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.getKeyD_union_of_not_mem_left
+crash(shard, oom) on main:A/Std.DTreeMap.get_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.DTreeMap.inter_equiv_empty_comm
+crash(shard, oom) on main:A/Std.DTreeMap.mem_map
+crash(shard, oom) on main:A/Std.DTreeMap.valuesIter_toList
+shard 16: done; 1623 results; 22784 s

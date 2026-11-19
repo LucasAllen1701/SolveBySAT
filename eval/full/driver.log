@@ -30,3 +30,54 @@ crash(shard, oom) on main:A/Array.findSomeRev?_push_of_isNone
 crash(shard, oom) on main:A/Array.flatMap_def
 crash(shard, oom) on main:A/Array.flatten_filter_ne_empty
 shard 0: done; 50 results; 2201 s
+remote: error: GH007: Your push would publish a private email address.        
+remote: You can make your email public or disable this protection by visiting:        
+remote: https://github.com/settings/emails        
+To https://github.com/LucasAllen1701/SolveBySAT.git
+ ! [remote rejected] eval-m7 -> eval-m7 (push declined due to email privacy restrictions)
+error: failed to push some refs to 'https://github.com/LucasAllen1701/SolveBySAT.git'
+remote: error: GH007: Your push would publish a private email address.        
+remote: You can make your email public or disable this protection by visiting:        
+remote: https://github.com/settings/emails        
+To https://github.com/LucasAllen1701/SolveBySAT.git
+ ! [remote rejected] eval-m7 -> eval-m7 (push declined due to email privacy restrictions)
+error: failed to push some refs to 'https://github.com/LucasAllen1701/SolveBySAT.git'
+remote: error: GH007: Your push would publish a private email address.        
+remote: You can make your email public or disable this protection by visiting:        
+remote: https://github.com/settings/emails        
+To https://github.com/LucasAllen1701/SolveBySAT.git
+ ! [remote rejected] eval-m7 -> eval-m7 (push declined due to email privacy restrictions)
+error: failed to push some refs to 'https://github.com/LucasAllen1701/SolveBySAT.git'
+push failed (will retry after the next shard)
+after-shard hook failed with 1 (run continues)
+crash(shard, oom) on main:A/Array.foldlM_start_stop
+crash(shard, oom) on main:A/Array.foldl_append_eq_append
+crash(shard, oom) on main:A/Array.foldl_filterMap'
+crash(shard, oom) on main:A/Array.foldl_hom
+crash(shard, oom) on main:A/Array.foldl_toList_eq_flatMap
+crash(shard, oom) on main:A/Array.foldrM_map
+crash(shard, oom) on main:A/Array.foldr_flatMap
+crash(shard, oom) on main:A/Array.foldr_flatten'
+crash(shard, oom) on main:A/Array.forIn_eq_foldlM
+crash(shard, oom) on main:A/Array.getElem!_set!_ne
+crash(shard, oom) on main:A/Array.getElem?_extract
+crash(shard, oom) on main:A/Array.getElem?_filter
+crash(shard, oom) on main:A/Array.getElem?_setIfInBounds
+crash(shard, oom) on main:A/Array.getElem?_swap
+crash(shard, oom) on main:A/Array.getElem_append_right'
+crash(shard, oom) on main:A/Array.getElem_insertIdx_of_gt
+crash(shard, oom) on main:A/Array.getElem_swapIfInBounds
+crash(shard, oom) on main:A/Array.get_find?_mem
+crash(shard, oom) on main:A/Array.insertIdx_size_self
+crash(shard, oom) on main:A/Array.isSome_max?_iff
+crash(shard, oom) on main:A/Array.iterFromIdxM_equiv_iterM_drop_toList
+crash(shard, oom) on main:A/Array.le_iff_lt_or_eq
+crash(shard, oom) on main:A/Array.le_snd_of_mem_zipIdx
+crash(shard, oom) on main:A/Array.mapIdx_eq_append_iff
+crash(shard, oom) on main:A/Array.map_eq_replicate_iff
+crash(shard, oom) on main:A/Array.map_inj
+crash(shard, oom) on main:A/Array.map_pmap
+crash(shard, oom) on main:A/Array.map_push
+crash(shard, oom) on main:A/Array.map_zipWith
+crash(shard, oom) on main:A/Array.max?_eq_none_iff
+shard 1: done; 100 results; 4653 s

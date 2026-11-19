@@ -456,3 +456,17 @@ crash(shard, oom) on main:A/Std.DHashMap.get!_inter_of_not_mem_right
 crash(shard, oom) on main:A/Std.DHashMap.get?_insertIfNew
 crash(shard, oom) on main:A/Std.DHashMap.getKey!_diff
 shard 9: done; 1273 results; 15273 s
+crash(shard, oom) on main:A/Std.DHashMap.getKey!_inter_of_not_mem_left
+crash(shard, oom) on main:A/Std.DHashMap.getKey_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.DHashMap.getKey_union_of_not_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.insertMany_list_singleton
+crash(shard, oom) on main:A/Std.DHashMap.isEmpty_iff_forall_not_mem
+crash(shard, oom) on main:A/Std.DHashMap.isEmpty_modify
+crash(shard, oom) on main:A/Std.DTreeMap.Const.equiv_iff_toList_perm
+crash(shard, oom) on main:A/Std.DTreeMap.Const.get!_diff_of_not_mem_left
+crash(shard, oom) on main:A/Std.DTreeMap.Const.get!_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Const.getD_filter'
+crash(shard, oom) on main:A/Std.DTreeMap.Const.getD_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Const.maxKey?_alter_eq_self
+crash(shard, oom) on main:A/Std.DTreeMap.Const.mem_ofList
+shard 10: done; 1323 results; 16446 s

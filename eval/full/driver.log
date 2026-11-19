@@ -572,3 +572,13 @@ crash(shard, oom) on main:A/Std.DTreeMap.inter_equiv_empty_comm
 crash(shard, oom) on main:A/Std.DTreeMap.mem_map
 crash(shard, oom) on main:A/Std.DTreeMap.valuesIter_toList
 shard 16: done; 1623 results; 22784 s
+crash(shard, oom) on main:A/Std.Do.Spec.IterM.forIn_filter
+crash(shard, oom) on main:A/Std.Do.Spec.forIn'_cnfClause
+crash(shard, oom) on main:A/Std.Do.Spec.orElse_OptionT
+crash(shard, oom) on main:A/Std.Do.Spec.tryCatch_StateT
+crash(shard, oom) on main:A/Std.Do.WP.pure
+crash(shard, oom) on main:A/Std.ExtDHashMap.Const.get?_insertIfNew
+crash(shard, oom) on main:A/Std.ExtDHashMap.Const.get?_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.ExtDHashMap.Const.size_insertManyIfNewUnit_list_le
+crash(shard, oom) on main:A/Std.ExtDHashMap.get!_insertIfNew
+shard 17: done; 1673 results; 23559 s

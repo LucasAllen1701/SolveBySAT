@@ -320,3 +320,10 @@ crash(shard, oom) on main:A/Nat.getD_toArray_rcc
 crash(shard, oom) on main:A/Nat.getElem!_toArray_rco_eq_zero_iff
 crash(shard, oom) on main:A/Nat.getElem!_toList_rcc_eq_zero_iff
 shard 2: done; 923 results; 5391 s
+crash(shard, oom) on main:A/Nat.getElem!_toList_ric_eq_zero
+crash(shard, oom) on main:A/Nat.getElem?_toArray_rcc_eq_none_iff
+crash(shard, oom) on main:A/Nat.induct_rcc_right
+crash(shard, oom) on main:A/Nat.lt_of_div_eq_zero
+crash(shard, oom) on main:A/Nat.one_lt_mul_iff
+crash(shard, oom) on main:A/Nat.pos_of_lt_mul_left
+shard 3: done; 973 results; 6761 s

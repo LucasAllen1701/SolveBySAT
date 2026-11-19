@@ -903,3 +903,15 @@ crash(shard, oom) on main:A/_private.Std.Data.Internal.List.Associative.0.Std.In
 crash(shard, oom) on main:A/_private.Std.Sat.AIG.CNF.0.Std.Sat.AIG.Decl.iteToCNF_eval
 crash(shard, oom) on main:A/_private.Std.Tactic.BVDecide.Bitblast.BVExpr.Circuit.Lemmas.Operations.Cpop.0.Std.Tactic.BVDecide.BVExpr.bitblast.denote_blastExtractAndExtend.go
 shard 43: done; 2973 results; 53635 s
+crash(shard, oom) on main:B/Array.append_eq_replicate_iff/5
+crash(shard, oom) on main:B/Array.append_eq_replicate_iff/7
+crash(shard, oom) on main:B/Array.append_eq_replicate_iff/12
+crash(shard, oom) on main:B/Array.append_eq_replicate_iff/19
+crash(shard, oom) on main:B/Array.append_inj/0
+crash(shard, oom) on main:B/Array.append_inj/1
+crash(shard, oom) on main:B/Array.append_inj/6
+crash(shard, oom) on main:B/Array.append_inj/18
+crash(shard, oom) on main:B/Array.append_inj/20
+crash(shard, oom) on main:B/Array.append_right_inj/0
+crash(shard, oom) on main:B/Array.contains_filter/3
+shard 44: done; 3023 results; 54574 s

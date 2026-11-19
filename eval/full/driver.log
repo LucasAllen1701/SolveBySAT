@@ -192,3 +192,10 @@ crash(shard, oom) on main:A/Int32.or_eq_zero_iff
 crash(shard, oom) on main:A/Int32.shiftLeft_or
 crash(shard, oom) on main:A/Int32.shiftRight_or
 shard 9: done; 500 results; 16248 s
+crash(shard, oom) on main:A/Int32.shiftRight_xor
+crash(shard, oom) on main:A/Int32.toInt_div_of_ne_left
+crash(shard, oom) on main:A/Int64.add_assoc
+crash(shard, oom) on main:A/Int64.add_eq_left
+crash(shard, oom) on main:A/Int64.neg_inj
+crash(shard, oom) on main:A/Int8.not_inj
+shard 10: done; 550 results; 17392 s

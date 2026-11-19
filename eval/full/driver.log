@@ -395,3 +395,33 @@ crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getKey?_insert
 crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getKey?_union_of_contains_eq_false_left
 crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.getKeyD_insert
 shard 7: done; 1173 results; 12703 s
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.size_add_size_eq_size_union_add_size_inter
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.wfImp_modifyₘ
+crash(shard, oom) on main:A/Std.DHashMap.Internal.apply_bucket
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.distinct_keys_toList
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.get?_emptyWithCapacity
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_contains
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.getD_filter
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.getD_inter_of_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.getKey!_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.getKey?_alter
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.getKeyD_insertManyIfNewUnit_list_of_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.getKey_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.getThenInsertIfNew?_fst
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.get_insertIfNew
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.mem_iff_isSome_get?
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.mem_insertMany_of_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.mem_toList_iff_get?_eq_some
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.size_toArray
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.toArray_toList
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.toList_insert_perm
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.values_emptyWithCapacity
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Equiv.constGet!_eq
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Equiv.inter_congr
+crash(shard, oom) on main:A/Std.DHashMap.Raw.WF.containsThenInsertIfNew
+crash(shard, oom) on main:A/Std.DHashMap.Raw.contains_inter
+crash(shard, oom) on main:A/Std.DHashMap.Raw.contains_modify
+crash(shard, oom) on main:A/Std.DHashMap.Raw.contains_of_contains_insertIfNew
+crash(shard, oom) on main:A/Std.DHashMap.Raw.get?_alter
+shard 8: done; 1223 results; 14053 s

@@ -1136,3 +1136,14 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
   touched. Old → new hashes: 445f29a → 977c867, 1b777b2 → c81e323, 6ef9ea2 → c3a3ec8,
   e9f77e7 → ef0c75b. `eval/full/header.json` records the start commit as `6ef9ea2`, which
   is now `c3a3ec8` (same tree).
+- **Full run stopped (recorded automatically by `Test/eval_full.sh`, 2026-11-19 17:00:25).**
+  Driver exit 3: Driver ended: STOPPED: decoder bug or solver error (see results.jsonl)..
+  Last driver output:
+  ```
+  crash(shard, oom) on main:A/List.getElem_scanl
+  crash(shard, oom) on main:A/List.getLast?_drop
+  STOP: "decoder_bug" on main:A/List.getLast_eq_head_reverse: "solve_by_sat: decoder failed on a satisfiable CNF (bug).\nskeleton: fun α#0 l#1 h => Eq.symm(List.head_reverse(fun a0@g5 => h(List.reverse_eq_nil_iff.mp(a0@g5))))\nerror: Tactic `introN` failed: The metavariable below has already been assigned\n\nNote: This likely indicates an internal error in this tactic or a prior one\n\ncase h\nα✝ : Type u_1\nl✝ : List α✝\nh✝ : l✝ = [] → False\n⊢ l✝.reverse = [] → False"
+  STOP: shard exited with 3 (decoder bug or solver error; see results.jsonl)
+  === driver exit 3 2026-11-19 17:00:25
+  ```
+  - Goals done: 774 of 6300 - Crashes by cause: oom 233 

@@ -255,3 +255,19 @@ crash(shard, oom) on main:A/List.findIdx?_flatten
 crash(shard, oom) on main:A/List.findIdx_subtype
 crash(shard, oom) on main:A/List.findSome?_isSome_iff
 shard 14: done; 750 results; 23247 s
+crash(shard, oom) on main:A/List.findSomeRev?_eq_findSomeRev?TR
+crash(shard, oom) on main:A/List.flatMap_le_flatMap_iff
+crash(shard, oom) on main:A/List.flatten_eq_cons_iff
+crash(shard, oom) on main:A/List.flatten_eq_flattenTR
+crash(shard, oom) on main:A/List.flatten_reverse
+crash(shard, oom) on main:A/List.foldl_push_eq_append
+crash(shard, oom) on main:A/List.forIn_toArray
+crash(shard, oom) on main:A/List.getElem!_inj
+crash(shard, oom) on main:A/List.getElem?_of_mem
+crash(shard, oom) on main:A/List.getElem_eraseIdx_of_ge
+crash(shard, oom) on main:A/List.getElem_insertIdx_of_lt
+crash(shard, oom) on main:A/List.getElem_scanl
+crash(shard, oom) on main:A/List.getLast?_drop
+STOP: "decoder_bug" on main:A/List.getLast_eq_head_reverse: "solve_by_sat: decoder failed on a satisfiable CNF (bug).\nskeleton: fun α#0 l#1 h => Eq.symm(List.head_reverse(fun a0@g5 => h(List.reverse_eq_nil_iff.mp(a0@g5))))\nerror: Tactic `introN` failed: The metavariable below has already been assigned\n\nNote: This likely indicates an internal error in this tactic or a prior one\n\ncase h\nα✝ : Type u_1\nl✝ : List α✝\nh✝ : l✝ = [] → False\n⊢ l✝.reverse = [] → False"
+STOP: shard exited with 3 (decoder bug or solver error; see results.jsonl)
+=== driver exit 3 2026-11-19 17:00:25

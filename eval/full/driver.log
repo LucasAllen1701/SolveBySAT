@@ -861,3 +861,30 @@ crash(shard, oom) on main:A/Vector.map_findSome?
 crash(shard, oom) on main:A/Vector.mem_flatten
 crash(shard, oom) on main:A/Vector.mem_ofFn
 shard 41: done; 2873 results; 50074 s
+crash(shard, oom) on main:A/Vector.mem_singleton
+crash(shard, oom) on main:A/Vector.mem_zipIdx_iff_getElem?
+crash(shard, oom) on main:A/Vector.mem_zipIdx_iff_le_and_getElem?_sub
+crash(shard, oom) on main:A/Vector.not_mem_append
+crash(shard, oom) on main:A/Vector.reverse_attach
+crash(shard, oom) on main:A/Vector.reverse_attachWith
+crash(shard, oom) on main:A/Vector.right_distrib
+crash(shard, oom) on main:A/Vector.set_replicate_self
+crash(shard, oom) on main:A/Vector.set_set
+crash(shard, oom) on main:A/Vector.size_ne_zero_of_mem
+crash(shard, oom) on main:A/Vector.smul_add
+crash(shard, oom) on main:A/Vector.snd_lt_add_of_mem_zipIdx
+crash(shard, oom) on main:A/Vector.swap_perm
+crash(shard, oom) on main:A/Vector.swap_swap
+crash(shard, oom) on main:A/Vector.toArray_iterFromIdx
+crash(shard, oom) on main:A/Vector.toList_zip
+crash(shard, oom) on main:A/Vector.zipIdx_map
+crash(shard, oom) on main:A/Vector.zip_eq_zipWith
+crash(shard, oom) on main:A/_private.Init.Data.Array.Lemmas.0.Array.getElem_shrink_loop
+crash(shard, oom) on main:A/_private.Init.Data.Array.Lemmas.0.Array.toList_reverse.go
+crash(shard, oom) on main:A/_private.Init.Data.BitVec.Bitblast.0.BitVec.extractLsb'_addRecAux_of_le
+crash(shard, oom) on main:A/_private.Init.Data.ByteArray.Lex.0.ByteArray.instLawfulBEq
+crash(shard, oom) on main:A/_private.Init.Data.List.MinMaxIdx.0.List.combineMinIdxOn_lt'
+crash(shard, oom) on main:A/_private.Init.Data.List.MinMaxIdx.0.List.minIdxOn.go_eq
+crash(shard, oom) on main:A/_private.Init.Data.List.Nat.Perm.0.List.set_set_perm'
+crash(shard, oom) on main:A/_private.Init.Data.List.Sort.Impl.0.List.MergeSort.Internal.mergeSortTR_run_eq_mergeSort
+shard 42: done; 2923 results; 52118 s

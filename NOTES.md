@@ -1232,3 +1232,9 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
   `c3a3ec8`. Results written after the resume come from the fixed decoder; per the check
   above, that differs from the start commit only on goals whose CNF is SAT, and there
   only in being able to decode the case of this bug. No filter, seed or limit changed.
+  - In the resumed run, `main:A/List.getLast_eq_head_reverse` is `proved` at N = 5, with
+    the skeleton the failed decode had reported.
+  - On resume, the driver numbers the remaining goals' shards from `shard_0000.jsonl`
+    again, overwriting the first part's shard spec lists. These are input lists only, and
+    the originals are in git history at `342d184`. Shard counts in `STATUS.md` are
+    computed from the full spec order, not from these files.

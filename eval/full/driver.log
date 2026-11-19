@@ -649,3 +649,24 @@ crash(shard, oom) on main:A/Std.Internal.List.getValue?_filter_not_contains_of_c
 crash(shard, oom) on main:A/Std.Internal.List.insertEntry_append_of_not_contains_right
 crash(shard, oom) on main:A/Std.Internal.List.length_insertList
 shard 25: done; 2073 results; 29649 s
+crash(shard, oom) on main:A/Std.Internal.List.maxKey?_eq_some_iff_getKey?_eq_self_and_forall
+crash(shard, oom) on main:A/Std.Internal.List.maxKey?_eq_some_iff_mem_and_forall
+crash(shard, oom) on main:A/Std.Internal.List.maxKey?_eraseKey_eq_iff_beq_maxKey?_eq_false
+crash(shard, oom) on main:A/Std.Internal.List.mem_eraseKey_of_key_ne
+crash(shard, oom) on main:A/Std.Internal.List.mem_map_toProd_iff_getValue?_eq_some
+crash(shard, oom) on main:A/Std.Internal.List.mem_replaceEntry_of_true
+crash(shard, oom) on main:A/Std.Internal.List.min?_keys
+crash(shard, oom) on main:A/Std.Internal.List.minEntry?_eq_some_iff
+crash(shard, oom) on main:A/Std.Internal.List.minKey?_eraseKey_eq_of_beq_minKey?_eq_false
+crash(shard, oom) on main:A/Std.Internal.instLawfulMemForInIdRoi
+crash(shard, oom) on main:A/Std.Iter.atIdxSlow?_intermediateZip
+crash(shard, oom) on main:A/Std.Iter.find?_eq_match_step
+crash(shard, oom) on main:A/Std.Iter.forIn'_eq_forIn'_toArray
+crash(shard, oom) on main:A/Std.Iter.isPlausibleIndirectOutput_of_mem_toList
+crash(shard, oom) on main:A/Std.Iter.isPlausibleStep_iff_step_eq
+crash(shard, oom) on main:A/Std.Iter.step_filterMap
+crash(shard, oom) on main:A/Std.Iter.step_intermediateZip
+crash(shard, oom) on main:A/Std.Iter.toArray_drop
+crash(shard, oom) on main:A/Std.Iter.toArray_filter
+crash(shard, oom) on main:A/Std.Iter.toListRev_dropWhile_of_finite
+shard 26: done; 2123 results; 30989 s

@@ -327,3 +327,17 @@ crash(shard, oom) on main:A/Nat.lt_of_div_eq_zero
 crash(shard, oom) on main:A/Nat.one_lt_mul_iff
 crash(shard, oom) on main:A/Nat.pos_of_lt_mul_left
 shard 3: done; 973 results; 6761 s
+crash(shard, oom) on main:A/Nat.size_rco
+crash(shard, oom) on main:A/Nat.toArray_rcc_succ_succ
+crash(shard, oom) on main:A/Nat.toArray_rco_eq_singleton
+crash(shard, oom) on main:A/Nat.toArray_rco_eq_singleton_append_iff
+crash(shard, oom) on main:A/Nat.toArray_roc_add_right_eq_map
+crash(shard, oom) on main:A/Nat.toArray_roc_eq_singleton_iff
+crash(shard, oom) on main:A/Nat.toArray_roo_eq_singleton
+crash(shard, oom) on main:A/Nat.toList_rcc_eq_cons
+crash(shard, oom) on main:A/Nat.toList_rcc_eq_cons_iff
+crash(shard, oom) on main:A/Nat.toList_rcc_eq_nil_iff
+crash(shard, oom) on main:A/Nat.toList_roc_eq_append
+crash(shard, oom) on main:A/Option.all_attachWith
+crash(shard, oom) on main:A/Option.eq_none_iff_forall_not_mem
+shard 4: done; 1023 results; 8482 s

@@ -1252,3 +1252,12 @@ crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.aux_size_modify/25
 crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.get!_diff_of_contains_eq_false_left/11
 crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.get!_diff_of_contains_eq_false_left/35
 shard 8: done; 4695 results; 9025 s
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.get!_filterMap_of_getKey?_eq_some/0
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.get_map'/0
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.get_map'/87
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.mem_toList_iff_getKey?_eq_some_and_get?_eq_some/0
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.mem_toList_iff_getKey?_eq_some_and_get?_eq_some/19
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.minKeyD_modify_eq_minKeyD/3
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.minKeyD_modify_eq_minKeyD/7
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.toArray_map/2
+shard 9: done; 4745 results; 10110 s

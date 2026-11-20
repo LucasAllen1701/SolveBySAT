@@ -1446,3 +1446,13 @@ crash(shard, oom) on main:B/Vector.extract_push/161
 crash(shard, oom) on main:B/Vector.findSome?_subtype/2
 crash(shard, oom) on main:B/Vector.findSome?_subtype/5
 shard 31: done; 5845 results; 27048 s
+crash(shard, oom) on main:B/Vector.getElem?_extract_of_succ/0
+crash(shard, oom) on main:B/Vector.getElem?_extract_of_succ/2
+crash(shard, oom) on main:B/Vector.getElem?_extract_of_succ/7
+crash(shard, oom) on main:B/Vector.getElem?_zero_flatten/0
+crash(shard, oom) on main:B/Vector.getElem_zipIdx/30
+crash(shard, oom) on main:B/Vector.getElem_zipIdx/70
+crash(shard, oom) on main:B/Vector.mapFinIdx_eq_mapFinIdx_iff/10
+crash(shard, oom) on main:B/Vector.mapFinIdx_eq_mapFinIdx_iff/12
+crash(shard, oom) on main:B/Vector.snd_lt_add_of_mem_zipIdx/3
+shard 32: done; 5895 results; 27734 s

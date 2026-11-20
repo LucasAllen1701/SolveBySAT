@@ -1433,3 +1433,5 @@ crash(shard, oom) on main:B/String.skipSuffixWhile_eq_endPos_iff/5
 crash(shard, oom) on main:B/String.splits_prev_endPos/218
 crash(shard, oom) on main:B/UInt16.add_eq_left/1
 shard 27: done; 5645 results; 24565 s
+crash(shard, oom) on main:B/UInt32.mul_add/0
+shard 28: done; 5695 results; 25198 s

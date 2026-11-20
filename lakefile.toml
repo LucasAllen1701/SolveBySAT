@@ -47,3 +47,8 @@ supportInterpreter = true
 name = "eval_run"
 root = "Test.EvalRun"
 supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_numerals"
+root = "Test.EvalNumerals"
+supportInterpreter = true

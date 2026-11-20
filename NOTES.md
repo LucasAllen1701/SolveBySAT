@@ -1479,3 +1479,42 @@ both with and without rule 4.
     not numerals in this sense; they fall to rule 6 and the review.
   - *The 7a walker and budget.* The same traversal defines Tier B goals and the node estimate,
     so the three notions see the same oracle term; the budget is the pre-registered one.
+
+### 7d-1: annotations, report and review samples (fixed before any review)
+
+- **Annotations** (`lake exe eval_numerals`, `Test/EvalNumerals.lean`, under the 2.5 GB cap):
+  - `eval/corpus_numerals.jsonl`: rule 4 as fixed above, for all 6,000 corpus goals (46 s,
+    774 MB). 0 errors; 162,687 positions checked, 0 skipped; 36 walks cut at the budget.
+    Rule 4 holds for 180 Tier A and 105 Tier B goals.
+  - `eval/corpus_hcompile.jsonl`: the compiler's verdict on each goal, and on each `H_main`
+    constant on its own (`H_full` for the 300 R1b goals) (23 s, 770 MB).
+    *Decision:* the 1,375 memory-crash records do not include `H_accepted`/`H_rejected`, since
+    the shard died before writing its result line. Rules 1 and 2 of §3.3 and the R1 funnel need
+    them. So they are recomputed with `compile goal [c]`, the harness's own call. That is
+    compilation only, with no encoding or solving, so it is not a new run. `eval/report.py`
+    checks the recomputation against every result that records acceptance: **4,925 agree,
+    0 disagree.**
+- **Report.** `eval/report.py` writes `EVAL.md` from `eval/full/`, the corpus files (with the
+  two annotations) and `eval/reviews/`. It has no charts, because matplotlib is not installed.
+- **Review samples (seeded, written by `python3 eval/report.py samples` to
+  `eval/reviews/*.sample.txt`).**
+
+  | review | population | reviewed | seed |
+  | --- | --- | --- | --- |
+  | §3.3 unexplained (main run, rule 6 with rule 4 applied) | 770 | 50 | 70101 |
+  | §3.4 / R7: oracle-in-class Tier B goals with `no_proof_le_Nmax` | 158 | 100 | 70102 |
+  | E1: like-for-like `solve_by_elim` closed, `solve_by_sat` `no_proof_le_Nmax` | 1,588 | 50 | 70103 |
+  | `solve_by_sat` proved, like-for-like `solve_by_elim` did not | 89 (58 A, 31 B) | 89 | – |
+
+  *Deviation (as the 7d-1 instructions provide):* R7 has 158 cases, more than 100, so a seeded
+  sample of 100 is reviewed instead of all of them.
+  - Oracle-in-class (§3.4) is read as: the goal is accepted, every `H_main` constant is
+    accepted, the oracle term has no elimination constant (with §10.4's additions), and the
+    node estimate is at most 10.
+  - The unexplained and E1 samples pool both tiers.
+- **Review tool.** `eval_numerals inspect sbe|nosbe KEY…` rebuilds one goal from the corpus.
+  It prints the goal, the oracle term and up to 6 positions where the oracle term's types match
+  only definitionally (rule 4's check, with each position reported). With `sbe`, it reruns
+  like-for-like `solve_by_elim` as the harness defines it, and applies the same check to that
+  proof term. It changes nothing in the tactic, encoder, decoder or compiler. It runs one goal
+  at a time, at a reviewer's request; it is not a batch run.

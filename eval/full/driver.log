@@ -1435,3 +1435,4 @@ crash(shard, oom) on main:B/UInt16.add_eq_left/1
 shard 27: done; 5645 results; 24565 s
 crash(shard, oom) on main:B/UInt32.mul_add/0
 shard 28: done; 5695 results; 25198 s
+shard 29: done; 5745 results; 25669 s

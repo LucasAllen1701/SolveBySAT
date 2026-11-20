@@ -1377,3 +1377,4 @@
 {"hwm_mb":912,"ms":720,"rss_after_mb":912,"rss_before_mb":752,"specs":"eval/full/shard_0027.jsonl"}
 {"hwm_mb":915,"ms":731,"rss_after_mb":915,"rss_before_mb":750,"specs":"eval/full/shard_0028.jsonl"}
 {"hwm_mb":908,"ms":712,"rss_after_mb":908,"rss_before_mb":750,"specs":"eval/full/shard_0028.jsonl"}
+{"hwm_mb":911,"ms":702,"rss_after_mb":911,"rss_before_mb":751,"specs":"eval/full/shard_0029.jsonl"}

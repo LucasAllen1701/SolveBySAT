@@ -1054,3 +1054,33 @@ crash(shard, oom) on main:B/List.drop_eq_getElem?_toList_append/48
 crash(shard, oom) on main:B/List.erase_append/6
 crash(shard, oom) on main:B/List.ext_getElem/114
 shard 62: done; 3923 results; 70393 s
+crash(shard, oom) on main:B/List.find?_eq_some_iff_append/21
+crash(shard, oom) on main:B/List.find?_eq_some_iff_append/67
+crash(shard, oom) on main:B/List.find?_eq_some_iff_append/146
+crash(shard, oom) on main:B/List.find?_eq_some_iff_append/170
+crash(shard, oom) on main:B/List.find?_toArray/36
+crash(shard, oom) on main:B/List.find?_toArray/54
+crash(shard, oom) on main:B/List.find?_toArray/65
+crash(shard, oom) on main:B/List.findSomeRev?_eq_findSomeRev?TR/7
+crash(shard, oom) on main:B/List.findSomeRev?_eq_findSomeRev?TR/12
+crash(shard, oom) on main:B/List.flatMap_le_flatMap_iff/0
+crash(shard, oom) on main:B/List.flatten_eq_flattenTR/0
+crash(shard, oom) on main:B/List.flatten_eq_flattenTR/1
+crash(shard, oom) on main:B/List.flatten_reverse/17
+crash(shard, oom) on main:B/List.flatten_reverse/18
+crash(shard, oom) on main:B/List.flatten_reverse/21
+crash(shard, oom) on main:B/List.foldl_push_eq_append/4
+crash(shard, oom) on main:B/List.foldl_push_eq_append/10
+crash(shard, oom) on main:B/List.foldl_push_eq_append/13
+crash(shard, oom) on main:B/List.foldr_cons_eq_append/8
+crash(shard, oom) on main:B/List.getElem?_mapFinIdx/93
+crash(shard, oom) on main:B/List.getElem?_mapFinIdx/332
+crash(shard, oom) on main:B/List.getElem_eraseIdx_of_ge/0
+crash(shard, oom) on main:B/List.getElem_eraseIdx_of_ge/2
+crash(shard, oom) on main:B/List.getElem_eraseIdx_of_ge/5
+crash(shard, oom) on main:B/List.getElem_eraseIdx_of_ge/35
+crash(shard, oom) on main:B/List.getElem_insertIdx_of_lt/0
+crash(shard, oom) on main:B/List.getElem_insertIdx_of_lt/1
+crash(shard, oom) on main:B/List.getElem_insertIdx_of_lt/5
+crash(shard, oom) on main:B/List.getElem_insertIdx_of_lt/6
+shard 63: done; 3973 results; 72039 s

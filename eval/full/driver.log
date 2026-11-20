@@ -1456,3 +1456,8 @@ crash(shard, oom) on main:B/Vector.mapFinIdx_eq_mapFinIdx_iff/10
 crash(shard, oom) on main:B/Vector.mapFinIdx_eq_mapFinIdx_iff/12
 crash(shard, oom) on main:B/Vector.snd_lt_add_of_mem_zipIdx/3
 shard 32: done; 5895 results; 27734 s
+crash(shard, oom) on main:B/Vector.zipIdx_map/0
+crash(shard, oom) on main:B/Vector.zipIdx_map/20
+crash(shard, oom) on main:B/Vector.zipIdx_map/27
+crash(shard, oom) on main:B/_private.Init.Data.String.Basic.0.ByteArray.isSome_utf8Decode?go_iff/328
+shard 33: done; 5945 results; 28487 s

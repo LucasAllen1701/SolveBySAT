@@ -1209,3 +1209,21 @@ crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.get?_emptyWithCapacity/12
 crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_contains/0
 crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.getKey_insertMany_list_of_mem/0
 shard 5: done; 4545 results; 6253 s
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.get_insertIfNew/272
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/2
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/19
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.size_toArray/0
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Equiv.inter_congr/3
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Equiv.inter_congr/5
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Equiv.inter_congr/21
+crash(shard, oom) on main:B/Std.DHashMap.Raw.all_eq_false_iff_exists_contains_get/22
+crash(shard, oom) on main:B/Std.DHashMap.Raw.contains_inter/0
+crash(shard, oom) on main:B/Std.DHashMap.Raw.contains_inter/7
+crash(shard, oom) on main:B/Std.DHashMap.Raw.contains_inter/74
+crash(shard, oom) on main:B/Std.DHashMap.Raw.contains_of_contains_insertIfNew/32
+crash(shard, oom) on main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/2
+crash(shard, oom) on main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/3
+crash(shard, oom) on main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/10
+crash(shard, oom) on main:B/Std.DHashMap.Raw.getD_alter_self/21
+shard 6: done; 4595 results; 7283 s

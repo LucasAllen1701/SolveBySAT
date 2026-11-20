@@ -1240,3 +1240,15 @@ crash(shard, oom) on main:B/Std.DHashMap.getKey!_inter_of_not_mem_left/8
 crash(shard, oom) on main:B/Std.DHashMap.getKey?_eq_some_getKeyD/2
 crash(shard, oom) on main:B/Std.DHashMap.getKey?_eq_some_getKeyD/3
 shard 7: done; 4645 results; 8171 s
+crash(shard, oom) on main:B/Std.DHashMap.isEmpty_modify/0
+crash(shard, oom) on main:B/Std.DTreeMap.Const.maxKey!_modify/0
+crash(shard, oom) on main:B/Std.DTreeMap.Const.mem_ofList/4
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Const.toList_roo/3
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Const.toList_roo/13
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Const.toList_roo/44
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.aux_size_modify/12
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.aux_size_modify/14
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.aux_size_modify/25
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.get!_diff_of_contains_eq_false_left/11
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.get!_diff_of_contains_eq_false_left/35
+shard 8: done; 4695 results; 9025 s

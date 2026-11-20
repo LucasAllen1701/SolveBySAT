@@ -1000,3 +1000,7 @@ crash(shard, oom) on main:B/Int.Internal.Linear.cooper_dvd_left_split_dvd2/3
 crash(shard, oom) on main:B/Int.Internal.Linear.cooper_dvd_left_split_dvd2/74
 crash(shard, oom) on main:B/Int.Internal.Linear.cooper_left_split_dvd/1
 shard 51: done; 3373 results; 62511 s
+crash(shard, oom) on main:B/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos/0
+crash(shard, oom) on main:B/Int.exists_add_of_le/0
+crash(shard, oom) on main:B/Int.exists_add_of_le/2
+shard 52: done; 3423 results; 62974 s

@@ -955,3 +955,7 @@
 {"hwm_mb":911,"ms":707,"rss_after_mb":911,"rss_before_mb":738,"specs":"eval/full/shard_0051.jsonl"}
 {"hwm_mb":909,"ms":701,"rss_after_mb":909,"rss_before_mb":738,"specs":"eval/full/shard_0051.jsonl"}
 {"hwm_mb":910,"ms":707,"rss_after_mb":910,"rss_before_mb":738,"specs":"eval/full/shard_0051.jsonl"}
+{"hwm_mb":909,"ms":692,"rss_after_mb":909,"rss_before_mb":738,"specs":"eval/full/shard_0052.jsonl"}
+{"hwm_mb":908,"ms":696,"rss_after_mb":908,"rss_before_mb":738,"specs":"eval/full/shard_0052.jsonl"}
+{"hwm_mb":912,"ms":714,"rss_after_mb":912,"rss_before_mb":738,"specs":"eval/full/shard_0052.jsonl"}
+{"hwm_mb":904,"ms":721,"rss_after_mb":904,"rss_before_mb":736,"specs":"eval/full/shard_0052.jsonl"}

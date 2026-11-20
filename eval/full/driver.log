@@ -1104,3 +1104,11 @@ crash(shard, oom) on main:B/List.prefix_concat_iff/16
 crash(shard, oom) on main:B/List.splitOnP_cons_eq_ite_splitOnPPrepend/4
 crash(shard, oom) on main:B/List.splitOnP_cons_eq_ite_splitOnPPrepend/8
 shard 65: done; 4073 results; 74184 s
+crash(shard, oom) on main:B/List.toList_mkSlice_rii/0
+crash(shard, oom) on main:B/List.toList_mkSlice_rii/1
+crash(shard, oom) on main:B/List.toList_mkSlice_rii/2
+crash(shard, oom) on main:B/List.utf8Decode?_utf8Encode/13
+crash(shard, oom) on main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/12
+crash(shard, oom) on main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/15
+crash(shard, oom) on main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/65
+shard 66: done; 4123 results; 75180 s

@@ -1031,3 +1031,9 @@ crash(shard, oom) on main:B/Lean.Grind.AC.diseq_simp_lhs_suffix/1
 crash(shard, oom) on main:B/Lean.Grind.AddCommGroup.add_left_inj/2
 crash(shard, oom) on main:B/Lean.Grind.AddCommGroup.add_left_inj/3
 shard 58: done; 3723 results; 67186 s
+crash(shard, oom) on main:B/Lean.Grind.CommRing.Poly.denote_mul/2
+crash(shard, oom) on main:B/Lean.Grind.CommRing.Stepwise.d_step1C/0
+crash(shard, oom) on main:B/Lean.Grind.CommRing.Stepwise.d_step1C/8
+crash(shard, oom) on main:B/Lean.Grind.CommRing.le_norm_tight_expr/62
+crash(shard, oom) on main:B/Lean.Grind.CommRing.le_norm_tight_expr/120
+shard 59: done; 3773 results; 68372 s

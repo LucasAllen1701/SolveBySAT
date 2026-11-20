@@ -988,3 +988,7 @@ crash(shard, oom) on main:B/ByteArray.extract_append_eq_left/3
 crash(shard, oom) on main:B/ByteArray.extract_append_eq_left/5
 crash(shard, oom) on main:B/ByteArray.extract_append_eq_left/7
 shard 49: done; 3273 results; 60962 s
+crash(shard, oom) on main:B/Fin.add_one_pos/81
+crash(shard, oom) on main:B/Fin.foldr_rev/21
+crash(shard, oom) on main:B/Fin.foldr_rev/31
+shard 50: done; 3323 results; 61507 s

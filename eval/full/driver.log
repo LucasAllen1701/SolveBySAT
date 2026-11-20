@@ -1529,3 +1529,5 @@ crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/9
 crash(shard, oom) on r1b:B/Std.TreeMap.Raw.getD_filter'/6
 crash(shard, oom) on r1b:B/Array.eq_iff_flatten_eq/49
 shard 40: done; 6295 results; 33118 s
+crash(shard, oom) on r1b:B/String.skipSuffixWhile_eq_endPos_iff/5
+shard 41: done; 6300 results; 33164 s

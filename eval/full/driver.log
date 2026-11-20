@@ -1500,3 +1500,16 @@ crash(shard, oom) on r1b:B/Std.TreeMap.maxKeyD_eq_iff_getKey?_eq_self_and_forall
 crash(shard, oom) on r1b:B/Std.TreeSet.toList_ric/0
 crash(shard, oom) on r1b:B/Std.DTreeMap.Raw.Const.equiv_iff_toArray_eq/0
 shard 37: done; 6145 results; 31237 s
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.toArray_map/7
+crash(shard, oom) on r1b:B/Std.Tactic.BVDecide.Normalize.BitVec.not_neg''/6
+crash(shard, oom) on r1b:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/2
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.get!_filterMap_of_getKey?_eq_some/0
+crash(shard, oom) on r1b:B/Array.size_eq_of_beq/3
+crash(shard, oom) on r1b:B/Array.toList_mkSlice_ric/3
+crash(shard, oom) on r1b:B/Std.DTreeMap.Equiv.constEntryAtIdx_eq/0
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/34
+crash(shard, oom) on r1b:B/Option.length_toList_eq_zero_iff/0
+crash(shard, oom) on r1b:B/BitVec.not_not/1
+crash(shard, oom) on r1b:B/Int.toArray_rco_eq_singleton_append_iff/0
+crash(shard, oom) on r1b:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13
+shard 38: done; 6195 results; 31934 s

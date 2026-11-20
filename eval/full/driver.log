@@ -1084,3 +1084,14 @@ crash(shard, oom) on main:B/List.getElem_insertIdx_of_lt/1
 crash(shard, oom) on main:B/List.getElem_insertIdx_of_lt/5
 crash(shard, oom) on main:B/List.getElem_insertIdx_of_lt/6
 shard 63: done; 3973 results; 72039 s
+crash(shard, oom) on main:B/List.getLast_eq_head_reverse/4
+crash(shard, oom) on main:B/List.gt_of_range'_eq_append_cons/13
+crash(shard, oom) on main:B/List.gt_of_range'_eq_append_cons/18
+crash(shard, oom) on main:B/List.max_eq_max_toArray/0
+crash(shard, oom) on main:B/List.max_eq_max_toArray/2
+crash(shard, oom) on main:B/List.mergeSort_pair/30
+crash(shard, oom) on main:B/List.mergeSort_pair/42
+crash(shard, oom) on main:B/List.mergeSort_pair/45
+crash(shard, oom) on main:B/List.min?_eq_head?/4
+crash(shard, oom) on main:B/List.min?_eq_head?/30
+shard 64: done; 4023 results; 73150 s

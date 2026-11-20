@@ -1037,3 +1037,4 @@ crash(shard, oom) on main:B/Lean.Grind.CommRing.Stepwise.d_step1C/8
 crash(shard, oom) on main:B/Lean.Grind.CommRing.le_norm_tight_expr/62
 crash(shard, oom) on main:B/Lean.Grind.CommRing.le_norm_tight_expr/120
 shard 59: done; 3773 results; 68372 s
+shard 60: done; 3823 results; 69166 s

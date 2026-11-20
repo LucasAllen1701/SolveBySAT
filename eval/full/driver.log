@@ -1380,3 +1380,12 @@ crash(shard, oom) on main:B/Std.Tactic.BVDecide.Normalize.BitVec.ite_same_left'/
 crash(shard, oom) on main:B/Std.Tactic.BVDecide.Normalize.BitVec.not_neg''/0
 crash(shard, oom) on main:B/Std.Tactic.BVDecide.Normalize.BitVec.not_neg''/2
 shard 21: done; 5345 results; 19646 s
+crash(shard, oom) on main:B/Std.Tactic.BVDecide.Normalize.BitVec.not_neg''/5
+crash(shard, oom) on main:B/Std.Tactic.BVDecide.Normalize.BitVec.not_neg''/6
+crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_filter'/6
+crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_filter'/21
+crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_filter'/26
+crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_inter_of_mem_right/0
+crash(shard, oom) on main:B/Std.TreeMap.Raw.mem_insertMany_list/0
+crash(shard, oom) on main:B/Std.TreeMap.getKey?_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false/0
+shard 22: done; 5395 results; 20190 s

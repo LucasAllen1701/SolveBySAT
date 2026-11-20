@@ -2,7 +2,7 @@
 
 Lucas Allen · 18 November 2026
 
-**Status: 7a (corpus) and the 7b pilot are done. The full 7b run goes to a dedicated test machine under the decisions of section 10.5.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
+**Status: 7a and 7b are done; the full 7b run finished on 21 November 2026. Next: 7d-1 (analysis of the 7b data), then 7c, then 7d-2 (section 10.6).** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
 
 ## 1. Questions
 
@@ -335,3 +335,49 @@ These numbers are for orientation only, and nothing is tuned on them.
    - any other difference, such as a timeout or memory crash on one machine only: list and explain it, then continue.
 6. Results are pushed to the eval-m7 branch after each completed shard. No other machine pushes to that branch during the run.
 7. After the full run, stop and report. Stage 7c is planned separately.
+
+### 10.6 After the full 7b run (21 November 2026)
+
+**Run record.**
+
+- All 6,300 goals were run on the test machine, one shard at a time: 37.5 hours of running, 42 hours elapsed.
+- Two decoder bugs stopped the run. Both were in the decoder's replay (SPEC 8), not in the encoding.
+  - Premise metavariables could be assigned by head unification. They are now synthetic opaque.
+  - The decoder used its caller's unifier settings. It now always uses the tactic's (`foApprox`, `ctxApprox`).
+- Both bugs were rejected, never accepted as proofs. Both have regression tests (`Test/M7Lean.lean`).
+- Every goal that had reached SAT was rerun after each fix. No other result changed.
+- The test machine needed `vm.overcommit_memory = 1`: under the kernel's heuristic overcommit, `lake` could not fork. The development machine's intermittent ENOMEM most likely has the same cause.
+
+**Counts before classification.** These are the raw `solve_by_sat` outcomes.
+
+| Run | Goals | Proved | No proof ≤ 10 | Memory crash | Goal rejected | Solver timeout |
+| --- | --- | --- | --- | --- | --- | --- |
+| Tier A | 3,000 | 140 | 1,711 | 819 | 272 | 58 |
+| Tier B | 3,000 | 828 | 1,363 | 496 | 297 | 16 |
+| R1b (Tier B, H_full) | 300 | 87 | 121 | 60 | 28 | 4 |
+
+- Of the 1,055 proofs found across all three runs, 598 have N = 1.
+- Like-for-like `solve_by_elim` closes 977 Tier A goals and 2,069 Tier B goals.
+  - It closes 797 of the 828 Tier B goals that `solve_by_sat` proves.
+  - `solve_by_sat` alone proves 58 Tier A goals and 31 Tier B goals.
+
+**Order of the remaining stages.** 7d is split in two. This changes the order of the plan's work, not any filter, sample or limit.
+
+- **7d-1 now:** everything that needs only the 7b data. That is R1, R1b, R2, R3, R4 and R7, the hand reviews of 3.3 and 3.4, and the exploratory analyses below. It needs no new runs.
+- **7c next:** typed scaling, as in section 4.
+- **7d-2 last:** R5 and R6 from the 7c data, and the reading of section 7.
+
+**Rule 4 of 3.3 (numerals) is made exact before R2 is computed.** The rule was never made exact. Claude Code proposes an exact, mechanical version, records it in NOTES.md, and reports R2 both with and without it.
+
+**Exploratory analyses.** These were not pre-registered, and are labelled as exploratory in EVAL.md.
+
+- **E1, where `solve_by_elim` wins.** For goals closed by like-for-like `solve_by_elim` but not proved by `solve_by_sat`:
+  - break them down by `solve_by_sat` outcome;
+  - for those with `no_proof_le_Nmax`, review a seeded sample of 50 by hand and record why the search failed. Candidate reasons are defeq or instance unification beyond syntactic matching, a lemma our compiler rejects, and proof size.
+- **E2, the data-constant rule.** Compare R1b with the main run on the same 300 goals. Any goal proved only with H_full is a counterexample to the 10.2 rule; list it with its proof.
+- **E3, CNF composition on real goals.**
+  - For proved and no-proof goals: the per-family clause shares at the final N.
+  - For crashed goals: the clauses at the last N reached.
+
+  Both are plotted against |H_main| and N. This tests whether groundness and decomposition dominate on real goals as they do in SPEC 7.3.
+- **E4, time.** Compare the wall times of `solve_by_sat` and `solve_by_elim` on the goals both prove.

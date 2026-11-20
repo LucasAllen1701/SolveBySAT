@@ -1227,3 +1227,16 @@ crash(shard, oom) on main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/3
 crash(shard, oom) on main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/10
 crash(shard, oom) on main:B/Std.DHashMap.Raw.getD_alter_self/21
 shard 6: done; 4595 results; 7283 s
+crash(shard, oom) on main:B/Std.DHashMap.Raw.getKeyD_of_isEmpty/1
+crash(shard, oom) on main:B/Std.DHashMap.Raw.getKeyD_of_isEmpty/2
+crash(shard, oom) on main:B/Std.DHashMap.Raw.isEmpty_erase/0
+crash(shard, oom) on main:B/Std.DHashMap.Raw.isEmpty_erase/6
+crash(shard, oom) on main:B/Std.DHashMap.Raw.isEmpty_erase/19
+crash(shard, oom) on main:B/Std.DHashMap.Raw.isSome_getKey?_iff_mem/0
+crash(shard, oom) on main:B/Std.DHashMap.equiv_emptyWithCapacity_iff_isEmpty/17
+crash(shard, oom) on main:B/Std.DHashMap.get?_insertIfNew/4
+crash(shard, oom) on main:B/Std.DHashMap.getD_diff/0
+crash(shard, oom) on main:B/Std.DHashMap.getKey!_inter_of_not_mem_left/8
+crash(shard, oom) on main:B/Std.DHashMap.getKey?_eq_some_getKeyD/2
+crash(shard, oom) on main:B/Std.DHashMap.getKey?_eq_some_getKeyD/3
+shard 7: done; 4645 results; 8171 s

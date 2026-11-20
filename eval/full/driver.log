@@ -1191,3 +1191,21 @@ crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/28
 crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/34
 crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/50
 shard 4: done; 4495 results; 5186 s
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Equiv.union_right/4
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Equiv.union_right/6
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Equiv.union_right/8
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.all_eq_not_any_not/6
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.contains_inter_eq_false_of_contains_eq_false_left/0
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.contains_inter_eq_false_of_contains_eq_false_left/5
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.contains_inter_eq_false_of_contains_eq_false_left/10
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.contains_inter_eq_false_of_contains_eq_false_left/17
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.get!_diff/5
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/2
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/7
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/9
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/10
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/11
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.get?_emptyWithCapacity/12
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_contains/0
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.getKey_insertMany_list_of_mem/0
+shard 5: done; 4545 results; 6253 s

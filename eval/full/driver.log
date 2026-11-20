@@ -1345,3 +1345,10 @@ crash(shard, oom) on main:B/Std.HashSet.mem_erase/0
 crash(shard, oom) on main:B/Std.Internal.List.Const.map_insertEntry_perm_filter_map/33
 crash(shard, oom) on main:B/Std.Internal.List.Const.map_insertEntry_perm_filter_map/81
 shard 17: done; 5145 results; 16487 s
+crash(shard, oom) on main:B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/0
+crash(shard, oom) on main:B/Std.Internal.List.length_filter_eq_length_iff/7
+crash(shard, oom) on main:B/Std.Internal.List.length_filter_eq_length_iff/9
+crash(shard, oom) on main:B/Std.Internal.List.length_filter_eq_length_iff/11
+crash(shard, oom) on main:B/Std.Internal.List.maxKey!_eq_iff_mem_and_forall/0
+crash(shard, oom) on main:B/Std.Internal.List.maxKey?_eraseKey_eq_iff_beq_maxKey?_eq_false/0
+shard 18: done; 5195 results; 17253 s

@@ -992,3 +992,11 @@ crash(shard, oom) on main:B/Fin.add_one_pos/81
 crash(shard, oom) on main:B/Fin.foldr_rev/21
 crash(shard, oom) on main:B/Fin.foldr_rev/31
 shard 50: done; 3323 results; 61507 s
+crash(shard, oom) on main:B/ISize.toInt16_ofIntClamp/48
+crash(shard, oom) on main:B/ISize.toInt_div_of_ne_left/5
+crash(shard, oom) on main:B/ISize.toInt_div_of_ne_left/9
+crash(shard, oom) on main:B/ISize.toInt_div_of_ne_left/10
+crash(shard, oom) on main:B/Int.Internal.Linear.cooper_dvd_left_split_dvd2/3
+crash(shard, oom) on main:B/Int.Internal.Linear.cooper_dvd_left_split_dvd2/74
+crash(shard, oom) on main:B/Int.Internal.Linear.cooper_left_split_dvd/1
+shard 51: done; 3373 results; 62511 s

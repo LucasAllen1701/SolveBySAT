@@ -974,3 +974,17 @@ crash(shard, oom) on main:B/BitVec.sshiftRight_add/8
 crash(shard, oom) on main:B/BitVec.sshiftRight_add/22
 crash(shard, oom) on main:B/BitVec.sshiftRight_add/216
 shard 48: done; 3223 results; 59570 s
+crash(shard, oom) on main:B/BitVec.toInt_sshiftRight/0
+crash(shard, oom) on main:B/BitVec.toInt_sshiftRight/24
+crash(shard, oom) on main:B/BitVec.udiv_eq_zero_iff_eq_zero_or_lt/2
+crash(shard, oom) on main:B/BitVec.udiv_eq_zero_iff_eq_zero_or_lt/12
+crash(shard, oom) on main:B/BitVec.zero_udiv/1
+crash(shard, oom) on main:B/ByteArray.extract_add_four/7
+crash(shard, oom) on main:B/ByteArray.extract_add_four/79
+crash(shard, oom) on main:B/ByteArray.extract_add_four/80
+crash(shard, oom) on main:B/ByteArray.extract_add_four/93
+crash(shard, oom) on main:B/ByteArray.extract_add_four/108
+crash(shard, oom) on main:B/ByteArray.extract_append_eq_left/3
+crash(shard, oom) on main:B/ByteArray.extract_append_eq_left/5
+crash(shard, oom) on main:B/ByteArray.extract_append_eq_left/7
+shard 49: done; 3273 results; 60962 s

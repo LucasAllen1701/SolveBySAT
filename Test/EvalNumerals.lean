@@ -236,6 +236,29 @@ def sbeLike (goal : Expr) (nctx : Nat) (H : Array Name) : MetaM (Except String E
       if e.isMaxRecDepth then return .error "max_rec_depth"
       return .error s!"failed: {((← e.toMessageData.toString).take 150).toString}"
 
+/-- The heads of the proof nodes of `p` (proof-valued spines headed by a constant or a local
+hypothesis, as in the node estimate), each with what it is: `H` (in H), `builtin`, a §2.3
+drop reason, or `hyp` (a local hypothesis, with its user name). -/
+partial def proofHeads (H : Array Name) (e : Expr) (acc : IO.Ref (Array (String × String))) : MetaM Unit := do
+  match e with
+  | .lam n t b bi => withLocalDecl n bi t fun x => proofHeads H (b.instantiate1 x) acc
+  | .letE _ _ v b _ => proofHeads H v acc; proofHeads H (b.instantiate1 v) acc
+  | .mdata _ b | .proj _ _ b => proofHeads H b acc
+  | .const .. | .fvar .. | .app .. =>
+    let f := e.getAppFn
+    if (f.isConst || f.isFVar) && (← Eval.isProofSafe e) then
+      match f with
+      | .const c _ =>
+        let k ← if H.contains c then pure "H" else classifyH c
+        acc.modify (·.push (c.toString, k))
+      | .fvar fv => acc.modify (·.push (s!"{(← fv.getDecl).userName}", "hyp"))
+      | _ => pure ()
+    match f with
+    | .const .. | .fvar .. => pure ()
+    | _ => proofHeads H f acc
+    for a in e.getAppArgs do proofHeads H a acc
+  | _ => pure ()
+
 def inspectGoal (spec : Json) (names : Std.HashMap String Name) (withSbe : Bool) : MetaM Json := do
   let get := fun (f : String) => (spec.getObjValAs? String f).toOption.getD ""
   let some thm := names[get "thm"]? | throwError "unknown theorem"
@@ -246,9 +269,19 @@ def inspectGoal (spec : Json) (names : Std.HashMap String Name) (withSbe : Bool)
     let some c := (← candidates thm).1[pos]? | throwError "no candidate"
     pure c
   let (om, ochecked) ← mismatches p g
+  let acc ← IO.mkRef #[]
+  proofHeads H p acc
+  let heads := (← acc.get).map fun (c, k) => Json.arr #[jStr c, jStr k]
+  let mut accH := #[]
+  for c in H do
+    if ← (try discard <| compile g #[c]; pure true catch _ => pure false) then accH := accH.push c
+  let notes ← try (do
+      let C ← compile g accH
+      C.notes.mapM fun m => do return jStr ((← m.toString).take 200).toString)
+    catch e => pure #[jStr s!"(compile with H failed: {((← e.toMessageData.toString).take 120).toString})"]
   let mut fields : List (String × Json) := [("key", spec.getObjValD "key"), ("goal", jStr ((toString (← ppExpr g)).take 400).toString),
     ("oracle", jStr ((toString (← ppExpr p)).take 700).toString), ("oracle_checked", toJson ochecked),
-    ("oracle_mismatches", Json.arr om)]
+    ("oracle_mismatches", Json.arr om), ("oracle_heads", Json.arr heads), ("dropped_hyps", Json.arr notes)]
   if withSbe then
     match ← sbeLike g nctx H with
     | .ok sp =>
@@ -258,7 +291,138 @@ def inspectGoal (spec : Json) (names : Std.HashMap String Name) (withSbe : Bool)
     | .error e => fields := fields ++ [("sbe", jStr s!"({e})")]
   return Json.mkObj fields
 
+/-- The compiled forest of one goal with its accepted H (debugging the reviews). -/
+def forestOf (spec : Json) (names : Std.HashMap String Name) : MetaM Json := do
+  let get := fun (f : String) => (spec.getObjValAs? String f).toOption.getD ""
+  let some thm := names[get "thm"]? | throwError "unknown theorem"
+  let some (.thmInfo t) := (← getEnv).find? thm | throwError "not a theorem"
+  let H := ((spec.getObjValAs? (Array String) "H").toOption.getD #[]).filterMap (names[·]?)
+  let g ← if get "tier" == "A" then pure t.type else do
+    let pos := (spec.getObjValAs? Nat "pos").toOption.getD 0
+    let some c := (← candidates thm).1[pos]? | throwError "no candidate"
+    pure c.1
+  let mut accH := #[]
+  for c in H do
+    if ← (try discard <| compile g #[c]; pure true catch _ => pure false) then accH := accH.push c
+  let C ← compile g accH
+  let F := C.forest
+  let goals := F.goals.mapIdx fun i gp => jStr s!"g{i}: tgt {gp.tgt}  eig {gp.eig}  hyps {gp.hyps}  types {gp.tgtTypes.map fun (p, t) => s!"{p}:{t.map toString}"}"
+  let cls := F.clauses.mapIdx fun i c => jStr s!"c{i} {c.name}: head {c.head}  vars {c.vars}  prems {c.prems}  local {c.localOf}  builtin {c.builtin}  data {c.dataVal.map toString}  types {c.headTypes.map fun (p, t) => s!"{p}:{t.map toString}"}"
+  return Json.mkObj [("key", spec.getObjValD "key"), ("goals", Json.arr goals), ("clauses", Json.arr cls),
+    ("varTypes", jStr s!"{F.varTypes.map fun (v, t) => s!"{v}:{t.map toString}"}"),
+    ("groundTypes", Json.arr (F.groundTypes.map fun (t, ty) => jStr s!"{t} : {ty.map toString}")),
+    ("notes", Json.arr (← C.notes.mapM fun m => do return jStr (← m.toString)))]
+
+/-- Encode and solve one goal at node bound `N` under the run's options, with the static typing
+filter off, and with every type template forgotten (the tactic's `forgetTypes` testing option).
+Library `encode` and `runSolver`, unchanged. -/
+def diag (spec : Json) (names : Std.HashMap String Name) (N : Nat) : MetaM Json := do
+  let get := fun (f : String) => (spec.getObjValAs? String f).toOption.getD ""
+  let some thm := names[get "thm"]? | throwError "unknown theorem"
+  let some (.thmInfo t) := (← getEnv).find? thm | throwError "not a theorem"
+  let H := ((spec.getObjValAs? (Array String) "H").toOption.getD #[]).filterMap (names[·]?)
+  let g ← if get "tier" == "A" then pure t.type else do
+    let pos := (spec.getObjValAs? Nat "pos").toOption.getD 0
+    let some c := (← candidates thm).1[pos]? | throwError "no candidate"
+    pure c.1
+  let mut accH := #[]
+  for c in H do
+    if ← (try discard <| compile g #[c]; pure true catch _ => pure false) then accH := accH.push c
+  let C ← compile g accH
+  let mut out := #[]
+  for (name, F, o) in [("as run", C.forest, ({} : EncodeOptions)),
+                       ("static typing off", C.forest, ({ staticTyping := false } : EncodeOptions)),
+                       ("types forgotten", C.forest.forgetTypes, ({} : EncodeOptions))] do
+    let E := encode F N o
+    let r ← runSolver E.cnf
+    let sk := match r with
+      | .sat m => match readSkeleton F E.vars m with
+        | .ok sk => renderSkeleton F sk 0
+        | .error e => s!"(skeleton: {e})"
+      | .unsat => ""
+    out := out.push (jStr s!"{name}: {if r.isSat then "SAT " ++ sk else "UNSAT"}")
+  return Json.mkObj [("key", spec.getObjValD "key"), ("N", toJson N), ("results", Json.arr out)]
+
+/-! ## Reach of the type-template issue (7d-1 stop): does preprocessing change the inferred
+type of some term position of the goal or of an accepted `H_main` constant? -/
+
+structure ScanSt where
+  visited : Nat := 0
+  hit : Option String := none
+
+partial def scanTerm (e : Expr) : StateRefT ScanSt MetaM Unit := do
+  if (← get).hit.isSome || (← get).visited ≥ 5000 then return
+  modify fun s => { s with visited := s.visited + 1 }
+  match e with
+  | .forallE n d b bi | .lam n d b bi =>
+    scanTerm d
+    withLocalDecl n bi d fun x => scanTerm (b.instantiate1 x)
+  | .mdata _ b => scanTerm b
+  | .app .. | .const .. | .fvar .. | .proj .. =>
+    unless e.hasLooseBVars do
+      unless ← Eval.isProofSafe e do
+        let ok ← tryCatchRuntimeEx (do
+            let T ← instantiateMVars (← inferType e)
+            -- `compileType` strips metadata itself; compare what it does not do
+            let T ← Core.transform T (pre := fun x => match x with
+              | .mdata _ y => return .visit y
+              | _ => return .continue)
+            let P ← preprocess T
+            if P != T then
+              -- which step changes it: level normalisation, unfolding, β
+              let lv := T.replaceLevel (fun l => some l.normalize)
+              let bT ← Core.betaReduce T
+              let kind := if lv == P then "levels" else if bT == P then "beta" else "unfolding or mixed"
+              let msg := s!"[{kind}] {← ppS e} : {← ppS T}  ⇒  {← ppS P}"
+              modify fun s => { s with hit := some msg }
+            pure true) (fun _ => pure false)
+        discard <| pure ok
+    match e with
+    | .app .. => for a in e.getAppArgs do scanTerm a
+    | .proj _ _ b => scanTerm b
+    | _ => pure ()
+  | _ => pure ()
+
+def tmplScan (H : Array Name) (g : Expr) : MetaM Json := do
+  let mut acc := #[]
+  for c in H do
+    if ← (try discard <| compile g #[c]; pure true catch _ => pure false) then acc := acc.push c
+  let mut exprs := #[(← preprocess g)]
+  for c in acc do
+    let ci ← getConstInfo c
+    exprs := exprs.push (← preprocess ci.type)
+  for e in exprs do
+    let ((), s) ← (scanTerm e).run {}
+    if let some h := s.hit then return Json.mkObj [("affected", toJson true), ("example", jStr h)]
+  return Json.mkObj [("affected", toJson false)]
+
 unsafe def main (args : List String) : IO UInt32 := do
+  if let ["tmplscan", outPath] := args then
+    let env ← importEnv sourceModules
+    let names := nameTable env
+    let out ← IO.FS.Handle.mk outPath .write
+    forGoals env names (fun r _ g => tmplScan (namesOf names r "H_main") g) out
+    return 0
+  if let "diag" :: nStr :: keys := args then
+    let env ← importEnv sourceModules
+    let names := nameTable env
+    let specs ← ((← IO.FS.readFile "eval/specs_full.jsonl").splitOn "\n").filter (· != "") |>.mapM (IO.ofExcept ∘ Json.parse)
+    for k in keys do
+      let some sp := specs.find? (·.getObjValD "key" == jStr k) | IO.println s!"unknown key {k}"; continue
+      match ← (runMeta env 0 (diag sp names nStr.toNat!)).toBaseIO with
+      | .ok j => IO.println j.compress
+      | .error e => IO.println s!"{k}: error {e}"
+    return 0
+  if let "forest" :: keys := args then
+    let env ← importEnv sourceModules
+    let names := nameTable env
+    let specs ← ((← IO.FS.readFile "eval/specs_full.jsonl").splitOn "\n").filter (· != "") |>.mapM (IO.ofExcept ∘ Json.parse)
+    for k in keys do
+      let some sp := specs.find? (·.getObjValD "key" == jStr k) | IO.println s!"unknown key {k}"; continue
+      match ← (runMeta env 400000 (forestOf sp names)).toBaseIO with
+      | .ok j => IO.println (j.pretty 200)
+      | .error e => IO.println s!"{k}: error {e}"
+    return 0
   if let "inspect" :: withSbe :: keys := args then
     let env ← importEnv sourceModules
     let names := nameTable env

@@ -1518,3 +1518,76 @@ both with and without rule 4.
   like-for-like `solve_by_elim` as the harness defines it, and applies the same check to that
   proof term. It changes nothing in the tactic, encoder, decoder or compiler. It runs one goal
   at a time, at a reviewer's request; it is not a batch run.
+
+### 7d-1 STOPPED: probable completeness bug (type templates are not preprocessed)
+
+The reviews stopped under rule 4 of the 7d-1 instructions. Nothing has been fixed, nothing rerun.
+
+- **Found by** the E1 review (`main:B/Std.Internal.List.Const.map_insertEntry_perm_filter_map/15`).
+  - Like-for-like `solve_by_elim` proves the goal with the 2-node term
+    `Decidable.decide.congr_simp _ _ (Bool.not_eq_true _)`. Both constants are in `H_main` and
+    the compiler accepts both.
+  - `solve_by_sat` reports no proof up to N = 10. `eval_numerals diag` gives UNSAT typed and
+    with the static filter off, and **SAT at N = 2 with type templates forgotten**.
+- **Cause, in `SolveBySat/Compile.lean` (`recordNode`).** Every type template is
+  `compileType (← inferType e)`, built from the raw inferred type. The terms themselves are
+  built from preprocessed expressions (SPEC 4.1: `Not`/`Ne`/`GE.ge`/`GT.gt` unfolded, β, levels
+  through `Level.normalize`, which "pushes `succ` inside `max`"). SPEC 4.1 says *each type* is
+  normalised.
+  - Here the target position `instDecidableNot (…)` gets the template `Decidable (Not …)`. The
+    clause variable `self : Decidable ?p` gets `?p := (… → False)` from the preprocessed
+    target. The syntactic typing clause (SPEC 2.2, §6.8) then excludes the only proof.
+- **Minimal reproductions with the tactic** (`eval/reviews/typetemplate_repro.lean`):
+  1. `example (b : Bool) : decide (¬ b = true) = decide (b = false) := by
+     solve_by_sat [Decidable.decide.congr_simp, Bool.not_eq_true] (nodes := 4)` fails with
+     "no proof with at most 4 nodes". With `solve_by_sat.forgetTypes` it finds the 2-node
+     proof, which decodes and kernel-checks. The term
+     `Decidable.decide.congr_simp _ _ (Bool.not_eq_true b)` checks in Lean.
+  2. `example {α : Type u} {β : Type v} (x : List (α × β)) : x = x := by solve_by_sat [Eq.refl]
+     (nodes := 3)` fails with "no proof with at most 3 nodes". With a single universe
+     (`x : List α`) it is proved in 1 node. The target's `Eq` level is normalised to
+     `max (u+1) (v+1)`; `Eq.refl`'s `α : Sort ?u` gets the value `List (α × β)`, whose inferred
+     type template is the unnormalised `Sort (succ (max u v))`.
+- **Why it is a completeness bug and not a documented limitation.** These proofs are in the
+  class as SPEC defines it: syntactic matching and typing on *preprocessed* types. They are
+  within N ≤ 10, `solve_by_sat` reports no proof, and no limit explains it. The decoder and
+  the encoder are not involved; the compiler builds inconsistent templates. Soundness is not
+  affected: the typing clause can only exclude models, and every proof is kernel-checked.
+- **Reclassified in the R7 review:** 3 of the 100 sampled cases that I had first put under
+  "universe levels (SPEC 2.4)" are this bug: their mismatch is `Sort (succ (max …))` against
+  `Sort (max (succ …) (succ …))`. They are now marked `probable_bug` in
+  `eval/reviews/r7_soft_completeness.jsonl`:
+  - `B/Std.DHashMap.Internal.Raw.Const.toArray_eq_toArray_map_toListModel/7`
+  - `B/Std.DHashMap.Internal.Raw₀.Const.get!_emptyWithCapacity/31`
+  - `B/Std.DTreeMap.Internal.Impl.Const.toArray_map/18`
+
+  The other level cases (`max ?u ?v` against `u` with `v = 0`, before instantiation) are not
+  this bug and stay as SPEC 2.4.
+- **Reach (analysis only, no SAT run; `eval_numerals tmplscan`, `eval/tmplscan_7d1.jsonl`, 41 s).**
+  For each goal, the scan visits every subterm of the preprocessed goal and of each accepted
+  `H_main` constant, and checks whether preprocessing changes the inferred type
+  (metadata-only differences ignored). This over-approximates the positions the compiler
+  records, so the counts are an upper bound on the goals whose result can change.
+  - Main run, Tier A: 882 goals flagged (levels 875, β 3, unfolding 4).
+  - Main run, Tier B: 661 goals flagged (all levels).
+  - By recorded outcome (Tier A / Tier B): no proof ≤ 10 404 / 256; memory crash 329 / 192;
+    goal rejected 139 / 112; solver timeout 3 / 0; proved 7 / 101.
+  - A rejected goal cannot change, since the goal is compiled before any typing. A proved goal
+    can only get a smaller N. So the results that can change are among the no-proof, crash and
+    timeout goals: at most 660 / 521 / 3 (1,184 goals).
+- **Review state at the stop.**
+  - R7: all 100 reviewed (`eval/reviews/r7_soft_completeness.jsonl`); 3 probable bug as
+    above, the rest explained.
+  - §3.3 unexplained: all 50 reviewed (`eval/reviews/r2_unexplained.jsonl`). None was marked
+    as this bug: the cases that the compiler blocks are classified by the oracle term's first
+    definitional mismatch. Classes and counts may move after a fix.
+  - E1: 50 `solve_by_elim` proofs rerun (`eval/reviews/e1_sbe_wins.evidence.jsonl`). Of the
+    15 that are syntactic, 11 use a constant our compiler rejects (`propext`, `congrArg`,
+    `congrFun'`, `ite_congr`, …), 3 are known SPEC 2.4 typing cases, and 1 is this bug. The
+    35 with a definitional position are not yet classified.
+  - `solve_by_sat`-only (89 goals): not started.
+  - EVAL.md: generated, but not final.
+- **Decision needed from the owner:** whether and how to fix (the template would be built from
+  `preprocess (← inferType e)`), and how to rerun. Candidates: the 1,184 flagged no-proof,
+  crash and timeout goals (and the 108 flagged proved goals, whose N can only drop), or all
+  non-proved goals.

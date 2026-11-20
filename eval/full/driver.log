@@ -1437,3 +1437,12 @@ crash(shard, oom) on main:B/UInt32.mul_add/0
 shard 28: done; 5695 results; 25198 s
 shard 29: done; 5745 results; 25669 s
 shard 30: done; 5795 results; 25928 s
+crash(shard, oom) on main:B/Vector.Perm.push_comm/0
+crash(shard, oom) on main:B/Vector.attach_congr/0
+crash(shard, oom) on main:B/Vector.attach_congr/8
+crash(shard, oom) on main:B/Vector.extract_push/124
+crash(shard, oom) on main:B/Vector.extract_push/156
+crash(shard, oom) on main:B/Vector.extract_push/161
+crash(shard, oom) on main:B/Vector.findSome?_subtype/2
+crash(shard, oom) on main:B/Vector.findSome?_subtype/5
+shard 31: done; 5845 results; 27048 s

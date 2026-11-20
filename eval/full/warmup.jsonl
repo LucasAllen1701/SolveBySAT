@@ -1093,3 +1093,15 @@
 {"hwm_mb":911,"ms":714,"rss_after_mb":911,"rss_before_mb":741,"specs":"eval/full/shard_0002.jsonl"}
 {"hwm_mb":912,"ms":711,"rss_after_mb":912,"rss_before_mb":742,"specs":"eval/full/shard_0002.jsonl"}
 {"hwm_mb":913,"ms":719,"rss_after_mb":913,"rss_before_mb":741,"specs":"eval/full/shard_0002.jsonl"}
+{"hwm_mb":916,"ms":709,"rss_after_mb":916,"rss_before_mb":742,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":912,"ms":697,"rss_after_mb":912,"rss_before_mb":741,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":913,"ms":729,"rss_after_mb":913,"rss_before_mb":741,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":908,"ms":705,"rss_after_mb":908,"rss_before_mb":738,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":911,"ms":702,"rss_after_mb":911,"rss_before_mb":741,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":912,"ms":732,"rss_after_mb":912,"rss_before_mb":742,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":911,"ms":727,"rss_after_mb":911,"rss_before_mb":741,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":912,"ms":716,"rss_after_mb":912,"rss_before_mb":741,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":914,"ms":719,"rss_after_mb":914,"rss_before_mb":742,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":914,"ms":736,"rss_after_mb":914,"rss_before_mb":742,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":912,"ms":703,"rss_after_mb":912,"rss_before_mb":741,"specs":"eval/full/shard_0003.jsonl"}
+{"hwm_mb":911,"ms":706,"rss_after_mb":911,"rss_before_mb":741,"specs":"eval/full/shard_0003.jsonl"}

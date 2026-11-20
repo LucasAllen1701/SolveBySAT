@@ -1146,3 +1146,15 @@ crash(shard, oom) on main:B/Option.mem_toArray/16
 crash(shard, oom) on main:B/Option.mem_toArray/21
 crash(shard, oom) on main:B/Option.merge_eq_or_eq/8
 shard 2: done; 4395 results; 2944 s
+crash(shard, oom) on main:B/Std.DHashMap.Const.get!_insertIfNew/0
+crash(shard, oom) on main:B/Std.DHashMap.Const.get!_insertIfNew/4
+crash(shard, oom) on main:B/Std.DHashMap.Const.get!_insertIfNew/5
+crash(shard, oom) on main:B/Std.DHashMap.Const.get?_eq_get?/0
+crash(shard, oom) on main:B/Std.DHashMap.Const.get_eq_get_get?/3
+crash(shard, oom) on main:B/Std.DHashMap.Const.get_eq_get_get?/6
+crash(shard, oom) on main:B/Std.DHashMap.Const.get_eq_get_get?/9
+crash(shard, oom) on main:B/Std.DHashMap.Const.insertMany_list_equiv_foldl/0
+crash(shard, oom) on main:B/Std.DHashMap.Const.insertMany_list_equiv_foldl/4
+crash(shard, oom) on main:B/Std.DHashMap.Const.insertMany_list_equiv_foldl/6
+crash(shard, oom) on main:B/Std.DHashMap.Const.mem_alter/0
+shard 3: done; 4445 results; 3811 s

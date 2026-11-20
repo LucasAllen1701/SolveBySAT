@@ -1425,3 +1425,11 @@ crash(shard, oom) on main:B/String.Slice.sliceTo_sliceTo/12
 crash(shard, oom) on main:B/String.Slice.sliceTo_sliceTo/18
 crash(shard, oom) on main:B/String.Slice.sliceTo_sliceTo/104
 shard 26: done; 5595 results; 23762 s
+crash(shard, oom) on main:B/String.skipSuffix?_bool_eq_some_iff/1168
+crash(shard, oom) on main:B/String.skipSuffix?_bool_eq_some_iff/1169
+crash(shard, oom) on main:B/String.skipSuffixWhile_eq_endPos_iff/0
+crash(shard, oom) on main:B/String.skipSuffixWhile_eq_endPos_iff/2
+crash(shard, oom) on main:B/String.skipSuffixWhile_eq_endPos_iff/5
+crash(shard, oom) on main:B/String.splits_prev_endPos/218
+crash(shard, oom) on main:B/UInt16.add_eq_left/1
+shard 27: done; 5645 results; 24565 s

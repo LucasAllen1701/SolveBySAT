@@ -1314,7 +1314,7 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
     line. The removed lines stay in git history at `01a9430`.
   - Then `Test/eval_full.sh` is resumed on the commit with this fix.
   - `eval/full/header.json` stays as written at the start.
-- **Full run finished (recorded automatically by `Test/eval_full.sh`, 2026-11-21 04:30:24); tables to be checked.**
+- **Full run finished (recorded automatically by `Test/eval_full.sh`, 2026-11-21 04:30:24).** The tables were checked against `eval/full/results.jsonl` in the final record below.
 
   | run | tier | goals | crash(oom) | goal_rejected | no_proof_le_Nmax | proved | timeout(solver) |
   | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -1335,3 +1335,81 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
     - exact: closed_other 1371, none 1285, closed_self 327, max_rec_depth 9, heartbeats 8
     - apply: closed_other 1371, partial 1285, closed_self 327, max_rec_depth 9, heartbeats 8
 
+### 7b: full run, final record (`eval/full/`)
+
+- **Completeness.** `results.jsonl` has 6,300 lines for the 6,300 specs of
+  `eval/specs_full.jsonl`, with no key missing, duplicated or extra.
+  - All 6,000 `main` goals have their baselines, including the 1,375 that crashed: the
+    baselines run before the N loop (decision 2).
+  - The `r1b` run has no baselines, by design.
+  - In the final results: no `decoder_bug`, `solver_error`, `harness_error`, `memout` or
+    `limitation`.
+- **Outcomes (solve_by_sat) per run and tier:**
+
+  | run | tier | goals | proved | no_proof_le_Nmax | crash (oom) | goal_rejected | timeout (solver) |
+  | --- | --- | --- | --- | --- | --- | --- | --- |
+  | main | A | 3,000 | 140 | 1,711 | 819 | 272 | 58 |
+  | main | B | 3,000 | 828 | 1,363 | 496 | 297 | 16 |
+  | r1b | B | 300 | 87 | 121 | 60 | 28 | 4 |
+
+- **Proved at N:**
+
+  | run | tier | N = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+  | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+  | main | A | 18 | 25 | 37 | 19 | 21 | 6 | 8 | 4 | 2 |
+  | main | B | 528 | 167 | 78 | 28 | 13 | 6 | 4 | 3 | 1 |
+  | r1b | B | 52 | 20 | 8 | 5 | 1 | 0 | 0 | 0 | 1 |
+
+  No proof at N = 10.
+- **Crashes.**
+  - All 1,375 have cause `oom` and occurred in the SAT phase, none during the baselines.
+  - The last N reached, from 1 to 10: 14, 46, 100, 127, 173, 177, 165, 186, 195, 192.
+  - No other crash cause occurred, so the repeated-cause stop never applied. Free memory
+    outside the eval slices never fell below the 1 GB stop threshold.
+- **Time limits.** 78 goals hit a time limit, all at the solver's per-call limit: 58 in
+  `main` A, 16 in `main` B and 4 in `r1b`. No loop timeouts and no watchdog kills.
+- **Baselines (`main`, 3,000 goals per tier):**
+
+  | tier | baseline | outcomes |
+  | --- | --- | --- |
+  | A | sbe_like | failed 1,137, closed 977, heartbeats 875, max_rec_depth 11 |
+  | A | sbe_default | failed 1,076, heartbeats 971, closed 943, max_rec_depth 10 |
+  | A | exact? | closed_self 2,655, none 182, closed_other 159, heartbeats 2, max_rec_depth 2 |
+  | A | apply? | closed_self 2,655, partial 182, closed_other 159, heartbeats 2, max_rec_depth 2 |
+  | B | sbe_like | closed 2,069, failed 476, heartbeats 447, max_rec_depth 8 |
+  | B | sbe_default | closed 1,987, heartbeats 642, failed 363, max_rec_depth 8 |
+  | B | exact? | closed_other 1,371, none 1,285, closed_self 327, max_rec_depth 9, heartbeats 8 |
+  | B | apply? | closed_other 1,371, partial 1,285, closed_self 327, max_rec_depth 9, heartbeats 8 |
+
+  Overlap with `solve_by_sat`'s proved goals, counted only and not analysed (that is 7d):
+
+  | tier | solve_by_sat proved | sbe_like closed | both | solve_by_sat only | sbe_like only | sbe_default closed | both | solve_by_sat only |
+  | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+  | A | 140 | 977 | 82 | 58 | 895 | 943 | 75 | 65 |
+  | B | 828 | 2,069 | 797 | 31 | 1,272 | 1,987 | 796 | 32 |
+
+- **Wall time.** Three driver runs (`eval/full/driver.log`) total 37 h 27 min (37.46 h),
+  against this machine's calibrated projection of 35.5 h.
+
+  | start | end | duration | ended by |
+  | --- | --- | --- | --- |
+  | 19 Nov 10:15:33 | 19 Nov 17:00:25 | 6 h 45 min | first decoder bug |
+  | 19 Nov 18:08:48 | 20 Nov 15:38:37 | 21 h 30 min | second decoder bug |
+  | 20 Nov 19:17:34 | 21 Nov 04:30:23 | 9 h 13 min | finished |
+
+  Elapsed from first start to finish: 42 h 15 min, including the two stops for the fixes.
+- **Code versions.**
+  - Results written before 19 Nov 17:00 come from the start commit (`6ef9ea2`, rewritten
+    as `c3a3ec8`).
+  - Results written from 18:08 that day to 20 Nov 15:38 come from `2394acf` (first fix).
+  - The rest come from `f35c182` (second fix).
+  - Both fixes change only the decoder. The reruns in `eval/fix_check/` and
+    `eval/fix_check2/` show that all earlier results are identical under the fixed
+    decoder, except the two bug goals, which were recomputed.
+  - No filter, seed, sample size or limit changed during the run.
+- **Not done, as instructed:** 7c (typed scaling) and `EVAL.md` (7d).
+- **Regression:** `Test/run_all.sh` exit 0 on the final code (`01a9430`, unchanged
+  since; `eval/fix_check2/run_all.log`): M0 902/902, M1 19/19, M4 4/4, M5 10/10, and the
+  Lean test files M2, M3, M4Lean, M5Lean and M7Lean (R1, R2) all pass. Named harness
+  cases 36/36 unchanged. The full run ends with 0 decoder bugs, solver errors or harness
+  errors.

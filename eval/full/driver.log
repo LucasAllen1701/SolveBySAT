@@ -1492,3 +1492,11 @@ crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/50
 crash(shard, oom) on r1b:B/Vector.mapFinIdx_eq_mapFinIdx_iff/10
 crash(shard, oom) on r1b:B/Array.append_eq_replicate_iff/19
 shard 36: done; 6095 results; 30734 s
+crash(shard, oom) on r1b:B/List.utf8Decode?_utf8Encode/13
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.isSome_apply_of_contains_filterMap/246
+crash(shard, oom) on r1b:B/Std.Internal.List.length_filter_eq_length_iff/9
+crash(shard, oom) on r1b:B/Nat.getD_toArray_rcc/4
+crash(shard, oom) on r1b:B/Std.TreeMap.maxKeyD_eq_iff_getKey?_eq_self_and_forall/0
+crash(shard, oom) on r1b:B/Std.TreeSet.toList_ric/0
+crash(shard, oom) on r1b:B/Std.DTreeMap.Raw.Const.equiv_iff_toArray_eq/0
+shard 37: done; 6145 results; 31237 s

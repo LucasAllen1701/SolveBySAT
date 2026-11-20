@@ -1249,3 +1249,68 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
   === driver exit 3 2026-11-20 15:38:37
   ```
   - Goals done: 4246 of 6300 - Crashes by cause: oom 1010 
+
+### 7b: second decoder bug in the full run (`Nat.pred_eq_self_iff`), found and fixed
+
+- **The goal.** `main:B/Nat.pred_eq_self_iff/22`, Tier B, with H = {`Ne.symm`,
+  `Nat.succ_ne_self`}:
+  `∀ {n : Nat} (n_1 : Nat), n = n_1 + 1 → ∀ (x_0 x_0 : Nat), x_0 ≠ x_0.succ`.
+  N = 1–3 are UNSAT and N = 4 is SAT. The model's proof is
+  `Ne.symm (fun a0 => Nat.succ_ne_self _ a0) a5`, and the decode failed at node 3: "the head
+  ?a = ?b of a0@g2 does not unify with the target Nat.succ ?n = ?n".
+- **Cause: the decoder used its caller's unifier configuration.**
+  - Node 3 uses the hypothesis `a0 : ?a = ?b`. Node 2 introduced it while opening `Ne.symm`'s
+    premise `?a ≠ ?b`. `?a` and `?b` were created at node 1, outside `a0`.
+  - `?n` was created at node 2, inside `a0`. Unifying the two equations assigns
+    `?a := Nat.succ ?n`. That needs `?n` restricted to `?a`'s smaller local context, which
+    Lean's `checkAssignment` does only under `ctxApprox`.
+  - The elaborator runs tactics with `foApprox` and `ctxApprox` on (checked with `run_tac`
+    in 4.36: `ctxApprox true`, `foApprox true`, `quasiPatternApprox false`). So the tactic
+    proves this goal. Run as `solve_by_sat [Nat.succ_ne_self, Ne.symm] (nodes := 4)`, it
+    gives the same skeleton.
+  - The harness's `runMeta` is a bare `MetaM` with every approximation off. The same CNF
+    and the same model fail there. Reproduced outside the harness by running `decode` under
+    a fresh `Core.Context`.
+  - The restriction is sound here. `?n`'s value (`x_0`) is outside `a0`, as the encoder's
+    scope clauses (SPEC §6.7) guarantee for every grounding. A model whose value used `a0`
+    would be UNSAT, not a decode.
+- **Fix (`SolveBySat/Decode.lean`, `decode`).** The whole decode runs under
+  `withConfig (fun c => { c with foApprox := true, ctxApprox := true })`, the tactic's
+  configuration, whatever the caller's.
+  - This does not change the tactic, which already ran with these settings.
+  - It changes the harness, and the M1/M4/M5 test executables, which call `decode` from
+    a bare `MetaM`. They now decode as the tactic does.
+  - The compiler is unaffected: it never assigns metavariables (only `inferType` and
+    `isProp`, no `isDefEq`). So CNFs, rejections and baselines are unaffected.
+  - Not in SPEC §8, which does not name a unifier configuration. It is recorded here as a
+    clarification, not a change of the class.
+- **Regression tests: `Test/M7Lean.lean`, R2.** They run `solveCore` under `withConfig`
+  with every approximation off. Each success has its minimality check.
+  - R2a: `∀ x : Nat, x ≠ x.succ` from the same two lemmas, 4 nodes, with the printed term
+    `fun x a => Ne.symm (fun a => Nat.succ_ne_self x a) a`. No proof at 3 nodes.
+  - R2b: the full run's goal, 4 nodes, and none at 3.
+  - With the fix reverted, R2a and R2b fail with "decoder failed on a satisfiable CNF".
+- **Regression (after the fix):** `Test/run_all.sh` exit 0 in 17 min 15 s
+  (`eval/fix_check2/run_all.log`).
+  - Test executables: M0 902/902; M1 19/19 (differentials 7,500 / 2,551 / 0 mismatches;
+    with binders 7,500 / 2,346 / 0); M4 unit 4/4; M5 10/10 (with data 15,000 / 3,854 / 0).
+  - Lean test files: `Test/M2.lean`, `M3.lean`, `M4Lean.lean`, `M5Lean.lean` and
+    `M7Lean.lean` (R1 and R2) all pass.
+  - Named cases through the harness: 36 of 36 identical to before the fix in outcome, N
+    and skeleton, including the documented `limitation` case
+    (`eval/fix_check2/compare.txt`).
+- **Effect on results so far.** As with the first fix, the change runs only after a SAT
+  answer, so only goals that reached SAT can be affected. No result so far is a
+  `limitation`. The check reran with the fix every full-run goal that reached SAT (492
+  `proved` plus the bug) and the 20 proved goals of the calibration pilot: 501 distinct
+  goals, without baselines (`eval/fix_check2/sat/`).
+  - 500 of 501 are identical in outcome, N and skeleton.
+  - The bug goal is now `proved` at N = 4, with the skeleton the failed decode had
+    reported.
+  - The other 3,753 results of `eval/full/`, and the calibration, stand as computed.
+- **Resume (owner-approved, 20 November 2026), as after the first fix.**
+  - The `decoder_bug` result line of `main:B/Nat.pred_eq_self_iff/22` is removed from
+    `eval/full/`, together with its 7 started and progress markers and its baselines
+    line. The removed lines stay in git history at the commit before the removal.
+  - Then `Test/eval_full.sh` is resumed on the commit with this fix.
+  - `eval/full/header.json` stays as written at the start.

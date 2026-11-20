@@ -1,0 +1,5 @@
+named: 36 goals; identical (outcome, N, skeleton): 36
+  outcomes now: Counter({'proved': 26, 'no_proof_le_Nmax': 9, 'limitation': 1})
+sat: 501 goals; identical (outcome, N, skeleton): 500
+  DIFF main:B/Nat.pred_eq_self_iff/22 ('decoder_bug', 4) ('proved', 4) False
+  outcomes now: Counter({'proved': 501})

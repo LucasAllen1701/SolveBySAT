@@ -1,0 +1,1 @@
+{"H": ["Eq.trans", "HDiv.hDiv", "HPow.hPow", "HShiftRight.hShiftRight", "Int.shiftRight_eq_div_pow", "Int.zero_ediv", "Nat.cast", "OfNat.ofNat"], "H_main_size": 3, "baselines": false, "id": "B/Int.zero_shiftRight/4", "key": "r1b:B/Int.zero_shiftRight/4", "nctx": 1, "pos": 4, "run": "r1b", "thm": "Int.zero_shiftRight", "tier": "B"}

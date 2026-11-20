@@ -16,6 +16,7 @@ irrelevance and only the child fills the premise. See NOTES.md, "7b: decoder bug
 - R1d: a premise without binders, with a different proof in the target (the child's proof
   is used, and the kernel accepts it by proof irrelevance);
 - R1e: the full run's goal, `List.getLast_eq_head_reverse`, with the lemmas its proof uses.
+R2 (decoder configuration) is at the end of the file.
 -/
 import SolveBySat
 
@@ -92,3 +93,43 @@ set_option maxHeartbeats 0 in
 #guard_msgs in
 example : type_of% @List.getLast_eq_head_reverse := by
   solve_by_sat [Eq.symm, List.head_reverse, List.reverse_eq_nil_iff] (nodes := 4)
+
+/-! ## R2 (decoder): the unifier's configuration
+
+R2: the decoder used the caller's unifier configuration. Without `ctxApprox` (a bare
+`MetaM`, as in the evaluation harness; the tactic gets it from the elaborator), a clause
+variable created under a hypothesis that a node introduced could not become the value of a
+variable from outside that node, and decoding failed on a satisfiable CNF. The decoder now
+sets the tactic's configuration itself. See NOTES.md, "7b: second decoder bug".
+- R2a: `∀ x, x ≠ x.succ` from `Ne.symm` and `Nat.succ_ne_self` (4 nodes, as
+  `Ne.symm (fun a => Nat.succ_ne_self x a)`), decoded with the approximations off;
+- R2b: the full run's goal, `Nat.pred_eq_self_iff` position 22 of Tier B. -/
+
+def R2aGoal : Prop := ∀ x : Nat, x ≠ x.succ
+set_option linter.unusedVariables false in
+def R2bGoal : Prop := ∀ {n : Nat} (n_1 : Nat), n = n_1 + 1 → ∀ (x_0 x_0 : Nat), x_0 ≠ x_0.succ
+
+open Lean Meta in
+/-- Run `solveCore` on the value of `g` with the unifier's approximations off. -/
+def R2run (g : Name) (N : Nat) : MetaM Unit :=
+  withConfig (fun c => { c with foApprox := false, ctxApprox := false, quasiPatternApprox := false }) do
+    let goal := (← getConstInfo g).value!
+    let t ← SolveBySat.solveCore goal #[``Ne.symm, ``Nat.succ_ne_self] N
+    unless ← isDefEq (← inferType t) goal do throwError "wrong type"
+    logInfo m!"{t}"
+
+/-- info: fun x a => Ne.symm (fun a => Nat.succ_ne_self x a) a -/
+#guard_msgs in
+#eval R2run ``R2aGoal 4
+
+/-- error: solve_by_sat: no proof with at most 3 nodes exists in the class -/
+#guard_msgs in
+#eval R2run ``R2aGoal 3
+
+/-- info: fun {n} n_1 a x_0 x_0_1 a_1 => Ne.symm (fun a => Nat.succ_ne_self x_0_1 a) a_1 -/
+#guard_msgs in
+#eval R2run ``R2bGoal 4
+
+/-- error: solve_by_sat: no proof with at most 3 nodes exists in the class -/
+#guard_msgs in
+#eval R2run ``R2bGoal 3

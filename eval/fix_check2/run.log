@@ -1,0 +1,138 @@
+=== build 2026-11-20 18:49:28
+⚠ [27/59] Replayed Test.EvalCorpus
+warning: Test/EvalCorpus.lean:195:26: Variable name `h` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _h
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [42/59] Replayed Test.EvalNamed
+warning: Test/EvalNamed.lean:22:49: Variable name `k` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _k
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: Test/EvalNamed.lean:31:37: Variable name `k` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _k
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [44/59] Built Test.EvalRun (2.9s)
+✔ [47/59] Built SolveBySat.Decode:c.o (3.5s)
+⚠ [48/59] Built Test.M2 (3.9s)
+info: Test/M2.lean:23:2: solve_by_sat: N = 5, 1377 variables, 16523 clauses; proof with 5 nodes: fun x#0 y#1 z#2 w#3 h1 h2 h3 => Nat.le_trans(Nat.le_trans(h1, h2), h3)
+info: Test/M2.lean:26:2: solve_by_sat: N = 3, 195 variables, 1325 clauses; proof with 3 nodes: fun A#0 B#1 C#2 a3@g0 a4@g0 a5@g0 => a4@g0(a3@g0(a5@g0))
+info: Test/M2.lean:29:2: solve_by_sat: N = 2, 131 variables, 565 clauses; proof with 2 nodes: fun P#0 Q#1 a#2 h hp => h(hp)
+info: Test/M2.lean:32:2: solve_by_sat: N = 1, 21 variables, 65 clauses; proof with 1 nodes: fun n#0 => Nat.le_refl
+warning: Test/M2.lean:37:0: declaration uses `sorry`
+info: Test/M2.lean:68:2: solve_by_sat: N = 2, 135 variables, 451 clauses; proof with 2 nodes: fun Q#0 P0#1 k#2 h q => h(q)
+info: Test/M2.lean:123:2: solve_by_sat: N = 1, 10 variables, 13 clauses; proof with 1 nodes: True.intro
+✔ [50/59] Built eval_run:exe (920ms)
+⚠ [51/59] Built Test.M4Lean (4.6s)
+info: Test/M4Lean.lean:40:2: solve_by_sat: N = 1, 60 variables, 190 clauses; proof with 1 nodes: fun n#0 => Eq.refl
+warning: Test/M4Lean.lean:50:0: declaration uses `sorry`
+warning: Test/M4Lean.lean:54:0: declaration uses `sorry`
+info: Test/M4Lean.lean:70:2: solve_by_sat: N = 2, 623 variables, 2222 clauses; proof with 2 nodes: fun y#0 => Exists.intro(Eq.refl)
+info: Test/M4Lean.lean:75:2: solve_by_sat: N = 1, 101 variables, 327 clauses; proof with 1 nodes: fun T#0 P0#1 t#2 Q#3 h => h
+warning: Test/M4Lean.lean:74:43: Variable name `Q` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _Q
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: Test/M4Lean.lean:74:76: Variable name `y` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _y
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+info: Test/M4Lean.lean:103:2: expected error: solve_by_sat: documented limitation (NOTES.md, milestone 4): the model grounds y#2 at node 0 to a candidate whose type, or the variable's type, is unknown to the encoder, so no typing clause applied to the pair; Lean rejects it: ill-typed grounding of y#2 at node 0: the model gives Q✝ : Nat →
+warning: Test/M4Lean.lean:102:0: declaration uses `sorry`
+info: Test/M4Lean.lean:111:2: solve_by_sat: N = 5, 1377 variables, 16523 clauses; proof with 5 nodes: fun x#0 y#1 z#2 w#3 h1 h2 h3 => Nat.le_trans(Nat.le_trans(h1, h2), h3)
+info: Test/M4Lean.lean:113:2: solve_by_sat: N = 5, 1377 variables, 16523 clauses; proof with 5 nodes: fun x#0 y#1 z#2 w#3 h1 h2 h3 => Nat.le_trans(Nat.le_trans(h1, h2), h3)
+info: Test/M4Lean.lean:118:2: solve_by_sat: N = 1, 46 variables, 147 clauses; proof with 1 nodes: fun n#0 => Eq.refl
+info: Test/M4Lean.lean:120:2: solve_by_sat: N = 1, 60 variables, 190 clauses; proof with 1 nodes: fun n#0 => Eq.refl
+⚠ [53/59] Built Test.M3 (5.4s)
+info: Test/M3.lean:23:2: solve_by_sat: N = 3, 132 variables, 966 clauses; proof with 3 nodes: fun A#0 B#1 ha hb => And.intro(ha, hb)
+info: Test/M3.lean:26:2: solve_by_sat: N = 2, 75 variables, 507 clauses; proof with 2 nodes: fun A#0 B#1 hb => Or.inr(hb)
+info: Test/M3.lean:29:2: solve_by_sat: N = 2, 547 variables, 1659 clauses; proof with 2 nodes: fun a#0 b#1 h => Exists.intro(h)
+info: Test/M3.lean:32:2: solve_by_sat: N = 1, 26 variables, 88 clauses; proof with 1 nodes: fun A#0 B#1 h h.left h.right => h.right
+warning: Test/M3.lean:37:0: declaration uses `sorry`
+info: Test/M3.lean:72:2: solve_by_sat: N = 1, 28 variables, 162 clauses; proof with 1 nodes: fun A#0 B#1 h => h
+info: Test/M3.lean:75:2: solve_by_sat: N = 1, 29 variables, 187 clauses; proof with 1 nodes: fun A#0 B#1 h h.left h.right => h
+info: Test/M3.lean:79:2: solve_by_sat: N = 1, 177 variables, 390 clauses; proof with 1 nodes: fun P#0 h => h
+info: Test/M3.lean:81:2: solve_by_sat: N = 2, 77 variables, 681 clauses; proof with 2 nodes: fun A#0 B#1 h h.mp h.mpr ha => h.mp(ha)
+info: Test/M3.lean:93:2: solve_by_sat: hypothesis bad is introduced but gives no clause:
+solve_by_sat: the clause variable f#1 is applied to arguments in f 0: not first order
+info: Test/M3.lean:93:2: solve_by_sat: N = 1, 14 variables, 33 clauses; proof with 1 nodes: fun A#0 ha => ha
+warning: Test/M3.lean:92:20: Variable name `bad` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _bad
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+info: Test/M3.lean:103:2: solve_by_sat: N = 2, 531 variables, 1853 clauses; proof with 2 nodes: fun R#0 y#1 r => Exists.intro(r)
+info: Test/M3.lean:118:2: solve_by_sat: N = 3, 1127 variables, 6264 clauses; proof with 3 nodes: fun g#0 k#1 Q#2 R#3 P0#4 h q r => h(q, r)
+info: Test/M3.lean:119:0: theorem A4a : ∀ (g : Nat → Int) (k : Nat) (Q R : Int → Prop) (P0 : Prop),
+  (∀ (y : Int) (u : Nat), Q y → R (g u) → P0) → (∀ (y' : Int), Q y') → (∀ (t : Int), R t) → P0 :=
+fun g k Q R P0 h q r => h (g k) k (q (g k)) (r (g k))
+info: Test/M3.lean:132:2: solve_by_sat: N = 4, 1401 variables, 7356 clauses; proof with 4 nodes: fun R0#0 Q#1 T#2 hp h q t => And.intro(h(q), t)
+info: Test/M3.lean:133:0: theorem A4b : ∀ (R0 : Prop) (Q T : { x // x = 3 } → Prop) (hp : 3 = 3),
+  (∀ (s : { x // x = 3 }), Q s → R0) → (∀ (s : { x // x = 3 }), Q s) → (∀ (s : { x // x = 3 }), T s) → R0 ∧ T ⟨3, hp⟩ :=
+fun R0 Q T hp h q t => ⟨h ⟨3, hp⟩ (q ⟨3, hp⟩), t ⟨3, hp⟩⟩
+⚠ [55/59] Built Test.M5Lean (6.8s)
+info: Test/M5Lean.lean:27:2: solve_by_sat: N = 3, 288 variables, 1260 clauses; proof with 3 nodes: Exists.intro(Nat.le_refl, n:=Nat.zero)
+info: Test/M5Lean.lean:42:2: solve_by_sat: N = 3, 186 variables, 588 clauses; proof with 3 nodes: Exists.intro(True.intro, n:=Nat.zero)
+warning: Test/M5Lean.lean:41:12: Variable name `n` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _n
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+info: Test/M5Lean.lean:57:2: solve_by_sat: N = 3, 1155 variables, 4602 clauses; proof with 3 nodes: fun Q#0 q => Exists.intro(q(m:=Nat.zero))
+info: Test/M5Lean.lean:72:2: solve_by_sat: N = 4, 585 variables, 2326 clauses; proof with 4 nodes: Exists.intro(True.intro, i:=Int.ofNat(a:=Nat.zero))
+warning: Test/M5Lean.lean:71:15: Variable name `i` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _i
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+info: Test/M5Lean.lean:107:2: solve_by_sat: N = 2, 216 variables, 800 clauses; proof with 2 nodes: Exists.intro(Eq.refl)
+info: Test/M5Lean.lean:123:2: solve_by_sat: N = 4, 761 variables, 3102 clauses; proof with 4 nodes: fun f#0 => Exists.intro(True.intro, i:=f(a:=Nat.zero))
+warning: Test/M5Lean.lean:122:15: Variable name `f` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _f
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: Test/M5Lean.lean:122:32: Variable name `i` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _i
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+info: Test/M5Lean.lean:143:2: solve_by_sat: N = 6, 3359 variables, 19771 clauses; proof with 6 nodes: fun f#0 => And.intro(fun g#2 => True.intro, Exists.intro(True.intro, i:=f(a:=Nat.zero)))
+warning: Test/M5Lean.lean:142:29: Variable name `g` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _g
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: Test/M5Lean.lean:142:54: Variable name `i` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _i
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+info: Test/M5Lean.lean:151:2: solve_by_sat: N = 1, 1073 variables, 4043 clauses; proof with 1 nodes: fun f#0 => maxL
+✔ [57/59] Built Test.M7Lean (124s)
+Build completed successfully (59 jobs).
+=== run_all 2026-11-20 18:51:33
+run_all exit 0
+=== named 2026-11-20 19:08:48
+named exit 0
+=== sat 2026-11-20 19:09:01
+sat exit 0
+=== done 2026-11-20 19:16:16

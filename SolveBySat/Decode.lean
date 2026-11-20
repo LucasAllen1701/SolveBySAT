@@ -374,8 +374,17 @@ def groundOpen (C : Compiled) (E : Encoding) (sk : Array SkelNode) (model : Arra
         throwError "grounding of level {v} at node {a} to {l} was rejected"
       progress := true
 
-/-- Decode a model into a proof of the preprocessed goal type. -/
-def decode (C : Compiled) (E : Encoding) (model : Array Bool) : MetaM Expr := do
+/-- Decode a model into a proof of the preprocessed goal type.
+
+The unifier runs with the approximations a tactic gets from the elaborator (`foApprox`,
+`ctxApprox`), whatever the caller's configuration. Without `ctxApprox`, a clause variable
+created under a hypothesis that a node introduced cannot be the value of a variable from
+outside that node, even when its own value will be in scope (and the encoder's scope
+clauses, SPEC §6.7, say it will). The decoder then failed on a satisfiable CNF when called
+from a bare `MetaM`, as the evaluation harness does, but not from the tactic. (Full run of
+7b, `Nat.pred_eq_self_iff`; see NOTES.md.) -/
+def decode (C : Compiled) (E : Encoding) (model : Array Bool) : MetaM Expr :=
+  withConfig (fun c => { c with foApprox := true, ctxApprox := true }) do
   let sk ← match readSkeleton C.forest E.vars model with
     | .ok sk => pure sk
     | .error e => throwError "solve_by_sat: decoder failed on a satisfiable CNF (bug): {e}"

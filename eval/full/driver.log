@@ -1095,3 +1095,12 @@ crash(shard, oom) on main:B/List.mergeSort_pair/45
 crash(shard, oom) on main:B/List.min?_eq_head?/4
 crash(shard, oom) on main:B/List.min?_eq_head?/30
 shard 64: done; 4023 results; 73150 s
+crash(shard, oom) on main:B/List.min_cons/7
+crash(shard, oom) on main:B/List.min_cons/8
+crash(shard, oom) on main:B/List.ofFn_getElem/17
+crash(shard, oom) on main:B/List.prefix_concat_iff/2
+crash(shard, oom) on main:B/List.prefix_concat_iff/13
+crash(shard, oom) on main:B/List.prefix_concat_iff/16
+crash(shard, oom) on main:B/List.splitOnP_cons_eq_ite_splitOnPPrepend/4
+crash(shard, oom) on main:B/List.splitOnP_cons_eq_ite_splitOnPPrepend/8
+shard 65: done; 4073 results; 74184 s

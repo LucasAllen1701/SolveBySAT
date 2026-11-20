@@ -1513,3 +1513,10 @@ crash(shard, oom) on r1b:B/BitVec.not_not/1
 crash(shard, oom) on r1b:B/Int.toArray_rco_eq_singleton_append_iff/0
 crash(shard, oom) on r1b:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13
 shard 38: done; 6195 results; 31934 s
+crash(shard, oom) on r1b:B/List.MergeSort.Internal.splitInTwo_snd_pairwise/0
+crash(shard, oom) on r1b:B/List.getElem_eraseIdx_of_ge/2
+crash(shard, oom) on r1b:B/String.Slice.all_slice_iff/2
+crash(shard, oom) on r1b:B/Array.mkSlice_rio_eq_mkSlice_rio_min/2
+crash(shard, oom) on r1b:B/Array.getElem_append_right'/24
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.get!_diff_of_contains_eq_false_left/11
+shard 39: done; 6245 results; 32560 s

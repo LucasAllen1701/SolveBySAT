@@ -1,14 +1,14 @@
 # 7b full run: status
 
-Updated 2026-11-21 04:09 (machine time). Specs: `/home/tom/SolveBySAT/eval/specs_full.jsonl`; P = 1; commit at start `6ef9ea207a`.
+Updated 2026-11-21 04:20 (machine time). Specs: `/home/tom/SolveBySAT/eval/specs_full.jsonl`; P = 1; commit at start `6ef9ea207a`.
 
-- Shards done: 123 of 126 (shard size 50)
-- Goals done: 6195 of 6300
+- Shards done: 124 of 126 (shard size 50)
+- Goals done: 6245 of 6300
 - decoder_bug / solver_error / harness_error: 0
-- Goals that hit a time limit (solver or loop timeout, watchdog): 76
-- Crashes by cause: oom 1360
+- Goals that hit a time limit (solver or loop timeout, watchdog): 77
+- Crashes by cause: oom 1366
 - Driver wall time of finished driver runs: 28.24 h
-- Remaining: 105 goals, projected 0.4 h → finish about 2026-11-21 04:32; observed throughput 24.2 s per goal → about 2026-11-21 04:52
+- Remaining: 55 goals, projected 0.2 h → finish about 2026-11-21 04:31; observed throughput 24.1 s per goal → about 2026-11-21 04:42
 
 ## Outcomes so far
 
@@ -16,9 +16,9 @@ Updated 2026-11-21 04:09 (machine time). Specs: `/home/tom/SolveBySAT/eval/specs
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | main | A | 3000 | 819 | 272 | 1711 | 140 | 58 |
 | main | B | 3000 | 496 | 297 | 1363 | 828 | 16 |
-| r1b | B | 195 | 45 | 20 | 74 | 54 | 2 |
+| r1b | B | 245 | 51 | 24 | 100 | 67 | 3 |
 
-Proved at N: 1: 584, 2: 200, 3: 119, 4: 50, 5: 35, 6: 12, 7: 12, 8: 7, 9: 3
+Proved at N: 1: 590, 2: 205, 3: 120, 4: 50, 5: 35, 6: 12, 7: 12, 8: 7, 9: 4
 
 ## Baselines so far
 

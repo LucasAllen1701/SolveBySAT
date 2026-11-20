@@ -1038,3 +1038,7 @@ crash(shard, oom) on main:B/Lean.Grind.CommRing.le_norm_tight_expr/62
 crash(shard, oom) on main:B/Lean.Grind.CommRing.le_norm_tight_expr/120
 shard 59: done; 3773 results; 68372 s
 shard 60: done; 3823 results; 69166 s
+crash(shard, oom) on main:B/List.IsInfix.sublist/0
+crash(shard, oom) on main:B/List.MergeSort.Internal.splitInTwo_snd_pairwise/0
+crash(shard, oom) on main:B/List.MergeSort.Internal.splitInTwo_snd_pairwise/1
+shard 61: done; 3873 results; 69711 s

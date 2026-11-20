@@ -1476,3 +1476,19 @@ crash(shard, oom) on r1b:B/Std.ExtDTreeMap.Const.size_insertMany_list_le/3
 crash(shard, oom) on r1b:B/String.skipSuffixWhile_eq_endPos_iff/10
 crash(shard, oom) on r1b:B/Array.map_pmap/17
 shard 35: done; 6045 results; 29989 s
+crash(shard, oom) on r1b:B/Std.Internal.List.getKeyD_insertList_of_mem/3
+crash(shard, oom) on r1b:B/Vector.zipIdx_map/20
+crash(shard, oom) on r1b:B/BitVec.not_lt/2
+crash(shard, oom) on r1b:B/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo/2
+crash(shard, oom) on r1b:B/Std.DHashMap.Raw.getD_alter_self/2
+crash(shard, oom) on r1b:B/Std.DTreeMap.inter_equiv_empty_comm/1
+crash(shard, oom) on r1b:B/Std.HashMap.isEmpty_diff_iff/0
+crash(shard, oom) on r1b:B/Std.DHashMap.Raw.Equiv.inter_congr/3
+crash(shard, oom) on r1b:B/Std.DHashMap.Raw.contains_inter/7
+crash(shard, oom) on r1b:B/List.erase_append/6
+crash(shard, oom) on r1b:B/List.foldl_push_eq_append/13
+crash(shard, oom) on r1b:B/List.modify_id/0
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/50
+crash(shard, oom) on r1b:B/Vector.mapFinIdx_eq_mapFinIdx_iff/10
+crash(shard, oom) on r1b:B/Array.append_eq_replicate_iff/19
+shard 36: done; 6095 results; 30734 s

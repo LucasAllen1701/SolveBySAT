@@ -75,20 +75,27 @@ Machine differences (CPU speed, RAM) change times and possibly which goals hit t
 The pilot's projection was made on the original machine, so record the new machine's
 specs in NOTES.md before a full run.
 
-## Where milestone 7 stands (18 November 2026)
+## Where milestone 7 stands (21 November 2026)
 
 - 7a (corpus) is accepted, including the H_main amendments (EVAL_PLAN §10.2, §10.4).
-- 7b: the harness is built and its acceptance has passed: named tests, resume after
-  SIGKILL, forced OOM. The 120-goal pilot is done (`eval/pilot/`, report:
-  `python3 Test/eval_pilot.py eval/pilot`). It projects the full run at **30.6 h**, over
-  the plan's 8 h.
-- **Waiting for the owner** on two points before any full run (NOTES.md "7b: pilot"):
-  1. a sample-size reduction (proposed: Tier A 500, Tier B 900, R1b 150, about 7.4 h);
-  2. running the baselines before the `solve_by_sat` N loop, so that a shard OOM no
-     longer loses them.
+- 7b is done. The full run (`eval/full/`, 6,300 goals) ran on the test machine under the
+  decisions of EVAL_PLAN §10.5:
+  - no sample reduction;
+  - baselines before the N loop;
+  - `sbe_like` without default lemmas;
+  - P = 1.
 
-  Do not start the full run without that approval.
-- 7c (typed scaling) and 7d (report) have not started.
+  It finished on 21 November after 37.5 h of driver time. The final record is in
+  NOTES.md, "7b: full run, final record", and the per-shard status is in
+  `eval/full/STATUS.md`.
+- Two decoder bugs stopped the run and were fixed, with regression tests R1 and R2 in
+  `Test/M7Lean.lean` and reruns in `eval/fix_check/` and `eval/fix_check2/`:
+  1. premises as synthetic-opaque metavariables;
+  2. `decode` sets the tactic's unifier configuration itself.
+
+  Earlier results were shown unaffected, except the two bug goals, which were recomputed.
+- 7c (typed scaling) and 7d (report, `EVAL.md`) have not started. **Wait for the owner**
+  before starting either.
 
 ## Running the evaluation
 
@@ -113,3 +120,6 @@ specs in NOTES.md before a full run.
 - In Lean 4.36 `try … catch` in `MetaM` does not catch heartbeat or recursion-depth
   exceptions; use `tryCatchRuntimeEx`.
 - CaDiCaL 2.1.2 at its `-t` limit prints `c UNKNOWN` (a comment line) and exits 0.
+- The elaborator runs tactics with `foApprox` and `ctxApprox` on; a bare `MetaM` (the
+  harness's `runMeta`, the test executables) has them off. Code that must behave as the
+  tactic does sets its configuration itself (as `decode` now does).

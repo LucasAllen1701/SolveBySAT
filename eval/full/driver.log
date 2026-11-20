@@ -1158,3 +1158,36 @@ crash(shard, oom) on main:B/Std.DHashMap.Const.insertMany_list_equiv_foldl/4
 crash(shard, oom) on main:B/Std.DHashMap.Const.insertMany_list_equiv_foldl/6
 crash(shard, oom) on main:B/Std.DHashMap.Const.mem_alter/0
 shard 3: done; 4445 results; 3811 s
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw.Const.toArray_eq_toArray_map_toListModel/1
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw.Const.toArray_eq_toArray_map_toListModel/6
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_diff_of_contains_right/1
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_diff_of_contains_right/3
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_diff_of_contains_right/4
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_diff_of_contains_right/18
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_diff_of_contains_right/27
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_emptyWithCapacity/1
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_emptyWithCapacity/3
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default/3
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default/4
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default/5
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default/8
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default/9
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default/10
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get?_emptyWithCapacity/2
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv/4
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv/5
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv/6
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv/8
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv/12
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv/45
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv/50
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_union_of_contains_eq_false_right/5
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_union_of_contains_eq_false_right/12
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_union_of_contains_eq_false_right/21
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_union_of_contains_eq_false_right/29
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/12
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/26
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/28
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/34
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/50
+shard 4: done; 4495 results; 5186 s

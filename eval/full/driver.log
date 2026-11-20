@@ -1139,3 +1139,10 @@ crash(shard, oom) on main:B/Nat.toList_roc_eq_append/10
 crash(shard, oom) on main:B/Option.all_attachWith/7
 crash(shard, oom) on main:B/Option.isNone_pfilter_iff/41
 shard 1: done; 4345 results; 2056 s
+crash(shard, oom) on main:B/Option.isNone_pfilter_iff/64
+crash(shard, oom) on main:B/Option.isNone_pfilter_iff/67
+crash(shard, oom) on main:B/Option.length_toList_eq_zero_iff/3
+crash(shard, oom) on main:B/Option.mem_toArray/16
+crash(shard, oom) on main:B/Option.mem_toArray/21
+crash(shard, oom) on main:B/Option.merge_eq_or_eq/8
+shard 2: done; 4395 results; 2944 s

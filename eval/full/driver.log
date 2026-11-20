@@ -1004,3 +1004,8 @@ crash(shard, oom) on main:B/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos/0
 crash(shard, oom) on main:B/Int.exists_add_of_le/0
 crash(shard, oom) on main:B/Int.exists_add_of_le/2
 shard 52: done; 3423 results; 62974 s
+crash(shard, oom) on main:B/Int.le_mul_iff_le_left/5
+crash(shard, oom) on main:B/Int.le_mul_iff_le_left/6
+crash(shard, oom) on main:B/Int.le_shiftRight_of_nonneg/17
+crash(shard, oom) on main:B/Int.le_shiftRight_of_nonneg/21
+shard 53: done; 3473 results; 63643 s

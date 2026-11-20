@@ -1373,3 +1373,10 @@ crash(shard, oom) on main:B/Std.Rii.forIn'_eq_forIn'_toList/0
 crash(shard, oom) on main:B/Std.Rii.forIn'_eq_forIn'_toList/11
 crash(shard, oom) on main:B/Std.Rxi.Iterator.toArray_eq_match/19
 shard 20: done; 5295 results; 18827 s
+crash(shard, oom) on main:B/Std.Tactic.BVDecide.BVExpr.bitblast.blastUdiv.blastDivSubtractShift_decl_eq/0
+crash(shard, oom) on main:B/Std.Tactic.BVDecide.BVExpr.bitblast.blastUdiv.blastDivSubtractShift_decl_eq/28
+crash(shard, oom) on main:B/Std.Tactic.BVDecide.BVExpr.bitblast.blastUdiv.blastDivSubtractShift_decl_eq/160
+crash(shard, oom) on main:B/Std.Tactic.BVDecide.Normalize.BitVec.ite_same_left'/1
+crash(shard, oom) on main:B/Std.Tactic.BVDecide.Normalize.BitVec.not_neg''/0
+crash(shard, oom) on main:B/Std.Tactic.BVDecide.Normalize.BitVec.not_neg''/2
+shard 21: done; 5345 results; 19646 s

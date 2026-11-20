@@ -1286,3 +1286,14 @@ crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.equiv_iff_toArray_eq/2
 crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.get!_filterMap'/2
 crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.get!_filterMap'/13
 shard 12: done; 4895 results; 12568 s
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.get!_filterMap'/29
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.get!_union/1
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.get_diff/1
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.maxKey!_modify/0
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.get!_insertIfNew/0
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.getKey?_union_of_not_mem_right/1
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.getKey?_union_of_not_mem_right/5
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/2
+crash(shard, oom) on main:B/Std.DTreeMap.get!_diff_of_not_mem_left/4
+shard 13: done; 4945 results; 13062 s

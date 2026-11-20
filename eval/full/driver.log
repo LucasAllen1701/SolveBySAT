@@ -1406,3 +1406,17 @@ crash(shard, oom) on main:B/String.Pos.next_le_of_lt/16
 crash(shard, oom) on main:B/String.Pos.prev_le/0
 crash(shard, oom) on main:B/String.Pos.startPos_lt_iff/3
 shard 24: done; 5495 results; 21596 s
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/0
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/6
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/9
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/10
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or/1
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or/3
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo/0
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo/1
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo/2
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo/4
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo/6
+crash(shard, oom) on main:B/String.Slice.Pos.next_eq_iff/21
+crash(shard, oom) on main:B/String.Slice.Pos.ofSliceTo_lt_iff/2
+shard 25: done; 5545 results; 22889 s

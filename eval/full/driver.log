@@ -1389,3 +1389,12 @@ crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_inter_of_mem_right/0
 crash(shard, oom) on main:B/Std.TreeMap.Raw.mem_insertMany_list/0
 crash(shard, oom) on main:B/Std.TreeMap.getKey?_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false/0
 shard 22: done; 5395 results; 20190 s
+crash(shard, oom) on main:B/Std.TreeMap.isEmpty_filterMap_iff/0
+crash(shard, oom) on main:B/Std.TreeMap.maxKeyD_eq_iff_getKey?_eq_self_and_forall/0
+crash(shard, oom) on main:B/Std.TreeSet.Raw.mem_insertMany_list/0
+crash(shard, oom) on main:B/Std.TreeSet.Raw.min?_eq_some_iff_get?_eq_self_and_forall/0
+crash(shard, oom) on main:B/Std.TreeSet.toList_ric/0
+crash(shard, oom) on main:B/Std.WP.Spec.IterM.foldM_filterWithPostcondition/0
+crash(shard, oom) on main:B/Std.WP.Spec.IterM.foldM_filterWithPostcondition/2
+crash(shard, oom) on main:B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/3
+shard 23: done; 5445 results; 20686 s

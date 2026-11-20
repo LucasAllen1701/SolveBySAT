@@ -1267,3 +1267,7 @@ crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.contains_union!_iff/0
 crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left/2
 crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left/11
 shard 10: done; 4795 results; 10987 s
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.getKeyD_filter_key/4
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.get_map/64
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.isSome_apply_of_contains_filterMap/11
+shard 11: done; 4845 results; 11555 s

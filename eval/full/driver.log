@@ -1122,3 +1122,14 @@ crash(shard, oom) on main:B/Nat.pos_of_lt_mul_left/2
 STOP: "decoder_bug" on main:B/Nat.pred_eq_self_iff/22: "solve_by_sat: decoder failed on a satisfiable CNF (bug).\nskeleton: fun n#0 n#1 x_0#2 x_0#3 h2@g0 a5@g0 => Ne.symm(fun a0@g2 => Nat.succ_ne_self(a0@g2), a5@g0)\nerror: node 3: the head ?a = ?b of a0@g2 does not unify with the target Nat.succ ?n = ?n"
 STOP: shard exited with 3 (decoder bug or solver error; see results.jsonl)
 === driver exit 3 2026-11-20 15:38:37
+=== driver start 2026-11-20 19:17:34
+6300 specs, 4245 done, 2055 to run
+crash(shard, oom) on main:B/Nat.toArray_rco_eq_singleton_append_iff/18
+crash(shard, oom) on main:B/Nat.toArray_roc_add_right_eq_map/3
+crash(shard, oom) on main:B/Nat.toArray_roc_eq_singleton_iff/0
+crash(shard, oom) on main:B/Nat.toArray_roc_eq_singleton_iff/2
+crash(shard, oom) on main:B/Nat.toList_rcc_eq_cons/1
+crash(shard, oom) on main:B/Nat.toList_rcc_eq_cons_iff/2
+crash(shard, oom) on main:B/Nat.toList_rcc_eq_cons_iff/4
+crash(shard, oom) on main:B/Nat.toList_rcc_eq_nil_iff/10
+shard 0: done; 4295 results; 1053 s

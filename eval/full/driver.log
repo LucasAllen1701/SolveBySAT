@@ -1520,3 +1520,12 @@ crash(shard, oom) on r1b:B/Array.mkSlice_rio_eq_mkSlice_rio_min/2
 crash(shard, oom) on r1b:B/Array.getElem_append_right'/24
 crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.get!_diff_of_contains_eq_false_left/11
 shard 39: done; 6245 results; 32560 s
+crash(shard, oom) on r1b:B/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or/3
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.toArray_map/15
+crash(shard, oom) on r1b:B/Std.DTreeMap.get!_diff_of_not_mem_left/4
+crash(shard, oom) on r1b:B/Std.DHashMap.getKey?_eq_some_getKeyD/2
+crash(shard, oom) on r1b:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/10
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/9
+crash(shard, oom) on r1b:B/Std.TreeMap.Raw.getD_filter'/6
+crash(shard, oom) on r1b:B/Array.eq_iff_flatten_eq/49
+shard 40: done; 6295 results; 33118 s

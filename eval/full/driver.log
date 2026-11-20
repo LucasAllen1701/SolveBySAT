@@ -1420,3 +1420,8 @@ crash(shard, oom) on main:B/String.Slice.Pattern.Model.isLongestRevMatch_iff_isL
 crash(shard, oom) on main:B/String.Slice.Pos.next_eq_iff/21
 crash(shard, oom) on main:B/String.Slice.Pos.ofSliceTo_lt_iff/2
 shard 25: done; 5545 results; 22889 s
+crash(shard, oom) on main:B/String.Slice.skipPrefix?_string_eq_some_iff/0
+crash(shard, oom) on main:B/String.Slice.sliceTo_sliceTo/12
+crash(shard, oom) on main:B/String.Slice.sliceTo_sliceTo/18
+crash(shard, oom) on main:B/String.Slice.sliceTo_sliceTo/104
+shard 26: done; 5595 results; 23762 s

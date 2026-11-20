@@ -1413,3 +1413,69 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
   Lean test files M2, M3, M4Lean, M5Lean and M7Lean (R1, R2) all pass. Named harness
   cases 36/36 unchanged. The full run ends with 0 decoder bugs, solver errors or harness
   errors.
+
+### 7d-1: rule 4 of §3.3 (numerals) made exact (EVAL_PLAN §10.6)
+
+Fixed and written here before any numeral flag or any R2 count was computed. R2 is reported
+both with and without rule 4.
+
+- **Where it is computed.** A new corpus annotation, `eval/corpus_numerals.jsonl` (one line per
+  Tier A and Tier B goal id), produced by `Test/EvalNumerals.lean` (`lake exe eval_numerals`)
+  from the corpus and the imported environment alone. The tactic is not run; the compiler is
+  used read-only for its `preprocess`. `eval/report.py` reads the file as part of the corpus.
+- **The rule.** Let p be the goal's oracle term: Tier A, the theorem's proof value; Tier B, the
+  closed oracle subterm `fun ctx => e`, rebuilt by the 7a walker from (theorem, position).
+  1. Walk p in the 7a walker's traversal: λ-bodies with binders entered as local declarations,
+     `let` by zeta, application heads and arguments, `mdata`, `proj`. Binder types are not
+     walked. The budget is the 7a walk budget, 20,000 visited nodes.
+  2. **Checked positions.** (a) The root: T = `inferType p` against A = the goal's closed type.
+     (b) Every argument aᵢ of every application `f a₁ … aₙ` in p for which aᵢ is a proof:
+     T = `inferType aᵢ` against A = the binder type of `f a₁ … aᵢ₋₁`'s type
+     (`instantiateForall` after `whnf` where needed; a position whose expected type cannot be
+     computed is skipped and counted).
+  3. Both A and T go through the compiler's `preprocess` (instantiate, zeta, `mdata` removed,
+     `Not`/`Ne`/`GE.ge`/`GT.gt` unfolded, β, levels normalised).
+  4. **Syntactic equality** is SPEC 2.2's: structural equality with bound variables by
+     position, universe levels compared after normalisation, and any two proofs equal (proof
+     irrelevance: a pair of subterms that are both proofs is equal).
+  5. **Mismatch and its position.** If A and T are not equal, the mismatch position is the
+     first differing pair in a simultaneous pre-order traversal: two subterms whose kinds,
+     head constants, levels, literals, bound-variable indices or argument counts differ.
+  6. **Numeral mismatch.** The mismatch is a *numeral mismatch* if, on either side, the
+     differing subterm or any subterm enclosing it on the path from the root of A or T is a
+     *numeral*: an application of `OfNat.ofNat` (any type, any arguments) or a raw
+     natural-number literal (`Expr.lit (.natVal _)`).
+  7. **Rule 4 holds** for the goal iff at least one checked position in p has a numeral
+     mismatch. If the walk is cut at the budget, the rule is decided on the part walked, and
+     the cut is recorded (`cut`).
+- **Also recorded, for the reviews only (not a §3.3 rule):** `mismatch_any`, whether any checked
+  position has a mismatch of any kind, with the first one printed (A side, T side, outermost
+  differing pair), and the number of checked and skipped positions.
+- **Reasons for each choice.**
+  - *Mismatches, not occurrences.* The rule says "in a position that matching would need to
+    see through". A numeral that appears identically on both sides is matched syntactically
+    (D7: `∃ n : Nat, n = 1` is proved), so counting every `OfNat.ofNat` would blame goals that
+    numerals do not block. Matching has to see through a position exactly where the kernel
+    accepts the oracle term only by definitional unfolding, which is where the expected and
+    inferred types differ after the compiler's preprocessing.
+  - *Proof arguments and the root only.* `solve_by_sat` matches propositions: a clause's head
+    against a target, a premise against a child's target. Data arguments are not matched;
+    clause variables are determined by unification. The oracle term's proof arguments and its
+    root are the places where an oracle step's conclusion meets what is expected of it. A
+    `show`/type ascription in the proof appears as `@id T h` and is covered, because `h` is a
+    proof argument of `id`.
+  - *The compiler's preprocessing and SPEC 2.2's equality.* These are exactly what the tactic
+    sees, so a mismatch here is one the tactic cannot get past. A difference that preprocessing
+    removes (`Ne`, `GT.gt`, `mdata`, level order) is not a mismatch.
+  - *A numeral on the path to the outermost difference.* This is the numeral being looked
+    through: D6's `Nat.succ ?n` against `1` differs at the numeral itself, and a different
+    instance or literal inside `OfNat.ofNat T n inst` differs below the numeral. A mismatch
+    such as `n + 1` against `Nat.succ n` has the numeral `1` inside one side but not on the
+    path; it is the unfolding of `HAdd.hAdd` (SPEC 2.4, "unfolding and computation"), not a
+    numeral against a constructor, so it is left to rule 6 and the hand review.
+  - *`OfNat.ofNat` and raw literals only.* The plan names `OfNat.ofNat`; raw `Nat` literals are
+    what it unfolds to (`instOfNatNat n` is a raw literal), so a difference there is the same
+    numeral question. Other literal kinds (strings) and `Int.ofNat`/`Nat.cast` coercions are
+    not numerals in this sense; they fall to rule 6 and the review.
+  - *The 7a walker and budget.* The same traversal defines Tier B goals and the node estimate,
+    so the three notions see the same oracle term; the budget is the pre-registered one.

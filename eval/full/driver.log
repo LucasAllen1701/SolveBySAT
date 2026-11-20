@@ -1042,3 +1042,15 @@ crash(shard, oom) on main:B/List.IsInfix.sublist/0
 crash(shard, oom) on main:B/List.MergeSort.Internal.splitInTwo_snd_pairwise/0
 crash(shard, oom) on main:B/List.MergeSort.Internal.splitInTwo_snd_pairwise/1
 shard 61: done; 3873 results; 69711 s
+crash(shard, oom) on main:B/List.MergeSort.Internal.splitInTwo_snd_pairwise/2
+crash(shard, oom) on main:B/List.append_right_le_iff_of_length_eq/0
+crash(shard, oom) on main:B/List.append_right_le_iff_of_length_eq/1
+crash(shard, oom) on main:B/List.beq_eq_decide/20
+crash(shard, oom) on main:B/List.beq_eq_decide/46
+crash(shard, oom) on main:B/List.drop_eq_getElem?_toList_append/1
+crash(shard, oom) on main:B/List.drop_eq_getElem?_toList_append/7
+crash(shard, oom) on main:B/List.drop_eq_getElem?_toList_append/42
+crash(shard, oom) on main:B/List.drop_eq_getElem?_toList_append/48
+crash(shard, oom) on main:B/List.erase_append/6
+crash(shard, oom) on main:B/List.ext_getElem/114
+shard 62: done; 3923 results; 70393 s

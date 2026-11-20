@@ -1398,3 +1398,11 @@ crash(shard, oom) on main:B/Std.WP.Spec.IterM.foldM_filterWithPostcondition/0
 crash(shard, oom) on main:B/Std.WP.Spec.IterM.foldM_filterWithPostcondition/2
 crash(shard, oom) on main:B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/3
 shard 23: done; 5445 results; 20686 s
+crash(shard, oom) on main:B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/5
+crash(shard, oom) on main:B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/6
+crash(shard, oom) on main:B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/9
+crash(shard, oom) on main:B/String.Pos.Raw.instTotalLe/7
+crash(shard, oom) on main:B/String.Pos.next_le_of_lt/16
+crash(shard, oom) on main:B/String.Pos.prev_le/0
+crash(shard, oom) on main:B/String.Pos.startPos_lt_iff/3
+shard 24: done; 5495 results; 21596 s

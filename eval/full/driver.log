@@ -1009,3 +1009,4 @@ crash(shard, oom) on main:B/Int.le_mul_iff_le_left/6
 crash(shard, oom) on main:B/Int.le_shiftRight_of_nonneg/17
 crash(shard, oom) on main:B/Int.le_shiftRight_of_nonneg/21
 shard 53: done; 3473 results; 63643 s
+shard 54: done; 3523 results; 64295 s

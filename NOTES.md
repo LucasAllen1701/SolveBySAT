@@ -1238,3 +1238,14 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
     again, overwriting the first part's shard spec lists. These are input lists only, and
     the originals are in git history at `342d184`. Shard counts in `STATUS.md` are
     computed from the full spec order, not from these files.
+- **Full run stopped (recorded automatically by `Test/eval_full.sh`, 2026-11-20 15:38:38).**
+  Driver exit 3: Driver ended: STOPPED: decoder bug or solver error (see results.jsonl)..
+  Last driver output:
+  ```
+  crash(shard, oom) on main:B/Nat.pos_of_lt_mul_left/1
+  crash(shard, oom) on main:B/Nat.pos_of_lt_mul_left/2
+  STOP: "decoder_bug" on main:B/Nat.pred_eq_self_iff/22: "solve_by_sat: decoder failed on a satisfiable CNF (bug).\nskeleton: fun n#0 n#1 x_0#2 x_0#3 h2@g0 a5@g0 => Ne.symm(fun a0@g2 => Nat.succ_ne_self(a0@g2), a5@g0)\nerror: node 3: the head ?a = ?b of a0@g2 does not unify with the target Nat.succ ?n = ?n"
+  STOP: shard exited with 3 (decoder bug or solver error; see results.jsonl)
+  === driver exit 3 2026-11-20 15:38:37
+  ```
+  - Goals done: 4246 of 6300 - Crashes by cause: oom 1010 

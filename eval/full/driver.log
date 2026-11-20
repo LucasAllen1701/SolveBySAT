@@ -1271,3 +1271,18 @@ crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.getKeyD_filter_key/4
 crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.get_map/64
 crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.isSome_apply_of_contains_filterMap/11
 shard 11: done; 4845 results; 11555 s
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.isSome_apply_of_contains_filterMap/32
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.isSome_apply_of_contains_filterMap/50
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.isSome_apply_of_contains_filterMap/246
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.minKey!_insert_le_self/2
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.minKey!_insert_le_self/4
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.minKeyD_insertIfNew_le_minKeyD/0
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.minKeyD_insertIfNew_le_minKeyD/2
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.toList_rcc/2
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.toList_rcc/11
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.toList_rcc/13
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.equiv_iff_toArray_eq/0
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.equiv_iff_toArray_eq/2
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.get!_filterMap'/2
+crash(shard, oom) on main:B/Std.DTreeMap.Raw.Const.get!_filterMap'/13
+shard 12: done; 4895 results; 12568 s

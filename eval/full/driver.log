@@ -1015,3 +1015,9 @@ crash(shard, oom) on main:B/Int.toArray_rco_eq_singleton_append_iff/17
 crash(shard, oom) on main:B/Int.toList_roo_eq_cons_iff/0
 crash(shard, oom) on main:B/Int.toList_roo_eq_cons_iff/2
 shard 55: done; 3573 results; 64944 s
+crash(shard, oom) on main:B/Int32.shiftLeft_or/6
+crash(shard, oom) on main:B/Int32.toInt_div_of_ne_left/9
+crash(shard, oom) on main:B/Int32.xor_right_inj/1
+crash(shard, oom) on main:B/Int32.xor_right_inj/3
+crash(shard, oom) on main:B/Int32.xor_right_inj/11
+shard 56: done; 3623 results; 65730 s

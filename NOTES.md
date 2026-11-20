@@ -1311,6 +1311,6 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
 - **Resume (owner-approved, 20 November 2026), as after the first fix.**
   - The `decoder_bug` result line of `main:B/Nat.pred_eq_self_iff/22` is removed from
     `eval/full/`, together with its 7 started and progress markers and its baselines
-    line. The removed lines stay in git history at the commit before the removal.
+    line. The removed lines stay in git history at `01a9430`.
   - Then `Test/eval_full.sh` is resumed on the commit with this fix.
   - `eval/full/header.json` stays as written at the start.

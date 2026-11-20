@@ -44224,10 +44224,3 @@
 {"N":8,"key":"main:B/Nat.pred_eq_self_iff/16"}
 {"N":9,"key":"main:B/Nat.pred_eq_self_iff/16"}
 {"N":10,"key":"main:B/Nat.pred_eq_self_iff/16"}
-{"key":"main:B/Nat.pred_eq_self_iff/22"}
-{"key":"main:B/Nat.pred_eq_self_iff/22","phase":"baselines"}
-{"key":"main:B/Nat.pred_eq_self_iff/22","phase":"sat"}
-{"N":1,"key":"main:B/Nat.pred_eq_self_iff/22"}
-{"N":2,"key":"main:B/Nat.pred_eq_self_iff/22"}
-{"N":3,"key":"main:B/Nat.pred_eq_self_iff/22"}
-{"N":4,"key":"main:B/Nat.pred_eq_self_iff/22"}

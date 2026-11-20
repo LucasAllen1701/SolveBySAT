@@ -1352,3 +1352,12 @@ crash(shard, oom) on main:B/Std.Internal.List.length_filter_eq_length_iff/11
 crash(shard, oom) on main:B/Std.Internal.List.maxKey!_eq_iff_mem_and_forall/0
 crash(shard, oom) on main:B/Std.Internal.List.maxKey?_eraseKey_eq_iff_beq_maxKey?_eq_false/0
 shard 18: done; 5195 results; 17253 s
+crash(shard, oom) on main:B/Std.Internal.List.mem_eraseKey_of_key_ne/0
+crash(shard, oom) on main:B/Std.Internal.List.mem_replaceEntry_of_true/11
+crash(shard, oom) on main:B/Std.Internal.List.mem_replaceEntry_of_true/15
+crash(shard, oom) on main:B/Std.Iter.find?_eq_match_step/42
+crash(shard, oom) on main:B/Std.Iter.step_filterMap/4
+crash(shard, oom) on main:B/Std.Iter.step_filterMap/24
+crash(shard, oom) on main:B/Std.Iter.step_filterMap/53
+crash(shard, oom) on main:B/Std.IterM.TerminationMeasures.Finite.rel_of_skip/2
+shard 19: done; 5245 results; 17968 s

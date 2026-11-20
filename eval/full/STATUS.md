@@ -2,12 +2,15 @@
 
 Updated 2026-11-21 04:30 (machine time). Specs: `/home/tom/SolveBySAT/eval/specs_full.jsonl`; P = 1; commit at start `6ef9ea207a`.
 
+**Driver ended: finished.**
+
+
 - Shards done: 126 of 126 (shard size 50)
 - Goals done: 6300 of 6300
 - decoder_bug / solver_error / harness_error: 0
 - Goals that hit a time limit (solver or loop timeout, watchdog): 78
 - Crashes by cause: oom 1375
-- Driver wall time of finished driver runs: 28.24 h
+- Driver wall time of finished driver runs: 37.46 h
 
 ## Outcomes so far
 

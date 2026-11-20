@@ -1314,3 +1314,24 @@ lemmas, a rule for parallel shards, calibration, and a push after each shard.
     line. The removed lines stay in git history at `01a9430`.
   - Then `Test/eval_full.sh` is resumed on the commit with this fix.
   - `eval/full/header.json` stays as written at the start.
+- **Full run finished (recorded automatically by `Test/eval_full.sh`, 2026-11-21 04:30:24); tables to be checked.**
+
+  | run | tier | goals | crash(oom) | goal_rejected | no_proof_le_Nmax | proved | timeout(solver) |
+  | --- | --- | --- | --- | --- | --- | --- | --- |
+  | main | A | 3000 | 819 | 272 | 1711 | 140 | 58 |
+  | main | B | 3000 | 496 | 297 | 1363 | 828 | 16 |
+  | r1b | B | 300 | 60 | 28 | 121 | 87 | 4 |
+  
+  Proved at N: 1: 598, 2: 212, 3: 123, 4: 52, 5: 35, 6: 12, 7: 12, 8: 7, 9: 4
+  
+  - Tier A (3000 goals with baselines):
+    - sbe_like: failed 1137, closed 977, heartbeats 875, max_rec_depth 11
+    - sbe_default: failed 1076, heartbeats 971, closed 943, max_rec_depth 10
+    - exact: closed_self 2655, none 182, closed_other 159, heartbeats 2, max_rec_depth 2
+    - apply: closed_self 2655, partial 182, closed_other 159, heartbeats 2, max_rec_depth 2
+  - Tier B (3000 goals with baselines):
+    - sbe_like: closed 2069, failed 476, heartbeats 447, max_rec_depth 8
+    - sbe_default: closed 1987, heartbeats 642, failed 363, max_rec_depth 8
+    - exact: closed_other 1371, none 1285, closed_self 327, max_rec_depth 9, heartbeats 8
+    - apply: closed_other 1371, partial 1285, closed_self 327, max_rec_depth 9, heartbeats 8
+

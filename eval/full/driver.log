@@ -1297,3 +1297,16 @@ crash(shard, oom) on main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0
 crash(shard, oom) on main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/2
 crash(shard, oom) on main:B/Std.DTreeMap.get!_diff_of_not_mem_left/4
 shard 13: done; 4945 results; 13062 s
+crash(shard, oom) on main:B/Std.DTreeMap.getKey?_diff_of_not_mem_right/0
+crash(shard, oom) on main:B/Std.DTreeMap.getKey?_diff_of_not_mem_right/5
+crash(shard, oom) on main:B/Std.DTreeMap.inter_equiv_empty_comm/1
+crash(shard, oom) on main:B/Std.Do.ExceptConds.imp_intro/11
+crash(shard, oom) on main:B/Std.Do.Iter.fold_filterMapWithPostcondition/1
+crash(shard, oom) on main:B/Std.Do.Iter.fold_filterMapWithPostcondition/3
+crash(shard, oom) on main:B/Std.Do.Spec.tryCatch_StateT/1
+crash(shard, oom) on main:B/Std.Do.WP.pure/0
+crash(shard, oom) on main:B/Std.Do.WP.pure/2
+crash(shard, oom) on main:B/Std.Do.WP.pure/3
+crash(shard, oom) on main:B/Std.Do.WP.pure/4
+crash(shard, oom) on main:B/Std.ExtDHashMap.Const.get?_insertIfNew/0
+shard 14: done; 4995 results; 14128 s

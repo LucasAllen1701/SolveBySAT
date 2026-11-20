@@ -1112,3 +1112,7 @@ crash(shard, oom) on main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/12
 crash(shard, oom) on main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/15
 crash(shard, oom) on main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/65
 shard 66: done; 4123 results; 75180 s
+crash(shard, oom) on main:B/Nat.gcd_eq_one_iff/3
+crash(shard, oom) on main:B/Nat.getD_toArray_rcc/0
+crash(shard, oom) on main:B/Nat.getD_toArray_rcc/2
+shard 67: done; 4173 results; 76129 s

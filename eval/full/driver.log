@@ -1361,3 +1361,15 @@ crash(shard, oom) on main:B/Std.Iter.step_filterMap/24
 crash(shard, oom) on main:B/Std.Iter.step_filterMap/53
 crash(shard, oom) on main:B/Std.IterM.TerminationMeasures.Finite.rel_of_skip/2
 shard 19: done; 5245 results; 17968 s
+crash(shard, oom) on main:B/Std.IterM.stepAsHetT_filterMapWithPostcondition/15
+crash(shard, oom) on main:B/Std.IterM.stepAsHetT_filterMapWithPostcondition/17
+crash(shard, oom) on main:B/Std.IterM.stepAsHetT_filterMapWithPostcondition/29
+crash(shard, oom) on main:B/Std.IterM.stepAsHetT_filterMapWithPostcondition/33
+crash(shard, oom) on main:B/Std.IterM.stepAsHetT_filterMapWithPostcondition/41
+crash(shard, oom) on main:B/Std.IterM.stepAsHetT_filterMapWithPostcondition/44
+crash(shard, oom) on main:B/Std.IterM.step_takeWhileWithPostcondition/25
+crash(shard, oom) on main:B/Std.Iterators.PostconditionT.run_bind/21
+crash(shard, oom) on main:B/Std.Rii.forIn'_eq_forIn'_toList/0
+crash(shard, oom) on main:B/Std.Rii.forIn'_eq_forIn'_toList/11
+crash(shard, oom) on main:B/Std.Rxi.Iterator.toArray_eq_match/19
+shard 20: done; 5295 results; 18827 s

@@ -1116,3 +1116,4 @@ crash(shard, oom) on main:B/Nat.gcd_eq_one_iff/3
 crash(shard, oom) on main:B/Nat.getD_toArray_rcc/0
 crash(shard, oom) on main:B/Nat.getD_toArray_rcc/2
 shard 67: done; 4173 results; 76129 s
+shard 68: done; 4223 results; 77009 s

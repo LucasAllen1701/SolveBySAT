@@ -1461,3 +1461,5 @@ crash(shard, oom) on main:B/Vector.zipIdx_map/20
 crash(shard, oom) on main:B/Vector.zipIdx_map/27
 crash(shard, oom) on main:B/_private.Init.Data.String.Basic.0.ByteArray.isSome_utf8Decode?go_iff/328
 shard 33: done; 5945 results; 28487 s
+crash(shard, oom) on main:B/_private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.PartialMatch.le_prefixFunction/26
+shard 34: done; 5995 results; 29241 s

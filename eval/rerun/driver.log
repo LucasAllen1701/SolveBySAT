@@ -1,0 +1,25 @@
+=== driver start 2026-11-21 13:43:56
+1128 specs, 0 done, 1128 to run
+crash(shard, oom) on main:A/Array.append_eq_replicate_iff
+crash(shard, oom) on main:A/Array.find?_map
+crash(shard, oom) on main:A/Array.getElem?_setIfInBounds
+crash(shard, oom) on main:A/Array.zip_eq_append_iff
+crash(shard, oom) on main:A/Array.zip_eq_empty_iff
+crash(shard, oom) on main:A/Array.zip_replicate
+crash(shard, oom) on main:A/Int.fdiv_nonneg_of_nonpos_of_nonpos
+crash(shard, oom) on main:A/Int.tdiv_nonneg_of_nonpos_of_nonpos
+crash(shard, oom) on main:A/Int.toList_roo_eq_cons_iff
+crash(shard, oom) on main:A/List.ext_getElem
+crash(shard, oom) on main:A/List.getElem!_inj
+crash(shard, oom) on main:A/List.getLast?_drop
+crash(shard, oom) on main:A/List.getLast_ofFn
+crash(shard, oom) on main:A/Nat.toList_rcc_eq_cons_iff
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_diff_of_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_filter'
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_filterMap'
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_insertIfNew
+crash(shard, oom) on main:A/Std.DHashMap.Const.get!_inter
+crash(shard, oom) on main:A/Std.DHashMap.Const.getD_filter'
+crash(shard, oom) on main:A/Std.DHashMap.Const.getKey_alter_self
+crash(shard, oom) on main:A/Std.DHashMap.Const.get_eq_get_get?
+shard 0: done; 50 results; 2009 s

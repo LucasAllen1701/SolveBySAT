@@ -2,7 +2,7 @@
 
 Lucas Allen · 18 November 2026
 
-**Status: 7a and 7b are done; the full 7b run finished on 21 November 2026. Next: 7d-1 (analysis of the 7b data), then 7c, then 7d-2 (section 10.6).** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
+**Status: 7a and 7b are done. 7d-1 stopped on a compiler bug (section 10.7). Next: fix it, rerun the affected goals, finish 7d-1, then 7c and 7d-2.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
 
 ## 1. Questions
 
@@ -381,3 +381,41 @@ These numbers are for orientation only, and nothing is tuned on them.
 
   Both are plotted against |H_main| and N. This tests whether groundness and decomposition dominate on real goals as they do in SPEC 7.3.
 - **E4, time.** Compare the wall times of `solve_by_sat` and `solve_by_elim` on the goals both prove.
+
+### 10.7 Type-template bug found in 7d-1 (21 November 2026)
+
+**Finding.** The E1 review found a completeness bug in the compiler.
+
+- Type templates are built from the raw inferred type (`compileType (← inferType e)`).
+- Terms are built from preprocessed expressions (SPEC 4.1).
+- The typing clause (6.8) therefore compares an unnormalised type with a normalised one, and can exclude a real proof.
+
+There are two minimal reproductions with the tactic:
+
+- `decide (¬ b = true) = decide (b = false)` with `[Decidable.decide.congr_simp, Bool.not_eq_true]`: here `Not` is not unfolded in the template.
+- `x = x` for `x : List (α × β)` with `[Eq.refl]`: here the level `succ (max u v)` is compared with `max (succ u) (succ v)`.
+
+Soundness is unaffected, because the typing clause only excludes models and every proof is kernel-checked. A static scan flags at most 1,184 non-proved and 108 proved main-run goals, almost all through universe levels.
+
+**Decisions.**
+
+1. **Fix the compiler.** Build every type template from the preprocessed inferred type. Also audit `Compile.lean` for any other inferred type that is used without preprocessing.
+2. **Add an invariant check.** Every template the compiler records must be unchanged by preprocessing. Run the check over every goal and H constant in the corpus. Any failure is a further instance of this bug.
+3. **Add regression tests** from both reproductions (`Test/M7Lean.lean`, R3), each with its minimality check. Add a mutation check showing that the tests fail with the fix reverted.
+4. **Choose the rerun set by comparing forests.**
+   - Compile all 6,300 full-run goals before and after the fix, and compare the compiled forests.
+   - If a goal's forest is identical, its CNF is identical at every N, so its result stands.
+   - Every goal whose forest changes is rerun.
+   - Run the SAT phase only. The baselines do not use the compiler, so they are kept.
+5. **Spot-check the unchanged goals.** Also rerun a seeded sample of 100 goals whose forests did not change. Their outcomes must match, except outcomes that hit a resource limit on either run.
+6. **Rerun on the test machine** with the same limits and P = 1, writing results to `eval/rerun/`.
+7. **Reporting.**
+   - In the final results, a rerun goal's `solve_by_sat` outcome replaces the original.
+   - Each result records its code version.
+   - EVAL.md gives the outcome counts both before and after the fix, so the effect of the bug is visible.
+8. **Reviews.**
+   - After the merge, redraw the 7d-1 samples with the same seeds from the updated populations.
+   - Reuse an existing review if its goal's forest did not change. Otherwise, review the goal again.
+   - The `solve_by_sat`-only review starts after the merge.
+
+**Order.** Fix and compare forests (development machine), then rerun (test machine), then merge and finish 7d-1 (development machine), then 7c, then 7d-2.

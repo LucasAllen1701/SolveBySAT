@@ -1729,3 +1729,35 @@ Implemented in `eval/merge.py`, which writes `eval/final/results.jsonl` and
   M1 19/19, M4 4/4, M5 10/10, M2/M3/M4Lean/M5Lean/M7Lean all pass, including R3). Named cases
   36/36 unchanged. Invariant check 0 failures over the whole corpus. Both forest dumps are
   deterministic.
+
+### 10.7: the rerun on the test machine
+
+- **First start, 21 November 13:43** (commit `3cd95d6`, kernel 7.3.4). Checks before the run
+  passed (`eval/rerun_check/`): `Test/run_all.sh` exit 0; named cases 36/36 equal to
+  `eval/fix_check3/named`; forest dump md5 `13ae01664c0a` (equal to the development machine).
+- **Power loss, 21 November about 15:15** (battery drained, not plugged in). Shards 0 and 1 were
+  done and pushed (100 goals); shard 2 had finished 23 goals and was running its 24th,
+  `main:A/Std.DHashMap.Raw.get?_inter_of_not_mem_left` (markers up to N = 3 or later). After
+  the outage the machine did not boot until a kernel/driver problem was worked around (kernel
+  7.3.5 with `pcie_aspm=off pci=noaer modprobe.blacklist=nouveau`; rtw88 ASPM disabled). The
+  evaluation does not use the GPU.
+- **Recovery, 22 November** (no code changed). The filesystem had zero-filled the unflushed
+  tails of three files: `results.jsonl` (146 NUL bytes), `started.jsonl` (124), `driver.log`
+  (72). The originals are kept in `eval/rerun_check/powerloss/`.
+  - The NULs were only at the ends of the files; everything before them was intact. The
+    123 complete result lines are exactly the first 123 specs of `eval/specs_rerun.jsonl` in
+    order, so no result was lost and no key is duplicated. Their outcomes so far: 74
+    crash(oom), all also crash(oom) in `eval/full/`; 49 no proof ≤ 10, of which 2 were
+    crash(oom) in the full run.
+  - The NUL tails were removed. The 5 markers of the interrupted goal were dropped, so
+    the goal runs again. *Decision:* a power loss is an external stop, not a property of the
+    goal, so it is treated as the driver treats exit 7 (markers removed, goal rerun), not as
+    the resume rule's `crash(unknown)`. The NUL line would also have made `drop_markers`
+    raise on the first crash.
+- **Checks redone after the reboot** (kernel 7.3.5, `eval/rerun_check/reboot/`): `Test/run_all.sh`
+  exit 0; named cases 36/36 equal to `eval/fix_check3/named` in outcome, N and skeleton;
+  forest dump md5 `13ae01664c0a` (peak 750 MB, 245 s). `vm.overcommit_memory` = 1; the user
+  cgroup has the memory controller and a `systemd-run --user` scope with `MemoryMax=200M`
+  killed a 600 MB allocation; Firefox closed, 6.6 GB available before the start.
+- `eval/rerun/header.json` still records the first start (kernel 7.3.4). Goals from 124 on run
+  under 7.3.5; this can change times, not the CNFs.

@@ -1591,3 +1591,141 @@ The reviews stopped under rule 4 of the 7d-1 instructions. Nothing has been fixe
   `preprocess (← inferType e)`), and how to rerun. Candidates: the 1,184 flagged no-proof,
   crash and timeout goals (and the 108 flagged proved goals, whose N can only drop), or all
   non-proved goals.
+
+### 10.7: type-template fix, forest comparison and rerun set (development machine)
+
+EVAL_PLAN §10.7 was added on 21 November 2026; it carries the owner's decisions on the bug
+above.
+
+- **Forests before the fix** (step 1). `eval_numerals forests eval/specs_full.jsonl` compiles each
+  of the 6,300 specs exactly as the harness does:
+  - goal reconstruction as in `goalOf`;
+  - `compile goal []`, then `compile goal [c]` for each H constant, then `compile goal accepted`,
+    in a `MetaM` with unlimited heartbeats;
+  - `H_main`, or `H_full` for R1b.
+
+  The forest is serialised with its derived `Repr` (`goals`, `clauses`, `varTypes`,
+  `groundTypes`, `levelVars`, every field the encoder reads), with the status and the accepted
+  and rejected constants.
+  - Two runs: byte-identical (md5 2eb4951a6b61, 124 MB; committed gzipped as
+    `eval/forests/before.jsonl.gz`, 5.2 MB).
+  - 5,703 `ok`, 597 `goal_rejected` (= 272 + 297 + 28 in the full run).
+  - The accepted constants equal `H_accepted` on all 4,328 result lines that record it; the
+    goal rejections agree on all 6,300.
+- **Fix (decision 1), `SolveBySat/Compile.lean`.** `recordNode` builds both kinds of template
+  (ground terms and non-ground positions) from `preprocess (← inferType e)` instead of the raw
+  inferred type.
+- **Audit (decision 1).** Every type template is made by `compileType`. Its five call sites:
+
+  | site | type | preprocessed? |
+  | --- | --- | --- |
+  | `recordNode`, ground terms | `inferType e` | no (**the bug**; fixed) |
+  | `recordNode`, positions | `inferType e` | no (**the bug**; fixed) |
+  | `classifyBinders` | a binder type of the preprocessed statement | yes |
+  | `compileDataClause` (`rootTy`) | the body of the preprocessed statement | yes |
+  | `Exists.intro` built-in | the domain α of the preprocessed target | yes |
+
+  The other inferred types in the compiler (`isProp`, `isProof`, `resultType`, `dataEligible`,
+  `checkBinderType`) are tested, never compiled into a template.
+- **Invariant check (decision 2).** New testing option `solve_by_sat.checkTemplates` (default
+  off, so behaviour is unchanged). When it is on, `compileType` throws an internal error if its
+  type is changed by `preprocess` (metadata ignored). `eval_numerals checktemplates` compiles
+  every corpus goal alone, with each `H_full` constant alone (a superset of `H_main`), and with
+  all accepted ones together, with the option on. It counts only errors from the check, so a
+  failure cannot pass for an ordinary rejection.
+  - With the fix: **6,000 goals, 70,630 (goal, constant) pairs, 0 failures** (248 s).
+  - With the fix reverted (mutation): 1,036 goals with a failure. Examples:
+    `Decidable ((fun xs => xs = #[] → False) xs) ⇒ Decidable (xs = #[] → False)` (β) and
+    `Type (max u_1 u_2)` (levels; the two print alike).
+- **Regression tests (decision 3), `Test/M7Lean.lean`, R3.**
+  - R3a: `decide (¬ b = true) = decide (b = false)` with
+    `[Decidable.decide.congr_simp, Bool.not_eq_true]`, 2 nodes, printed term
+    `fun b => Decidable.decide.congr_simp (b = true → False) (b = false) (Bool.not_eq_true b)`;
+    no proof at 1 node.
+  - R3b: `x = x` for `x : List (α × β)` with `[Eq.refl]`, 1 node, `fun {α} {β} x => Eq.refl x`;
+    no proof at 0 nodes.
+  - Mutation, with only the fix reverted: R3a fails with "no proof with at most 2 nodes" and
+    R3b with "no proof with at most 1 nodes". Both `#print` guards fail. The fix was then
+    restored from a copy (`compileType (← preprocess (← inferType e))` at both sites).
+- **Forests after the fix** (step 4). Same tool, two runs byte-identical (md5 13ae01664c0a).
+  - **1,028 of 6,300 forests changed.** In every case only the forest text changed; no status
+    and no accepted-constant list changed.
+
+    | run | tier | changed | proved | no proof ≤ 10 | memory crash | timeout | goal rejected |
+    | --- | --- | --- | --- | --- | --- | --- | --- |
+    | main | A | 585 of 3,000 | 7 | 297 | 278 | 3 | 0 |
+    | main | B | 401 of 3,000 | 59 | 184 | 158 | 0 | 0 |
+    | r1b | B | 42 of 300 | 4 | 15 | 23 | 0 | 0 |
+
+    (Columns after "changed" are the original outcomes of the changed goals.)
+  - **Against the `tmplscan` upper bound** (main run): 1,543 goals flagged, 986 changed, and
+    no changed goal outside the flagged set (flagged and changed 986; flagged, unchanged 557;
+    not flagged, unchanged 4,457; not flagged, changed 0). The scan over-approximates, as
+    intended: it looks at every subterm, the compiler only at the term positions it records.
+- **Rerun set (decisions 4 and 5): `eval/specs_rerun.jsonl`, 1,128 specs.** They are in the order
+  of `eval/specs_full.jsonl`, each with `baselines: false` and `rerun_set`:
+  - `changed`: the 1,028 goals above (main A 585, main B 401, R1b 42);
+  - `spot`: 100 goals whose forest did not change, `random.Random(70201).sample` of the sorted
+    keys of the 4,675 unchanged goals whose original outcome is not `goal_rejected`. That gives
+    main A 47, main B 52, R1b 1; by original outcome no proof 59, crash 26, proved 13, timeout 2.
+    *Decision:* rejected goals are left out of the spot-check population, because a rejected
+    goal never reaches the encoder and its rerun would check nothing.
+- **Projection** (test machine, P = 1, SAT phase only):
+  - **From the calibration pilot's per-stratum means: 3.4 h.** That is the pilot's time per goal
+    minus its baselines, by run × tier × |H_main| bucket, plus the pilot's 0.29 s overhead per
+    goal. Strata the pilot lacks use the tier mean (main B > 20, R1b 11–20).
+  - From these 1,128 goals' own SAT-phase times in the full run: 6.4 h. The changed goals are
+    harder than the pilot's average: 459 of the 1,028 crashed in the full run. The fix can also
+    change times either way, so 3.4–6.4 h is the honest range.
+
+### 10.7: merge rule (pre-registered before any rerun result exists)
+
+Implemented in `eval/merge.py`, which writes `eval/final/results.jsonl` and
+`eval/final/merge_report.txt`.
+
+- **Final line per key.** Every one of the 6,300 keys of `eval/specs_full.jsonl` gets exactly one
+  line, in that order.
+  - `changed` keys: the rerun line, with the original line's baseline fields put back
+    (`baselines`, `rss_before_baselines_mb`, `rss_after_baselines_mb`,
+    `hwm_after_baselines_mb`). Every `solve_by_sat` field comes from the rerun, including the
+    crash fields (`cause`, `last_N`, `phase`, `elapsed_s`). A changed key without a rerun line is
+    an error.
+  - `spot` keys: the original line stands. The rerun is the decision 5 check: the outcome must
+    be the same, and when proved the N must be the same, unless either run's outcome is a
+    resource limit (`crash`, `timeout`, `memout`). A failure stops the merge (exit 1) for
+    investigation.
+  - All other keys: the original line stands.
+  - A decoder bug in the rerun stops the rerun, as always.
+- **Code version.** Each final line gets `code_version: {source: full|rerun, commit}`.
+  - Original lines: lines 1–773 of `eval/full/results.jsonl` come from `c3a3ec8` (start commit,
+    recorded in the header as `6ef9ea2`); lines 774–4245 from `2394acf` (first decoder fix);
+    lines 4246–6300 from `f35c182` (second decoder fix). `merge.py` checks the boundaries
+    through the two recomputed decoder-bug goals, which open the second and third segments.
+  - Rerun lines: the commit in `eval/rerun/header.json`.
+- **Before/after counts for EVAL.md.**
+  - "Before" is `eval/full/results.jsonl` as recorded; "after" is `eval/final/results.jsonl`.
+  - EVAL.md gives the raw outcome table (per run and tier) and the proved-at-N table for both,
+    plus a transition table (original outcome → final outcome) for the 1,028 changed goals.
+  - Every other table, and every review population, uses "after".
+
+### 10.7: acceptance of the fix (development machine)
+
+- **`Test/run_all.sh`: exit 0** (`eval/fix_check3/run_all.log`).
+  - M0 902/902.
+  - M1 19/19: differentials 7,500 / 2,551 provable / 0 mismatches; with binders 7,500 / 2,346 / 0.
+  - M4 unit 4/4.
+  - M5 10/10: data differential 15,000 / 3,854 / 0.
+  - `Test/M2.lean`, `M3.lean`, `M4Lean.lean`, `M5Lean.lean` and `M7Lean.lean` (R1, R2 and the
+    new R3) all pass.
+- **Named cases through the harness:** 36 of 36 identical to before the fix
+  (`eval/fix_check2/named`) in outcome, N and skeleton (`eval/fix_check3/named`).
+- **SAT phase alone (decision 4).** The existing spec field `baselines: false` (used by
+  `eval/fix_check2/sat`) already does this: the shard skips the baselines and the warm-up
+  `librarySearch`, writes no `baselines.jsonl`, and records `baselines: null`. Nothing else in the
+  shard changes. Checked on 3 rerun specs (`eval/test_runs/satonly/`): no warm-up line, no
+  `baselines.jsonl`, `baselines: null`. Outcome, N and skeleton equal the full run on all three
+  (2 changed goals that were proved, 1 unchanged spot goal). No harness change was needed.
+- **Regression (end of the 10.7 fix):** `Test/run_all.sh` exit 0 with the fix (M0 902/902,
+  M1 19/19, M4 4/4, M5 10/10, M2/M3/M4Lean/M5Lean/M7Lean all pass, including R3). Named cases
+  36/36 unchanged. Invariant check 0 failures over the whole corpus. Both forest dumps are
+  deterministic.

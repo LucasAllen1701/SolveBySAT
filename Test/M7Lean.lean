@@ -133,3 +133,47 @@ def R2run (g : Name) (N : Nat) : MetaM Unit :=
 /-- error: solve_by_sat: no proof with at most 3 nodes exists in the class -/
 #guard_msgs in
 #eval R2run ``R2bGoal 3
+
+/-! ## R3 (compiler): type templates are built from preprocessed types (EVAL_PLAN §10.7)
+
+The compiler built each type template from the raw inferred type (`compileType (← inferType e)`),
+while terms are built from preprocessed expressions (SPEC §4.1). The syntactic typing clause
+(§6.8) then compared an unnormalised type with a normalised one and excluded real proofs.
+Found in the 7d-1 E1 review (`B/Std.Internal.List.Const.map_insertEntry_perm_filter_map/15`);
+see NOTES.md, "7d-1 STOPPED" and the fix record after it.
+- R3a: `Not` is unfolded in the target but was not in the template of `instDecidableNot …`;
+- R3b: universe levels: `Eq.refl` at a type in `Type (max u v)`. The target's `Eq` level is
+  normalised to `max (u+1) (v+1)`; the inferred type of `List (α × β)` was `Sort (succ (max u v))`.
+-/
+
+universe u v
+
+/-! ## R3a -/
+
+theorem R3a (b : Bool) : decide (¬ b = true) = decide (b = false) := by
+  solve_by_sat [Decidable.decide.congr_simp, Bool.not_eq_true] (nodes := 2)
+
+/-- info: theorem R3a : ∀ (b : Bool), (decide ¬b = true) = decide (b = false) :=
+fun b => Decidable.decide.congr_simp (b = true → False) (b = false) (Bool.not_eq_true b) -/
+#guard_msgs in
+#print R3a
+
+/-- error: solve_by_sat: no proof with at most 1 nodes exists in the class -/
+#guard_msgs in
+example (b : Bool) : decide (¬ b = true) = decide (b = false) := by
+  solve_by_sat [Decidable.decide.congr_simp, Bool.not_eq_true] (nodes := 1)
+
+/-! ## R3b -/
+
+theorem R3b {α : Type u} {β : Type v} (x : List (α × β)) : x = x := by
+  solve_by_sat [Eq.refl] (nodes := 1)
+
+/-- info: theorem R3b.{u, v} : ∀ {α : Type u} {β : Type v} (x : List (α × β)), x = x :=
+fun {α} {β} x => Eq.refl x -/
+#guard_msgs in
+#print R3b
+
+/-- error: solve_by_sat: no proof with at most 0 nodes exists in the class -/
+#guard_msgs in
+example {α : Type u} {β : Type v} (x : List (α × β)) : x = x := by
+  solve_by_sat [Eq.refl] (nodes := 0)

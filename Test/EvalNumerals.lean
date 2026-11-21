@@ -24,8 +24,9 @@ unsafe def importEnv (mods : Array Name) : IO Environment := do
   initSearchPath (← findSysroot)
   importModules (mods.map fun m => { module := m }) {} (loadExts := true)
 
-def runMeta {α} (env : Environment) (hb : Nat) (x : MetaM α) : IO α := do
-  let ctx : Core.Context := { fileName := "<eval>", fileMap := default, maxHeartbeats := hb * 1000 }
+def runMeta {α} (env : Environment) (hb : Nat) (x : MetaM α) (opts : Options := {}) : IO α := do
+  let ctx : Core.Context := { fileName := "<eval>", fileMap := default, maxHeartbeats := hb * 1000,
+                              options := opts }
   let (a, _) ← (x.run' {} {}).toIO ctx { env }
   return a
 
@@ -429,7 +430,61 @@ def compileSpec (spec : Json) (names : Std.HashMap String Name) (cands : Array (
     catch e => return Json.mkObj (head ++ [("status", jStr "compile_error"), accJ, rejJ, ("reason", jStr (← msg e))])
   return Json.mkObj (head ++ [("status", jStr "ok"), accJ, rejJ, ("forest", jStr (forestText C.forest))])
 
+/-- EVAL_PLAN §10.7 decision 2: compile a goal and each H constant with
+`solve_by_sat.checkTemplates` on; collect every compile error that comes from the check. -/
+def checkSpec (g : Expr) (H : Array Name) : MetaM (Array String) := do
+  let marker := "a type template is built from a type that preprocessing changes"
+  let mut fails := #[]
+  let run := fun (cs : Array Name) => do
+    try discard <| compile g cs; pure none
+    catch e => pure (some (← e.toMessageData.toString))
+  if let some m ← run #[] then
+    if (m.splitOn marker).length > 1 then fails := fails.push s!"goal: {m.take 300}"
+    return fails
+  let mut acc := #[]
+  for c in H do
+    match ← run #[c] with
+    | none => acc := acc.push c
+    | some m => if (m.splitOn marker).length > 1 then fails := fails.push s!"{c}: {(m.take 300).toString}"
+  if let some m ← run acc then
+    if (m.splitOn marker).length > 1 then fails := fails.push s!"all accepted: {(m.take 300).toString}"
+  return fails
+
 unsafe def main (args : List String) : IO UInt32 := do
+  if let ["checktemplates", outPath] := args then
+    let env ← importEnv sourceModules
+    let names := nameTable env
+    let out ← IO.FS.Handle.mk outPath .write
+    let opts : Options := ({} : Options).setBool `solve_by_sat.checkTemplates true
+    let mut nFail := 0
+    let mut nGoals := 0
+    let mut nConsts := 0
+    for tier in ["A", "B"] do
+      let recs ← readCorpus tier
+      let mut cache : Name × Array (Expr × Expr × Nat) := (.anonymous, #[])
+      for r in recs do
+        let id := (r.getObjValAs? String "id").toOption.getD ""
+        let some thm := names[(r.getObjValAs? String "thm").toOption.getD ""]? | throw (IO.userError s!"{id}")
+        if tier == "B" && cache.1 != thm then
+          cache := (thm, ← runMeta env 0 (do return (← candidates thm).1))
+        let cands := cache.2
+        let H := namesOf names r "H_full"
+        let res ← (runMeta env 0 (opts := opts) do
+          let some (.thmInfo t) := (← getEnv).find? thm | throwError "not a theorem"
+          let g ← if tier == "A" then pure t.type else do
+            let some c := cands[(r.getObjValAs? Nat "pos").toOption.getD 0]? | throwError "no candidate"
+            pure c.1
+          checkSpec g H).toBaseIO
+        nGoals := nGoals + 1
+        nConsts := nConsts + H.size
+        match res with
+        | .ok fails =>
+          if !fails.isEmpty then
+            nFail := nFail + 1
+            appendLine out (Json.mkObj [("id", jStr id), ("failures", Json.arr (fails.map jStr))])
+        | .error e => nFail := nFail + 1; appendLine out (Json.mkObj [("id", jStr id), ("error", jStr (toString e))])
+    IO.println s!"checked {nGoals} goals and {nConsts} (goal, H_full constant) pairs: {nFail} goals with a failure"
+    return (if nFail == 0 then 0 else 1)
   if let ["forests", specsPath, outPath] := args then
     let env ← importEnv sourceModules
     let names := nameTable env

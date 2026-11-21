@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 OUT=$1; MSG=${2:-"eval: $(basename "$OUT") progress"}; shift; shift || true
 RC=""; NOTES=""
 while [ $# -gt 0 ]; do case $1 in --rc) RC=$2; shift;; --with-notes) NOTES=NOTES.md;; esac; shift; done
-python3 Test/eval_status.py "$OUT" ${RC:+--rc $RC} || echo "status script failed"
+python3 Test/eval_status.py "$OUT" ${RC:+--rc $RC} ${EVAL_SPECS:+--specs $EVAL_SPECS} || echo "status script failed"
 git add -- "$OUT" $NOTES
 git commit -q -m "$MSG
 

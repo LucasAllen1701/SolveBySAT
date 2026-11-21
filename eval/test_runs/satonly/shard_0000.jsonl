@@ -1,0 +1,3 @@
+{"H": ["Eq.refl"], "H_main_size": 1, "baselines": false, "id": "B/StateT.run_map/5", "key": "main:B/StateT.run_map/5", "nctx": 9, "pos": 5, "rerun_set": "changed", "run": "main", "thm": "StateT.run_map", "tier": "B"}
+{"H": ["Std.DHashMap.Const.mem_iff_isSome_get?"], "H_main_size": 1, "baselines": false, "id": "B/Std.DHashMap.Const.get_eq_get_get?/2", "key": "main:B/Std.DHashMap.Const.get_eq_get_get?/2", "nctx": 9, "pos": 2, "rerun_set": "changed", "run": "main", "thm": "Std.DHashMap.Const.get_eq_get_get?", "tier": "B"}
+{"H": ["rfl"], "H_main_size": 1, "baselines": false, "id": "A/Fin.natAdd_mk", "key": "main:A/Fin.natAdd_mk", "rerun_set": "spot", "run": "main", "thm": "Fin.natAdd_mk", "tier": "A"}

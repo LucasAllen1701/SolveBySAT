@@ -42,6 +42,7 @@ Test/run_all.sh                    # milestones 0-6 acceptance (several minutes)
 Test/refinements.sh                # each SPEC 6.10 refinement alone (long)
 lake build eval_corpus eval_run    # milestone 7 executables
 lake build Test.EvalNamed          # loaded at run time by the named harness
+lake build eval_numerals           # 7d-1 annotations, forest dumps, invariant check
 ```
 
 ## Setting up a test machine for milestone 7
@@ -78,24 +79,49 @@ specs in NOTES.md before a full run.
 ## Where milestone 7 stands (21 November 2026)
 
 - 7a (corpus) is accepted, including the H_main amendments (EVAL_PLAN §10.2, §10.4).
-- 7b is done. The full run (`eval/full/`, 6,300 goals) ran on the test machine under the
-  decisions of EVAL_PLAN §10.5:
-  - no sample reduction;
-  - baselines before the N loop;
-  - `sbe_like` without default lemmas;
-  - P = 1.
+- 7b is done. The full run is in `eval/full/` (6,300 goals; NOTES.md, "7b: full run, final
+  record"). Two decoder bugs stopped it and were fixed (R1, R2 in `Test/M7Lean.lean`).
+- 7d-1 (analysis) **stopped on a compiler bug** (EVAL_PLAN §10.7; NOTES.md, "7d-1 STOPPED" and
+  the "10.7" sections after it). Type templates were built from the raw inferred type, without
+  the preprocessing of SPEC 4.1, so the typing clause excluded real proofs.
+  - The fix is in `SolveBySat/Compile.lean` (`recordNode`). It comes with an invariant check
+    (`solve_by_sat.checkTemplates`, 0 failures over the corpus) and regression tests R3a and R3b
+    in `Test/M7Lean.lean`.
+  - Comparing the compiled forests before and after the fix gives the rerun set: 1,028 goals
+    whose forest changed, plus 100 seeded spot-check goals whose forest did not change.
 
-  It finished on 21 November after 37.5 h of driver time. The final record is in
-  NOTES.md, "7b: full run, final record", and the per-shard status is in
-  `eval/full/STATUS.md`.
-- Two decoder bugs stopped the run and were fixed, with regression tests R1 and R2 in
-  `Test/M7Lean.lean` and reruns in `eval/fix_check/` and `eval/fix_check2/`:
-  1. premises as synthetic-opaque metavariables;
-  2. `decode` sets the tactic's unifier configuration itself.
+## The current task on the test machine: the 10.7 rerun
 
-  Earlier results were shown unaffected, except the two bug goals, which were recomputed.
-- 7c (typed scaling) and 7d (report, `EVAL.md`) have not started. **Wait for the owner**
-  before starting either.
+Run `eval/specs_rerun.jsonl` (1,128 specs, SAT phase only: each has `baselines: false`) into
+`eval/rerun/`, with the same limits and P = 1 as the full run. Projected 3.4–6.4 h.
+
+1. `git pull` on `eval-m7`. Then `lake build`, and
+   `lake build eval_corpus eval_run eval_numerals Test.EvalNamed`. `vm.overcommit_memory` must
+   still be 1.
+2. **Checks before the rerun** (stop and report if any fails):
+   - `Test/run_all.sh` exits 0 (it includes `Test/M7Lean.lean` with R3).
+   - The 36 named cases: `python3 Test/eval_driver.py run eval/specs_named.jsonl eval/rerun_check/named`
+     must equal `eval/fix_check3/named/results.jsonl` in outcome, N and skeleton for every key.
+   - Forests on this machine:
+     `Test/capped.sh .lake/build/bin/eval_numerals forests eval/specs_full.jsonl eval/rerun_check/after.jsonl`
+     must have md5 `13ae01664c0a…`, the development machine's after-fix dump. This shows that
+     this machine compiles every goal identically, so the rerun set is right here too.
+3. **Run it detached:** `setsid nohup Test/eval_rerun.sh > /dev/null 2>&1 &`.
+   - It pushes `eval/rerun/` after each shard. A stop is appended to NOTES.md and pushed.
+   - Exit 3 (decoder bug or solver error) or 4 (harness error): stop and investigate, as in the
+     full run.
+   - Resume by starting it again.
+4. **After it finishes:**
+   - check `eval/rerun/results.jsonl` against `eval/specs_rerun.jsonl` (no key missing,
+     duplicated or extra);
+   - run `python3 eval/merge.py`. The spot check of decision 5 must pass: same outcome, and when
+     proved the same N, unless either run hit a resource limit. It exits 1 on a failure;
+   - record the run in NOTES.md (machine, wall time, outcome counts, the merge report), commit,
+     push and **stop**.
+
+   The merge rule is pre-registered in NOTES.md ("10.7: merge rule"); do not change it.
+- **Do not** continue the 7d-1 reviews, regenerate `EVAL.md` or start 7c. They come after the
+  merge, on the development machine (EVAL_PLAN §10.7 decision 8).
 
 ## Running the evaluation
 

@@ -396,7 +396,61 @@ def tmplScan (H : Array Name) (g : Expr) : MetaM Json := do
     if let some h := s.hit then return Json.mkObj [("affected", toJson true), ("example", jStr h)]
   return Json.mkObj [("affected", toJson false)]
 
+/-! ## Compiled forests of the full-run specs (EVAL_PLAN §10.7 decision 4)
+
+Exactly as the harness compiles a goal (`Test/EvalRun.lean`, `runSat`): the goal alone, each H
+constant alone, then `compile goal accepted`, in a `MetaM` with unlimited heartbeats. The
+forest is serialised with its derived `Repr` (every field the encoder reads). -/
+
+def forestText (F : Forest) : String := (repr F).pretty 1000000000
+
+def compileSpec (spec : Json) (names : Std.HashMap String Name) (cands : Array (Expr × Expr × Nat)) :
+    MetaM Json := do
+  let get := fun (f : String) => (spec.getObjValAs? String f).toOption.getD ""
+  let some thm := names[get "thm"]? | throwError "unknown theorem"
+  let some (.thmInfo t) := (← getEnv).find? thm | throwError "not a theorem"
+  let H := ((spec.getObjValAs? (Array String) "H").toOption.getD #[]).filterMap (names[·]?)
+  let g ← if get "tier" == "A" then pure t.type else do
+    let pos := (spec.getObjValAs? Nat "pos").toOption.getD 0
+    let some c := cands[pos]? | throwError "no candidate {pos}"
+    pure c.1
+  let msg := fun (e : Exception) => do return (← e.toMessageData.toString)
+  let head := [("key", spec.getObjValD "key")]
+  try discard <| compile g #[]
+  catch e => return Json.mkObj (head ++ [("status", jStr "goal_rejected"), ("reason", jStr (← msg e))])
+  let mut acc := #[]
+  let mut rej := #[]
+  for c in H do
+    try discard <| compile g #[c]; acc := acc.push c
+    catch _ => rej := rej.push c
+  let accJ := ("accepted", Json.arr (acc.map (jStr ·.toString)))
+  let rejJ := ("rejected", Json.arr (rej.map (jStr ·.toString)))
+  let C ← try compile g acc
+    catch e => return Json.mkObj (head ++ [("status", jStr "compile_error"), accJ, rejJ, ("reason", jStr (← msg e))])
+  return Json.mkObj (head ++ [("status", jStr "ok"), accJ, rejJ, ("forest", jStr (forestText C.forest))])
+
 unsafe def main (args : List String) : IO UInt32 := do
+  if let ["forests", specsPath, outPath] := args then
+    let env ← importEnv sourceModules
+    let names := nameTable env
+    let specs ← ((← IO.FS.readFile specsPath).splitOn "\n").filter (· != "") |>.mapM (IO.ofExcept ∘ Json.parse)
+    let out ← IO.FS.Handle.mk outPath .write
+    let mut cache : Name × Array (Expr × Expr × Nat) := (.anonymous, #[])
+    let mut n := 0
+    for sp in specs do
+      let thmS := (sp.getObjValAs? String "thm").toOption.getD ""
+      let some thm := names[thmS]? | throw (IO.userError s!"unknown theorem {thmS}")
+      if (sp.getObjValAs? String "tier").toOption == some "B" && cache.1 != thm then
+        cache := (thm, ← runMeta env 0 (do return (← candidates thm).1))
+      let cands := cache.2
+      let r ← (runMeta env 0 (compileSpec sp names cands)).toBaseIO
+      let j := match r with
+        | .ok j => j
+        | .error e => Json.mkObj [("key", sp.getObjValD "key"), ("status", jStr "error"), ("reason", jStr (toString e))]
+      appendLine out j
+      n := n + 1
+      if n % 1000 == 0 then IO.eprintln s!"{n}"
+    return 0
   if let ["tmplscan", outPath] := args then
     let env ← importEnv sourceModules
     let names := nameTable env

@@ -77,3 +77,35 @@ crash(shard, oom) on main:A/Std.DHashMap.Raw.Equiv.inter_congr
 crash(shard, oom) on main:A/Std.DHashMap.Raw.WF.containsThenInsertIfNew
 crash(shard, oom) on main:A/Std.DHashMap.Raw.contains_inter
 === power loss 2026-11-21 ~15:15 (battery drained); NUL tails removed and the interrupted goal's markers dropped on 2026-11-22 (NOTES.md, 10.7 rerun); originals in eval/rerun_check/powerloss/
+=== driver start 2026-11-22 10:04:09
+1128 specs, 123 done, 1005 to run
+crash(shard, oom) on main:A/Std.DHashMap.Raw.get?_inter_of_not_mem_left
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getD_eq_fallback
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey?_diff_of_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey?_modify_self
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_diff
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_diff_of_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_eq_fallback
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey_insertMany_list_of_contains_eq_false
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey_insert_self
+crash(shard, oom) on main:A/Std.DHashMap.Raw.isEmpty_iff_forall_not_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.isSome_apply_of_mem_filterMap
+crash(shard, oom) on main:A/Std.DHashMap.Raw.isSome_getKey?_iff_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.size_add_size_eq_size_union_add_size_inter
+crash(shard, oom) on main:A/Std.DHashMap.Raw.size_alter
+crash(shard, oom) on main:A/Std.DHashMap.find?_toArray_eq_none_iff_contains_eq_false
+crash(shard, oom) on main:A/Std.DHashMap.find?_toList_eq_none_iff_not_mem
+crash(shard, oom) on main:A/Std.DHashMap.get!_insertIfNew
+crash(shard, oom) on main:A/Std.DHashMap.get!_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.get?_insertIfNew
+crash(shard, oom) on main:A/Std.DHashMap.getKey!_inter_of_not_mem_left
+crash(shard, oom) on main:A/Std.DHashMap.getKey_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.DHashMap.getKey_union_of_not_mem_right
+crash(shard, oom) on main:A/Std.DHashMap.insertMany_list_singleton
+crash(shard, oom) on main:A/Std.DHashMap.isEmpty_iff_forall_not_mem
+crash(shard, oom) on main:A/Std.DTreeMap.Const.equiv_iff_toList_perm
+crash(shard, oom) on main:A/Std.DTreeMap.Const.get!_diff_of_not_mem_left
+crash(shard, oom) on main:A/Std.DTreeMap.Const.get!_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Const.getD_filter'
+shard 0: done; 173 results; 2498 s

@@ -487,3 +487,5 @@ crash(shard, oom) on r1b:B/Std.DTreeMap.get!_diff_of_not_mem_left/4
 crash(shard, oom) on r1b:B/Std.DHashMap.getKey?_eq_some_getKeyD/2
 crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/9
 shard 19: done; 1123 results; 43499 s
+crash(shard, oom) on r1b:B/Std.TreeMap.Raw.getD_filter'/6
+shard 20: done; 1128 results; 43650 s

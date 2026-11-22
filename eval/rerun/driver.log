@@ -215,3 +215,12 @@ crash(shard, oom) on main:A/Std.ExtHashMap.instLawfulGetElemMem
 crash(shard, oom) on main:A/Std.ExtTreeMap.getElem!_filter'
 crash(shard, oom) on main:A/Std.ExtTreeMap.getElem!_insertMany_list_of_contains_eq_false
 shard 4: done; 373 results; 12951 s
+crash(shard, oom) on main:A/Std.ExtTreeMap.ofList_eq_empty_iff
+crash(shard, oom) on main:A/Std.HashMap.Equiv.insertMany_list
+crash(shard, oom) on main:A/Std.HashMap.Raw.all_eq_true_iff_forall_mem_getElem
+crash(shard, oom) on main:A/Std.HashMap.Raw.any_eq_false_iff_forall_mem_getElem
+crash(shard, oom) on main:A/Std.HashMap.Raw.contains_insertMany_list
+crash(shard, oom) on main:A/Std.HashMap.Raw.find?_toArray_eq_some_iff_getKey?_eq_some_and_getElem?_eq_some
+crash(shard, oom) on main:A/Std.HashMap.Raw.getElem?_insertMany_list_of_contains_eq_false
+crash(shard, oom) on main:A/Std.HashMap.Raw.getKey?_insertIfNew
+shard 5: done; 423 results; 14933 s

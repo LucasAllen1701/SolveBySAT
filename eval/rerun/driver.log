@@ -387,3 +387,11 @@ crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.minKeyD_modify_eq_m
 crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.minKeyD_modify_eq_minKeyD/7
 crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.toArray_map/2
 shard 13: done; 823 results; 31815 s
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Equiv.getKeyGE_eq/20
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Equiv.getKeyGE_eq/36
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left/2
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left/11
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.getKeyD_filter_key/4
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.get_map/64
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.isSome_apply_of_contains_filterMap/11
+shard 14: done; 873 results; 33270 s

@@ -234,3 +234,24 @@ crash(shard, oom) on main:A/Std.HashMap.mem_iff_isSome_getElem?
 crash(shard, oom) on main:A/Std.HashMap.mem_insert
 crash(shard, oom) on main:A/Std.HashSet.mem_erase
 shard 6: done; 473 results; 16817 s
+crash(shard, oom) on main:A/Std.Internal.List.Const.getValue?_map
+crash(shard, oom) on main:A/Std.Internal.List.Const.map_insertEntry_perm_filter_map
+crash(shard, oom) on main:A/Std.Internal.List.Const.minKey!_modifyKey
+crash(shard, oom) on main:A/Std.Internal.List.Const.minKeyD_modifyKey_eq_minKeyD
+crash(shard, oom) on main:A/Std.Internal.List.List.getValue?_filter_containsKey
+crash(shard, oom) on main:A/Std.Internal.List.getEntry?_insertList_of_contains_left_eq_false
+crash(shard, oom) on main:A/Std.Internal.List.getKey_insertEntry
+crash(shard, oom) on main:A/Std.Internal.List.insertEntry_append_of_not_contains_right
+crash(shard, oom) on main:A/Std.Internal.List.length_insertList
+crash(shard, oom) on main:A/Std.Internal.List.maxKey?_eraseKey_eq_iff_beq_maxKey?_eq_false
+crash(shard, oom) on main:A/Std.Internal.List.mem_eraseKey_of_key_ne
+crash(shard, oom) on main:A/Std.Internal.List.mem_map_toProd_iff_getValue?_eq_some
+crash(shard, oom) on main:A/Std.Internal.List.mem_replaceEntry_of_true
+crash(shard, oom) on main:A/Std.Internal.List.minEntry?_eq_some_iff
+crash(shard, oom) on main:A/Std.Internal.List.minKey?_eraseKey_eq_of_beq_minKey?_eq_false
+crash(shard, oom) on main:A/Std.Iter.isPlausibleIndirectOutput_of_mem_toList
+crash(shard, oom) on main:A/Std.IterM.length_map
+crash(shard, oom) on main:A/Std.IterM.step_dropWhileM
+crash(shard, oom) on main:A/Std.IterM.step_flatMap
+crash(shard, oom) on main:A/Std.IterM.toListRev_filterMapM_map
+shard 7: done; 523 results; 18883 s

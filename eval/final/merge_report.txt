@@ -1,0 +1,6 @@
+final lines: 6300 (specs 6300)
+changed: 1028, spot: 100
+spot check: 100 pass, 0 fail
+spot main:A/Lean.Order.Option.monotone_bindM: crash → no_proof_le_Nmax (a resource limit, allowed)
+spot main:B/BitVec.signExtend_neg_of_ne_intMin/21: crash → timeout (a resource limit, allowed)
+spot main:B/String.Pos.startPos_lt_iff/3: crash → no_proof_le_Nmax (a resource limit, allowed)

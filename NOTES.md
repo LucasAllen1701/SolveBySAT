@@ -1773,3 +1773,42 @@ Implemented in `eval/merge.py`, which writes `eval/final/results.jsonl` and
   
   
 
+- **Rerun: final record (test machine, 22 November).**
+  - Machine: Intel i7-10510U (4 cores, 8 threads), 7,735 MiB RAM, 2 GiB swap, Arch Linux,
+    systemd 262, `vm.overcommit_memory` = 1; cap 2,500 MB, P = 1, shard size 50, watchdog
+    300 s, N_max 10, solver 20 s, loop 120 s (`eval/rerun/header.json`). Kernel 7.3.4 for
+    goals 1–123, 7.3.5 after the outage.
+  - Wall time: first driver 21 November 13:43:56 to the power loss at about 15:15 (about 1.5 h,
+    123 goals); second driver 22 November 10:04:09 to 22:11:43 (12.13 h, 1,005 goals),
+    exit 0. About 13.7 h in all, against the 3.4–6.4 h projection: 463 of 1,128 goals crashed
+    on memory, and each memory crash costs a shard restart (Lean import) as well as the
+    goal's time.
+  - Completeness: 1,128 result lines for the 1,128 specs of `eval/specs_rerun.jsonl`; no key
+    missing, duplicated or extra. No decoder_bug, solver_error or harness_error; every crash is
+    `oom` (463), none `unknown`; 7 solver timeouts.
+  - Outcomes (from `eval/rerun/STATUS.md`):
+
+    | run | tier | goals | crash(oom) | no proof ≤ 10 | proved | timeout(solver) |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | main | A | 632 | 279 | 339 | 9 | 5 |
+    | main | B | 453 | 162 | 211 | 78 | 2 |
+    | r1b | B | 43 | 22 | 16 | 5 | 0 |
+
+    Proved at N: 1: 46, 2: 19, 3: 15, 4: 5, 5: 6, 8: 1.
+  - **Spot check (decision 5): passes.** 100 spot goals, original outcome (`eval/full/`) →
+    rerun outcome: no proof → no proof 59; proved → proved 13 (same N in all 13);
+    crash → crash 23; timeout → timeout 2; crash → no proof 2
+    (`main:A/Lean.Order.Option.monotone_bindM`, `main:B/String.Pos.startPos_lt_iff/3`);
+    crash → timeout 1 (`main:B/BitVec.signExtend_neg_of_ne_intMin/21`). The three differences
+    all involve a resource limit on the original run, so they are allowed. No failures.
+  - Changed goals (1,028), original → rerun, for information (the merge and EVAL.md tables are
+    done on the development machine): crash → crash 438; crash → no proof 19;
+    crash → proved 2; no proof → no proof 486; no proof → proved 7; no proof → crash 2;
+    no proof → timeout 1; proved → proved 70 (same N in all 70); timeout → timeout 3. No proof
+    was lost. The 9 new proofs are all tier B, 8 at N = 1 and 1 at N = 2.
+  - Not done here, as instructed: `eval/merge.py` was not run, `eval/full/` and EVAL.md are
+    untouched, the 7d-1 reviews and 7c were not started.
+- **Regression (end of the 10.7 rerun):** before the restart, `Test/run_all.sh` exit 0, named
+  cases 36/36 equal to `eval/fix_check3/named`, forest dump md5 `13ae01664c0a` (equal to the
+  development machine); the rerun ended with driver exit 0, 1,128/1,128 results, and the
+  decision 5 spot check passing (0 failures).

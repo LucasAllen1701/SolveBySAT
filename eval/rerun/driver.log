@@ -195,3 +195,23 @@ crash(shard, oom) on main:A/Std.DTreeMap.inter_equiv_empty_comm
 crash(shard, oom) on main:A/Std.DTreeMap.mem_map
 crash(shard, oom) on main:A/Std.Do.Spec.IterM.forIn_filter
 shard 3: done; 323 results; 10511 s
+crash(shard, oom) on main:A/Std.Do.Spec.forIn'_cnfClause
+crash(shard, oom) on main:A/Std.ExtDHashMap.Const.get?_insertIfNew
+crash(shard, oom) on main:A/Std.ExtDHashMap.Const.get?_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.ExtDHashMap.get!_insertIfNew
+crash(shard, oom) on main:A/Std.ExtDHashMap.getKey?_insertMany_list_of_contains_eq_false
+crash(shard, oom) on main:A/Std.ExtDTreeMap.Const.getD_filter
+crash(shard, oom) on main:A/Std.ExtDTreeMap.Const.size_insertMany_list_le
+crash(shard, oom) on main:A/Std.ExtDTreeMap.forIn_eq_forIn_toList
+crash(shard, oom) on main:A/Std.ExtDTreeMap.getD_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.ExtDTreeMap.getKey!_maxKey!
+crash(shard, oom) on main:A/Std.ExtDTreeMap.getKey?_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.ExtDTreeMap.getKeyD_minKeyD
+crash(shard, oom) on main:A/Std.ExtDTreeMap.minKey_insertIfNew_le_minKey
+crash(shard, oom) on main:A/Std.ExtHashMap.getElem!_filter
+crash(shard, oom) on main:A/Std.ExtHashMap.getElem?_insertIfNew
+crash(shard, oom) on main:A/Std.ExtHashMap.insertMany_list_eq_foldl
+crash(shard, oom) on main:A/Std.ExtHashMap.instLawfulGetElemMem
+crash(shard, oom) on main:A/Std.ExtTreeMap.getElem!_filter'
+crash(shard, oom) on main:A/Std.ExtTreeMap.getElem!_insertMany_list_of_contains_eq_false
+shard 4: done; 373 results; 12951 s

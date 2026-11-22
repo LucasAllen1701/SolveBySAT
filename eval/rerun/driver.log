@@ -271,3 +271,20 @@ crash(shard, oom) on main:A/Std.TreeMap.getElem_eq_getElem!
 crash(shard, oom) on main:A/Std.TreeMap.inter_equiv_empty_comm
 crash(shard, oom) on main:A/Std.TreeMap.isEmpty_filterMap_iff
 shard 8: done; 573 results; 21106 s
+crash(shard, oom) on main:A/Std.TreeMap.keys_filter
+crash(shard, oom) on main:A/Std.TreeMap.maxKeyD_eq_iff_getKey?_eq_self_and_forall
+crash(shard, oom) on main:A/Std.TreeMap.mem_alter_self
+crash(shard, oom) on main:A/Std.TreeMap.mem_iff_contains
+crash(shard, oom) on main:A/Std.TreeMap.mem_map
+crash(shard, oom) on main:A/Std.TreeMap.mem_modify
+crash(shard, oom) on main:A/Std.TreeMap.mem_toList_iff_getElem?_eq_some
+crash(shard, oom) on main:A/Std.TreeSet.Equiv.eraseMany_list
+crash(shard, oom) on main:A/Std.TreeSet.isEmpty_diff_iff
+crash(shard, oom) on main:A/Std.WP.Spec.IterM.forIn_map
+crash(shard, oom) on main:A/Std.WP.Spec.forInPure
+crash(shard, oom) on main:A/Std.WP.Spec.tryCatch_StateT
+crash(shard, oom) on main:A/Std.WP.WPMonad.le_wp_monadLift_OptionT_apply
+crash(shard, oom) on main:A/String.Slice.Model.map_get_positionsFrom_of_splits
+crash(shard, oom) on main:A/USize.toUInt8_shiftLeft
+crash(shard, oom) on main:A/Vector.flatten_push
+shard 9: done; 623 results; 23170 s

@@ -109,3 +109,35 @@ crash(shard, oom) on main:A/Std.DTreeMap.Const.get!_diff_of_not_mem_left
 crash(shard, oom) on main:A/Std.DTreeMap.Const.get!_inter_of_not_mem_right
 crash(shard, oom) on main:A/Std.DTreeMap.Const.getD_filter'
 shard 0: done; 173 results; 2498 s
+crash(shard, oom) on main:A/Std.DTreeMap.Const.getD_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Const.maxKey?_alter_eq_self
+crash(shard, oom) on main:A/Std.DTreeMap.Const.mem_ofList
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Const.toList_roo
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.get!_diff_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.get!_filterMap_of_getKey?_eq_some
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.get?_diff_of_contains_eq_false_right
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.get_map'
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.maxKey_modify
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.mem_iff_isSome_get?
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.mem_toList_iff_getKey?_eq_some_and_get?_eq_some
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.minKeyD_alter!_eq_self
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.minKeyD_modify_eq_minKeyD
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.constMaxEntryD_eq
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.constMinEntry?_eq
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.getKeyGE_eq
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.getKeyLE_eq
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Equiv.inter_right
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.applyPartition_eq_apply_toListModel'
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.containsThenInsertIfNew!_fst_eq_containsThenInsertIfNew_fst
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.containsThenInsertIfNew_snd
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.contains_alter
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.get?_insertIfNew
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.get?_union_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getD_diff_of_contains_right
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getD_inter_of_contains_eq_false_right
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getEntryGE?_eq_find?
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_right
+shard 1: done; 223 results; 5386 s

@@ -75,6 +75,16 @@ structure Spec where
   opts : Array String := #[]
   baselines : Bool
   expect : String := ""
+  /-- 7c (EVAL_PLAN §4.2, §10.9 decision 6): the N loop's bound. Absent: `nMax`. -/
+  nmax : Nat := nMax
+  /-- 7c: the distractors appended to `H` (decision 6), watched in the decoded proof. -/
+  distractors : Array Name := #[]
+  /-- 7c: the goal's proved N and outcome in `eval/final/` (decision 9's stop rules).
+  `none` for every spec that is not a 4.2 run. -/
+  origN : Option Nat := none
+  origOutcome : String := ""
+  k : Nat := 0
+  mode : String := ""
 
 def parseSpec (names : Std.HashMap String Name) (j : Json) : Except String Spec := do
   let name := fun (s : String) => match names[s]? with
@@ -88,7 +98,13 @@ def parseSpec (names : Std.HashMap String Name) (j : Json) : Except String Spec 
            nctx := (j.getObjValAs? Nat "nctx").toOption.getD 0,
            H, opts := (j.getObjValAs? (Array String) "opts").toOption.getD #[],
            baselines := (j.getObjValAs? Bool "baselines").toOption.getD false,
-           expect := (j.getObjValAs? String "expect").toOption.getD "" }
+           expect := (j.getObjValAs? String "expect").toOption.getD "",
+           nmax := (j.getObjValAs? Nat "nmax").toOption.getD nMax,
+           distractors := ← ((j.getObjValAs? (Array String) "distractors").toOption.getD #[]).mapM name,
+           origN := (j.getObjValAs? Nat "orig_N").toOption,
+           origOutcome := (j.getObjValAs? String "orig_outcome").toOption.getD "",
+           k := (j.getObjValAs? Nat "k").toOption.getD 0,
+           mode := (j.getObjValAs? String "mode").toOption.getD "" }
 
 /-- The closed goal type and its binder count (the Tier B context). -/
 def goalOf (s : Spec) : MetaM (Expr × Nat) := do
@@ -159,7 +175,8 @@ def kernelCheck (goal t : Expr) : MetaM (Option String) := do
   | .error e => return some (← (e.toMessageData {}).toString)
 
 /-- Returns the result object and whether it is a decoder bug. -/
-def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat → IO Unit) :
+def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat → IO Unit)
+    (nmax : Nat := nMax) (watch : Array Name := #[]) :
     MetaM (Json × Bool) := do
   let t0 ← IO.monoMsNow
   -- 1. the goal
@@ -178,7 +195,7 @@ def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat 
   let eopts : EncodeOptions := { staticTyping := !opts.contains "nostatic" }
   -- 3. N = 1 … Nmax
   let mut log := #[]
-  for N in [1:nMax+1] do
+  for N in [1:nmax+1] do
     let elapsed ← msSince t0
     if elapsed ≥ loopSeconds * 1000 then
       return (Json.mkObj (base ++ [("outcome", jStr "timeout"), ("N", toJson (N)), ("timeout_kind", jStr "loop"),
@@ -211,7 +228,7 @@ def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat 
     | .unsat =>
       log := log.push (row "unsat")
       -- §3.1 step 4: if every N is UNSAT, the statistics at the final N (= Nmax)
-      if N == nMax then
+      if N == nmax then
         return (Json.mkObj (base ++ [("outcome", jStr "no_proof_le_Nmax"), ("N", toJson N),
           ("vars", toJson E.cnf.nVars), ("clauses", toJson nCl),
           ("families", Json.mkObj (E.cnf.familyCounts.toList.map fun (f, k) => (f, Json.num k))),
@@ -243,8 +260,11 @@ def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat 
         let sk := match readSkeleton C.forest E.vars model with
           | .ok sk => renderSkeleton C.forest sk 0
           | .error e => s!"(skeleton: {e})"
-        return (final "proved" [("skeleton", jStr sk), ("decode_ms", toJson (decMs)), ("loop_ms", toJson (← msSince t0))], false)
-  return (Json.mkObj (base ++ [("outcome", jStr "no_proof_le_Nmax"), ("N", toJson (nMax)), ("per_N", Json.arr log),
+        -- 7c: which watched constants (the distractors of a 4.2 run) the proof uses
+        let used := if watch.isEmpty then [] else
+          [("distractors_used", toJson ((watch.filter t.getUsedConstants.contains).map (·.toString)))]
+        return (final "proved" ([("skeleton", jStr sk), ("decode_ms", toJson (decMs)), ("loop_ms", toJson (← msSince t0))] ++ used), false)
+  return (Json.mkObj (base ++ [("outcome", jStr "no_proof_le_Nmax"), ("N", toJson (nmax)), ("per_N", Json.arr log),
     ("loop_ms", toJson (← msSince t0))]), false)
 
 /-! ## Baselines (§3.2, §10.3, §10.4) -/
@@ -370,20 +390,46 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
         let (goal, _) ← goalOf s
         let progress := fun (N : Nat) =>
           appendLine started (Json.mkObj [("key", jStr s.key), ("N", toJson N)]).compress
-        runSat goal s.H s.opts progress
+        runSat goal s.H s.opts progress s.nmax s.distractors
       return (sat, Json.mkObj blInfo, bug)).toBaseIO
     let (rss, hwm) ← memMB
     let head := [("key", jStr s.key), ("id", jStr s.id), ("run", jStr s.run), ("tier", jStr s.tier),
                  ("H_size", Json.num s.H.size), ("expect", jStr s.expect)]
     match r with
     | .ok (sat, bl, bug) =>
-      let j := (Json.mkObj head).mergeObj sat |>.mergeObj bl |>.mergeObj
-        (Json.mkObj [("total_ms", Json.num (← msSince t0)),
-                     ("rss_mb", Json.num rss), ("hwm_mb", Json.num hwm)])
+      -- 7c, 4.2 runs only (EVAL_PLAN §10.9 decisions 6 and 9): the new record fields and the
+      -- stop rules. Every other spec has `origN = none` and is unchanged.
+      let outcome := (sat.getObjValAs? String "outcome").toOption.getD ""
+      let nFound := (sat.getObjValAs? Nat "N").toOption
+      let (scal, stop) := match s.origN with
+        | none => ((Json.mkObj []), none)
+        | some n0 =>
+          let proved := outcome == "proved"
+          let limits := ["timeout", "memout"]
+          let f := Json.mkObj [("k", toJson s.k), ("mode", jStr s.mode), ("nmax", toJson s.nmax),
+            ("orig_N", toJson n0), ("orig_outcome", jStr s.origOutcome),
+            ("distractors", toJson (s.distractors.map (·.toString))),
+            ("below_original", toJson (proved && nFound.getD n0 < n0)),
+            ("feasible", toJson (proved && nFound.getD (n0 + 1) ≤ n0))]
+          -- monotonicity (4.2): within every limit, there must be a proof at or below n0
+          let stop1 := if !proved && !limits.contains outcome && !bug then
+              some s!"monotonicity violation: {outcome} within the limits, original N {n0}" else none
+          -- k = 0 builds the CNFs of the final results: same outcome and N (unless a limit)
+          let stop2 := if s.k == 0 && !limits.contains outcome && !limits.contains s.origOutcome &&
+              (outcome != s.origOutcome || (proved && nFound != some n0)) then
+              some s!"k = 0 differs from eval/final/: {outcome} N {nFound} against {s.origOutcome} N {n0}" else none
+          (f, stop1 <|> stop2)
+      let j := (Json.mkObj head).mergeObj sat |>.mergeObj bl |>.mergeObj scal |>.mergeObj
+        (Json.mkObj ([("total_ms", Json.num (← msSince t0)),
+                     ("rss_mb", Json.num rss), ("hwm_mb", Json.num hwm)] ++
+                     (match stop with | some m => [("stop", jStr m)] | none => [])))
       appendLine results j.compress
       if bug then
         IO.eprintln s!"STOP: {(sat.getObjValD "outcome").compress} on {s.key}: {(sat.getObjValD "reason").compress}"
         return 3
+      if let some m := stop then
+        IO.eprintln s!"STOP (EVAL_PLAN 10.9 decision 9): {m} on {s.key}"
+        return 6
     | .error e =>
       appendLine results (Json.mkObj (head ++ [("outcome", jStr "harness_error"),
         ("reason", jStr (toString e))])).compress
@@ -391,9 +437,38 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
       return 4
   return 0
 
+/-- 7c (EVAL_PLAN §10.9 decision 7): the `countOnly` sizes per family of each spec at its
+`nmax` (the goal's original N), compiled exactly as `runSat` compiles. Nothing is solved.
+A marker goes to `started` before each spec, so a wrapper can tell which spec a crash hit. -/
+unsafe def runSizes (specsPath results started : System.FilePath) : IO UInt32 := do
+  let lines := (← IO.FS.readFile specsPath).splitOn "\n" |>.filter (· != "")
+  let js ← lines.mapM fun l => IO.ofExcept (Json.parse l)
+  let env ← importEnv #[`Init, `Std]
+  let names := nameTable env
+  let specs ← js.mapM fun j => IO.ofExcept (parseSpec names j)
+  let done ← readKeys results
+  for s in specs.filter (!done.contains ·.key) do
+    appendLine started (Json.mkObj [("key", s.key)]).compress
+    let t0 ← IO.monoMsNow
+    let r ← runMeta env do
+      let (goal, _) ← goalOf s
+      let mut acc := #[]
+      for c in s.H do
+        try discard <| compile goal #[c]; acc := acc.push c catch _ => pure ()
+      let C ← compile goal acc
+      let E := encode C.forest s.nmax { countOnly := true }
+      return Json.mkObj [("N", toJson s.nmax), ("vars", toJson E.cnf.nVars), ("clauses", toJson E.cnf.numClauses),
+        ("families", Json.mkObj (E.cnf.familyCounts.toList.map fun (f, k) => (f, Json.num k))),
+        ("H_accepted", toJson acc.size)]
+    let (_, hwm) ← memMB
+    appendLine results ((Json.mkObj [("key", jStr s.key), ("status", jStr "ok")]).mergeObj r |>.mergeObj
+      (Json.mkObj [("ms", toJson (← msSince t0)), ("hwm_mb", toJson hwm)])).compress
+  return 0
+
 unsafe def main (args : List String) : IO UInt32 := do
   match args with
   | ["run", specs, results, started, warmup] => runShard specs results started warmup
+  | ["sizes", specs, results, started] => runSizes specs results started
   | "verify-removed" :: cs =>
     let env ← importEnv #[`Init, `Std]
     let names := nameTable env

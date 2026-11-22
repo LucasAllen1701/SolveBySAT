@@ -211,7 +211,9 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MI
     commit, dirty = git_commit()
     hdr = {"specs": os.path.abspath(specs_path), "n_specs": len(specs), "toolchain": "4.36.0",
            "git_commit": commit, "git_dirty": dirty, "shard_size": shard_size, "cap_mb": cap_mb,
-           "watchdog_s": watchdog, "nmax": 10, "solver_s": 20, "loop_s": 120,
+           "watchdog_s": watchdog,
+           "nmax": "per spec (field nmax: the goal's N in eval/final/, EVAL_PLAN 10.9 decision 6)" if any("nmax" in s for s in specs) else 10,
+           "solver_s": 20, "loop_s": 120,
            "baseline_heartbeats": 200000, "sbe_max_depth": 10,
            "seeds": {"r1b": SEED_R1B, "pilot_A": SEED_PILOT_A, "pilot_B": SEED_PILOT_B},
            "parallel_shards": PARALLEL_SHARDS, "machine": machine(), "min_free_mb": min_free,
@@ -303,8 +305,10 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MI
                     return 7
                 if rc == 0:
                     continue
-                if rc in (3, 4):
-                    print(f"STOP: shard exited with {rc} ({'decoder bug or solver error' if rc == 3 else 'harness error'}; see results.jsonl)", flush=True)
+                if rc in (3, 4, 6):
+                    what = {3: "decoder bug or solver error", 4: "harness error",
+                            6: "a 4.2 stop rule, EVAL_PLAN 10.9 decision 9"}[rc]
+                    print(f"STOP: shard exited with {rc} ({what}; see results.jsonl)", flush=True)
                     return rc
                 fix_trailing(results)
                 done = {r["key"] for r in load(results)}

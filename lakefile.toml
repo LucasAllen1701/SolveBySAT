@@ -52,3 +52,22 @@ supportInterpreter = true
 name = "eval_numerals"
 root = "Test.EvalNumerals"
 supportInterpreter = true
+
+[[lean_lib]]
+name = "SynthLib"
+roots = ["Test.Synth", "Test.BenchForests"]
+
+[[lean_exe]]
+name = "test_countonly"
+root = "Test.CountOnly"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_scaling"
+root = "Test.EvalScaling"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_pool"
+root = "Test.EvalPool"
+supportInterpreter = true

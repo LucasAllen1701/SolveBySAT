@@ -2,7 +2,7 @@
 
 Lucas Allen · 18 November 2026
 
-**Status: 7a and 7b are done. 7d-1 stopped on a compiler bug (section 10.7). Next: fix it, rerun the affected goals, finish 7d-1, then 7c and 7d-2.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
+**Status: 7a and 7b are done, and the compiler bug of section 10.7 is fixed and its goals rerun (section 10.8). Next: merge the rerun and finish 7d-1, then 7c and 7d-2.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
 
 ## 1. Questions
 
@@ -419,3 +419,32 @@ Soundness is unaffected, because the typing clause only excludes models and ever
    - The `solve_by_sat`-only review starts after the merge.
 
 **Order.** Fix and compare forests (development machine), then rerun (test machine), then merge and finish 7d-1 (development machine), then 7c, then 7d-2.
+
+### 10.8 After the 10.7 rerun (23 November 2026)
+
+**Run record.**
+
+- The 1,128 goals of the rerun set (1,028 whose forest changed, 100 spot-check goals) were run on the test machine, SAT phase only, finishing on 22 November. There were no decoder bugs, solver errors or harness errors.
+- A power loss interrupted the run once. No result was lost or duplicated; NOTES.md records the recovery.
+- The spot check of decision 5 passed, 100 of 100. The three differences all had a memory crash on the original run.
+- The run took about 13.7 hours, against a projection of 3.4 to 6.4 hours. 463 of the 1,128 goals crashed on memory, and each crash also costs a shard restart.
+
+**Effect of the fix.** These counts are from a preview of the pre-registered merge; `eval/merge.py` gives the final ones.
+
+| Run | Proved, before → after | Memory crash, before → after |
+| --- | --- | --- |
+| Tier A | 140 → 140 | 819 → 807 |
+| Tier B | 828 → 836 | 496 → 490 |
+| R1b | 87 → 88 | 60 → 59 |
+
+- There are 9 new proofs, all in Tier B: 8 at N = 1 and 1 at N = 2. They include the 4 goals that the 7d-1 reviews attributed to this bug. No proof was lost, and every goal proved before keeps its N.
+- 438 of the 1,028 changed goals crashed on memory both before and after the fix, so the fix's effect on them is not measured.
+
+**Decisions.**
+
+1. **Merge** by the rule pre-registered in NOTES.md ("10.7: merge rule").
+2. **Redraw the review samples exactly as decision 8 of 10.7 says.** The samples change much more than their populations, because `random.Random(seed).sample` is not stable when a population's membership changes, even at the same size. In the preview, the redrawn samples keep 11 of the 50 unexplained goals, 69 of the 100 R7 goals and 17 of the 50 E1 goals. Reviews of goals that leave a sample are kept, marked as superseded, and not counted in any table.
+3. **EVAL.md states the crashed-twice caveat** next to the before and after tables.
+4. **Samples not yet drawn** (the 50 goals of 4.2 in 7c, and any later sample) are drawn so that small changes to the population change them little: rank the keys by a hash of the seed and the key, and take the first n. This does not affect the 7d-1 samples, which are already pre-registered.
+
+**Order.** Merge and finish 7d-1 (development machine), then 7c, then 7d-2.

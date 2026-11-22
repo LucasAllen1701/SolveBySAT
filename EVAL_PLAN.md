@@ -2,7 +2,7 @@
 
 Lucas Allen · 18 November 2026
 
-**Status: 7a and 7b are done, and the compiler bug of section 10.7 is fixed and its goals rerun (section 10.8). Next: merge the rerun and finish 7d-1, then 7c and 7d-2.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
+**Status: 7a, 7b and 7d-1 are done, including the fix and rerun of section 10.7. Next: 7c (section 10.9), then 7d-2.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
 
 ## 1. Questions
 
@@ -448,3 +448,40 @@ Soundness is unaffected, because the typing clause only excludes models and ever
 4. **Samples not yet drawn** (the 50 goals of 4.2 in 7c, and any later sample) are drawn so that small changes to the population change them little: rank the keys by a hash of the seed and the key, and take the first n. This does not affect the 7d-1 samples, which are already pre-registered.
 
 **Order.** Merge and finish 7d-1 (development machine), then 7c, then 7d-2.
+
+### 10.9 Before 7c (23 November 2026)
+
+**Findings from 7d-1 for the 7d-2 reading.** NOTES.md ("7d-1: merge and reviews") has the evidence.
+
+- **The baseline's step budget.** Like-for-like `solve_by_elim` spends one step on every `apply`, `intro` and `constructor`, and `maxDepth := 10` is one budget for the whole search, so at most 9 steps succeed. The harness introduces a Tier B goal's context first, but a Tier A goal pays a step for every binder of its statement. 11 of the 12 `solve_by_sat`-only goals lost to depth are Tier A. This is a property of the pre-registered baseline, not a change to it.
+- **Projections.** 63 of the 89 `solve_by_sat`-only proofs use an `↔` or `∧` projection. These are built-in rules of `solve_by_sat`, and like-for-like `solve_by_elim` cannot build them from H_main. Of the other 26, `solve_by_elim` loses 12 to its step budget, 9 to heartbeats, 3 to backtracking order, 1 to metavariables shared between subgoals and 1 to a built witness.
+- **Where `solve_by_elim` wins.** Of the 50 E1 goals, 33 first need definitional unfolding or instance unification (25 of them unfolding a definition), and 17 need a constant the compiler rejects (`propext` 7, `congrArg` 6). None fails on proof size.
+
+**Decisions for 4.1 (synthetic).**
+
+1. **`countOnly`.** It counts variables and clauses per family without storing clauses. It must equal a full encode, in variables and in every family's clause count, on every instance of the SPEC 7.3 table, with all refinements on and with all off. It must also equal a full encode on every synthetic cell where a full encode fits under the 2.5 GB cap.
+2. **Distractors** are `axiom` declarations in a test-only Lean file, never in the library. The family shapes are those of the table in 4.1. In T2, each carrier `Tᵢ` is a distinct structure with its own `LE` instance.
+3. **The grid** is that of 4.1: 4 families, k ∈ {0, 4, 8, 16, 32}, N ∈ {5, 8, 12} and the five configurations, all counted with `countOnly`. Nothing is solved. Results go to `eval/scaling_synthetic.jsonl`.
+
+**Decisions for 4.2 (real distractors).** These are fixed before any 4.2 run.
+
+1. **Goals.** The population is the main-run goals proved in `eval/final/` (976; R1b is excluded). Split them by their proved N into four buckets: 1, 2, 3–4, and 5 or more (553, 193, 162 and 68 goals). Take 12, 12, 13 and 13 goals, ranking each bucket's keys by a hash of seed 70301 and the key (10.8 decision 4), with the two tiers pooled.
+2. **Pool.** The 48,012 Tier A source theorems (the filters of 2.1, before sampling) that the compiler accepts as an H constant. For constants that also appear in `eval/corpus_hcompile.jsonl`, the verdicts must agree.
+3. **Exclusions per goal.** Leave out its H_main constants, and its own declaration (Tier A) or its source theorem (Tier B).
+4. **Modes.**
+   - **random:** the whole pool after the exclusions;
+   - **near:** the pool members that have a clause head, on any split path and including opaque heads, whose predicate symbol is in S. S holds the predicate symbols of the goal's root target and of the heads of the clauses compiled from H_main. The eigenvariable symbol `app` does not count.
+5. **Nested selection.** For each goal and mode, rank the candidates by a hash of the seed (70302 random, 70303 near), the goal key and the constant name. The k distractors are the first k, so each set contains the smaller ones. If there are fewer than k candidates, use all of them and record the actual k.
+6. **Runs.** For each goal: k = 0 once, and k ∈ {2, 4, 8, 16, 32} for each mode, so 11 runs per goal and 550 in all.
+   - H is H_main followed by the distractors in rank order.
+   - The N loop runs from 1 up to the goal's proved N, with the full run's limits: solver 20 s per call, N loop 120 s, watchdog 300 s, 2.5 GB cap, P = 1.
+   - Record the outcome, the N found, whether it is below the original N, whether the proof uses a distractor, and the per-N record the full run keeps.
+7. **Sizes.** For every run, also record the `countOnly` counts per family at the goal's original N, so R6 has clause counts even for runs that crash.
+8. **Feasible.** A run is feasible if it finds a proof at or below the original N within the limits. For each goal and mode, report the largest k such that every k′ ≤ k is feasible, and also the largest feasible k on its own.
+9. **Stop rules.**
+   - A run that ends within every limit without a proof at or below the original N violates the monotonicity invariant (4.2). It stops the run as a completeness bug.
+   - A k = 0 run builds the same CNFs as the final results. One whose outcome or N differs from them stops the run, unless either run hit a resource limit.
+   - A decoder bug stops the run, as always.
+10. **Pilot first.** Run the highest-ranked goal of each bucket, with all 11 runs (44 runs in all), and stop with a projection, as in 7b. If the projection for the full 4.2 run exceeds about 24 hours, propose a reduction (fewer goals per bucket, never fewer values of k) and wait for approval.
+
+**Order.** 4.1, then the 4.2 pilot, then the full 4.2 run after approval, then 7d-2.

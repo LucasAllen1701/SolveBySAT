@@ -347,3 +347,27 @@ crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Equiv.union_right/4
 crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Equiv.union_right/6
 crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Equiv.union_right/8
 shard 11: done; 723 results; 27726 s
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.all_eq_not_any_not/6
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.contains_inter_eq_false_of_contains_eq_false_left/0
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.contains_inter_eq_false_of_contains_eq_false_left/5
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.contains_inter_eq_false_of_contains_eq_false_left/10
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.contains_inter_eq_false_of_contains_eq_false_left/17
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.get!_diff/5
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/2
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/7
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/9
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/10
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.getKey_insertMany_list_of_mem/0
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.get_insertIfNew/272
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/2
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.size_toArray/0
+crash(shard, oom) on main:B/Std.DHashMap.Raw.contains_inter/0
+crash(shard, oom) on main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/2
+crash(shard, oom) on main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/3
+crash(shard, oom) on main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/10
+crash(shard, oom) on main:B/Std.DHashMap.Raw.getD_alter_self/21
+crash(shard, oom) on main:B/Std.DHashMap.Raw.getKeyD_of_isEmpty/2
+crash(shard, oom) on main:B/Std.DHashMap.Raw.isSome_getKey?_iff_mem/0
+crash(shard, oom) on main:B/Std.DHashMap.get?_insertIfNew/4
+crash(shard, oom) on main:B/Std.DHashMap.getKey!_inter_of_not_mem_left/8
+shard 12: done; 773 results; 29661 s

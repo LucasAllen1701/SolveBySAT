@@ -1812,3 +1812,223 @@ Implemented in `eval/merge.py`, which writes `eval/final/results.jsonl` and
   cases 36/36 equal to `eval/fix_check3/named`, forest dump md5 `13ae01664c0a` (equal to the
   development machine); the rerun ended with driver exit 0, 1,128/1,128 results, and the
   decision 5 spot check passing (0 failures).
+
+### 7d-1: merge and reviews (development machine, 23 November 2026)
+
+EVAL_PLAN §10.8 was added on 23 November 2026 with the owner's decisions after the rerun.
+Machine: the same laptop as the test machine (Intel i7-10510U, 7,735 MiB, Arch Linux), now on
+kernel 7.3.5. No filter, seed, sample size or limit was changed; no goal was rerun; the compiler,
+encoder and decoder are unchanged.
+
+- **Checks before the merge** (`eval-m7` at `aad549b`, after `git pull`; `lake build` and
+  `lake build eval_corpus eval_run eval_numerals Test.EvalNamed`): `Test/run_all.sh` exit 0 (`eval/merge_check/run_all.log`): M0 902/902, M1 19/19
+  (differentials 7,500 / 2,551 / 0 and 7,500 / 2,346 / 0), M4 4/4, M5 10/10 (15,000 / 3,854 / 0),
+  and `Test/M2.lean`, `M3.lean`, `M4Lean.lean`, `M5Lean.lean`, `M7Lean.lean` (R1, R2, R3) pass.
+  The named cases (`eval/merge_check/named`) are 36 of 36 equal to `eval/fix_check3/named` in
+  outcome, N and skeleton.
+- **Merge** (`python3 eval/merge.py`, exit 0; `eval/final/results.jsonl`,
+  `eval/final/merge_report.txt`): 6,300 final lines for 6,300 specs, 1,028 changed keys,
+  100 spot keys, spot check 100 pass, 0 fail (the three allowed differences are the ones
+  recorded on the test machine). Every line has a `code_version`: full `c3a3ec8` 764,
+  `2394acf` 2,895, `f35c182` 1,613; rerun `3cd95d6` 1,028.
+
+  | run | tier | proved | no proof ≤ 10 | crash | goal rejected | timeout |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | main | A | 140 | 1,722 | 807 | 272 | 59 |
+  | main | B | 836 | 1,361 | 490 | 297 | 16 |
+  | r1b | B | 88 | 121 | 59 | 28 | 4 |
+
+  These equal the owner's preview. The 9 new proofs are the 9 the prompt names, with the same
+  N (one at N = 2, eight at N = 1). Among them are the E1 goal that found the bug
+  (`main:B/Std.Internal.List.Const.map_insertEntry_perm_filter_map/15`, N = 2) and the three R7
+  cases marked `probable_bug` (`…Raw.Const.toArray_eq_toArray_map_toListModel/7`,
+  `…Raw₀.Const.get!_emptyWithCapacity/31`, `…Impl.Const.toArray_map/18`, all N = 1). All four
+  are confirmed. No proof was lost; the 70 changed goals proved before keep their N.
+- **Report (`eval/report.py`, 10.7 decision 7 and the merge rule).**
+  - Every table and every review population reads `eval/final/results.jsonl`. `eval/full/` is
+    read only by the new section "Effect of the type-template fix".
+  - That section gives the raw outcome table per run and tier before and after, proved-at-N
+    before and after, the transition table of the 1,028 changed goals, the 9 new proofs, the
+    spot check, and the caveat of 10.8 decision 3. 438 changed goals crashed on memory both
+    times, so the fix's effect on them is not measured. Three changed goals went from no proof
+    to a resource limit: `main:A/Std.DTreeMap.Equiv.inter_congr` (solver timeout),
+    `main:B/StateT.run_map/1` and `main:B/StateT.run_map/2` (memory crash at N = 10).
+  - The run description covers both runs: the full run's three commits (`c3a3ec8`, recorded as
+    `6ef9ea2`; `2394acf`; `f35c182`) and the rerun's commit `3cd95d6`, machine and kernel note.
+  - The data checks cover `eval/final/`: 6,300 keys with exactly one line, none missing,
+    duplicated or extra; 0 lines without a `code_version`; the rerun lines are exactly the
+    `changed` keys.
+  - The R1 text computed the crash count from the data instead of the hard-coded 1,375 (now
+    1,356).
+  - *Bug fixed (it was there before this stage):* the R2 table of compiler reasons sorted its
+    rows by count alone and broke ties in `set` order. Python's hash randomisation changes that
+    order, so two EVAL.md runs could differ. Ties now sort by name; EVAL.md is byte-identical
+    under `PYTHONHASHSEED` 1, 12345 and unset.
+  - Review records are counted only if their goal is in the current sample.
+    `eval/reviews/before_fix/` is never read, nor are `*.evidence.jsonl` files.
+- **Samples (10.7 decision 8, 10.8 decision 2).** The pre-fix sample files, `r2_unexplained.jsonl`,
+  `r7_soft_completeness.jsonl` and `e1_sbe_wins.evidence.jsonl` were moved with `git mv` to
+  `eval/reviews/before_fix/`. Their records are kept as they were and are superseded: nothing
+  there is counted. `python3 eval/report.py samples` redrew the samples with the same seeds.
+  The result equals the owner's preview:
+
+  | review | population | sample | kept from before | kept, forest changed | new |
+  | --- | --- | --- | --- | --- | --- |
+  | §3.3 unexplained (seed 70101) | 770 | 50 | 11 | 3 | 39 |
+  | R7 oracle-in-class (seed 70102) | 151 | 100 | 69 | 15 | 31 |
+  | E1 `solve_by_elim` wins (seed 70103) | 1,586 | 50 | 17 | 5 | 33 |
+  | `solve_by_sat` only | 89 | 89 | – | 9 | 89 (not started) |
+
+  - Reused unchanged with `"reused": true`: 8 R2 and 54 R7 reviews (kept goals whose forest did
+    not change). Every other sampled goal was reviewed afresh: 42 R2, 46 R7, all 50 E1, all 89
+    `solve_by_sat`-only.
+  - Kept goals whose forest changed (3 R2, 15 R7, 5 E1) have a `class_change` field. In all 23
+    the class is unchanged: the oracle (or `solve_by_elim`) term and its mismatch positions are
+    the same as before, and the fix changes only type templates. For the three R7 cases whose
+    class rests on typing or levels (`get!_diff_of_not_mem_left/1`, `getKey_insertIfNew/1`:
+    `autoParam`; `TreeSet.Raw.get?_union/0`: levels), `diag` was rerun after the fix and gives
+    the same answer.
+- **Review tools.**
+  - `eval_numerals inspect nosbe` gave the oracle term, its mismatches and heads for every fresh
+    R2, R7 and `solve_by_sat`-only goal. `inspect sbe` gave `solve_by_elim`'s term for the 38
+    E1 goals without pre-fix evidence, and its error for one `solve_by_sat`-only goal.
+  - *Decision:* `eval_numerals diag` (one encode and solve at one N, as run, with the static
+    filter off and with types forgotten) was used, as in 7d-1, only where the evidence did not
+    settle the class: 8 R7 goals (`eval/reviews/r7_soft_completeness.jsonl`,
+    `evidence.diag`). It is review evidence and replaces no result. I read "do not rerun any
+    goal" as excluding any new result line, not this tool; if the owner reads it otherwise,
+    those 8 classes rest on the oracle evidence and the 7d-1 diag of the same classes.
+  - New: `eval/reviews/sbe_model.lean`, minimal statements (no corpus goal) that show how
+    like-for-like `solve_by_elim` behaves (T1–T8, output below).
+- **Review counts per class.**
+  - §3.3 unexplained (50; before the fix → after):
+
+    | class | before | after |
+    | --- | --- | --- |
+    | definitional unfolding at a proof position | 40 | 43 |
+    | field of a structure or class hypothesis | 5 | 4 |
+    | instance needed | 1 | 2 |
+    | definitional typing: unfolding a type family (SPEC 2.4) | 1 | 1 |
+    | universe levels up to level arithmetic (SPEC 2.4) | 1 | 0 |
+    | a clause variable's value is a proof | 1 | 0 |
+    | definitional typing: `autoParam` wrapper (SPEC 2.4) | 1 | 0 |
+
+  - R7 (100):
+
+    | class | before | after |
+    | --- | --- | --- |
+    | instance needed | 54 | 54 |
+    | definitional unfolding at a proof position | 14 | 18 |
+    | definitional typing: `autoParam` wrapper (SPEC 2.4) | 10 | 12 |
+    | β-reduction needed after instantiation (SPEC 2.4) | 3 | 3 |
+    | instance mismatch up to unfolding | 3 | 3 |
+    | computation: `decide … = true` | 2 | 3 |
+    | definitional typing: unfolding a type family (SPEC 2.4) | 4 | 2 |
+    | universe levels up to level arithmetic (SPEC 2.4) | 3 | 2 |
+    | a clause variable's value is a proof | 3 | 2 |
+    | internal helper lemma needed | 1 | 1 |
+    | probable bug (type template) | 3 | 0 |
+
+  - E1 (50, all classified; the first pass had classified none per goal): definitional
+    unfolding or instance unification 33 (a definition 25, instances 5, numerals 2, η 1); a
+    constant our compiler rejects 17 (`propext` 7, `congrArg` 6, and one each of the private
+    `AssocListIterator.finitenessRelation`, `LawfulMonad.bind_pure_comp`,
+    `List.countP_cons_of_neg`, `Std.DTreeMap.Const.getKey!_alter_self`, all "not first order"
+    or "clause variable as head symbol"); proof size 0; probable bug 0; other 0. The primary
+    class is the first obstacle in `solve_by_elim`'s own term: a definitional position first,
+    otherwise a rejected constant. 16 of the 33 definitional terms also use a rejected constant.
+    *New detail (no new class):* "η" for `instLawfulCommIdentityUInt32HOrOfNat/6`, where
+    `HOr.hOr` must match `fun x1 x2 => x1 ||| x2`. It is none of the five kinds the prompt lists.
+  - `solve_by_sat` only (89; like-for-like `solve_by_elim` failed on 65, ran out of heartbeats on
+    24, `max_rec_depth` 0):
+
+    | reason | detail | failed | heartbeats |
+    | --- | --- | --- | --- |
+    | other, explained | `↔`/`∧` projection | 50 | 13 |
+    | depth | more than 9 steps | 10 | 2 |
+    | its budget | heartbeats on a proof within the step bound | 0 | 9 |
+    | backtracking order | `constructor` commits to `Or.inl` | 3 | 0 |
+    | metavariables shared between subgoals | instance argument fixed only by the premises | 1 | 0 |
+    | other, explained | built witness | 1 | 0 |
+
+    *New details under "other, explained"* (recorded here as the prompt asks): "`↔`/`∧`
+    projection" and "built witness".
+- **How like-for-like `solve_by_elim` searches** (Lean 4.36 source,
+  `Lean/Meta/Tactic/SolveByElim.lean` and `Backtrack.lean`, checked by
+  `eval/reviews/sbe_model.lean`). These facts decide the `solve_by_sat`-only classes.
+  - It tries the local hypotheses first, then `H` in order, each with `MVarId.apply` at default
+    transparency, depth-first with full backtracking. `intro` and `constructor` run only as the
+    discharger, when no alternative succeeds.
+  - `maxDepth := 10` is one budget of steps for the whole search, not a tree depth. Every
+    `apply`, every `intro` and every `constructor` call takes a step. Instance subgoals closed by
+    `inferInstance` and goals already assigned are free. `run` throws when the fuel reaches 0,
+    before it checks for an empty goal list, so at most 9 steps succeed (T1: 8 intros + 1
+    closes, 9 + 1 fails).
+  - The harness calls it with `introNP nctx`, so Tier A goals (`nctx = 0`) pay a step for every
+    binder of the statement, implicit and instance binders included. Tier B goals get their
+    context binders free (T1, T7).
+  - It never splits `↔` or `∧`: `Iff.mp`/`mpr` and `And.left`/`right` are not in `H_main`, and
+    `apply` uses a lemma only as stated (T2, T3). `solve_by_sat` has these projections as
+    built-in rules.
+  - `constructor` takes the first constructor that applies and does not backtrack over the
+    others, so `Or.inr` is never tried (T4, T5).
+  - Step counts per goal come from the proof skeleton: the outer binders beyond `nctx`, plus
+    inner λ binders, plus N, minus instance leaves (`inst…@g`). They are recorded in
+    `sbe_steps`.
+
+  `eval/reviews/sbe_model.lean` output (`lake env lean eval/reviews/sbe_model.lean`):
+
+  ```
+  T1 k=7 intros + 1: closed: fun a b c d e f g => Eq.refl a
+  T1 k=8 intros + 1: closed: fun a b c d e f g h => Eq.refl a
+  T1 k=9 intros + 1: failed: failed
+  T1 k=9, 9 introduced by the harness (nctx), + 1: closed: fun a b c d e f g h i => Eq.refl a
+  T2 Iff.mpr of an H lemma: failed: failed
+  T3 And.left of a hypothesis: failed: failed
+  T4 Or.inr, no H: failed: failed
+  T4b Or.inl, no H: closed: fun p a => Or.inl a
+  T5 exists_or_eq_right: failed: failed
+  T6 eq_trans_true, H_main: heartbeats
+  T6b same goal, hyps introduced, H_main: closed: fun p q a a_1 => Eq.symm (Eq.symm (Eq.symm (Eq.symm (Eq.symm (Eq.symm (Eq.trans a a_1))))))
+  T6c same goal, hyps introduced, H = [Eq.trans]: closed: fun p q a a_1 => Eq.trans a a_1
+  T6d same goal, hyps introduced, H = [Eq.trans, Eq.symm]: closed: fun p q a a_1 => Eq.trans a a_1
+  T7 Int.le_trans chain, 8 binders (Tier A): failed: failed
+  T7b same, binders introduced: closed: fun a b c d a_1 a_2 a_3 a_4 =>
+    Int.le_trans (Int.mul_le_mul_of_nonneg_right a_1 a_3) (Int.mul_le_mul_of_nonneg_left a_2 a_4)
+  T8 chain/4 context, nctx 15: failed: failed
+  T8b smaller context: failed: failed
+  apply failed: failed to synthesize
+    String.Slice.Pattern.Model.PatternModel ?pat
+  apply (synthAssignedInstances := false) failed: failed to synthesize
+    String.Slice.Pattern.Model.PatternModel ?pat
+  ```
+- **Stop rule.** No review found a probable completeness or soundness bug. The places a bug
+  could hide are syntactic oracle terms whose heads are all accepted. Each one was resolved:
+  - the `t.wf` goals: `autoParam`, typed UNSAT and SAT with types forgotten;
+  - `ExtHashMap.contains_insertIfNew/0`: β after instantiation;
+  - `ExtTreeSet.get?_union/0` and `TreeSet.Raw.get?_union/0`: the head's level `max ?u ?v`
+    against `u`, UNSAT even with types forgotten, so head matching, which SPEC 2.4 leaves out of
+    reach;
+  - `HEq.refl h`: a proof value.
+- **Surprising.**
+  - `Std.Internal.List.getKeyD_insertList_of_mem/3` was in both pre-fix R2 and R7 as "universe
+    levels up to level arithmetic (SPEC 2.4)". The fix proves it at N = 1, so it was this bug
+    all along. The 7d-1 stop note's sentence "the other level cases … are not this bug" was wrong
+    for it. Its old note already said "SAT with types forgotten", which points to typing, not
+    to head matching. The two level cases left (`get?_union/0` for `TreeSet.Raw` and
+    `ExtTreeSet`) are UNSAT with types forgotten and are not the bug.
+  - The E1 population fell by only 2 (1,588 → 1,586), yet the redrawn sample keeps only 17 of
+    its 50 goals. That is the instability of `random.Random(seed).sample` that 10.8 decision 2
+    describes.
+  - Like-for-like `solve_by_elim` is weaker on Tier A than its configuration suggests. As
+    called by the harness, every binder of a Tier A statement costs one of its 9 steps. 12 of
+    the 89 `solve_by_sat`-only goals are lost to depth this way, almost all Tier A (11 of 12).
+    T7 closes the same proof when the binders are introduced first. This is a property of the
+    pre-registered baseline, not a change to it; 7d-2 should take it into account when it reads
+    R4.
+  - 63 of the 89 `solve_by_sat`-only proofs use an `↔` or `∧` projection, which
+    `solve_by_elim` cannot build with `H_main` alone.
+- **Regression (end of the merge and 7d-1 reviews):** `Test/run_all.sh` exit 0 (M0 902/902, M1 19/19, M4 4/4,
+  M5 10/10, M2/M3/M4Lean/M5Lean/M7Lean pass); named cases 36/36 equal to `eval/fix_check3/named`;
+  `merge.py` exit 0 with spot check 100/0; EVAL.md regenerated three times (two hash seeds and
+  unset) byte-identical (md5 83517dba4e70).

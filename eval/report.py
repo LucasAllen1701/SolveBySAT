@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
-"""Milestone 7d-1: generate EVAL.md from the 7b data alone (EVAL_PLAN §6, §10.6).
+"""Milestone 7d-1: generate EVAL.md from the 7b data alone (EVAL_PLAN §6, §10.6, §10.7, §10.8).
 
   python3 eval/report.py            write EVAL.md (repo root)
   python3 eval/report.py samples    write the seeded review samples to eval/reviews/
 
 Inputs, all under eval/:
-  full/results.jsonl, full/header.json   the full 7b run
+  final/results.jsonl                    the merged results (eval/merge.py, NOTES.md "10.7: merge
+                                         rule"): every table and review population reads these
+  full/results.jsonl, full/header.json   the full 7b run, "before" the type-template fix (used
+                                         only in the "Effect of the type-template fix" section)
+  rerun/header.json, specs_rerun.jsonl   the 10.7 rerun and its rerun set
   specs_full.jsonl                       the pre-registered specs
   corpus_A.jsonl, corpus_B.jsonl         the corpus (7a, with the §10.2/§10.4 H sets)
   corpus_numerals.jsonl                  rule 4 of §3.3, as fixed in NOTES.md (7d-1)
   corpus_hcompile.jsonl                  compiler acceptance of the goal and of each H
                                          constant, recomputed (checked here against the
                                          results that record it)
-  reviews/*.jsonl                        the hand reviews (7d-1 step 3)
+  reviews/*.jsonl                        the hand reviews (7d-1 step 3, redrawn after the merge).
+                                         `*.evidence.jsonl` files are review evidence, not reviews.
+                                         reviews/before_fix/ holds the reviews of the samples drawn
+                                         before the fix; nothing in it is read or counted here.
 Only the standard library is used; there are no charts (matplotlib is not installed).
 """
 import collections, json, os, random, re, statistics, sys
@@ -96,7 +103,11 @@ def short(s, n=110):
 class Data:
     def __init__(self):
         self.specs = {s["key"]: s for s in load(os.path.join(E, "specs_full.jsonl"))}
-        self.res = {r["key"]: r for r in load(os.path.join(E, "full", "results.jsonl"))}
+        self.final_lines = load(os.path.join(E, "final", "results.jsonl"))
+        self.res = {r["key"]: r for r in self.final_lines}
+        self.before = {r["key"]: r for r in load(os.path.join(E, "full", "results.jsonl"))}
+        self.rerun_set = {s["key"]: s["rerun_set"] for s in load(os.path.join(E, "specs_rerun.jsonl"))}
+        self.rerun = {r["key"]: r for r in load(os.path.join(E, "rerun", "results.jsonl"))}
         self.corpus = {}
         for t in "AB":
             for r in load(os.path.join(E, f"corpus_{t}.jsonl")):
@@ -108,8 +119,9 @@ class Data:
         rd = os.path.join(E, "reviews")
         if os.path.isdir(rd):
             for f in sorted(os.listdir(rd)):
-                if f.endswith(".jsonl"):
-                    self.reviews[f[:-6]] = load(os.path.join(rd, f))
+                # only top-level review files; reviews/before_fix/ (a directory) is never read
+                if f.endswith(".jsonl") and not f.endswith(".evidence.jsonl") and os.path.isfile(os.path.join(rd, f)):
+                    self.reviews[f[:-6]] = [x for x in load(os.path.join(rd, f)) if not x.get("superseded")]
         self.checks = []
         self._acceptance()
 
@@ -168,8 +180,8 @@ class Data:
             return REASONS[5]
         return "other: " + r["outcome"]
 
-    def raw(self, k):
-        r = self.res[k]
+    def raw(self, k, res=None):
+        r = (res or self.res)[k]
         o = r["outcome"]
         return {"crash": "memory crash", "no_proof_le_Nmax": "no proof ≤ 10", "goal_rejected": "goal rejected",
                 "timeout": "solver timeout", "proved": "proved"}.get(o, o)
@@ -201,6 +213,27 @@ def sample(keys, n, seed):
     return keys if len(keys) <= n else sorted(random.Random(seed).sample(keys, n))
 
 
+def read_sample(path):
+    """The keys of a written sample file (first line is a comment), or None if it does not exist."""
+    if not os.path.exists(path):
+        return None
+    return [l.strip() for l in open(path) if l.strip() and not l.startswith("#")]
+
+
+def sample_comparison(d):
+    """10.8 decision 2: the redrawn samples against those drawn before the fix
+    (eval/reviews/before_fix/*.sample.txt). Rows: review, population, sample, kept from before,
+    kept with a changed forest, new, and changed-forest goals in the sample."""
+    rows = []
+    for name, (pop, smp, seed) in review_sets(d).items():
+        old = read_sample(os.path.join(E, "reviews", "before_fix", f"{name}.sample.txt")) or []
+        kept = [k for k in smp if k in set(old)]
+        ch = [k for k in smp if d.rerun_set.get(k) == "changed"]
+        rows.append((name, seed, len(pop), len(smp), len(kept), sum(1 for k in kept if d.rerun_set.get(k) == "changed"),
+                     len(smp) - len(kept), len(ch), len(old)))
+    return rows
+
+
 def review_sets(d):
     main = d.keys("main")
     unexplained = [k for k in main if d.reason(k) == REASONS[5]]
@@ -218,10 +251,77 @@ def review_sets(d):
 # ---------------------------------------------------------------- sections
 
 
+RAW_COLS = ["proved", "no proof ≤ 10", "memory crash", "goal rejected", "solver timeout"]
+RUNS = [("main", "A", "Tier A"), ("main", "B", "Tier B"), ("r1b", "B", "R1b (Tier B, H_full)")]
+LIMIT_RAW = ("memory crash", "solver timeout")
+
+
+def effect(d):
+    """EVAL_PLAN §10.7 decision 7, §10.8 decision 3, NOTES.md "10.7: merge rule"."""
+    out = ["## Effect of the type-template fix (EVAL_PLAN §10.7, §10.8)", "",
+           "7d-1 found a completeness bug in the compiler: type templates were built from the raw inferred "
+           "type, without the preprocessing of SPEC 4.1 (§10.7). After the fix, every goal whose compiled "
+           "forest changed was rerun (SAT phase only), and its `solve_by_sat` result replaces the original "
+           "(`eval/final/`, by the merge rule pre-registered in NOTES.md). *Before* is `eval/full/` as "
+           "recorded; *after* is `eval/final/`. Every other table in this report reads *after*.", ""]
+    ch = sorted(k for k, v in d.rerun_set.items() if v == "changed")
+    spot = sorted(k for k, v in d.rerun_set.items() if v == "spot")
+    rows = []
+    for run, t, name in RUNS:
+        ks = d.keys(run, t)
+        for lab, res in (("before", d.before), ("after", d.res)):
+            c = collections.Counter(d.raw(k, res) for k in ks)
+            rows.append([name, lab, len(ks)] + [c.get(o, 0) for o in RAW_COLS])
+    out += ["Raw `solve_by_sat` outcomes, before and after:", "",
+            table(["run", "", "goals"] + RAW_COLS, rows), ""]
+    rows = []
+    for run, t, name in RUNS:
+        for lab, res in (("before", d.before), ("after", d.res)):
+            c = collections.Counter(res[k]["N"] for k in d.keys(run, t) if res[k]["outcome"] == "proved")
+            rows.append([name, lab, sum(c.values())] + [c.get(n, 0) for n in range(1, 11)])
+    out += ["Smallest N at which `solve_by_sat` found a proof, before and after:", "",
+            table(["run", "", "proved"] + [f"N = {n}" for n in range(1, 11)], rows), ""]
+    per = collections.Counter(d.specs[k]["run"] + " " + d.specs[k]["tier"] for k in ch)
+    x = collections.Counter((d.raw(k, d.before), d.raw(k)) for k in ch)
+    out += [f"The {len(ch):,} goals whose forest changed (main A {per.get('main A', 0):,}, main B "
+            f"{per.get('main B', 0):,}, R1b {per.get('r1b B', 0):,}): original outcome (rows) against final "
+            "outcome (columns):", "",
+            table(["before \\ after"] + RAW_COLS + ["total"],
+                  [[a] + [x.get((a, b), 0) for b in RAW_COLS] + [sum(x.get((a, b), 0) for b in RAW_COLS)]
+                   for a in RAW_COLS if any(x.get((a, b)) for b in RAW_COLS)]), ""]
+    new = [k for k in ch if d.proved(k) and d.before[k]["outcome"] != "proved"]
+    lost = [k for k in ch if d.before[k]["outcome"] == "proved" and not d.proved(k)]
+    sameN = [k for k in ch if d.before[k]["outcome"] == "proved" and d.proved(k) and d.before[k]["N"] == d.res[k]["N"]]
+    rows = [[f"`{k}`", d.res[k]["N"], d.raw(k, d.before), f"`{short(d.res[k].get('skeleton'), 120)}`"] for k in new]
+    out += [f"New proofs: {len(new)}. Proofs lost: {len(lost)}. Goals proved before and after: "
+            f"{len(sameN) + sum(1 for k in ch if d.before[k]['outcome'] == 'proved' and d.proved(k) and k not in sameN)}, "
+            f"{len(sameN)} of them at the same N.", "",
+            table(["goal", "N", "outcome before", "proof (skeleton)"], rows), ""]
+    both = [k for k in ch if d.raw(k, d.before) == "memory crash" and d.raw(k) == "memory crash"]
+    tolim = [k for k in ch if d.raw(k, d.before) == "no proof ≤ 10" and d.raw(k) in LIMIT_RAW]
+    out += ["**Caveat (§10.8 decision 3).** "
+            f"{len(both):,} of the {len(ch):,} changed goals crashed on memory both before and after the fix, so "
+            "the fix's effect on them is not measured: a goal that crashed both times may or may not have a proof "
+            "within N ≤ 10 that the bug excluded. The fix can also change a CNF's size, so a result can move "
+            f"towards a resource limit: {len(tolim)} changed goal{'s' if len(tolim) != 1 else ''} went from no proof "
+            "≤ 10 to a resource limit"
+            + (": " + "; ".join(f"`{k}` ({d.raw(k)}{', last N ' + str(d.res[k].get('last_N')) if d.res[k].get('last_N') else ''})" for k in tolim) if tolim else "")
+            + ".", ""]
+    sx = collections.Counter((d.raw(k, d.before), d.raw(k, {k: d.rerun[k]})) for k in spot if k in d.rerun)
+    out += [f"**Spot check (§10.7 decision 5).** {len(spot)} goals whose forest did not change were also rerun; "
+            "their original line stands. Original outcome → rerun outcome: "
+            + "; ".join(f"{a} → {b} {v}" for (a, b), v in sorted(sx.items(), key=lambda z: (-z[1], z[0]))) + ". "
+            f"Proved goals keep their N in {sum(1 for k in spot if k in d.rerun and d.before[k]['outcome'] == 'proved' and d.rerun[k].get('N') == d.before[k].get('N'))} "
+            f"of {sum(1 for k in spot if d.before[k]['outcome'] == 'proved')}. Every difference has a resource limit on "
+            "one of the runs, which the check allows (`eval/final/merge_report.txt`)."]
+    return out
+
+
 def r1(d):
+    ncr = sum(1 for k in d.specs if d.res[k]["outcome"] == "crash" and "H_rejected" not in d.res[k])
     out = ["## R1 Funnel", "",
            "Main run (`H_main`). *Goal accepted*: the compiler accepts the goal. *H fully accepted*: "
-           "it also accepts every `H_main` constant on its own. For the 1,375 memory crashes, whose "
+           f"it also accepts every `H_main` constant on its own. For the {ncr:,} memory crashes (all runs), whose "
            "result lines do not record acceptance, it is taken from `corpus_hcompile` (see Data checks).", ""]
     rows = []
     for t in "AB":
@@ -321,7 +421,7 @@ def r2(d):
             if d.reason(k) == REASONS[1]:
                 for cl in {msg_class(m) for _, m in d.acc[k][1]}:
                     c2[cl] += 1
-        for cl in sorted(set(c1) | set(c2), key=lambda x: -(c1[x] + c2[x])):
+        for cl in sorted(set(c1) | set(c2), key=lambda x: (-(c1[x] + c2[x]), x)):
             rows.append([f"Tier {t}", cl, c1.get(cl, 0), c2.get(cl, 0)])
     out.append(table(["tier", "compiler's reason", "rule 1 goals", "rule 2 goals"], rows))
     out += ["", "Raw outcome (rows) against primary reason (columns), with rule 4. A memory crash on a goal "
@@ -403,6 +503,33 @@ def r4(d):
     out += ["Wall time in ms on the goals each one closes. `solve_by_sat`'s time is the whole N loop from "
             "N = 1, including compilation and every encode and solve:", "",
             table(["tier", "tactic", "goals closed", "median ms", "p90 ms"], rows)]
+    rv = d.reviews.get("sbs_only")
+    pop, _, _ = review_sets(d)["sbs_only"]
+    c = collections.Counter((d.specs[k]["tier"], d.sbe(k) or "none") for k in pop)
+    out += ["", f"Main-run goals `solve_by_sat` proves and like-for-like `solve_by_elim` does not: {len(pop)} "
+            f"(Tier A {sum(v for (t, _), v in c.items() if t == 'A')}, Tier B {sum(v for (t, _), v in c.items() if t == 'B')}). "
+            "`solve_by_elim`'s outcome on them:", "",
+            table(["tier", "failed", "heartbeats", "max_rec_depth"],
+                  [[f"Tier {t}"] + [c.get((t, o), 0) for o in ("failed", "heartbeats", "max_rec_depth")] for t in "AB"])]
+    if rv:
+        out += [""] + review_summary(d, "sbs_only", rv,
+                                     "Review: why like-for-like `solve_by_elim` missed the proof (EVAL_PLAN §7)")
+        _, _, _, recs, _, _ = in_sample(d, "sbs_only", rv)
+        x = collections.Counter((r.get("sbe_outcome"), r.get("class")) for r in recs)
+        cls = sorted({b for _, b in x}, key=str)
+        out += ["", "`solve_by_elim`'s outcome (rows) against the reason (columns):", "",
+                table(["outcome"] + cls + ["total"],
+                      [[o] + [x.get((o, b), 0) for b in cls] + [sum(x.get((o, b), 0) for b in cls)]
+                       for o in ("failed", "heartbeats", "max_rec_depth") if any(x.get((o, b)) for b in cls)])]
+        cd = collections.Counter((r.get("class"), r.get("detail", "")) for r in recs)
+        out += ["", "By reason and detail:", "",
+                table(["reason", "detail", "goals"], [[a, b, v] for (a, b), v in sorted(cd.items(), key=lambda z: (-z[1], z[0]))])]
+        Nc = collections.Counter(r.get("N") for r in recs)
+        out += ["", "`solve_by_sat`'s N on these goals: " + ", ".join(f"N = {n}: {v}" for n, v in sorted(Nc.items())) + ".",
+                "", "Every goal:", "",
+                table(["goal", "solve_by_elim", "N", "solve_by_sat proof (skeleton)", "reason", "note"],
+                      [[f"`{r['id']}`", r.get("sbe_outcome", ""), r.get("N", ""), f"`{short(r.get('skeleton'), 90)}`",
+                        r.get("class", ""), short(r.get("note", ""), 120)] for r in recs])]
     return out
 
 
@@ -417,20 +544,35 @@ def r7(d):
     rv = d.reviews.get("r7_soft_completeness")
     if rv:
         out += [""] + review_summary(d, "r7_soft_completeness", rv, "Review of the oracle-in-class goals with no proof ≤ 10")
-        rows = [[f"`{x['id']}`", x.get("class", ""), short(x.get("note", ""), 140)] for x in rv]
+        rows = [[f"`{x['id']}`", x.get("class", ""), short(x.get("note", ""), 140)] for x in in_sample(d, "r7_soft_completeness", rv)[3]]
         out += ["", "Every reviewed case:", "", table(["goal", "classification", "note"], rows)]
     return out
 
 
+def in_sample(d, name, rv):
+    """The review records of the current sample only (10.8 decision 2: a review of a goal that left
+    the sample is superseded and not counted), with the sample keys that have no record."""
+    pop, smp, seed = review_sets(d)[name]
+    ss = set(smp)
+    recs = [x for x in rv if x["key"] in ss]
+    have = {x["key"] for x in recs}
+    return pop, smp, seed, recs, [k for k in smp if k not in have], [x["key"] for x in rv if x["key"] not in ss]
+
+
 def review_summary(d, name, rv, title):
-    sets = review_sets(d)
-    pop, smp, seed = sets[name]
-    c = collections.Counter(x.get("class", "?") for x in rv)
+    pop, smp, seed, recs, missing, outside = in_sample(d, name, rv)
+    c = collections.Counter(x.get("class", "?") for x in recs)
+    reused = sum(1 for x in recs if x.get("reused"))
+    chg = sum(1 for x in recs if d.rerun_set.get(x["key"]) == "changed")
     out = [f"### {title}", "",
-           f"Population {len(pop):,}; reviewed {len(rv)}"
-           + (f" (seeded sample, seed {seed})" if seed and len(pop) > len(smp) else " (all)") + ". "
-           f"Per-goal records: `eval/reviews/{name}.jsonl`.", "",
-           table(["classification", "goals"], c.most_common())]
+           f"Population {len(pop):,}; sample {len(smp)}"
+           + (f" (seeded, seed {seed})" if seed and len(pop) > len(smp) else " (all)") + f"; reviewed {len(recs)}"
+           + (f", {len(missing)} not yet reviewed" if missing else "") + ". "
+           f"{reused} reviews were reused from the sample drawn before the fix (same goal, forest unchanged); "
+           f"the other {len(recs) - reused} were done after the merge, including {chg} goals whose forest changed. "
+           f"Per-goal records: `eval/reviews/{name}.jsonl`."
+           + (f" Records outside the sample (not counted): {len(outside)}." if outside else ""), "",
+           table(["classification", "goals"], sorted(c.items(), key=lambda z: (-z[1], z[0])))]
     return out
 
 
@@ -450,11 +592,22 @@ def exploratory(d):
         rows.append([f"  by reason", ""] + [", ".join(f"{x.split(' ', 1)[1]} {v}" for x, v in r.most_common()), "", "", ""])
     out.append(table(["tier", "goals", "no proof ≤ 10", "memory crash", "goal rejected", "solver timeout"], rows))
     if "e1_sbe_wins" in d.reviews:
-        out += [""] + review_summary(d, "e1_sbe_wins", d.reviews["e1_sbe_wins"],
+        rv = d.reviews["e1_sbe_wins"]
+        out += [""] + review_summary(d, "e1_sbe_wins", rv,
                                      "Review: why `solve_by_sat` found no proof where `solve_by_elim` closed the goal")
-    if "sbs_only" in d.reviews:
-        out += [""] + review_summary(d, "sbs_only", d.reviews["sbs_only"],
-                                     "Review: why `solve_by_elim` (like-for-like) failed where `solve_by_sat` proved the goal")
+        _, _, _, recs, _, _ = in_sample(d, "e1_sbe_wins", rv)
+        ev = collections.Counter((x.get("evidence") or {}).get("source") for x in recs)
+        out += ["", f"The first E1 pass (before the fix) recorded `solve_by_elim`'s proof terms but classified none of them, "
+                f"so every goal is classified here. The evidence (like-for-like `solve_by_elim` rerun by `eval_numerals inspect sbe`) "
+                f"is the pre-fix record for {ev.get('before_fix', 0)} goals (in the earlier sample, forest unchanged) and new for "
+                f"{ev.get('after_merge', 0)} (`eval/reviews/e1_sbe_wins.evidence.jsonl`)."]
+        c = collections.Counter((x.get("class", "?"), x.get("detail", "")) for x in recs)
+        out += ["", "By class and detail (for definitional unfolding: what is unfolded; for a rejected constant: "
+                "the constant's rejection reason):", "",
+                table(["class", "detail", "goals"], [[a, b, v] for (a, b), v in sorted(c.items(), key=lambda z: (z[0][0], -z[1], z[0][1]))]),
+                "", "Every reviewed goal:", "",
+                table(["goal", "class", "detail", "note"],
+                      [[f"`{x['id']}`", x.get("class", ""), x.get("detail", ""), short(x.get("note", ""), 140)] for x in recs])]
     # E2
     out += ["", "## E2 The data-constant rule", "",
             "R1b against the main run on the same 300 goals. A goal proved with `H_full` and not with `H_main` "
@@ -560,7 +713,21 @@ def checks(d):
         ["rule 4 annotation (corpus_numerals): goals missing / with an error / walk cut at the budget",
          f"{nmiss:,} / {err:,} / {cut:,}"],
         ["rule 4: positions checked / skipped (expected type not computable, or a runtime limit)", f"{checked:,} / {skipped:,}"],
-        ["result lines / specs", f"{len(d.res):,} / {len(d.specs):,}"],
+        ["eval/full/ result lines (before) / specs", f"{len(d.before):,} / {len(d.specs):,}"],
+    ]
+    fk = collections.Counter(r["key"] for r in d.final_lines)
+    rows += [
+        ["eval/final/: lines / specs; keys with exactly one line; missing; duplicated; not in the specs",
+         f"{len(d.final_lines):,} / {len(d.specs):,}; {sum(1 for k in d.specs if fk.get(k) == 1):,}; "
+         f"{sum(1 for k in d.specs if k not in fk):,}; {sum(1 for v in fk.values() if v > 1):,}; "
+         f"{sum(1 for k in fk if k not in d.specs):,}"],
+        ["eval/final/: lines without a `code_version`", f"{sum(1 for r in d.final_lines if 'code_version' not in r):,}"],
+        ["eval/final/: lines by `code_version` (source, commit)",
+         ", ".join(f"{a} {b}: {v:,}" for (a, b), v in sorted(collections.Counter(
+             (r["code_version"]["source"], r["code_version"]["commit"]) for r in d.final_lines if "code_version" in r).items()))],
+        ["eval/final/: rerun lines are exactly the `changed` keys of the rerun set",
+         "yes" if {r["key"] for r in d.final_lines if r.get("code_version", {}).get("source") == "rerun"}
+         == {k for k, v in d.rerun_set.items() if v == "changed"} else "NO"],
     ]
     return ["## Data checks", "", table(["check", "result"], rows)]
 
@@ -575,14 +742,34 @@ def main():
                 for k in smp:
                     f.write(k + "\n")
             print(f"{name}: population {len(pop)}, sample {len(smp)}")
+        print("review | seed | population | sample | kept from before | kept, forest changed | new | forest changed in sample | old sample size")
+        for row in sample_comparison(d):
+            print(" | ".join(str(x) for x in row))
         return
     h = json.load(open(os.path.join(E, "full", "header.json")))
+    hr = json.load(open(os.path.join(E, "rerun", "header.json")))
+    segs = collections.Counter(r["code_version"]["commit"] for r in d.final_lines if r["code_version"]["source"] == "full")
     out = ["# Solve By SAT: evaluation results (milestone 7, stage 7d-1)", "",
-           "Generated by `eval/report.py` from `eval/full/` (the full 7b run) and the corpus files alone. Facts "
-           "and counts only: the reading of EVAL_PLAN §7 comes in 7d-2, after 7c.", "",
-           f"Run: {h['n_specs']:,} goals, Lean {h['toolchain']}, N ≤ {h['nmax']}, solver {h['solver_s']} s per call, "
-           f"N loop {h['loop_s']} s, memory cap {h['cap_mb']:,} MB, baselines {h['baseline_heartbeats']:,} heartbeats; "
-           f"test machine {h['machine']['cpu']}, {h['machine']['ram_mib']:,} MiB.", ""]
+           "Generated by `eval/report.py` from `eval/final/` (the full 7b run merged with the 10.7 rerun), "
+           "`eval/full/`, `eval/rerun/` and the corpus files alone. Facts and counts only: the reading of "
+           "EVAL_PLAN §7 comes in 7d-2, after 7c.", "",
+           f"**Full run (7b, `eval/full/`).** {h['n_specs']:,} goals, Lean {h['toolchain']}, N ≤ {h['nmax']}, "
+           f"solver {h['solver_s']} s per call, N loop {h['loop_s']} s, memory cap {h['cap_mb']:,} MB, "
+           f"P = {h['parallel_shards']}, baselines {h['baseline_heartbeats']:,} heartbeats; test machine "
+           f"{h['machine']['cpu']}, {h['machine']['ram_mib']:,} MiB, kernel {h['machine']['kernel']}. Three commits "
+           f"wrote it: `c3a3ec8` (the start commit, recorded in the header as `{h['git_commit'][:7]}`; "
+           f"{segs.get('c3a3ec8', 0):,} final lines), `2394acf` (first decoder fix, R1; {segs.get('2394acf', 0):,}) and "
+           f"`f35c182` (second decoder fix, R2; {segs.get('f35c182', 0):,}). The decoder fixes change results only on "
+           "goals whose CNF is satisfiable (NOTES.md, 7b).", "",
+           f"**Rerun (§10.7, `eval/rerun/`).** {hr['n_specs']:,} goals ({sum(1 for v in d.rerun_set.values() if v == 'changed'):,} "
+           f"whose compiled forest changed with the type-template fix, {sum(1 for v in d.rerun_set.values() if v == 'spot'):,} "
+           f"spot-check goals), SAT phase only, commit `{hr['git_commit'][:7]}`, the same limits and P = "
+           f"{hr['parallel_shards']}; the same test machine ({hr['machine']['cpu']}, {hr['machine']['ram_mib']:,} MiB). "
+           f"Goals 1–123 ran under kernel {hr['machine']['kernel']}; a power loss stopped the run, and after it the machine "
+           "booted only with kernel 7.3.5 and changed boot parameters, under which the remaining goals ran. That can change "
+           "times, not CNFs (NOTES.md, \"10.7: the rerun on the test machine\"). Every final line records its "
+           "`code_version`.", ""]
+    out += effect(d) + [""]
     out += r1(d) + [""] + r1b(d) + [""] + r2(d) + [""] + r3(d) + [""] + r4(d) + [""]
     out += ["## R5 Synthetic scaling", "", "*Pending 7c.*", "", "## R6 Real distractors", "", "*Pending 7c.*", ""]
     out += r7(d) + [""] + checks(d) + [""] + exploratory(d)

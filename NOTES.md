@@ -2032,3 +2032,77 @@ encoder and decoder are unchanged.
   M5 10/10, M2/M3/M4Lean/M5Lean/M7Lean pass); named cases 36/36 equal to `eval/fix_check3/named`;
   `merge.py` exit 0 with spot check 100/0; EVAL.md regenerated three times (two hash seeds and
   unset) byte-identical (md5 83517dba4e70).
+
+### 7c: synthetic scaling and the 4.2 pilot (EVAL_PLAN §4, §10.9)
+
+EVAL_PLAN §10.9 was added on 23 November 2026. Machine: Intel i7-10510U, 7,735 MiB, Arch Linux,
+kernel 7.3.5, `vm.overcommit_memory` = 1 (the same laptop as 7b and 7d-1).
+
+#### 4.2 set-up, committed before any 4.2 run
+
+Written by `python3 Test/eval_scaling_real.py setup` from `eval/final/`, `eval/specs_full.jsonl`,
+`eval/corpus_hcompile.jsonl` and `eval/scaling_pool_all.jsonl` (`eval_pool pool`). Running it twice
+gives byte-identical files.
+
+| file | lines | md5 |
+| --- | --- | --- |
+| `eval/scaling_pool_all.jsonl` (header + every filtered Tier A theorem, with its verdict) | 48,013 | `580e34c23086` |
+| `eval/scaling_pool.jsonl` (the accepted pool, with clause-head symbols) | 33,617 | `1fba2b02aeee` |
+| `eval/scaling_goals.jsonl` (the 50 goals, bucket, rank, S, pool sizes) | 50 | `99041d07b319` |
+| `eval/specs_scaling.jsonl` (the 550 runs) | 550 | `6e78d1675b12` |
+| `eval/specs_scaling_pilot.jsonl` (the 44 pilot runs, decision 10) | 44 | `c84515887c0b` |
+
+- **Hash ranking (10.8 decision 4; 10.9 decisions 1 and 5), fixed here.** An item's rank key is the
+  SHA-256 hex digest of the UTF-8 string `"<seed>:<item>"`. Items are sorted by that digest, with
+  ties (none expected) broken by the item. For a goal the item is its key (seed 70301); for a
+  distractor it is `"<goal key>:<constant name>"` (seeds 70302 random, 70303 near).
+- **Goals (decision 1).** The population is 976 main-run goals proved in `eval/final/`. By proved N:
+  1: 553, 2: 193, 3–4: 162, 5+: 68, as in §10.9. Taking 12, 12, 13 and 13 gives 50 goals:
+  N = 1: 12 B; N = 2: 2 A, 10 B; 3–4: 5 A, 8 B; 5+: 7 A, 6 B.
+- **Pool (decision 2).**
+  - `eval_pool pool` reapplies §2.1's filters with a verbatim copy of `tierAReject`, and finds the
+    same counts as `corpus_stats.txt` (117,002 constants, 48,012 kept).
+  - It compiles each kept theorem on its own against the goal `True`, as
+    `eval_run verify-removed` does. 33,617 are accepted.
+  - Against `eval/corpus_hcompile.jsonl`, over every (goal, constant) verdict on a constant in
+    the pool, main and R1b: **29,426 agree, 0 disagree.**
+- **Exclusions (decision 3).** Each goal's `H_main` and its `thm` (own declaration for Tier A,
+  source theorem for Tier B).
+- **Near (decision 4).**
+  - S is the predicate symbols of the root target (goal position 0) and of the heads of every
+    clause compiled from the accepted `H_main`, from `eval_pool syms`. Data clauses count, with
+    their result type as head (`c:Nat` for one goal). `app` is removed.
+  - A pool member is near if a head of any of its clauses has a symbol in S.
+  - Near pool per goal: median 24,906, minimum 24, maximum 29,354.
+  - Two goals have fewer than 32 near candidates (24 each):
+    `main:B/Std.DTreeMap.Raw.Equiv.constGetEntryGED_eq/1` and
+    `main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_contains_eq_…`. Their near runs at
+    k = 32 use all 24 (`k_actual` = 24).
+  - *Observation, not a change:* 31 of the 50 goals have `c:Eq` in S, and about 74% of the pool
+    has an `Eq` head. For those goals, "near" as decision 4 defines it is close to "random".
+    Only goals with a specific predicate (`…Impl.WF`, `SPred.entails`, `List.Perm`, …) get a
+    small, truly near pool.
+- **Runs (decision 6).**
+  - `specs_scaling.jsonl` has 11 specs per goal: `scale:none:0:<goal>`, and
+    `scale:<mode>:<k>:<goal>` for k ∈ {2, 4, 8, 16, 32}.
+  - `H` is the goal's spec `H` (H_main, in `specs_full.jsonl` order) followed by the distractors
+    in rank order. Fields: `nmax` = `orig_N` = the proved N, `orig_outcome` = `proved`,
+    `distractors`, `k`, `k_actual`, `mode`, `baselines: false`.
+  - The pilot is the rank-0 goal of each bucket, 4 × 11 = 44 specs:
+    `main:B/Int32.toInt8_not/10` (N = 1), `main:B/UInt16.sizeOf/18` (N = 2),
+    `main:B/Nat.exists_testBit_of_ne_zero/1` (N = 3), `main:B/Nat.lcm_div/28` (N = 5).
+- **Harness (decisions 6, 7 and 9), `Test/EvalRun.lean`.**
+  - Optional spec fields: `nmax` (the N loop's bound, default 10), `distractors` (watched in
+    the decoded term: `distractors_used`), and `orig_N`, `orig_outcome`, `k`, `mode`.
+  - With `orig_N` set, the record adds `below_original` and `feasible` (proved at N ≤ `orig_N`),
+    and the shard applies decision 9's stop rules, exiting 6, which the driver now stops on:
+    - an outcome other than proved, timeout or memout within the limits is a monotonicity
+      violation;
+    - a k = 0 run whose outcome or N differs from `eval/final/`, unless either is a resource
+      limit, also stops.
+  - A driver-written crash record is a resource limit (memory or watchdog).
+  - `eval_run sizes` gives decision 7's `countOnly` sizes at `nmax`, in its own processes, so
+    sizes exist even for runs that crash.
+  - *Check:* the 36 named cases with the changed harness (`eval/c7_check/named_after`) equal the
+    run before the change (`eval/c7_check/named`) in every field except times and memory, per-N
+    sizes included.

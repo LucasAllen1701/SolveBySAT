@@ -288,3 +288,22 @@ crash(shard, oom) on main:A/String.Slice.Model.map_get_positionsFrom_of_splits
 crash(shard, oom) on main:A/USize.toUInt8_shiftLeft
 crash(shard, oom) on main:A/Vector.flatten_push
 shard 9: done; 623 results; 23170 s
+crash(shard, oom) on main:A/Vector.toList_zip
+crash(shard, oom) on main:A/Vector.zip_eq_zipWith
+crash(shard, oom) on main:A/_private.Std.Data.DTreeMap.Internal.Zipper.0.Std.DTreeMap.Internal.toList_rcoIter
+crash(shard, oom) on main:A/_private.Std.Data.DTreeMap.Internal.Zipper.0.Std.DTreeMap.Internal.toList_roiIter
+crash(shard, oom) on main:A/_private.Std.Data.Internal.List.Associative.0.Std.Internal.List.le_min_iff
+crash(shard, oom) on main:A/_private.Std.Sat.AIG.CNF.0.Std.Sat.AIG.Decl.iteToCNF_eval
+crash(shard, oom) on main:B/Array.append_eq_replicate_iff/5
+crash(shard, oom) on main:B/BitVec.not_lt/1
+crash(shard, oom) on main:B/ByteArray.extract_append_eq_left/3
+crash(shard, oom) on main:B/Int.toArray_rco_eq_singleton_append_iff/17
+crash(shard, oom) on main:B/Lean.Grind.CommRing.Poly.denote_mul/2
+crash(shard, oom) on main:B/List.find?_toArray/54
+crash(shard, oom) on main:B/List.getElem?_mapFinIdx/93
+crash(shard, oom) on main:B/StateT.run_map/1
+crash(shard, oom) on main:B/StateT.run_map/2
+crash(shard, oom) on main:B/Std.DHashMap.Const.get!_insertIfNew/0
+crash(shard, oom) on main:B/Std.DHashMap.Const.get!_insertIfNew/4
+crash(shard, oom) on main:B/Std.DHashMap.Const.get!_insertIfNew/5
+shard 10: done; 673 results; 24855 s

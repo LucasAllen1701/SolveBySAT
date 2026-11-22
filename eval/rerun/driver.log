@@ -441,3 +441,12 @@ crash(shard, oom) on main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_m
 crash(shard, oom) on main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/5
 crash(shard, oom) on main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/6
 shard 16: done; 973 results; 38023 s
+crash(shard, oom) on main:B/Std.ExtTreeMap.minKey?_eq_some_minKey!/0
+crash(shard, oom) on main:B/Std.HashMap.instLawfulGetElemMemOfEquivBEqOfLawfulHashable/9
+crash(shard, oom) on main:B/Std.HashMap.instLawfulGetElemMemOfEquivBEqOfLawfulHashable/29
+crash(shard, oom) on main:B/Std.HashMap.isEmpty_diff_iff/0
+crash(shard, oom) on main:B/Std.HashMap.mem_insert/0
+crash(shard, oom) on main:B/Std.HashSet.mem_erase/0
+crash(shard, oom) on main:B/Std.Internal.List.Const.map_insertEntry_perm_filter_map/33
+crash(shard, oom) on main:B/Std.Internal.List.Const.map_insertEntry_perm_filter_map/81
+shard 17: done; 1023 results; 39602 s

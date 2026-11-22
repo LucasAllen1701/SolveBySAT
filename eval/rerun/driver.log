@@ -177,3 +177,21 @@ crash(shard, oom) on main:A/Std.DTreeMap.Raw.Equiv.insertMany_list
 crash(shard, oom) on main:A/Std.DTreeMap.Raw.Equiv.of_forall_getKey_eq_of_forall_constGet?_eq
 crash(shard, oom) on main:A/Std.DTreeMap.Raw.contains_eq_false_iff_not_mem
 shard 2: done; 273 results; 8043 s
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.get?_diff_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.getKey!_union_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.getKey?_union_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.getKeyD_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.insertMany_list_equiv_foldl
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.maxKeyD_eq_iff_getKey?_eq_self_and_forall
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.ofList_cons
+crash(shard, oom) on main:A/Std.DTreeMap.get!_diff_of_not_mem_left
+crash(shard, oom) on main:A/Std.DTreeMap.get!_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.get?_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.DTreeMap.getKey?_diff_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.getKeyD_union_of_not_mem_left
+crash(shard, oom) on main:A/Std.DTreeMap.get_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.DTreeMap.inter_equiv_empty_comm
+crash(shard, oom) on main:A/Std.DTreeMap.mem_map
+crash(shard, oom) on main:A/Std.Do.Spec.IterM.forIn_filter
+shard 3: done; 323 results; 10511 s

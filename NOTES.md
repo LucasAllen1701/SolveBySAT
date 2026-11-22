@@ -1761,3 +1761,15 @@ Implemented in `eval/merge.py`, which writes `eval/final/results.jsonl` and
   killed a 600 MB allocation; Firefox closed, 6.6 GB available before the start.
 - `eval/rerun/header.json` still records the first start (kernel 7.3.4). Goals from 124 on run
   under 7.3.5; this can change times, not the CNFs.
+- **Rerun finished (recorded automatically by `Test/eval_rerun.sh`, 2026-11-22 22:11:43); tables to be checked.**
+
+  | run | tier | goals | crash(oom) | no_proof_le_Nmax | proved | timeout(solver) |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | main | A | 632 | 279 | 339 | 9 | 5 |
+  | main | B | 453 | 162 | 211 | 78 | 2 |
+  | r1b | B | 43 | 22 | 16 | 5 | 0 |
+  
+  Proved at N: 1: 46, 2: 19, 3: 15, 4: 5, 5: 6, 8: 1
+  
+  
+

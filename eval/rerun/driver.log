@@ -414,3 +414,30 @@ crash(shard, oom) on main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0
 crash(shard, oom) on main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/2
 crash(shard, oom) on main:B/Std.DTreeMap.getKey?_diff_of_not_mem_right/0
 shard 15: done; 923 results; 35364 s
+crash(shard, oom) on main:B/Std.DTreeMap.inter_equiv_empty_comm/1
+crash(shard, oom) on main:B/Std.Do.Spec.tryCatch_StateT/1
+crash(shard, oom) on main:B/Std.ExtDHashMap.Const.get?_insertIfNew/0
+crash(shard, oom) on main:B/Std.ExtDHashMap.getKey?_insertMany_list_of_contains_eq_false/0
+crash(shard, oom) on main:B/Std.ExtDHashMap.getKey?_insertMany_list_of_contains_eq_false/2
+crash(shard, oom) on main:B/Std.ExtDHashMap.getKey?_insertMany_list_of_contains_eq_false/3
+crash(shard, oom) on main:B/Std.ExtDHashMap.insertMany_list_eq_empty_iff/5
+crash(shard, oom) on main:B/Std.ExtDHashMap.insertMany_list_eq_empty_iff/7
+crash(shard, oom) on main:B/Std.ExtDTreeMap.Const.size_insertMany_list_le/0
+crash(shard, oom) on main:B/Std.ExtDTreeMap.Const.size_insertMany_list_le/1
+crash(shard, oom) on main:B/Std.ExtDTreeMap.Const.size_insertMany_list_le/3
+crash(shard, oom) on main:B/Std.ExtDTreeMap.Const.size_insertMany_list_le/5
+crash(shard, oom) on main:B/Std.ExtDTreeMap.filter_eq_empty_iff/1
+crash(shard, oom) on main:B/Std.ExtDTreeMap.getKey?_insertMany_list_of_mem/0
+crash(shard, oom) on main:B/Std.ExtDTreeMap.getKey?_insertMany_list_of_mem/1
+crash(shard, oom) on main:B/Std.ExtDTreeMap.getKey?_insertMany_list_of_mem/2
+crash(shard, oom) on main:B/Std.ExtDTreeMap.getKey?_insertMany_list_of_mem/4
+crash(shard, oom) on main:B/Std.ExtDTreeMap.getKey?_insertMany_list_of_mem/5
+crash(shard, oom) on main:B/Std.ExtDTreeMap.getKey?_insertMany_list_of_mem/8
+crash(shard, oom) on main:B/Std.ExtDTreeMap.getKeyD_minKeyD/0
+crash(shard, oom) on main:B/Std.ExtDTreeMap.getKeyD_minKeyD/1
+crash(shard, oom) on main:B/Std.ExtDTreeMap.minKey?_eq_some_iff_getKey?_eq_self_and_forall/1
+crash(shard, oom) on main:B/Std.ExtDTreeMap.size_le_size_insertMany_list/5
+crash(shard, oom) on main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2
+crash(shard, oom) on main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/5
+crash(shard, oom) on main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/6
+shard 16: done; 973 results; 38023 s

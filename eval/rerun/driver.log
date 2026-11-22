@@ -465,3 +465,25 @@ crash(shard, oom) on main:B/Std.TreeMap.isEmpty_filterMap_iff/0
 crash(shard, oom) on main:B/Std.TreeMap.maxKeyD_eq_iff_getKey?_eq_self_and_forall/0
 crash(shard, oom) on main:B/Std.TreeSet.Raw.min?_eq_some_iff_get?_eq_self_and_forall/0
 shard 18: done; 1073 results; 41476 s
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.mem_toList_iff_getKey?_eq_some_and_get?_eq_some/0
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.mem_toList_iff_getKey?_eq_some_and_get?_eq_some/19
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/26
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.Const.get!_diff_of_contains_right/3
+crash(shard, oom) on r1b:B/Std.ExtDTreeMap.Const.size_insertMany_list_le/3
+crash(shard, oom) on r1b:B/Std.DTreeMap.inter_equiv_empty_comm/1
+crash(shard, oom) on r1b:B/Std.HashMap.isEmpty_diff_iff/0
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/50
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.isSome_apply_of_contains_filterMap/246
+crash(shard, oom) on r1b:B/Std.Internal.List.length_filter_eq_length_iff/9
+crash(shard, oom) on r1b:B/Std.TreeMap.maxKeyD_eq_iff_getKey?_eq_self_and_forall/0
+crash(shard, oom) on r1b:B/Std.DTreeMap.Raw.Const.equiv_iff_toArray_eq/0
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.toArray_map/7
+crash(shard, oom) on r1b:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/2
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.get!_filterMap_of_getKey?_eq_some/0
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.Const.size_alter/34
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.get!_diff_of_contains_eq_false_left/11
+crash(shard, oom) on r1b:B/Std.DTreeMap.Internal.Impl.Const.toArray_map/15
+crash(shard, oom) on r1b:B/Std.DTreeMap.get!_diff_of_not_mem_left/4
+crash(shard, oom) on r1b:B/Std.DHashMap.getKey?_eq_some_getKeyD/2
+crash(shard, oom) on r1b:B/Std.DHashMap.Internal.Raw₀.isEmpty_inter_left/9
+shard 19: done; 1123 results; 43499 s

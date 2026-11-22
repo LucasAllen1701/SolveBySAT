@@ -450,3 +450,18 @@ crash(shard, oom) on main:B/Std.HashSet.mem_erase/0
 crash(shard, oom) on main:B/Std.Internal.List.Const.map_insertEntry_perm_filter_map/33
 crash(shard, oom) on main:B/Std.Internal.List.Const.map_insertEntry_perm_filter_map/81
 shard 17: done; 1023 results; 39602 s
+crash(shard, oom) on main:B/Std.Internal.List.length_filter_eq_length_iff/9
+crash(shard, oom) on main:B/Std.Internal.List.length_filter_eq_length_iff/11
+crash(shard, oom) on main:B/Std.Internal.List.maxKey?_eraseKey_eq_iff_beq_maxKey?_eq_false/0
+crash(shard, oom) on main:B/Std.Internal.List.mem_eraseKey_of_key_ne/0
+crash(shard, oom) on main:B/Std.Internal.List.mem_replaceEntry_of_true/11
+crash(shard, oom) on main:B/Std.Internal.List.mem_replaceEntry_of_true/15
+crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_filter'/6
+crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_filter'/21
+crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_filter'/26
+crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_inter_of_mem_right/0
+crash(shard, oom) on main:B/Std.TreeMap.Raw.mem_insertMany_list/0
+crash(shard, oom) on main:B/Std.TreeMap.isEmpty_filterMap_iff/0
+crash(shard, oom) on main:B/Std.TreeMap.maxKeyD_eq_iff_getKey?_eq_self_and_forall/0
+crash(shard, oom) on main:B/Std.TreeSet.Raw.min?_eq_some_iff_get?_eq_self_and_forall/0
+shard 18: done; 1073 results; 41476 s

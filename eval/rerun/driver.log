@@ -255,3 +255,19 @@ crash(shard, oom) on main:A/Std.IterM.step_dropWhileM
 crash(shard, oom) on main:A/Std.IterM.step_flatMap
 crash(shard, oom) on main:A/Std.IterM.toListRev_filterMapM_map
 shard 7: done; 523 results; 18883 s
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getD_filter'
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getElem!_filterMap'
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getElem?_filter
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getElem_union_of_mem_right
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getKeyD_insertMany_list_of_contains_eq_false
+crash(shard, oom) on main:A/Std.TreeMap.Raw.mem_alter
+crash(shard, oom) on main:A/Std.TreeMap.Raw.mem_alter_of_compare_eq
+crash(shard, oom) on main:A/Std.TreeMap.Raw.mem_insertMany_list
+crash(shard, oom) on main:A/Std.TreeMap.Raw.size_insertMany_list_le
+crash(shard, oom) on main:A/Std.TreeMap.find?_toList_eq_some_iff_getKey?_eq_some_and_getElem?_eq_some
+crash(shard, oom) on main:A/Std.TreeMap.getElem!_diff_of_not_mem_right
+crash(shard, oom) on main:A/Std.TreeMap.getElem!_union_of_not_mem_left
+crash(shard, oom) on main:A/Std.TreeMap.getElem_eq_getElem!
+crash(shard, oom) on main:A/Std.TreeMap.inter_equiv_empty_comm
+crash(shard, oom) on main:A/Std.TreeMap.isEmpty_filterMap_iff
+shard 8: done; 573 results; 21106 s

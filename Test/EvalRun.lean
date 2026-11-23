@@ -18,6 +18,7 @@ call is its own, to add CaDiCaL's time limit (`-t`) and measure the solver's mem
 import Lean
 import SolveBySat
 import Test.EvalCommon
+import Test.M8Rules
 
 open Lean Meta SolveBySat Eval
 
@@ -85,6 +86,11 @@ structure Spec where
   origOutcome : String := ""
   k : Nat := 0
   mode : String := ""
+  /-- 8a (M8_PLAN §2.3): generate the rewriting rules for this goal and pass H as in §2.3.
+  `H` is then the goal's accepted H_main constants. `false` for every other spec. -/
+  probe : Bool := false
+  /-- 8a: `rewrite_A`, `rewrite_B` or `control` (§2.2, §2.5's stop rules). -/
+  probeGroup : String := ""
 
 def parseSpec (names : Std.HashMap String Name) (j : Json) : Except String Spec := do
   let name := fun (s : String) => match names[s]? with
@@ -104,7 +110,9 @@ def parseSpec (names : Std.HashMap String Name) (j : Json) : Except String Spec 
            origN := (j.getObjValAs? Nat "orig_N").toOption,
            origOutcome := (j.getObjValAs? String "orig_outcome").toOption.getD "",
            k := (j.getObjValAs? Nat "k").toOption.getD 0,
-           mode := (j.getObjValAs? String "mode").toOption.getD "" }
+           mode := (j.getObjValAs? String "mode").toOption.getD "",
+           probe := (j.getObjValAs? Bool "probe").toOption.getD false,
+           probeGroup := (j.getObjValAs? String "probe_group").toOption.getD "" }
 
 /-- The closed goal type and its binder count (the Tier B context). -/
 def goalOf (s : Spec) : MetaM (Expr × Nat) := do
@@ -390,6 +398,17 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
         let (goal, _) ← goalOf s
         let progress := fun (N : Nat) =>
           appendLine started (Json.mkObj [("key", jStr s.key), ("N", toJson N)]).compress
+        if s.probe then
+          let tg ← IO.monoMsNow
+          let R ← M8.generate goal s.H
+          let genMs ← msSince tg
+          let H := M8.probeH s.H R.rules
+          let watch := H.filter (!s.H.contains ·)
+          let (sat, bug) ← runSat goal H s.opts progress s.nmax watch
+          let used := (sat.getObjValAs? (Array String) "distractors_used").toOption.getD #[]
+          return (sat.mergeObj (Json.mkObj (M8.rulesJson R ++
+            [("probe_group", jStr s.probeGroup), ("probe_H_size", toJson H.size), ("probe_gen_ms", toJson genMs),
+             ("probe_extra_used", toJson used), ("uses_rule", toJson (used.any (·.startsWith "_probe.")))])), bug)
         runSat goal s.H s.opts progress s.nmax s.distractors
       return (sat, Json.mkObj blInfo, bug)).toBaseIO
     let (rss, hwm) ← memMB
@@ -415,10 +434,14 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
           let stop1 := if !proved && !limits.contains outcome && !bug then
               some s!"monotonicity violation: {outcome} within the limits, original N {n0}" else none
           -- k = 0 builds the CNFs of the final results: same outcome and N (unless a limit)
-          let stop2 := if s.k == 0 && !limits.contains outcome && !limits.contains s.origOutcome &&
+          let stop2 := if s.k == 0 && !s.probe && !limits.contains outcome && !limits.contains s.origOutcome &&
               (outcome != s.origOutcome || (proved && nFound != some n0)) then
               some s!"k = 0 differs from eval/final/: {outcome} N {nFound} against {s.origOutcome} N {n0}" else none
           (f, stop1 <|> stop2)
+      -- 8a (M8_PLAN §2.5): a rewriting goal proved with its H_main constants alone stops the run
+      let stop := if s.probe && s.probeGroup.startsWith "rewrite" && outcome == "proved" &&
+          ((sat.getObjValAs? (Array String) "probe_extra_used").toOption.getD #[]).isEmpty then
+          stop <|> some "a rewriting goal proved with its H_main constants only (M8_PLAN 2.5)" else stop
       let j := (Json.mkObj head).mergeObj sat |>.mergeObj bl |>.mergeObj scal |>.mergeObj
         (Json.mkObj ([("total_ms", Json.num (← msSince t0)),
                      ("rss_mb", Json.num rss), ("hwm_mb", Json.num hwm)] ++
@@ -428,7 +451,7 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
         IO.eprintln s!"STOP: {(sat.getObjValD "outcome").compress} on {s.key}: {(sat.getObjValD "reason").compress}"
         return 3
       if let some m := stop then
-        IO.eprintln s!"STOP (EVAL_PLAN 10.9 decision 9): {m} on {s.key}"
+        IO.eprintln s!"STOP (EVAL_PLAN 10.9 decision 9, M8_PLAN 2.5): {m} on {s.key}"
         return 6
     | .error e =>
       appendLine results (Json.mkObj (head ++ [("outcome", jStr "harness_error"),
@@ -452,21 +475,51 @@ unsafe def runSizes (specsPath results started : System.FilePath) : IO UInt32 :=
     let t0 ← IO.monoMsNow
     let r ← runMeta env do
       let (goal, _) ← goalOf s
+      let (H, extra) : Array Name × List (String × Json) ← if s.probe then do
+          let R ← M8.generate goal s.H
+          pure (M8.probeH s.H R.rules, [("probe_rules", toJson R.rules.size)])
+        else pure (s.H, [])
       let mut acc := #[]
-      for c in s.H do
+      for c in H do
         try discard <| compile goal #[c]; acc := acc.push c catch _ => pure ()
       let C ← compile goal acc
       let E := encode C.forest s.nmax { countOnly := true }
-      return Json.mkObj [("N", toJson s.nmax), ("vars", toJson E.cnf.nVars), ("clauses", toJson E.cnf.numClauses),
+      return Json.mkObj ([("N", toJson s.nmax), ("vars", toJson E.cnf.nVars), ("clauses", toJson E.cnf.numClauses),
         ("families", Json.mkObj (E.cnf.familyCounts.toList.map fun (f, k) => (f, Json.num k))),
-        ("H_accepted", toJson acc.size)]
+        ("H_accepted", toJson acc.size)] ++ extra)
     let (_, hwm) ← memMB
     appendLine results ((Json.mkObj [("key", jStr s.key), ("status", jStr "ok")]).mergeObj r |>.mergeObj
       (Json.mkObj [("ms", toJson (← msSince t0)), ("hwm_mb", toJson hwm)])).compress
   return 0
 
+/-- 8a (M8_PLAN §2.3, "Bookkeeping"): for each probe spec, the rules generated for its goal, the
+rules that failed to build, and the H constants the compiler rejects (each compiled on its own, as
+`runSat` does). Nothing is encoded or solved. -/
+unsafe def runProbeRules (specsPath results : System.FilePath) : IO UInt32 := do
+  let lines := (← IO.FS.readFile specsPath).splitOn "\n" |>.filter (· != "")
+  let js ← lines.mapM fun l => IO.ofExcept (Json.parse l)
+  let env ← importEnv #[`Init, `Std]
+  let names := nameTable env
+  let specs ← js.mapM fun j => IO.ofExcept (parseSpec names j)
+  let done ← readKeys results
+  for s in specs.filter (!done.contains ·.key) do
+    let t0 ← IO.monoMsNow
+    let r ← runMeta env do
+      let (goal, _) ← goalOf s
+      let R ← M8.generate goal s.H
+      let H := M8.probeH s.H R.rules
+      let mut rej := #[]
+      for c in H do
+        try discard <| compile goal #[c]
+        catch e => rej := rej.push (Json.arr #[c.toString, ← msgOf e])
+      return Json.mkObj (M8.rulesJson R ++ [("probe_H_size", toJson H.size), ("H_rejected", Json.arr rej)])
+    appendLine results ((Json.mkObj [("key", jStr s.key), ("probe_group", jStr s.probeGroup)]).mergeObj r |>.mergeObj
+      (Json.mkObj [("ms", toJson (← msSince t0))])).compress
+  return 0
+
 unsafe def main (args : List String) : IO UInt32 := do
   match args with
+  | ["probe-rules", specs, results] => runProbeRules specs results
   | ["run", specs, results, started, warmup] => runShard specs results started warmup
   | ["sizes", specs, results, started] => runSizes specs results started
   | "verify-removed" :: cs =>

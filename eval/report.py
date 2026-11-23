@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Milestone 7d-1: generate EVAL.md from the 7b data alone (EVAL_PLAN §6, §10.6, §10.7, §10.8).
+"""Milestone 7d: generate EVAL.md from the data files alone (EVAL_PLAN §6, §10.6–§10.10).
 
   python3 eval/report.py            write EVAL.md (repo root)
   python3 eval/report.py samples    write the seeded review samples to eval/reviews/
@@ -18,6 +18,10 @@ Inputs, all under eval/:
                                          results that record it)
   scaling_synthetic*.jsonl               7c, EVAL_PLAN §4.1 (R5)
   specs_scaling.jsonl, scaling_full/     7c, EVAL_PLAN §4.2 (R6): results, countOnly sizes, header
+  scaling_goals.jsonl, scaling_pool.jsonl  7c set-up: each goal's S, and the pool's clause heads (R6, 7d-2)
+  scaling_synthetic_e6.jsonl             7d-2 E6: both typing filters off (§10.10 decision 7)
+  m8_families.json, m8_obstacles.jsonl   7d-2 E5: the fixed family table and the constant facts
+                                         (Test/M8Facts.lean) (§10.10 decision 6)
   reviews/*.jsonl                        the hand reviews (7d-1 step 3, redrawn after the merge).
                                          `*.evidence.jsonl` files are review evidence, not reviews.
                                          reviews/before_fix/ holds the reviews of the samples drawn
@@ -132,6 +136,13 @@ class Data:
         self.sc_specs = {s["key"]: s for s in load(os.path.join(E, "specs_scaling.jsonl")) if "key" in s}
         self.sc_res = {r["key"]: r for r in load(os.path.join(E, "scaling_full", "results.jsonl"))}
         self.sc_size = {r["key"]: r for r in load(os.path.join(E, "scaling_full", "sizes.jsonl"))}
+        self.sc_goals = {g["key"]: g for g in load(os.path.join(E, "scaling_goals.jsonl"))}
+        self.pool = [r for r in load(os.path.join(E, "scaling_pool.jsonl")) if "name" in r]
+        # 7d-2: E6 (§10.10 decision 7) and E5's fixed family table and constant facts (decision 6)
+        self.e6 = [r for r in load(os.path.join(E, "scaling_synthetic_e6.jsonl")) if "header" not in r]
+        fp = os.path.join(E, "m8_families.json")
+        self.m8 = json.load(open(fp)) if os.path.exists(fp) else None
+        self.m8_facts = {r["name"]: r for r in load(os.path.join(E, "m8_obstacles.jsonl"))}
         hp = os.path.join(E, "scaling_full", "header.json")
         self.sc_hdr = json.load(open(hp)) if os.path.exists(hp) else None
         self.checks = []
@@ -446,9 +457,68 @@ def r2(d):
                 table(["raw outcome"] + [r.split(" ", 1)[1] for r in REASONS] + ["total"],
                       [[a] + [x.get((a, b), 0) for b in REASONS] + [sum(x.get((a, b), 0) for b in REASONS)]
                        for a in raws]), ""]
+    out += r2_breakdown(d)
     rd = d.reviews.get("r2_unexplained")
     if rd:
         out += review_summary(d, "r2_unexplained", rd, "Hand review of unexplained goals (§3.3)")
+    return out
+
+
+R2_REASON_NAMES = {"variable applied to arguments (higher order)": "clause variable applied to arguments",
+                   "head, target or result is a variable": "clause variable as head symbol"}
+
+
+def r2_goals(d, t):
+    """Main-run goals of tier t with primary reason 2: goal accepted, not proved, some H_main constant rejected."""
+    return [k for k in d.keys("main", t) if d.reason(k) == REASONS[1]]
+
+
+def r2_stats(d, t):
+    ks = r2_goals(d, t)
+    rc, cc, one = collections.Counter(), collections.Counter(), collections.Counter()
+    cls = collections.defaultdict(collections.Counter)
+    for k in ks:
+        rej = d.acc[k][1]
+        for c in {R2_REASON_NAMES.get(msg_class(m), msg_class(m)) for _, m in rej}:
+            rc[c] += 1
+        cs = {c for c, _ in rej}
+        for c, m in rej:
+            cls[c][R2_REASON_NAMES.get(msg_class(m), msg_class(m))] += 1
+        for c in cs:
+            cc[c] += 1
+        if len(cs) == 1:
+            one[next(iter(cs))] += 1
+    return ks, rc, cc, one, cls
+
+
+def r2_breakdown(d):
+    """§10.10 decision 4: reason 2 by rejection reason, by constant, and by single blocking constant."""
+    out = ["### R2: what blocks reason 2 (EVAL_PLAN §7, §10.10 decision 4)", "",
+           "Reason 2 goals: accepted by the compiler, not proved, and at least one `H_main` constant rejected. "
+           "A goal counts once for each rejection reason, and once for each constant, that occurs among its rejected "
+           "constants, so columns do not sum to the number of goals.", ""]
+    st = {t: r2_stats(d, t) for t in "AB"}
+    out.append(f"Goals: Tier A {len(st['A'][0]):,}, Tier B {len(st['B'][0]):,}.")
+    out += ["", "By rejection reason (goals with at least one constant rejected for that reason):", ""]
+    allr = sorted(set(st["A"][1]) | set(st["B"][1]), key=lambda x: (-(st["A"][1][x] + st["B"][1][x]), x))
+    out.append(table(["rejection reason", "Tier A goals", "share", "Tier B goals", "share"],
+                     [[r, st["A"][1][r], pct(st["A"][1][r], len(st["A"][0])), st["B"][1][r], pct(st["B"][1][r], len(st["B"][0]))]
+                      for r in allr]))
+    for t in "BA":
+        ks, _, cc, _, cls = st[t]
+        rows = [[f"`{c}`", v, pct(v, len(ks)), ", ".join(f"{a} {b:,}" for a, b in cls[c].most_common())]
+                for c, v in sorted(cc.items(), key=lambda z: (-z[1], z[0]))[:15]]
+        out += ["", f"Tier {t}: the 15 constants that block the most goals (goals where the constant is rejected; "
+                "its rejection reasons, counted per goal and constant):", "",
+                table(["constant", "goals", f"share of {len(ks):,}", "rejection reasons"], rows)]
+    out += ["", "Goals blocked by exactly one rejected constant (removing that constant's rejection alone would "
+            "leave the goal with a fully accepted `H_main`), by constant:", ""]
+    for t in "BA":
+        ks, _, _, one, _ = st[t]
+        n1 = sum(one.values())
+        top = sorted(one.items(), key=lambda z: (-z[1], z[0]))
+        out.append(f"- **Tier {t}:** {n1:,} of {len(ks):,} goals ({pct(n1, len(ks))}); {len(one):,} distinct constants. "
+                   + "; ".join(f"`{c}` {v}" for c, v in top[:12]) + ".")
     return out
 
 
@@ -585,10 +655,14 @@ def r5(d):
     out += ["Clauses per family at N = 8, all refinements on:", "",
             table(["family", "k"] + [f.split(" ", 1)[1].split(" (")[0] for f in fams] + ["total", "groundness + decomposition %"], rows), ""]
     rows = []
+    X6 = {(x["family"], x["k"], x["N"]): x for x in d.e6}
     for fa in SYN_FAMS:
         for n in SYN_NS:
-            rows.append([fa, n] + [R[(fa, 32, n, c)]["clauses"] for c in SYN_CFGS])
-    out += ["Total clauses at k = 32 by configuration:", "", table(["family", "N"] + SYN_CFGS, rows), ""]
+            rows.append([fa, n] + [R[(fa, 32, n, c)]["clauses"] for c in SYN_CFGS]
+                        + ([X6[(fa, 32, n)]["clauses"]] if X6 else []))
+    out += ["Total clauses at k = 32 by configuration" + (" (the last column is E6, exploratory: static typing and candidate "
+            "pruning both off; see below)" if X6 else "") + ":", "",
+            table(["family", "N"] + SYN_CFGS + (["no_typing (E6, exploratory)"] if X6 else []), rows), ""]
     same = {c: all(R[(fa, k, n, c)]["clauses"] == R[(fa, k, n, "all")]["clauses"] and
                    R[(fa, k, n, c)]["families"] == R[(fa, k, n, "all")]["families"]
                    for fa in SYN_FAMS for k in SYN_KS for n in SYN_NS) for c in SYN_CFGS[1:]}
@@ -624,6 +698,54 @@ def r5(d):
             + ", ".join(f"{v} {k}" for k, v in sorted(fc.items())) + f". The largest equal cell has {eqmax:,} clauses. "
             "The memouts are " + "; ".join(f"{a} k = {b} N = {c} {e}" for a, b, c, e in mo) + "."
             if mo else f"**`countOnly` against a full encode.** " + ", ".join(f"{v} {k}" for k, v in sorted(fc.items())) + "."]
+    out += [""] + e6(d, R)
+    return out
+
+
+def e6(d, R):
+    """§10.10 decision 7 (E6, exploratory): both typing filters off, every other refinement on."""
+    out = ["### E6 (exploratory): both typing filters off (§10.10 decision 7)", ""]
+    if not d.e6:
+        return out + ["*Pending.*"]
+    X = {(x["family"], x["k"], x["N"]): x for x in d.e6}
+    bad = [x for x in d.e6 if x["status"] != "ok" or x.get("H_rejected")]
+    out += [f"Not pre-registered. The 60 cells of the grid (4 families × k ∈ {{0, 4, 8, 16, 32}} × N ∈ {{5, 8, 12}}) counted with "
+            "`countOnly` in a sixth configuration, *no_typing*: static typing and candidate pruning both off, every other "
+            "refinement on (`eval/scaling_synthetic_e6.jsonl`). The pre-registered grid is unchanged. "
+            f"Cells: {len(d.e6)}; not counted or with a rejected constant: {len(bad)}. With it, *no_static* is candidate "
+            "pruning alone, *no_candidate* is static typing alone, and *all* is both.", ""]
+    rows = []
+    for fa in SYN_FAMS:
+        for n in SYN_NS:
+            dd = X[(fa, 32, n)]["clauses"]
+            rows.append([fa, n, dd, R[(fa, 32, n, "no_static")]["clauses"], R[(fa, 32, n, "no_candidate")]["clauses"],
+                         R[(fa, 32, n, "all")]["clauses"],
+                         f"{dd / R[(fa, 32, n, 'all')]['clauses']:.2f}"])
+    out += ["Total clauses at k = 32:", "",
+            table(["family", "N", "no_typing (E6)", "candidate pruning alone (no_static)", "static typing alone (no_candidate)",
+                   "both (all)", "no_typing / all"], rows), ""]
+    rows = []
+    for fa in SYN_FAMS:
+        rows.append([fa] + [f"{math.log(X[(fa, 32, n)]['clauses'] / X[(fa, 8, n)]['clauses']) / math.log(4):.2f}" for n in SYN_NS]
+                    + [f"{100 * gd_share(X[(fa, 32, n)]):.1f}" for n in SYN_NS])
+    out += ["*no_typing*: growth exponent from k = 8 to 32, and the share of groundness plus decomposition (%) at k = 32:", "",
+            table(["family"] + [f"exponent N = {n}" for n in SYN_NS] + [f"g + d % N = {n}" for n in SYN_NS], rows), ""]
+    same = [fa for fa in SYN_FAMS if all(X[(fa, k, n)]["clauses"] == R[(fa, k, n, "all")]["clauses"]
+                                         and X[(fa, k, n)]["families"] == R[(fa, k, n, "all")]["families"]
+                                         for k in SYN_KS for n in SYN_NS)]
+    t2 = []
+    for n in SYN_NS:
+        dd, cand, stat, both = (X[("T2", 32, n)]["clauses"], R[("T2", 32, n, "no_static")]["clauses"],
+                                R[("T2", 32, n, "no_candidate")]["clauses"], R[("T2", 32, n, "all")]["clauses"])
+        t2.append((n, dd, cand, stat, both))
+    out.append("**What each filter does alone in T2** (k = 32): with both off, T2 has "
+               + ", ".join(f"{dd:,}" for _, dd, _, _, _ in t2) + " clauses at N = 5, 8, 12. Candidate pruning alone keeps "
+               + ", ".join(pct(c, dd) for _, dd, c, _, _ in t2) + " of them; static typing alone keeps "
+               + ", ".join(pct(st_, dd) for _, dd, _, st_, _ in t2) + "; both keep "
+               + ", ".join(pct(b, dd) for _, dd, _, _, b in t2) + ". "
+               + ("The two filters remove the same clauses in T2: either alone gives the count of both. "
+                  if all(c == b and st_ == b for _, _, c, st_, b in t2) else "")
+               + "Families where *no_typing* equals *all* in every cell: " + (", ".join(same) or "none") + ".")
     return out
 
 
@@ -711,7 +833,70 @@ def r6(d):
         rows.append([b.replace("-", "–"), len(gs)] + [fmt(med([F[(g, m)][0] for g in gs])) for m in ("random", "near")]
                     + [sum(1 for g in gs if F[(g, m)][0] == 32) for m in ("random", "near")])
     out += ["By original N (bucket): median largest feasible k, and goals feasible at every k up to 32:", "",
-            table(["original N", "goals", "median random", "median near", "all k random", "all k near"], rows)]
+            table(["original N", "goals", "median random", "median near", "all k random", "all k near"], rows), ""]
+    out += r6_additions(d, goals, F)
+    return out
+
+
+def sc_eq_split(d, goals):
+    """§10.10 decision 5: the goals whose S (eval/scaling_goals.jsonl) contains `c:Eq`, and the others."""
+    eq = [g for g in goals if "c:Eq" in d.sc_goals[g]["S"]]
+    return [("S contains `c:Eq`", eq), ("S without `c:Eq`", [g for g in goals if g not in set(eq)])]
+
+
+def sc_exponent(d, g, m, actual=False):
+    """Per-goal growth exponent in k from 8 to 32: log(c₃₂ / c₈) / log(k₃₂ / k₈), clauses at the original N."""
+    S, Z = d.sc_specs, d.sc_size
+    a, b = f"scale:{m}:8:{g}", f"scale:{m}:32:{g}"
+    ka, kb = (S[a]["k_actual"], S[b]["k_actual"]) if actual else (8, 32)
+    return math.log(Z[b]["clauses"] / Z[a]["clauses"]) / math.log(kb / ka)
+
+
+def r6_additions(d, goals, F):
+    S, R, Z = d.sc_specs, d.sc_res, d.sc_size
+    groups = [("all goals", goals)] + sc_eq_split(d, goals)
+    out = ["**Per-goal growth exponent** (§10.10 decision 5): for each goal and mode, the log-log slope of its clauses "
+           "at the original N (`countOnly`) from k = 8 to k = 32, log(c₃₂ / c₈) / log 4; the table gives the median over "
+           "goals, with the quartiles.", ""]
+    rows = []
+    for name, gs in groups:
+        row = [name, len(gs)]
+        for m in ("random", "near"):
+            v = [sc_exponent(d, g, m) for g in gs]
+            row.append(f"{med(v):.2f} ({quantile(v, .25):.2f}–{quantile(v, .75):.2f})")
+        rows.append(row)
+    out.append(table(["goals", "n", "random", "near"], rows))
+    short = [g for g in goals if S[f"scale:near:32:{g}"]["k_actual"] < 32]
+    va = [sc_exponent(d, g, "near", True) for g in goals]
+    out += ["", f"k is the nominal k. {len(short)} goals have fewer than 32 near candidates (R6 above); with their actual k "
+            f"the median near exponent over all goals is {med(va):.2f}. The random sets always have the nominal k.", ""]
+    out += ["**R6's main table by whether S contains `c:Eq`** (§10.10 decision 5; S as in `eval/scaling_goals.jsonl`). "
+            "When it does, about "
+            f"{pct(sum(1 for p in d.pool if 'c:Eq' in p['heads']), len(d.pool))} of the pool "
+            f"({sum(1 for p in d.pool if 'c:Eq' in p['heads']):,} of {len(d.pool):,} constants) has an `Eq` head, so *near* "
+            "draws from most of the pool.", ""]
+    rows = []
+    for name, gs in groups[1:]:
+        c0 = [Z["scale:none:0:" + g]["clauses"] for g in gs]
+        rows.append([name, len(gs), "none", 0, sum(1 for g in gs if R["scale:none:0:" + g]["outcome"] == "proved"),
+                     0, 0, int(med(c0)), "1.0"])
+        for m in ("random", "near"):
+            for k in SC_KS:
+                ks = [f"scale:{m}:{k}:{g}" for g in gs]
+                c = collections.Counter(R[x]["outcome"] for x in ks)
+                cl = [Z[x]["clauses"] for x in ks]
+                ratio = [Z[x]["clauses"] / Z["scale:none:0:" + x.split(":", 3)[3]]["clauses"] for x in ks]
+                rows.append([name, len(gs), m, k, c.get("proved", 0), c.get("crash", 0), c.get("timeout", 0),
+                             int(med(cl)), f"{med(ratio):.1f}"])
+    out.append(table(["goals", "n", "mode", "k", "proved", "memory crash", "timeout", "median clauses", "growth"], rows))
+    rows = []
+    for name, gs in groups:
+        nb = collections.Counter(S["scale:none:0:" + g]["bucket"] for g in gs)
+        rows.append([name, len(gs), " ".join(f"{b.replace('-', '–')}:{nb.get(b, 0)}" for b in SC_BUCKETS)]
+                    + [fn(med([F[(g, m)][0] for g in gs])) for m in ("random", "near")]
+                    + [sum(1 for g in gs if F[(g, m)][0] == 32) for m in ("random", "near")])
+    out += ["", "Largest feasible k (every k′ ≤ k feasible) by the same split, with the goals per original-N bucket:", "",
+            table(["goals", "n", "original N buckets", "median random", "median near", "all k random", "all k near"], rows)]
     return out
 
 
@@ -884,6 +1069,391 @@ def exploratory(d):
     return out
 
 
+M8_ORDER = ["3A", "1", "2", "out"]
+
+
+def m8_family(d, name):
+    """The family of one obstacle constant by the fixed table eval/m8_families.json (its `how`)."""
+    T = d.m8
+    if name in T["explicit"]:
+        return T["explicit"][name]
+    last = name.rsplit(".", 1)[-1]
+    if last in T["suffix_3A"]:
+        return "3A"
+    f = d.m8_facts.get(name, {})
+    kind = f.get("kind")
+    if kind in ("recursor", "auxrec"):
+        ind = f["inductive"]
+        return "1" if ind in T["inductives_1"] else "3A" if ind in T["inductives_3A"] else "2"
+    if kind == "matcher":
+        heads = [x["head"] if x["head_ind"] else (x["whnf_head"] if x["whnf_ind"] else None) for x in f["discrs"]]
+        hs = [h for h in heads if h is not None]
+        if any(h not in T["inductives_1"] and h not in T["inductives_3A"] for h in hs):
+            return "2"
+        if any(h in T["inductives_1"] for h in hs):
+            return "1"
+        if any(h in T["inductives_3A"] for h in hs):
+            return "3A"
+        return "out"
+    if re.search(T["induction_regex"], last, re.I):
+        return "1" if name.rsplit(".", 1)[0] in T["inductives_1"] else "2"
+    return "out"
+
+
+def m8_obstacles(d, k):
+    c = d.corpus[d.specs[k]["id"]]
+    return sorted({x for x, _ in d.acc[k][1]} | set(c.get("elim", [])))
+
+
+def m8_population(d, t):
+    """Main-run goals of tier t that the compiler accepts and solve_by_sat does not prove."""
+    return [k for k in d.keys("main", t) if d.acc[k][0] and not d.proved(k)]
+
+
+def e5(d):
+    out = ["## E5 What milestone 8 would reach (§10.10 decision 6)", ""]
+    if not d.m8 or not d.m8_facts:
+        return out + ["*Pending.*"]
+    out += ["Not pre-registered. Population: the main-run goals that the compiler accepts and `solve_by_sat` does not prove. "
+            "A goal's *obstacles* are its rejected `H_main` constants and the elimination constants of its oracle term "
+            "(§2.1, §10.4). Each obstacle is mapped to a family of the milestone 8 proposal by the fixed table "
+            "`eval/m8_families.json`, committed before any count, using the structural facts of `eval/m8_obstacles.jsonl` "
+            "(`Test/M8Facts.lean`): **3A** rewriting by first-order equality rules; **1** eliminations whose motive is "
+            "the goal; **2** cases and induction on data; **out** out of reach.", "",
+            "**This is an upper bound.** Removing every obstacle does not make a goal provable: definitional unfolding, "
+            "instances and proof size can still block it (R2's unexplained goals and R7's reviews are goals with no "
+            "obstacle that are still not proved), and the `congrArg` chains of elaborated `simp` proofs may need many nodes.", ""]
+    names = sorted({x for t in "AB" for k in m8_population(d, t) for x in m8_obstacles(d, k)})
+    miss = [x for x in names if x not in d.m8_facts or d.m8_facts[x].get("kind") == "missing"]
+    fc = collections.Counter(m8_family(d, x) for x in names)
+    out += [f"Distinct obstacle constants: {len(names):,} (" + ", ".join(f"{f} {fc.get(f, 0):,}" for f in M8_ORDER)
+            + f"); without facts: {len(miss)}.", ""]
+    combos, single = {}, {}
+    rows = []
+    for t in "AB":
+        ks = m8_population(d, t)
+        cb = collections.Counter("+".join(f for f in M8_ORDER if f in {m8_family(d, x) for x in m8_obstacles(d, k)}) or "no obstacle"
+                                 for k in ks)
+        combos[t] = (ks, cb)
+    labels = sorted(set(combos["A"][1]) | set(combos["B"][1]),
+                    key=lambda x: (x == "no obstacle", -(combos["A"][1][x] + combos["B"][1][x]), x))
+    out += ["Goals by the combination of families among their obstacles:", "",
+            table(["families", "Tier A", "Tier B"], [[x, combos["A"][1][x], combos["B"][1][x]] for x in labels]
+                  + [["total", len(combos["A"][0]), len(combos["B"][0])]]), ""]
+    rows = []
+    for f in M8_ORDER:
+        rows.append([f"all in {f}"] + [f"{combos[t][1][f]:,} ({pct(combos[t][1][f], len(combos[t][0]))})" for t in "AB"])
+    reach = {t: sum(v for x, v in combos[t][1].items() if x != "no obstacle" and "out" not in x.split("+")) for t in "AB"}
+    rows.append(["all in 3A, 1 or 2 (no out-of-reach obstacle)"] + [f"{reach[t]:,} ({pct(reach[t], len(combos[t][0]))})" for t in "AB"])
+    rows.append(["no obstacle"] + [f"{combos[t][1]['no obstacle']:,} ({pct(combos[t][1]['no obstacle'], len(combos[t][0]))})" for t in "AB"])
+    out += ["Goals whose obstacles all fall in a single family (share of the population):", "",
+            table(["", "Tier A", "Tier B"], rows), ""]
+    prov = {t: sum(1 for k in d.keys("main", t) if d.proved(k)) for t in "AB"}
+    out += ["For scale: `solve_by_sat` proves " + ", ".join(f"{prov[t]:,} Tier {t} goals" for t in "AB")
+            + ". If every goal whose obstacles all lie in 3A became provable, the proved share would be at most "
+            + ", ".join(f"{pct(prov[t] + combos[t][1]['3A'], 3000)} in Tier {t}" for t in "AB")
+            + "; with 3A, 1 and 2 together, at most " + ", ".join(f"{pct(prov[t] + reach[t], 3000)} in Tier {t}" for t in "AB") + ".", ""]
+    for t in "BA":
+        ks = combos[t][0]
+        oc = collections.Counter(x for k in ks for x in m8_obstacles(d, k) if m8_family(d, x) == "out")
+        out.append(f"- **Tier {t}, most common out-of-reach constants** (goals): "
+                   + "; ".join(f"`{c}` {v}" for c, v in sorted(oc.items(), key=lambda z: (-z[1], z[0]))[:15]) + ".")
+    for t in "BA":
+        ks = combos[t][0]
+        fc2 = collections.defaultdict(collections.Counter)
+        for k in ks:
+            for x in m8_obstacles(d, k):
+                fc2[m8_family(d, x)][x] += 1
+        out.append(f"- **Tier {t}, most common constant per family** (goals): "
+                   + "; ".join(f"{f}: " + ", ".join(f"`{c}` {v}" for c, v in sorted(fc2[f].items(), key=lambda z: (-z[1], z[0]))[:5])
+                               for f in M8_ORDER[:3]) + ".")
+    return out
+
+
+def fn(x):
+    """A number for prose: integral floats without the decimal point."""
+    if isinstance(x, float) and x.is_integer():
+        x = int(x)
+    return fmt(x)
+
+
+def rng(xs, f):
+    a, b = format(min(xs), f), format(max(xs), f)
+    return a if a == b else f"{a}–{b}"
+
+
+class Facts:
+    """The numbers the summary, the reading and the threats rest on, computed once from the data."""
+
+    def __init__(self, d):
+        self.d = d
+        self.n = {t: len(d.keys("main", t)) for t in "AB"}
+        self.proved = {t: sum(1 for k in d.keys("main", t) if d.proved(k)) for t in "AB"}
+        self.hfull = {t: [k for k in d.keys("main", t) if d.acc[k][0] and not d.acc[k][1]] for t in "AB"}
+        self.proved_hfull = {t: sum(1 for k in self.hfull[t] if d.proved(k)) for t in "AB"}
+        self.notp = {t: collections.Counter(d.reason(k) for k in d.keys("main", t) if not d.proved(k)) for t in "AB"}
+        self.r2 = {t: r2_stats(d, t) for t in "AB"}
+        self.Ns = {t: [d.res[k]["N"] for k in d.keys("main", t) if d.proved(k)] for t in "AB"}
+        self.crash = {t: sum(1 for k in d.keys("main", t) if d.res[k]["outcome"] == "crash") for t in "AB"}
+        self.crash_all = sum(1 for k in d.specs if d.res[k]["outcome"] == "crash")
+        self.nop = {t: sum(1 for k in d.keys("main", t) if d.res[k]["outcome"] == "no_proof_le_Nmax") for t in "AB"}
+        self.both = {t: sum(1 for k in d.keys("main", t) if d.proved(k) and d.sbe(k) == "closed") for t in "AB"}
+        self.sbe = {t: sum(1 for k in d.keys("main", t) if d.sbe(k) == "closed") for t in "AB"}
+        self.exact_b = sum(1 for k in d.keys("main", "B") if d.lib(k) == "closed_other")
+        self.exact_both_b = sum(1 for k in d.keys("main", "B") if d.lib(k) == "closed_other" and d.proved(k))
+        self.time = {}
+        for t in "AB":
+            ks = [k for k in d.keys("main", t) if d.proved(k) and d.sbe(k) == "closed"]
+            a = [d.res[k]["loop_ms"] for k in ks]
+            b = [d.res[k]["baselines"]["sbe_like"]["ms"] for k in ks]
+            self.time[t] = (med(a), med(b), sum(1 for x, y in zip(a, b) if x < y), len(ks))
+        ic = [k for k in d.keys("main", "B") if d.oracle_in_class(k)]
+        self.inclass = (len(ic), sum(1 for k in ic if d.proved(k)))
+        self.rev = {}
+        for name in ("sbs_only", "r7_soft_completeness", "r2_unexplained", "e1_sbe_wins"):
+            if name in d.reviews:
+                _, _, _, recs, _, _ = in_sample(d, name, d.reviews[name])
+                self.rev[name] = (len(recs), collections.Counter(r.get("class") for r in recs))
+        # synthetic (R5): growth exponent and g + d share at k = 32, per family, over N
+        R = {(x["family"], x["k"], x["N"], x["config"]): x for x in d.synth}
+        self.syn_exp = {fa: [math.log(R[(fa, 32, n, "all")]["clauses"] / R[(fa, 8, n, "all")]["clauses"]) / math.log(4) for n in SYN_NS]
+                        for fa in SYN_FAMS}
+        self.syn_gd = {fa: [100 * gd_share(R[(fa, 32, n, "all")]) for n in SYN_NS] for fa in SYN_FAMS}
+        # real distractors (R6)
+        S, Rr, Z = d.sc_specs, d.sc_res, d.sc_size
+        self.sc_goals = sorted({k.split(":", 3)[3] for k in S})
+        g = self.sc_goals
+
+        def pre(gg, m):
+            v = 0
+            for k in SC_KS:
+                if Rr[f"scale:{m}:{k}:{gg}"]["outcome"] != "proved":
+                    break
+                v = k
+            return v if Rr["scale:none:0:" + gg]["outcome"] == "proved" else None
+        self.feas = {m: [pre(x, m) for x in g] for m in ("random", "near")}
+        self.sc_exp = {m: med([sc_exponent(d, x, m) for x in g]) for m in ("random", "near")}
+        self.sc_eq = sc_eq_split(d, g)
+        self.sc_exp_eq = {name: {m: med([sc_exponent(d, x, m) for x in gs]) for m in ("random", "near")} for name, gs in self.sc_eq}
+        self.sc_growth32 = med([Z[f"scale:{m}:32:{x}"]["clauses"] / Z["scale:none:0:" + x]["clauses"] for m in ("random", "near") for x in g])
+        cr = [Z[k]["clauses"] for k in Rr if Rr[k]["outcome"] == "crash"]
+        pr = [Z[k]["clauses"] for k in Rr if Rr[k]["outcome"] == "proved"]
+        self.cap = (min(cr), max(pr))
+        self.sc_oc = collections.Counter(r["outcome"] for r in Rr.values())
+        self.bucket_feas = {}
+        for b in SC_BUCKETS:
+            gs = [x for x in g if S["scale:none:0:" + x]["bucket"] == b]
+            self.bucket_feas[b] = (len(gs), med([self.feas["near"][g.index(x)] for x in gs]), med([self.feas["random"][g.index(x)] for x in gs]))
+        self.pool_eq = (sum(1 for p in d.pool if "c:Eq" in p["heads"]), len(d.pool))
+        # E5
+        self.e5 = None
+        if d.m8 and d.m8_facts:
+            self.e5 = {}
+            for t in "AB":
+                ks = m8_population(d, t)
+                cb = collections.Counter(frozenset(m8_family(d, x) for x in m8_obstacles(d, k)) for k in ks)
+                self.e5[t] = (len(ks), cb)
+
+
+def e5_count(F, t, fams):
+    return F.e5[t][1].get(frozenset(fams), 0) if F.e5 else None
+
+
+def p1(a, b):
+    return 100 * a / b if b else 0.0
+
+
+def summary(d, F):
+    """§10.10 decision 3: Q1–Q4 of EVAL_PLAN §1, in numbers, each pointing to its table."""
+    nA, nB = F.n["A"], F.n["B"]
+    r2B, r2A = F.r2["B"], F.r2["A"]
+    out = ["## Summary: answers to Q1–Q4 (EVAL_PLAN §1)", ""]
+    out.append(f"- **Q1 Coverage.** With oracle H (`H_main`) and N ≤ 10, `solve_by_sat` proves {F.proved['B']:,} of {nB:,} Tier B "
+               f"goals ({pct(F.proved['B'], nB)}) and {F.proved['A']:,} of {nA:,} Tier A goals ({pct(F.proved['A'], nA)}). Among goals "
+               f"whose statement and every `H_main` constant the compiler accepts, it proves {F.proved_hfull['B']:,} of "
+               f"{len(F.hfull['B']):,} in Tier B ({pct(F.proved_hfull['B'], len(F.hfull['B']))}) and {F.proved_hfull['A']:,} of "
+               f"{len(F.hfull['A']):,} in Tier A ({pct(F.proved_hfull['A'], len(F.hfull['A']))}). Proofs are small: the median N is "
+               f"{fn(med(F.Ns['B']))} in Tier B and {fn(med(F.Ns['A']))} in Tier A, and "
+               f"{pct(sum(1 for n in F.Ns['B'] if n <= 2), len(F.Ns['B']))} of Tier B proofs have N ≤ 2. (R1, R3)")
+    out.append(f"- **Q2 Why not.** The compiler's rejection of an `H_main` constant (reason 2) is the primary reason for "
+               f"{F.notp['B'][REASONS[1]]:,} of the {sum(F.notp['B'].values()):,} unproved Tier B goals "
+               f"({pct(F.notp['B'][REASONS[1]], sum(F.notp['B'].values()))}) and {F.notp['A'][REASONS[1]]:,} of "
+               f"{sum(F.notp['A'].values()):,} in Tier A ({pct(F.notp['A'][REASONS[1]], sum(F.notp['A'].values()))}). In "
+               f"{pct(r2B[1]['clause variable applied to arguments'], len(r2B[0]))} of Tier B's reason 2 goals a constant is rejected "
+               f"because a clause variable is applied to arguments; `congrArg` alone is rejected in {r2B[2]['congrArg']:,} of them "
+               f"({pct(r2B[2]['congrArg'], len(r2B[0]))}), and in Tier A in {r2A[2]['congrArg']:,} ({pct(r2A[2]['congrArg'], len(r2A[0]))}). "
+               f"Next come unexplained goals ({F.notp['B'][REASONS[5]]:,} in Tier B; in review mostly definitional unfolding at a "
+               f"proof position), goal rejection ({F.notp['B'][REASONS[0]]:,}) and elimination constants ({F.notp['B'][REASONS[2]]:,}). "
+               "(R2, its breakdown, E5)")
+    se = F.syn_exp
+    out.append(f"- **Q3 Typed scaling.** On the synthetic families, the growth exponent of total clauses in k (8 to 32, all "
+               f"refinements on) is {min(se['S']):.2f}–{max(se['S']):.2f} for S, {min(se['T1']):.2f}–{max(se['T1']):.2f} for T1, "
+               f"{min(se['T2']):.2f}–{max(se['T2']):.2f} for T2 and {min(se['T3']):.2f}–{max(se['T3']):.2f} for T3; groundness plus "
+               f"decomposition is still {min(F.syn_gd['S']):.0f}–{max(F.syn_gd['S']):.0f}% of the clauses at k = 32 in S, and "
+               f"{min(F.syn_gd['T2']):.0f}–{max(F.syn_gd['T2']):.0f}% in T2, the only family where typing acts. With real "
+               f"distractors, the median per-goal exponent is {F.sc_exp['random']:.2f} (random) and {F.sc_exp['near']:.2f} (near), "
+               f"clauses at k = 32 are about {F.sc_growth32:,.0f} times those at k = 0, and the median largest feasible k is "
+               f"{fn(med(F.feas['random']))} (random) and {fn(med(F.feas['near']))} (near); every infeasible run hit the memory "
+               f"cap (about {F.cap[0] / 1e6:.1f}–{F.cap[1] / 1e6:.1f} M clauses) or, twice, a timeout. (R5, E6, R6)")
+    tB, tA = F.time["B"], F.time["A"]
+    out.append(f"- **Q4 Baselines.** Like-for-like `solve_by_elim` closes {F.sbe['B']:,} Tier B goals ({pct(F.sbe['B'], nB)}) and "
+               f"{F.sbe['A']:,} Tier A goals ({pct(F.sbe['A'], nA)}). Of `solve_by_sat`'s proofs it also finds {F.both['B']:,} of "
+               f"{F.proved['B']:,} in Tier B ({pct(F.both['B'], F.proved['B'])}) and {F.both['A']:,} of {F.proved['A']:,} in Tier A "
+               f"({pct(F.both['A'], F.proved['A'])}). On goals both close, the median time is {fn(tB[0])} ms against {fn(tB[1])} ms "
+               f"(Tier B) and {fn(tA[0])} ms against {fn(tA[1])} ms (Tier A). `exact?` closes {F.exact_b:,} Tier B goals with "
+               f"another library lemma ({pct(F.exact_b, nB)}), {F.exact_both_b:,} of them also proved by `solve_by_sat`. (R4, E4)")
+    return out
+
+
+def reading(d, F):
+    """§10.10 decision 2: each rule of EVAL_PLAN §7, its condition, the numbers, and whether it holds. No recommendation."""
+    nB = F.n["B"]
+    pB = p1(F.proved["B"], nB)
+    r2B, r2A = F.r2["B"], F.r2["A"]
+    nrB, nrA = sum(F.notp["B"].values()), sum(F.notp["A"].values())
+    out = ["## Reading the results (EVAL_PLAN §7)", "",
+           "Each rule of §7 with its condition, the numbers it rests on, and whether it holds. §7's thresholds are "
+           "indicative. This section does not choose between scope and scale: the owner decides after 7d-2 (§10.11).", ""]
+    # rule 1
+    one_r = (r2B[1]["clause variable applied to arguments"], len(r2B[0]))
+    out += ["### Rule 1: scope first", "",
+            "*Condition:* under about 20% of Tier B goals are proved with oracle H, **and** R2 is dominated by one or two "
+            "reasons that a targeted extension could address. R2 then names the extension.", "",
+            f"- *Proved share, Tier B:* {F.proved['B']:,} of {nB:,}, **{pB:.1f}%**, against about 20%: "
+            f"{pB - 20:.1f} percentage points above the threshold ({F.proved['B'] - 600:,} goals more than 20% would be). "
+            f"Tier A is at {pct(F.proved['A'], F.n['A'])}.",
+            f"- *Dominance:* reason 2 is {pct(F.notp['B'][REASONS[1]], nrB)} of Tier B's unproved goals and "
+            f"{pct(F.notp['A'][REASONS[1]], nrA)} of Tier A's. Within it, one rejection reason, a clause variable applied to "
+            f"arguments, occurs in {pct(*one_r)} of Tier B's goals ({one_r[0]:,} of {one_r[1]:,}) and "
+            f"{pct(r2A[1]['clause variable applied to arguments'], len(r2A[0]))} of Tier A's. One constant, `congrArg`, is rejected "
+            f"in {pct(r2B[2]['congrArg'], len(r2B[0]))} of Tier B's reason 2 goals; it alone blocks "
+            f"{r2B[3]['congrArg']:,} of the {sum(r2B[3].values()):,} goals blocked by a single constant.",
+            ]
+    if F.e5:
+        a3B, a3A = e5_count(F, "B", ["3A"]), e5_count(F, "A", ["3A"])
+        out.append(f"- *The extension R2 names:* rewriting by first-order equality rules (family 3A of the milestone 8 proposal). "
+                   f"In E5, {a3B:,} of Tier B's {F.e5['B'][0]:,} accepted, unproved goals ({pct(a3B, F.e5['B'][0])}) and {a3A:,} of "
+                   f"Tier A's {F.e5['A'][0]:,} ({pct(a3A, F.e5['A'][0])}) have only 3A obstacles. "
+                   f"Only {e5_count(F, 'B', ['1']):,} and {e5_count(F, 'B', ['2']):,} Tier B goals have only family 1 or only family 2 "
+                   "obstacles. E5 is an upper bound: removing the obstacles does not make a goal provable.")
+    out += [f"- *Holds?* **Only in part.** The dominance condition holds clearly. The proved-share condition does not: Tier B is "
+            f"{pB - 20:.1f} points above the indicative 20%.", ""]
+    # rule 2
+    near_med, rnd_med = med(F.feas["near"]), med(F.feas["random"])
+    n32 = {m: sum(1 for v in F.feas[m] if v == 32) for m in ("random", "near")}
+    lt16 = {m: sum(1 for v in F.feas[m] if v is not None and v < 16) for m in ("random", "near")}
+    ng = len(F.sc_goals)
+    out += ["### Rule 2: scale first", "",
+            "*Condition:* a fair share of goals is in the class, **and** R6 shows the feasible k falling well short of what premise "
+            "selection would supply (tens of lemmas): in-class goals become infeasible around k = 16 to 32 with near distractors.", "",
+            f"- *Share in the class:* {pB:.1f}% of Tier B goals are proved; {pct(F.proved_hfull['B'], len(F.hfull['B']))} of those "
+            f"whose goal and `H_main` are fully accepted; {F.inclass[0]:,} Tier B goals ({pct(F.inclass[0], nB)}) are oracle-in-class "
+            f"(R7), and {F.inclass[1]:,} of them are proved. §7 gives no number for \"a fair share\".",
+            f"- *Feasible k with near distractors* ({ng} proved goals, R6): median largest feasible k **{fn(near_med)}**; "
+            f"{lt16['near']} of {ng} goals are infeasible before k = 16, and {n32['near']} are feasible at every k up to 32. With "
+            f"random distractors: median {fn(rnd_med)}, {lt16['random']} before 16, {n32['random']} up to 32.",
+            "- *By original N* (median largest feasible k, near / random): "
+            + "; ".join(f"N {b.replace('-', '–').replace('+', ' or more')}: {fn(v[1])} / {fn(v[2])} ({v[0]} goals)"
+                        for b, v in F.bucket_feas.items()) + ".",
+            f"- *Cause:* of the {sum(F.sc_oc.values()) - F.sc_oc.get('proved', 0)} runs that are not proved, "
+            f"{F.sc_oc.get('crash', 0)} hit the 2.5 GB cap and {F.sc_oc.get('timeout', 0)} a timeout; none ran out of N. The cap "
+            f"falls at about {F.cap[0] / 1e6:.1f}–{F.cap[1] / 1e6:.1f} M clauses, and clauses at k = 32 are a median "
+            f"{F.sc_growth32:,.0f} times those at k = 0.",
+            f"- *Holds?* **The R6 condition holds:** the median feasible k is at or below the rule's 16–32 range, and lower for "
+            f"larger N. §7 sets no threshold for \"a fair share\", so that part is the owner's to judge. Caveat on near: for {len(F.sc_eq[0][1])} of the {ng} goals S contains `c:Eq` and near is close to random "
+            f"({pct(*F.pool_eq)} of the pool has an `Eq` head; threats below).", ""]
+    # rule 3
+    se, sg = F.syn_exp, F.syn_gd
+    out += ["### Rule 3: scale is less urgent than SPEC 7.3 suggests", "",
+            "*Condition:* the typed families show a growth exponent near 1, **or** pruning removes most of groundness and "
+            "decomposition.", "",
+            "- *Growth exponent* (k = 8 to 32, all refinements on, over N = 5, 8, 12): "
+            + ", ".join(f"{fa} {rng(se[fa], '.2f')}" for fa in SYN_FAMS)
+            + f". Real distractors: median per-goal {F.sc_exp['random']:.2f} (random), {F.sc_exp['near']:.2f} (near). Only T2 is near 1.",
+            "- *Groundness plus decomposition at k = 32*, all refinements on: "
+            + ", ".join(f"{fa} {rng(sg[fa], '.0f')}%" for fa in SYN_FAMS)
+            + ". With all refinements on, groundness and decomposition are still most of the clauses in every family except T2.",
+            "- *Holds?* **No**, except in T2, the family with distinct carrier types, where both parts hold in part (E6 separates "
+            "the two typing filters).", ""]
+    # rule 4
+    tB, tA = F.time["B"], F.time["A"]
+    so = F.rev.get("sbs_only")
+    out += ["### Rule 4: value against baselines", "",
+            "*Condition:* `solve_by_elim` with the same H proves nearly everything `solve_by_sat` proves, and faster. Then the "
+            "tactic's distinctive contributions are minimal proofs and certified \"no proof with at most N nodes\" answers, and "
+            "R4 should single out the goals where `solve_by_elim` fails and `solve_by_sat` succeeds, and say why.", "",
+            f"- *Tier B:* like-for-like `solve_by_elim` closes {F.both['B']:,} of `solve_by_sat`'s {F.proved['B']:,} proofs "
+            f"({pct(F.both['B'], F.proved['B'])}); on them its median time is {fn(tB[1])} ms against {fn(tB[0])} ms, and "
+            f"`solve_by_sat` is faster on {tB[2]:,} of {tB[3]:,}. It also closes {F.sbe['B'] - F.both['B']:,} goals "
+            "`solve_by_sat` does not prove (E1).",
+            f"- *Tier A:* {F.both['A']:,} of {F.proved['A']:,} ({pct(F.both['A'], F.proved['A'])}), median {fn(tA[1])} ms against "
+            f"{fn(tA[0])} ms. The like-for-like baseline's single depth budget handicaps it on Tier A (§10.9; threats below).",
+            (f"- *R4's single-out:* {so[0]} goals that only `solve_by_sat` proves, all reviewed: "
+             + ", ".join(f"{c} {v}" for c, v in so[1].most_common())
+             + ". Most of the \"other, explained\" ones use an `↔` or `∧` projection, a built-in rule of `solve_by_sat` that "
+             "like-for-like `solve_by_elim` cannot build from `H_main` (§10.9)." if so else "- *R4's single-out:* not reviewed."),
+            f"- *Certified answers:* {F.nop['B']:,} Tier B and {F.nop['A']:,} Tier A goals end with \"no proof with at most 10 "
+            "nodes\" over the compiled fragment. §8's bounded-failure caveat applies: this is not \"outside the class\".",
+            "- *Holds?* **Yes for Tier B; not for Tier A**, where the baseline's step budget is a confound.", ""]
+    # where the rules disagree
+    out += ["### Where the rules point different ways", "",
+            f"- Rules 1 and 2 are not exclusive, and the data meet parts of both. Rule 1's dominance condition holds strongly "
+            f"(one rejection reason, one constant), but its threshold is missed: Tier B's {pB:.1f}% is above about 20%. "
+            f"Rule 2's R6 condition holds: the median goal is infeasible before k = 16 with near distractors.",
+            f"- They measure different populations. Rule 1 counts the {nrB:,} unproved Tier B goals. Rule 2 rests on {ng} goals that "
+            "are already proved, chosen by proved N, and on oracle H plus distractors, not on premise selection.",
+            "- Rule 3 does not hold, which agrees with rule 2: SPEC 7.3's growth of about k² is what the real data show.",
+            "- Rule 4 holds for Tier B: nearly every goal `solve_by_sat` proves, the baseline also closes, faster. Rules 1 "
+            "and 2 are about the tactic alone. `solve_by_elim` was not run with distractors, so how the baseline behaves as "
+            "H grows (rule 2's axis) is not measured.", ""]
+    return out
+
+
+def threats(d, F):
+    """§10.10 decision 8: EVAL_PLAN §8 restated with what the data show."""
+    so = F.rev.get("sbs_only")
+    depth = so[1].get("depth", 0) if so else 0
+    out = ["## Threats to validity (EVAL_PLAN §8, with the data)", ""]
+    out.append(f"- **Oracle H is optimistic.** It assumes premise selection is solved. R6 measures the cost side only: with k "
+               f"distractors, the median largest feasible k is {fn(med(F.feas['random']))} (random) and {fn(med(F.feas['near']))} "
+               f"(near) on {len(F.sc_goals)} proved goals. Whether a selector would put the right lemmas in its top k is not measured.")
+    out.append(f"- **\"Near\" is close to random when S contains `c:Eq`.** That is {len(F.sc_eq[0][1])} of the {len(F.sc_goals)} "
+               f"scaling goals, and {pct(*F.pool_eq)} of the pool ({F.pool_eq[0]:,} of {F.pool_eq[1]:,}) has an `Eq` head. The median "
+               f"per-goal exponent is {F.sc_exp_eq[F.sc_eq[0][0]]['random']:.2f} / {F.sc_exp_eq[F.sc_eq[0][0]]['near']:.2f} "
+               f"(random / near) with `c:Eq` and {F.sc_exp_eq[F.sc_eq[1][0]]['random']:.2f} / {F.sc_exp_eq[F.sc_eq[1][0]]['near']:.2f} "
+               f"without, on {len(F.sc_eq[1][1])} goals (R6). For most goals, then, R6's near mode is not the harder test §4.2 intended.")
+    nm = F.n["A"] + F.n["B"]
+    cm = F.crash["A"] + F.crash["B"]
+    out.append(f"- **One machine, one memory cap.** {cm:,} of the {nm:,} main-run goals ({pct(cm, nm)}; Tier A {F.crash['A']:,}, "
+               f"Tier B {F.crash['B']:,}) crashed at the 2.5 GB cap and are unmeasured: they may or may not have a proof with "
+               f"N ≤ 10. With R1b, {F.crash_all:,} of {len(d.specs):,} runs ({pct(F.crash_all, len(d.specs))}). In R6 every "
+               f"infeasible run but two is a crash. Another cap or machine moves these numbers; it does not change a CNF.")
+    out.append(f"- **The like-for-like baseline's step budget.** `maxDepth := 10` is one budget for the whole search, and a Tier A "
+               f"goal pays a step for every binder of its statement (§10.9). {depth} of the {so[0] if so else 0} goals only "
+               "`solve_by_sat` proves are lost to depth, almost all in Tier A. Tier A's baseline comparison understates "
+               "`solve_by_elim`.")
+    r2B = F.r2["B"]
+    out.append(f"- **Elaborated `simp` proofs inflate the rewriting obstacles.** Tier B goals come from elaborated terms, where "
+               f"`simp` leaves `congrArg`, `of_eq_true`, `propext` and `congr` chains: `congrArg` is rejected in {r2B[2]['congrArg']:,} "
+               f"Tier B goals, `of_eq_true` in {r2B[2]['of_eq_true']:,}, `propext` in {r2B[2]['propext']:,}. A user's proof with "
+               "rewriting lemmas would not use these constants, and a proof through them may need many nodes. R2's breakdown and "
+               "E5 count obstacles in the oracle term, not in the shortest proof.")
+    out.append(f"- **Core proofs are tactic-heavy.** Tier A proves {pct(F.proved['A'], F.n['A'])} against Tier B's "
+               f"{pct(F.proved['B'], F.n['B'])}; Tier A's statements are whole theorems whose proofs need tactics.")
+    out.append("- **Core only.** Without Mathlib, goals about the algebraic hierarchy, where instances matter most, are "
+               f"under-represented. Even so, in R7's review instances are the most common reason an oracle-in-class goal has no "
+               f"proof ({F.rev['r7_soft_completeness'][1].most_common(1)[0][1] if 'r7_soft_completeness' in F.rev else '?'} of "
+               f"{F.rev['r7_soft_completeness'][0] if 'r7_soft_completeness' in F.rev else '?'}).")
+    out.append(f"- **Bounded failure.** {F.nop['B']:,} Tier B and {F.nop['A']:,} Tier A goals have no proof with N ≤ 10. That "
+               "does not put them outside the class.")
+    out.append(f"- **R6's sample.** {len(F.sc_goals)} goals, all proved in the main run, drawn by proved N (12, 12, 13, 13). "
+               "Goals with larger N have smaller feasible k (median 32 at N = 1, 4 at N ≥ 5), and most proved main-run goals "
+               "have N = 1, so the per-goal median is not a median over proved goals.")
+    out.append("- **E5 is an upper bound.** Removing every obstacle does not make a goal provable: definitional unfolding, "
+               "instances and proof size can still block it. The family table is a judgment, fixed before counting.")
+    return out
+
+
 def checks(d):
     num = [d.num.get(d.specs[k]["id"]) for k in d.keys("main")]
     nmiss = sum(1 for x in num if x is None)
@@ -931,10 +1501,14 @@ def main():
     h = json.load(open(os.path.join(E, "full", "header.json")))
     hr = json.load(open(os.path.join(E, "rerun", "header.json")))
     segs = collections.Counter(r["code_version"]["commit"] for r in d.final_lines if r["code_version"]["source"] == "full")
-    out = ["# Solve By SAT: evaluation results (milestone 7, stage 7d-1)", "",
-           "Generated by `eval/report.py` from `eval/final/` (the full 7b run merged with the 10.7 rerun), "
-           "`eval/full/`, `eval/rerun/` and the corpus files alone. Facts and counts only: the reading of "
-           "EVAL_PLAN §7 comes in 7d-2, after 7c.", "",
+    F = Facts(d)
+    out = ["# Solve By SAT: evaluation results (milestone 7)", "",
+           "Generated by `eval/report.py` from the data files alone: `eval/final/` (the full 7b run merged with the 10.7 "
+           "rerun), `eval/full/`, `eval/rerun/`, the corpus files, the 7c scaling data and the 7d-2 files (E5's family "
+           "table and constant facts, E6's counts). The reading of EVAL_PLAN §7 states facts against each rule; it does not "
+           "choose between scope and scale.", ""]
+    out += summary(d, F) + [""]
+    out += ["## The runs", "",
            f"**Full run (7b, `eval/full/`).** {h['n_specs']:,} goals, Lean {h['toolchain']}, N ≤ {h['nmax']}, "
            f"solver {h['solver_s']} s per call, N loop {h['loop_s']} s, memory cap {h['cap_mb']:,} MB, "
            f"P = {h['parallel_shards']}, baselines {h['baseline_heartbeats']:,} heartbeats; test machine "
@@ -954,7 +1528,7 @@ def main():
     out += effect(d) + [""]
     out += r1(d) + [""] + r1b(d) + [""] + r2(d) + [""] + r3(d) + [""] + r4(d) + [""]
     out += r5(d) + [""] + r6(d) + [""]
-    out += r7(d) + [""] + checks(d) + [""] + exploratory(d)
+    out += r7(d) + [""] + reading(d, F) + threats(d, F) + [""] + checks(d) + [""] + exploratory(d) + [""] + e5(d)
     open(os.path.join(ROOT, "EVAL.md"), "w").write("\n".join(out) + "\n")
     print("wrote EVAL.md")
 

@@ -21,13 +21,16 @@ unsafe def importEnv (mods : Array Name) : IO Environment := do
   initSearchPath (← findSysroot) [".lake/build/lib/lean"]
   importModules (mods.map fun m => { module := m }) {} (loadExts := true)
 
-/-- The five configurations of EVAL_PLAN §4.1. -/
+/-- The five configurations of EVAL_PLAN §4.1, and E6's `no_typing` (§10.10 decision 7). -/
 def configOf : String → Option EncodeOptions
   | "all" => some {}
   | "none" => some EncodeOptions.allOff
   | "no_candidate" => some { candidatePruning := false }
   | "no_pair" => some { pairPruning := false }
   | "no_static" => some { staticTyping := false }
+  -- E6 (EVAL_PLAN §10.10 decision 7, exploratory, not part of the pre-registered grid):
+  -- both typing filters off, every other refinement on
+  | "no_typing" => some { staticTyping := false, candidatePruning := false }
   | _ => none
 
 def distractors (fam : String) (k : Nat) : Array Name :=

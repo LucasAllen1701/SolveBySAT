@@ -2543,3 +2543,48 @@ sentence in bold was replaced; the rest of that paragraph is unchanged.
     are on `m7-data` only. They were last run at 7d-2, 36/36 (`eval/d2_check/named` on `m7-data`), and no
     Lean code has changed since.
 - **Regression (end of milestone 7, the merge):** on the merged tree (before the merge commit), `lake build` and `Test/run_all.sh` exit 0 (M0 902/902, M1 19/19, M4 4/4, M5 10/10, `countOnly` 22/22; M2, M3, M4Lean, M5Lean and M7Lean pass). The Lean code is `m7-data`'s, unchanged. The named cases are not rerun here (above); EVAL.md regenerates byte-identically on `m7-data`.
+
+## Milestone 8: scale, with a rewriting probe first (M8_PLAN.md)
+
+### 8a: probe set-up and pilot (M8_PLAN §2; 24 November 2026)
+
+Branch `m8`, made from `main` after the milestone 7 merge (`2f211b1`). Same machine as milestone 7
+(Intel i7-10510U, 7,735 MiB, kernel 7.3.5-arch1-1, `vm.overcommit_memory = 1`). `M8_PLAN.md` was
+added as written (`8221ac6`).
+
+#### Inputs (§2.8), extracted before any run
+
+`python3 Test/m8a_setup.py inputs ../m7-data` reads a worktree of tag `m7-data` (`fc61dd9`). It computes
+the E5 population with `m7-data`'s own `eval/report.py`: accepted, not proved in `eval/final/`, every
+obstacle in family 3A. The result is **522 Tier A and 946 Tier B**, as in EVAL.md E5. Then it copies the
+records of those 1,468 goals and of the 50 control goals into `eval/m8a/inputs/` (`MD5SUMS` there):
+
+| file | md5 | what |
+| --- | --- | --- |
+| `corpus.jsonl` | `4c2c2e270f3d` | corpus records (`corpus_A/B.jsonl`) of the 1,518 goals |
+| `hcompile.jsonl` | `c6d4fbd1ca76` | compiler verdicts (`corpus_hcompile.jsonl`) |
+| `final.jsonl` | `eb2d223580c8` | final results (`eval/final/results.jsonl`) |
+| `specs_full.jsonl` | `13d80428543a` | milestone 7's specs of the same goals (*addition*: H in run order, `thm`, `pos`, `nctx`) |
+| `population.jsonl` | `69230cf475e1` | the E5 population: key, tier, obstacles and their families (*addition*) |
+| `m8_families.json` | `24b74f9310c1` | the E5 table, as committed in 7d-2 |
+| `m8_obstacles.jsonl` | `d9cea64c7c95` | the E5 facts, as committed in 7d-2 |
+| `scaling_goals.jsonl` | `99041d07b319` | the 50 scaling goals, as committed in 7c |
+
+The two additions are derived from the same `m7-data` files. They let the sample and the specs be rebuilt
+from `eval/m8a/inputs/` alone.
+
+#### Sample (§2.2), drawn before any run
+
+`python3 Test/m8a_setup.py sample` writes `eval/m8a/goals.jsonl`, using the hash rule of NOTES.md 7c with
+seed 80101: SHA-256 of `"80101:<key>"`, ascending, first 100 Tier B and 50 Tier A keys of the population.
+- *Decision (the plan does not rank the controls):* the 50 control goals are ranked by the same rule and
+  seed. §2.6's "5 highest-ranked control goals" are their first five.
+- Each record has the rank, the H_main of milestone 7's spec in run order, and the accepted H_main
+  (`hcompile`'s `accepted`, in that order). For the controls, the accepted H_main equals
+  `scaling_goals.jsonl`'s (checked).
+
+| group | goals | \|H_main\| median / p90 / max | accepted \|H_main\| median | milestone 7 outcome |
+| --- | --- | --- | --- | --- |
+| rewriting, Tier B | 100 | 4 / 9 / 11 | 2 | no proof ≤ 10: 82, memory crash: 18 |
+| rewriting, Tier A | 50 | 8 / 12 / 17 | 5 | no proof ≤ 10: 28, memory crash: 22 |
+| control | 50 | 1 / 8 / 11 | 1 | proved: 50 (original N 1: 12, 2: 12, 3: 10, 4: 3, 5: 6, 6: 4, 7: 1, 8: 2) |

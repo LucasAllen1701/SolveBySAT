@@ -1,0 +1,54 @@
+{
+  "title": "E5 family table (EVAL_PLAN §10.10 decision 6), fixed and committed before any E5 count",
+  "date": "2026-11-24",
+  "families": {
+    "3A": "rewriting by first-order equality rules",
+    "1": "eliminations whose motive is the goal",
+    "2": "cases and induction on data",
+    "out": "out of reach"
+  },
+  "how": [
+    "An obstacle is a rejected H_main constant of the goal or an elimination constant of its oracle term (corpus field `elim`).",
+    "Facts about each constant come from Test/M8Facts.lean (eval/m8_obstacles.jsonl): recursor, auxiliary recursor (casesOn, recOn, brecOn, below, noConfusion) with its inductive type, or matcher (a constant at or under a matcher, such as match_1.splitter) with the head of each discriminant's type.",
+    "The rules apply in this order; the first that matches decides:",
+    "  1. the name is in `explicit` -> that family;",
+    "  2. the last name component is in `suffix_3A` -> 3A;",
+    "  3. recursor or auxiliary recursor: its inductive type in `inductives_1` -> 1, in `inductives_3A` -> 3A, otherwise -> 2;",
+    "  4. matcher: take each discriminant's type head (the head as written if it is an inductive type, else the head after whnf if that is one, else none). If some discriminant's head is an inductive type outside `inductives_1` and `inductives_3A` -> 2; else if some head is in `inductives_1` -> 1; else if some head is in `inductives_3A` -> 3A; else -> out;",
+    "  5. induction principle by name: the last name component matches `induction_regex` (case-insensitive). Its namespace (the name prefix) in `inductives_1` -> 1, otherwise -> 2;",
+    "  6. everything else -> out."
+  ],
+  "inductives_1": ["Or", "Exists", "False", "And", "Iff"],
+  "inductives_3A": ["Eq"],
+  "suffix_3A": ["congr_simp"],
+  "induction_regex": "induct|recon|caseson|cases_on|rec_on",
+  "explicit": {
+    "congrArg": "3A", "congrFun": "3A", "congrFun'": "3A", "congr": "3A", "propext": "3A",
+    "Eq.mpr": "3A", "Eq.mp": "3A", "Eq.rec": "3A", "Eq.ndrec": "3A", "Eq.subst": "3A", "cast": "3A",
+    "of_eq_true": "3A", "eq_true": "3A", "eq_false": "3A", "eq_self": "3A",
+    "Eq.casesOn": "3A", "Eq.recOn": "3A", "Eq.substr": "3A",
+    "of_eq_false": "3A", "eq_false'": "3A", "eq_true'": "3A",
+    "forall_congr": "3A", "forall_congr'": "3A", "exists_congr": "3A", "exists_prop_congr": "3A",
+    "forall_prop_domain_congr": "3A", "forall_prop_congr_dom": "3A",
+    "and_congr": "3A", "and_congr_left": "3A", "and_congr_right": "3A", "and_congr_left'": "3A",
+    "and_congr_right'": "3A", "and_congr_left_iff": "3A", "and_congr_right_iff": "3A",
+    "or_congr": "3A", "or_congr_left": "3A", "or_congr_right": "3A",
+    "iff_congr": "3A", "imp_congr": "3A", "imp_congr_left": "3A", "imp_congr_right": "3A",
+    "imp_congr_ctx": "3A", "implies_congr": "3A", "implies_congr_ctx": "3A", "not_congr": "3A",
+    "ite_congr": "3A", "dite_congr": "3A",
+
+    "Or.elim": "1", "Exists.elim": "1", "False.elim": "1", "absurd": "1", "Not.elim": "1",
+    "And.elim": "1", "Iff.elim": "1",
+    "Decidable.byContradiction": "1", "Classical.byContradiction": "1",
+    "Classical.byCases": "1", "Decidable.byCases": "1",
+    "dite": "1", "ite": "1",
+
+    "funext": "out", "of_decide_eq_true": "out"
+  },
+  "judgments": [
+    "Additions to the 3A list of §10.10 decision 6, as `and similar`: Eq's own casesOn, recOn and substr (Eq.rec and Eq.ndrec are listed); of_eq_false, eq_false' and eq_true' (the duals of of_eq_true, eq_false, eq_true); the congruence lemmas of the connectives and binders that occur among the obstacles (forall, exists, and, or, iff, implies, not), and ite_congr, dite_congr; and every `congr_simp` lemma (generated congruence lemmas, the function-congruence analogue of congr, which elaborated simp proofs use).",
+    "Additions to family 1: Not.elim (absurd with its arguments swapped), And.elim and Iff.elim.",
+    "Eq is the only inductive type whose eliminators count as 3A; HEq and every other inductive type go to family 2.",
+    "Option.elim, Nonempty.elim and other `.elim` constants not listed fall under rule 6 (out of reach) unless the induction rule matches. They are not recursors, matchers or induction principles."
+  ]
+}

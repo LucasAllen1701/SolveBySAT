@@ -47,6 +47,12 @@ structure CNF where
   counts : Std.HashMap String Nat := {}
   /-- Order in which families first received a clause, for stable reports. -/
   famOrder : Array String := #[]
+  /-- Count clauses without storing them (milestone 7c, EVAL_PLAN §4.1). Every clause is
+  built, folded and counted exactly as otherwise; only the final push is skipped, so
+  `clauses` stays empty and `nClauses`/`counts` are those of a full build. -/
+  countOnly : Bool := false
+  /-- Clauses added so far (equals `clauses.size` unless `countOnly`). -/
+  nClauses : Nat := 0
 
 instance : Inhabited CNF := ⟨{}⟩
 
@@ -82,7 +88,8 @@ def addClause (ls : Array BLit) : CnfM Unit := do
         out := out.push x
   modify fun s =>
     let c := s.counts.getD s.fam 0
-    { s with clauses := s.clauses.push out
+    { s with clauses := if s.countOnly then s.clauses else s.clauses.push out
+             nClauses := s.nClauses + 1
              counts := s.counts.insert s.fam (c + 1)
              famOrder := if c == 0 && !s.famOrder.contains s.fam then s.famOrder.push s.fam else s.famOrder }
 
@@ -149,6 +156,9 @@ def toDimacs (F : CNF) : String := Id.run do
       s := s ++ toString l ++ " "
     s := s ++ "0\n"
   return s
+
+/-- The number of clauses, stored or (under `countOnly`) only counted. -/
+def numClauses (F : CNF) : Nat := F.nClauses
 
 /-- Clause counts per family, in first-use order. -/
 def familyCounts (F : CNF) : Array (String × Nat) :=

@@ -51,6 +51,10 @@ structure EncodeOptions where
   framePruning : Bool := true
   /-- The ladder (sequential) at-most-one encoding for 6 or more literals. -/
   ladderAmo : Bool := true
+  /-- Count variables and clauses per family without storing the clauses (milestone 7c,
+  EVAL_PLAN §4.1 and §10.9). The encoding is built exactly as otherwise; the resulting
+  `cnf.clauses` is empty, so it cannot be solved. Only the measurement harness sets it. -/
+  countOnly : Bool := false
 
 /-- A named refinement configuration, for testing each refinement on its own: `all`
 (the default), `none`, or exactly one of `symmetry`, `pair`, `candidate`, `frame`, `ladder`
@@ -308,7 +312,7 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
     for b in [0:N] do
       for g in [0:b+1] do u := u.insert (b, g) (← newLit)
     return { N, A, act, cl, gp, y, anc, u }
-  let (V, F0) := buildCNF go
+  let (V, F0) := buildCNF go { countOnly := opts.countOnly }
   let act := V.act
   let cl := V.cl
   let gp := V.gp

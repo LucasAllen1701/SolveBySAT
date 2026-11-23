@@ -1,2 +1,8 @@
 /.lake
 __pycache__/
+eval/.driver.lock
+eval/**/tmp/
+eval/corpus_check/
+eval/named_check/
+eval/forests/*.jsonl
+eval/rerun_check/after.jsonl

@@ -45,7 +45,8 @@ def cell(fam, k, n, cfg, mode):
     for l in p.stdout.splitlines():
         if l.startswith("{"):
             rec = json.loads(l)
-    status = "ok" if (p.returncode == 0 and rec) else ("memout" if p.returncode in (137, -9) or "Killed" in p.stderr else f"error {p.returncode}")
+    # the cgroup OOM killer kills the process; systemd then stops the scope with SIGTERM (-15)
+    status = "ok" if (p.returncode == 0 and rec) else ("memout" if p.returncode in (137, -9, -15) or "Killed" in p.stderr else f"error {p.returncode}")
     return rec, status, peak, time.monotonic() - t0, p.stderr[-300:]
 
 

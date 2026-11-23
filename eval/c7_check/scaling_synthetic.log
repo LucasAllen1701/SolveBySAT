@@ -1,0 +1,601 @@
+count S k=0 N=5 all: ok 16523 clauses, 460 MB, 0.4 s
+count S k=4 N=5 all: ok 208083 clauses, 459 MB, 0.6 s
+count S k=8 N=5 all: ok 634023 clauses, 459 MB, 0.9 s
+count S k=16 N=5 all: ok 2328303 clauses, 459 MB, 2.1 s
+count S k=32 N=5 all: ok 9147103 clauses, 459 MB, 7.1 s
+count S k=0 N=8 all: ok 49335 clauses, 459 MB, 0.4 s
+count S k=4 N=8 all: ok 625911 clauses, 459 MB, 0.9 s
+count S k=8 N=8 all: ok 2015191 clauses, 461 MB, 1.9 s
+count S k=16 N=8 all: ok 7362279 clauses, 460 MB, 5.8 s
+count S k=32 N=8 all: ok 28710359 clauses, 466 MB, 21.2 s
+count S k=0 N=12 all: ok 128087 clauses, 460 MB, 0.5 s
+count S k=4 N=12 all: ok 1688063 clauses, 460 MB, 1.6 s
+count S k=8 N=12 all: ok 5236871 clauses, 460 MB, 4.2 s
+count S k=16 N=12 all: ok 19081919 clauses, 460 MB, 14.2 s
+count S k=32 N=12 all: ok 74116103 clauses, 492 MB, 53.8 s
+count S k=0 N=5 none: ok 19590 clauses, 460 MB, 0.4 s
+count S k=4 N=5 none: ok 212310 clauses, 460 MB, 0.6 s
+count S k=8 N=5 none: ok 638490 clauses, 457 MB, 0.9 s
+count S k=16 N=5 none: ok 2333950 clauses, 461 MB, 2.1 s
+count S k=32 N=5 none: ok 9156810 clauses, 460 MB, 7.1 s
+count S k=0 N=8 none: ok 59104 clauses, 460 MB, 0.4 s
+count S k=4 N=8 none: ok 638496 clauses, 460 MB, 0.9 s
+count S k=8 N=8 none: ok 2028704 clauses, 461 MB, 1.9 s
+count S k=16 N=8 none: ok 7377872 clauses, 460 MB, 5.7 s
+count S k=32 N=8 none: ok 28732640 clauses, 466 MB, 21.0 s
+count S k=0 N=12 none: ok 154616 clauses, 460 MB, 0.5 s
+count S k=4 N=12 none: ok 1721936 clauses, 460 MB, 1.6 s
+count S k=8 N=12 none: ok 5271320 clauses, 461 MB, 4.2 s
+count S k=16 N=12 none: ok 19119872 clauses, 461 MB, 14.1 s
+count S k=32 N=12 none: ok 74164472 clauses, 491 MB, 53.2 s
+count S k=0 N=5 no_candidate: ok 16523 clauses, 460 MB, 0.4 s
+count S k=4 N=5 no_candidate: ok 208083 clauses, 461 MB, 0.6 s
+count S k=8 N=5 no_candidate: ok 634023 clauses, 460 MB, 0.9 s
+count S k=16 N=5 no_candidate: ok 2328303 clauses, 461 MB, 2.1 s
+count S k=32 N=5 no_candidate: ok 9147103 clauses, 461 MB, 7.1 s
+count S k=0 N=8 no_candidate: ok 49335 clauses, 457 MB, 0.4 s
+count S k=4 N=8 no_candidate: ok 625911 clauses, 460 MB, 0.9 s
+count S k=8 N=8 no_candidate: ok 2015191 clauses, 460 MB, 1.9 s
+count S k=16 N=8 no_candidate: ok 7362279 clauses, 460 MB, 5.7 s
+count S k=32 N=8 no_candidate: ok 28710359 clauses, 467 MB, 21.0 s
+count S k=0 N=12 no_candidate: ok 128087 clauses, 460 MB, 0.5 s
+count S k=4 N=12 no_candidate: ok 1688063 clauses, 460 MB, 1.6 s
+count S k=8 N=12 no_candidate: ok 5236871 clauses, 460 MB, 4.2 s
+count S k=16 N=12 no_candidate: ok 19081919 clauses, 462 MB, 14.0 s
+count S k=32 N=12 no_candidate: ok 74116103 clauses, 492 MB, 53.3 s
+count S k=0 N=5 no_pair: ok 16523 clauses, 460 MB, 0.4 s
+count S k=4 N=5 no_pair: ok 208083 clauses, 460 MB, 0.5 s
+count S k=8 N=5 no_pair: ok 634023 clauses, 460 MB, 0.9 s
+count S k=16 N=5 no_pair: ok 2328303 clauses, 460 MB, 2.1 s
+count S k=32 N=5 no_pair: ok 9147103 clauses, 460 MB, 7.0 s
+count S k=0 N=8 no_pair: ok 49335 clauses, 461 MB, 0.4 s
+count S k=4 N=8 no_pair: ok 625911 clauses, 461 MB, 0.8 s
+count S k=8 N=8 no_pair: ok 2015191 clauses, 460 MB, 1.8 s
+count S k=16 N=8 no_pair: ok 7362279 clauses, 461 MB, 5.7 s
+count S k=32 N=8 no_pair: ok 28710359 clauses, 466 MB, 20.8 s
+count S k=0 N=12 no_pair: ok 128087 clauses, 460 MB, 0.5 s
+count S k=4 N=12 no_pair: ok 1688063 clauses, 461 MB, 1.6 s
+count S k=8 N=12 no_pair: ok 5236871 clauses, 459 MB, 4.1 s
+count S k=16 N=12 no_pair: ok 19081919 clauses, 461 MB, 14.0 s
+count S k=32 N=12 no_pair: ok 74116103 clauses, 492 MB, 52.8 s
+count S k=0 N=5 no_static: ok 17643 clauses, 460 MB, 0.4 s
+count S k=4 N=5 no_static: ok 215323 clauses, 461 MB, 0.6 s
+count S k=8 N=5 no_static: ok 654103 clauses, 461 MB, 0.9 s
+count S k=16 N=5 no_static: ok 2394223 clauses, 457 MB, 2.2 s
+count S k=32 N=5 no_static: ok 9385343 clauses, 460 MB, 7.4 s
+count S k=0 N=8 no_static: ok 51943 clauses, 460 MB, 0.4 s
+count S k=4 N=8 no_static: ok 643687 clauses, 457 MB, 0.9 s
+count S k=8 N=8 no_static: ok 2065031 clauses, 460 MB, 1.9 s
+count S k=16 N=8 no_static: ok 7526935 clauses, 461 MB, 5.9 s
+count S k=32 N=8 no_static: ok 29307399 clauses, 466 MB, 21.7 s
+count S k=0 N=12 no_static: ok 133631 clauses, 461 MB, 0.5 s
+count S k=4 N=12 no_static: ok 1727111 clauses, 460 MB, 1.6 s
+count S k=8 N=12 no_static: ok 5347055 clauses, 461 MB, 4.3 s
+count S k=16 N=12 no_static: ok 19447271 clauses, 460 MB, 14.6 s
+count S k=32 N=12 no_static: ok 75443375 clauses, 492 MB, 55.1 s
+count T1 k=0 N=5 all: ok 16523 clauses, 461 MB, 0.4 s
+count T1 k=4 N=5 all: ok 171523 clauses, 460 MB, 0.5 s
+count T1 k=8 N=5 all: ok 449703 clauses, 460 MB, 0.7 s
+count T1 k=16 N=5 all: ok 1512143 clauses, 461 MB, 1.5 s
+count T1 k=32 N=5 all: ok 5645823 clauses, 460 MB, 4.4 s
+count T1 k=0 N=8 all: ok 49335 clauses, 461 MB, 0.4 s
+count T1 k=4 N=8 all: ok 506983 clauses, 461 MB, 0.8 s
+count T1 k=8 N=8 all: ok 1398407 clauses, 460 MB, 1.4 s
+count T1 k=16 N=8 all: ok 4650311 clauses, 461 MB, 3.7 s
+count T1 k=32 N=8 all: ok 17168999 clauses, 466 MB, 12.3 s
+count T1 k=0 N=12 all: ok 128087 clauses, 461 MB, 0.5 s
+count T1 k=4 N=12 all: ok 1350407 clauses, 460 MB, 1.3 s
+count T1 k=8 N=12 all: ok 3589103 clauses, 461 MB, 2.9 s
+count T1 k=16 N=12 all: ok 11863823 clauses, 457 MB, 8.7 s
+count T1 k=32 N=12 all: ok 43528703 clauses, 492 MB, 30.5 s
+count T1 k=0 N=5 none: ok 19590 clauses, 462 MB, 0.4 s
+count T1 k=4 N=5 none: ok 175970 clauses, 460 MB, 0.5 s
+count T1 k=8 N=5 none: ok 454390 clauses, 461 MB, 0.7 s
+count T1 k=16 N=5 none: ok 1518230 clauses, 457 MB, 1.5 s
+count T1 k=32 N=5 none: ok 5656190 clauses, 462 MB, 4.4 s
+count T1 k=0 N=8 none: ok 59104 clauses, 457 MB, 0.4 s
+count T1 k=4 N=8 none: ok 520112 clauses, 461 MB, 0.8 s
+count T1 k=8 N=8 none: ok 1412464 clauses, 461 MB, 1.4 s
+count T1 k=16 N=8 none: ok 4666992 clauses, 460 MB, 3.7 s
+count T1 k=32 N=8 none: ok 17192912 clauses, 467 MB, 12.4 s
+count T1 k=0 N=12 none: ok 154616 clauses, 461 MB, 0.5 s
+count T1 k=4 N=12 none: ok 1385480 clauses, 460 MB, 1.4 s
+count T1 k=8 N=12 none: ok 3624752 clauses, 460 MB, 2.9 s
+count T1 k=16 N=12 none: ok 11904176 clauses, 461 MB, 8.7 s
+count T1 k=32 N=12 none: ok 43580672 clauses, 492 MB, 30.4 s
+count T1 k=0 N=5 no_candidate: ok 16523 clauses, 461 MB, 0.4 s
+count T1 k=4 N=5 no_candidate: ok 171523 clauses, 460 MB, 0.5 s
+count T1 k=8 N=5 no_candidate: ok 449703 clauses, 461 MB, 0.7 s
+count T1 k=16 N=5 no_candidate: ok 1512143 clauses, 461 MB, 1.5 s
+count T1 k=32 N=5 no_candidate: ok 5645823 clauses, 461 MB, 4.4 s
+count T1 k=0 N=8 no_candidate: ok 49335 clauses, 460 MB, 0.4 s
+count T1 k=4 N=8 no_candidate: ok 506983 clauses, 461 MB, 0.8 s
+count T1 k=8 N=8 no_candidate: ok 1398407 clauses, 460 MB, 1.4 s
+count T1 k=16 N=8 no_candidate: ok 4650311 clauses, 461 MB, 3.7 s
+count T1 k=32 N=8 no_candidate: ok 17168999 clauses, 466 MB, 12.3 s
+count T1 k=0 N=12 no_candidate: ok 128087 clauses, 460 MB, 0.5 s
+count T1 k=4 N=12 no_candidate: ok 1350407 clauses, 460 MB, 1.4 s
+count T1 k=8 N=12 no_candidate: ok 3589103 clauses, 460 MB, 2.9 s
+count T1 k=16 N=12 no_candidate: ok 11863823 clauses, 460 MB, 8.7 s
+count T1 k=32 N=12 no_candidate: ok 43528703 clauses, 492 MB, 30.5 s
+count T1 k=0 N=5 no_pair: ok 16523 clauses, 460 MB, 0.4 s
+count T1 k=4 N=5 no_pair: ok 171523 clauses, 461 MB, 0.5 s
+count T1 k=8 N=5 no_pair: ok 449703 clauses, 461 MB, 0.7 s
+count T1 k=16 N=5 no_pair: ok 1512143 clauses, 460 MB, 1.5 s
+count T1 k=32 N=5 no_pair: ok 5645823 clauses, 460 MB, 4.4 s
+count T1 k=0 N=8 no_pair: ok 49335 clauses, 461 MB, 0.4 s
+count T1 k=4 N=8 no_pair: ok 506983 clauses, 461 MB, 0.8 s
+count T1 k=8 N=8 no_pair: ok 1398407 clauses, 461 MB, 1.4 s
+count T1 k=16 N=8 no_pair: ok 4650311 clauses, 460 MB, 3.7 s
+count T1 k=32 N=8 no_pair: ok 17168999 clauses, 468 MB, 12.3 s
+count T1 k=0 N=12 no_pair: ok 128087 clauses, 460 MB, 0.5 s
+count T1 k=4 N=12 no_pair: ok 1350407 clauses, 461 MB, 1.3 s
+count T1 k=8 N=12 no_pair: ok 3589103 clauses, 461 MB, 2.9 s
+count T1 k=16 N=12 no_pair: ok 11863823 clauses, 460 MB, 8.7 s
+count T1 k=32 N=12 no_pair: ok 43528703 clauses, 492 MB, 30.3 s
+count T1 k=0 N=5 no_static: ok 17643 clauses, 461 MB, 0.4 s
+count T1 k=4 N=5 no_static: ok 171523 clauses, 460 MB, 0.5 s
+count T1 k=8 N=5 no_static: ok 449703 clauses, 460 MB, 0.7 s
+count T1 k=16 N=5 no_static: ok 1512143 clauses, 460 MB, 1.5 s
+count T1 k=32 N=5 no_static: ok 5645823 clauses, 461 MB, 4.5 s
+count T1 k=0 N=8 no_static: ok 51943 clauses, 461 MB, 0.4 s
+count T1 k=4 N=8 no_static: ok 506983 clauses, 460 MB, 0.8 s
+count T1 k=8 N=8 no_static: ok 1398407 clauses, 462 MB, 1.4 s
+count T1 k=16 N=8 no_static: ok 4650311 clauses, 461 MB, 3.8 s
+count T1 k=32 N=8 no_static: ok 17168999 clauses, 473 MB, 12.6 s
+count T1 k=0 N=12 no_static: ok 133631 clauses, 461 MB, 0.5 s
+count T1 k=4 N=12 no_static: ok 1350407 clauses, 461 MB, 1.4 s
+count T1 k=8 N=12 no_static: ok 3589103 clauses, 461 MB, 3.0 s
+count T1 k=16 N=12 no_static: ok 11863823 clauses, 457 MB, 8.9 s
+count T1 k=32 N=12 no_static: ok 43528703 clauses, 493 MB, 31.3 s
+count T2 k=0 N=5 all: ok 16523 clauses, 461 MB, 0.4 s
+count T2 k=4 N=5 all: ok 75163 clauses, 461 MB, 0.5 s
+count T2 k=8 N=5 all: ok 138103 clauses, 461 MB, 0.5 s
+count T2 k=16 N=5 all: ok 324783 clauses, 461 MB, 0.7 s
+count T2 k=32 N=5 all: ok 894623 clauses, 461 MB, 1.2 s
+count T2 k=0 N=8 all: ok 49335 clauses, 460 MB, 0.4 s
+count T2 k=4 N=8 all: ok 205911 clauses, 457 MB, 0.6 s
+count T2 k=8 N=8 all: ok 383031 clauses, 461 MB, 0.7 s
+count T2 k=16 N=8 all: ok 845431 clauses, 457 MB, 1.1 s
+count T2 k=32 N=8 all: ok 2155159 clauses, 461 MB, 2.2 s
+count T2 k=0 N=12 all: ok 128087 clauses, 460 MB, 0.5 s
+count T2 k=4 N=12 all: ok 521807 clauses, 460 MB, 0.8 s
+count T2 k=8 N=12 all: ok 945599 clauses, 460 MB, 1.1 s
+count T2 k=16 N=12 all: ok 1929527 clauses, 461 MB, 1.9 s
+count T2 k=32 N=12 all: ok 4629671 clauses, 460 MB, 4.1 s
+count T2 k=0 N=5 none: ok 19590 clauses, 461 MB, 0.4 s
+count T2 k=4 N=5 none: ok 79830 clauses, 461 MB, 0.5 s
+count T2 k=8 N=5 none: ok 143010 clauses, 460 MB, 0.5 s
+count T2 k=16 N=5 none: ok 331090 clauses, 461 MB, 0.7 s
+count T2 k=32 N=5 none: ok 905210 clauses, 461 MB, 1.2 s
+count T2 k=0 N=8 none: ok 59104 clauses, 460 MB, 0.4 s
+count T2 k=4 N=8 none: ok 219584 clauses, 461 MB, 0.6 s
+count T2 k=8 N=8 none: ok 397632 clauses, 461 MB, 0.7 s
+count T2 k=16 N=8 none: ok 862656 clauses, 457 MB, 1.1 s
+count T2 k=32 N=8 none: ok 2179616 clauses, 460 MB, 2.2 s
+count T2 k=0 N=12 none: ok 154616 clauses, 460 MB, 0.5 s
+count T2 k=4 N=12 none: ok 558080 clauses, 460 MB, 0.8 s
+count T2 k=8 N=12 none: ok 983648 clauses, 460 MB, 1.1 s
+count T2 k=16 N=12 none: ok 1971080 clauses, 460 MB, 1.9 s
+count T2 k=32 N=12 none: ok 4682840 clauses, 460 MB, 4.2 s
+count T2 k=0 N=5 no_candidate: ok 16523 clauses, 460 MB, 0.4 s
+count T2 k=4 N=5 no_candidate: ok 75163 clauses, 460 MB, 0.5 s
+count T2 k=8 N=5 no_candidate: ok 138103 clauses, 461 MB, 0.5 s
+count T2 k=16 N=5 no_candidate: ok 324783 clauses, 461 MB, 0.7 s
+count T2 k=32 N=5 no_candidate: ok 894623 clauses, 460 MB, 1.2 s
+count T2 k=0 N=8 no_candidate: ok 49335 clauses, 461 MB, 0.4 s
+count T2 k=4 N=8 no_candidate: ok 205911 clauses, 461 MB, 0.6 s
+count T2 k=8 N=8 no_candidate: ok 383031 clauses, 460 MB, 0.7 s
+count T2 k=16 N=8 no_candidate: ok 845431 clauses, 461 MB, 1.1 s
+count T2 k=32 N=8 no_candidate: ok 2155159 clauses, 461 MB, 2.2 s
+count T2 k=0 N=12 no_candidate: ok 128087 clauses, 461 MB, 0.5 s
+count T2 k=4 N=12 no_candidate: ok 521807 clauses, 460 MB, 0.8 s
+count T2 k=8 N=12 no_candidate: ok 945599 clauses, 461 MB, 1.1 s
+count T2 k=16 N=12 no_candidate: ok 1929527 clauses, 461 MB, 1.9 s
+count T2 k=32 N=12 no_candidate: ok 4629671 clauses, 461 MB, 4.1 s
+count T2 k=0 N=5 no_pair: ok 16523 clauses, 462 MB, 0.4 s
+count T2 k=4 N=5 no_pair: ok 75163 clauses, 460 MB, 0.5 s
+count T2 k=8 N=5 no_pair: ok 138103 clauses, 460 MB, 0.5 s
+count T2 k=16 N=5 no_pair: ok 324783 clauses, 460 MB, 0.7 s
+count T2 k=32 N=5 no_pair: ok 894623 clauses, 460 MB, 1.2 s
+count T2 k=0 N=8 no_pair: ok 49335 clauses, 460 MB, 0.4 s
+count T2 k=4 N=8 no_pair: ok 205911 clauses, 460 MB, 0.6 s
+count T2 k=8 N=8 no_pair: ok 383031 clauses, 461 MB, 0.7 s
+count T2 k=16 N=8 no_pair: ok 845431 clauses, 461 MB, 1.1 s
+count T2 k=32 N=8 no_pair: ok 2155159 clauses, 461 MB, 2.2 s
+count T2 k=0 N=12 no_pair: ok 128087 clauses, 461 MB, 0.5 s
+count T2 k=4 N=12 no_pair: ok 521807 clauses, 460 MB, 0.8 s
+count T2 k=8 N=12 no_pair: ok 945599 clauses, 457 MB, 1.1 s
+count T2 k=16 N=12 no_pair: ok 1929527 clauses, 460 MB, 1.9 s
+count T2 k=32 N=12 no_pair: ok 4629671 clauses, 460 MB, 4.1 s
+count T2 k=0 N=5 no_static: ok 17643 clauses, 461 MB, 0.4 s
+count T2 k=4 N=5 no_static: ok 75163 clauses, 460 MB, 0.5 s
+count T2 k=8 N=5 no_static: ok 144983 clauses, 460 MB, 0.5 s
+count T2 k=16 N=5 no_static: ok 324783 clauses, 460 MB, 0.7 s
+count T2 k=32 N=5 no_static: ok 894623 clauses, 461 MB, 1.2 s
+count T2 k=0 N=8 no_static: ok 51943 clauses, 462 MB, 0.4 s
+count T2 k=4 N=8 no_static: ok 205911 clauses, 461 MB, 0.6 s
+count T2 k=8 N=8 no_static: ok 383031 clauses, 461 MB, 0.7 s
+count T2 k=16 N=8 no_static: ok 845431 clauses, 460 MB, 1.1 s
+count T2 k=32 N=8 no_static: ok 2155159 clauses, 461 MB, 2.2 s
+count T2 k=0 N=12 no_static: ok 133631 clauses, 460 MB, 0.5 s
+count T2 k=4 N=12 no_static: ok 521807 clauses, 460 MB, 0.8 s
+count T2 k=8 N=12 no_static: ok 945599 clauses, 461 MB, 1.1 s
+count T2 k=16 N=12 no_static: ok 1929527 clauses, 460 MB, 2.0 s
+count T2 k=32 N=12 no_static: ok 4629671 clauses, 460 MB, 4.2 s
+count T3 k=0 N=5 all: ok 16523 clauses, 460 MB, 0.4 s
+count T3 k=4 N=5 all: ok 193803 clauses, 460 MB, 0.5 s
+count T3 k=8 N=5 all: ok 594423 clauses, 461 MB, 0.8 s
+count T3 k=16 N=5 all: ok 2197903 clauses, 460 MB, 2.0 s
+count T3 k=32 N=5 all: ok 8675103 clauses, 460 MB, 6.7 s
+count T3 k=0 N=8 all: ok 49335 clauses, 461 MB, 0.4 s
+count T3 k=4 N=8 all: ok 597943 clauses, 461 MB, 0.8 s
+count T3 k=8 N=8 all: ok 1933911 clauses, 460 MB, 1.8 s
+count T3 k=16 N=8 all: ok 7097319 clauses, 461 MB, 5.5 s
+count T3 k=32 N=8 all: ok 27760599 clauses, 466 MB, 20.2 s
+count T3 k=0 N=12 all: ok 128087 clauses, 460 MB, 0.5 s
+count T3 k=4 N=12 all: ok 1636511 clauses, 460 MB, 1.6 s
+count T3 k=8 N=12 all: ok 5093447 clauses, 462 MB, 4.0 s
+count T3 k=16 N=12 all: ok 18616895 clauses, 460 MB, 13.6 s
+count T3 k=32 N=12 all: ok 72457991 clauses, 493 MB, 51.5 s
+count T3 k=0 N=5 none: ok 19590 clauses, 461 MB, 0.4 s
+count T3 k=4 N=5 none: ok 198030 clauses, 460 MB, 0.6 s
+count T3 k=8 N=5 none: ok 598890 clauses, 461 MB, 0.8 s
+count T3 k=16 N=5 none: ok 2203550 clauses, 460 MB, 2.0 s
+count T3 k=32 N=5 none: ok 8684810 clauses, 461 MB, 6.6 s
+count T3 k=0 N=8 none: ok 59104 clauses, 462 MB, 0.4 s
+count T3 k=4 N=8 none: ok 610528 clauses, 461 MB, 0.8 s
+count T3 k=8 N=8 none: ok 1947424 clauses, 461 MB, 1.8 s
+count T3 k=16 N=8 none: ok 7112912 clauses, 461 MB, 5.4 s
+count T3 k=32 N=8 none: ok 27782880 clauses, 466 MB, 20.0 s
+count T3 k=0 N=12 none: ok 154616 clauses, 460 MB, 0.5 s
+count T3 k=4 N=12 none: ok 1670384 clauses, 461 MB, 1.6 s
+count T3 k=8 N=12 none: ok 5127896 clauses, 460 MB, 4.0 s
+count T3 k=16 N=12 none: ok 18654848 clauses, 461 MB, 13.5 s
+count T3 k=32 N=12 none: ok 72506360 clauses, 492 MB, 51.1 s
+count T3 k=0 N=5 no_candidate: ok 16523 clauses, 461 MB, 0.4 s
+count T3 k=4 N=5 no_candidate: ok 193803 clauses, 460 MB, 0.5 s
+count T3 k=8 N=5 no_candidate: ok 594423 clauses, 460 MB, 0.8 s
+count T3 k=16 N=5 no_candidate: ok 2197903 clauses, 460 MB, 2.0 s
+count T3 k=32 N=5 no_candidate: ok 8675103 clauses, 460 MB, 6.7 s
+count T3 k=0 N=8 no_candidate: ok 49335 clauses, 461 MB, 0.4 s
+count T3 k=4 N=8 no_candidate: ok 597943 clauses, 460 MB, 0.8 s
+count T3 k=8 N=8 no_candidate: ok 1933911 clauses, 460 MB, 1.8 s
+count T3 k=16 N=8 no_candidate: ok 7097319 clauses, 461 MB, 5.5 s
+count T3 k=32 N=8 no_candidate: ok 27760599 clauses, 466 MB, 20.2 s
+count T3 k=0 N=12 no_candidate: ok 128087 clauses, 462 MB, 0.5 s
+count T3 k=4 N=12 no_candidate: ok 1636511 clauses, 461 MB, 1.5 s
+count T3 k=8 N=12 no_candidate: ok 5093447 clauses, 461 MB, 4.0 s
+count T3 k=16 N=12 no_candidate: ok 18616895 clauses, 460 MB, 13.6 s
+count T3 k=32 N=12 no_candidate: ok 72457991 clauses, 492 MB, 51.6 s
+count T3 k=0 N=5 no_pair: ok 16523 clauses, 460 MB, 0.4 s
+count T3 k=4 N=5 no_pair: ok 193803 clauses, 460 MB, 0.5 s
+count T3 k=8 N=5 no_pair: ok 594423 clauses, 461 MB, 0.8 s
+count T3 k=16 N=5 no_pair: ok 2197903 clauses, 461 MB, 2.0 s
+count T3 k=32 N=5 no_pair: ok 8675103 clauses, 460 MB, 6.6 s
+count T3 k=0 N=8 no_pair: ok 49335 clauses, 461 MB, 0.4 s
+count T3 k=4 N=8 no_pair: ok 597943 clauses, 457 MB, 0.8 s
+count T3 k=8 N=8 no_pair: ok 1933911 clauses, 461 MB, 1.8 s
+count T3 k=16 N=8 no_pair: ok 7097319 clauses, 461 MB, 5.4 s
+count T3 k=32 N=8 no_pair: ok 27760599 clauses, 466 MB, 20.1 s
+count T3 k=0 N=12 no_pair: ok 128087 clauses, 461 MB, 0.5 s
+count T3 k=4 N=12 no_pair: ok 1636511 clauses, 461 MB, 1.5 s
+count T3 k=8 N=12 no_pair: ok 5093447 clauses, 461 MB, 4.0 s
+count T3 k=16 N=12 no_pair: ok 18616895 clauses, 462 MB, 13.5 s
+count T3 k=32 N=12 no_pair: ok 72457991 clauses, 492 MB, 51.2 s
+count T3 k=0 N=5 no_static: ok 17643 clauses, 460 MB, 0.4 s
+count T3 k=4 N=5 no_static: ok 200483 clauses, 460 MB, 0.5 s
+count T3 k=8 N=5 no_static: ok 613063 clauses, 460 MB, 0.9 s
+count T3 k=16 N=5 no_static: ok 2259663 clauses, 461 MB, 2.1 s
+count T3 k=32 N=5 no_static: ok 8899903 clauses, 460 MB, 6.9 s
+count T3 k=0 N=8 no_static: ok 51943 clauses, 460 MB, 0.4 s
+count T3 k=4 N=8 no_static: ok 614823 clauses, 461 MB, 0.8 s
+count T3 k=8 N=8 no_static: ok 1981447 clauses, 461 MB, 1.8 s
+count T3 k=16 N=8 no_static: ok 7255319 clauses, 461 MB, 5.7 s
+count T3 k=32 N=8 no_static: ok 28336135 clauses, 466 MB, 20.9 s
+count T3 k=0 N=12 no_static: ok 133631 clauses, 461 MB, 0.5 s
+count T3 k=4 N=12 no_static: ok 1674215 clauses, 460 MB, 1.6 s
+count T3 k=8 N=12 no_static: ok 5200175 clauses, 462 MB, 4.2 s
+count T3 k=16 N=12 no_static: ok 18972263 clauses, 461 MB, 14.0 s
+count T3 k=32 N=12 no_static: ok 73753007 clauses, 492 MB, 53.3 s
+full S k=0 N=5 all: equal 463 MB
+full S k=4 N=5 all: equal 470 MB
+full S k=8 N=5 all: equal 494 MB
+full S k=16 N=5 all: equal 573 MB
+full S k=32 N=5 all: equal 974 MB
+full S k=0 N=8 all: equal 466 MB
+full S k=4 N=8 all: equal 494 MB
+full S k=8 N=8 all: equal 561 MB
+full S k=16 N=8 all: equal 847 MB
+full S k=32 N=8 all: equal 2024 MB
+full S k=0 N=12 all: equal 469 MB
+full S k=4 N=12 all: equal 542 MB
+full S k=8 N=12 all: equal 726 MB
+full S k=16 N=12 all: equal 1512 MB
+full S k=32 N=12 all: error -15 None MB
+full S k=0 N=5 none: equal 464 MB
+full S k=4 N=5 none: equal 471 MB
+full S k=8 N=5 none: equal 494 MB
+full S k=16 N=5 none: equal 571 MB
+full S k=32 N=5 none: equal 973 MB
+full S k=0 N=8 none: equal 466 MB
+full S k=4 N=8 none: equal 493 MB
+full S k=8 N=8 none: equal 551 MB
+full S k=16 N=8 none: equal 845 MB
+full S k=32 N=8 none: equal 2024 MB
+full S k=0 N=12 none: equal 467 MB
+full S k=4 N=12 none: equal 544 MB
+full S k=8 N=12 none: equal 729 MB
+full S k=16 N=12 none: equal 1513 MB
+full S k=32 N=12 none: error -15 None MB
+full S k=0 N=5 no_candidate: equal 461 MB
+full S k=4 N=5 no_candidate: equal 469 MB
+full S k=8 N=5 no_candidate: equal 493 MB
+full S k=16 N=5 no_candidate: equal 571 MB
+full S k=32 N=5 no_candidate: equal 971 MB
+full S k=0 N=8 no_candidate: equal 462 MB
+full S k=4 N=8 no_candidate: equal 494 MB
+full S k=8 N=8 no_candidate: equal 558 MB
+full S k=16 N=8 no_candidate: equal 845 MB
+full S k=32 N=8 no_candidate: equal 2025 MB
+full S k=0 N=12 no_candidate: equal 467 MB
+full S k=4 N=12 no_candidate: equal 541 MB
+full S k=8 N=12 no_candidate: equal 726 MB
+full S k=16 N=12 no_candidate: equal 1513 MB
+full S k=32 N=12 no_candidate: error -15 None MB
+full S k=0 N=5 no_pair: equal 461 MB
+full S k=4 N=5 no_pair: equal 469 MB
+full S k=8 N=5 no_pair: equal 493 MB
+full S k=16 N=5 no_pair: equal 571 MB
+full S k=32 N=5 no_pair: equal 973 MB
+full S k=0 N=8 no_pair: equal 465 MB
+full S k=4 N=8 no_pair: equal 493 MB
+full S k=8 N=8 no_pair: equal 560 MB
+full S k=16 N=8 no_pair: equal 845 MB
+full S k=32 N=8 no_pair: equal 2025 MB
+full S k=0 N=12 no_pair: equal 468 MB
+full S k=4 N=12 no_pair: equal 541 MB
+full S k=8 N=12 no_pair: equal 725 MB
+full S k=16 N=12 no_pair: equal 1511 MB
+full S k=32 N=12 no_pair: error -15 None MB
+full S k=0 N=5 no_static: equal 461 MB
+full S k=4 N=5 no_static: equal 469 MB
+full S k=8 N=5 no_static: equal 493 MB
+full S k=16 N=5 no_static: equal 571 MB
+full S k=32 N=5 no_static: equal 979 MB
+full S k=0 N=8 no_static: equal 465 MB
+full S k=4 N=8 no_static: equal 493 MB
+full S k=8 N=8 no_static: equal 559 MB
+full S k=16 N=8 no_static: equal 851 MB
+full S k=32 N=8 no_static: equal 2055 MB
+full S k=0 N=12 no_static: equal 467 MB
+full S k=4 N=12 no_static: equal 542 MB
+full S k=8 N=12 no_static: equal 731 MB
+full S k=16 N=12 no_static: equal 1507 MB
+full S k=32 N=12 no_static: error -15 None MB
+full T1 k=0 N=5 all: equal 458 MB
+full T1 k=4 N=5 all: equal 469 MB
+full T1 k=8 N=5 all: equal 481 MB
+full T1 k=16 N=5 all: equal 529 MB
+full T1 k=32 N=5 all: equal 747 MB
+full T1 k=0 N=8 all: equal 462 MB
+full T1 k=4 N=8 all: equal 485 MB
+full T1 k=8 N=8 all: equal 524 MB
+full T1 k=16 N=8 all: equal 719 MB
+full T1 k=32 N=8 all: equal 1487 MB
+full T1 k=0 N=12 all: equal 467 MB
+full T1 k=4 N=12 all: equal 522 MB
+full T1 k=8 N=12 all: equal 633 MB
+full T1 k=16 N=12 all: equal 1085 MB
+full T1 k=32 N=12 all: equal 2807 MB
+full T1 k=0 N=5 none: equal 464 MB
+full T1 k=4 N=5 none: equal 466 MB
+full T1 k=8 N=5 none: equal 483 MB
+full T1 k=16 N=5 none: equal 532 MB
+full T1 k=32 N=5 none: equal 747 MB
+full T1 k=0 N=8 none: equal 466 MB
+full T1 k=4 N=8 none: equal 485 MB
+full T1 k=8 N=8 none: equal 522 MB
+full T1 k=16 N=8 none: equal 719 MB
+full T1 k=32 N=8 none: equal 1488 MB
+full T1 k=0 N=12 none: equal 467 MB
+full T1 k=4 N=12 none: equal 523 MB
+full T1 k=8 N=12 none: equal 635 MB
+full T1 k=16 N=12 none: equal 1088 MB
+full T1 k=32 N=12 none: equal 2808 MB
+full T1 k=0 N=5 no_candidate: equal 461 MB
+full T1 k=4 N=5 no_candidate: equal 469 MB
+full T1 k=8 N=5 no_candidate: equal 481 MB
+full T1 k=16 N=5 no_candidate: equal 529 MB
+full T1 k=32 N=5 no_candidate: equal 747 MB
+full T1 k=0 N=8 no_candidate: equal 466 MB
+full T1 k=4 N=8 no_candidate: equal 486 MB
+full T1 k=8 N=8 no_candidate: equal 523 MB
+full T1 k=16 N=8 no_candidate: equal 719 MB
+full T1 k=32 N=8 no_candidate: equal 1487 MB
+full T1 k=0 N=12 no_candidate: equal 467 MB
+full T1 k=4 N=12 no_candidate: equal 521 MB
+full T1 k=8 N=12 no_candidate: equal 633 MB
+full T1 k=16 N=12 no_candidate: equal 1086 MB
+full T1 k=32 N=12 no_candidate: equal 2805 MB
+full T1 k=0 N=5 no_pair: equal 461 MB
+full T1 k=4 N=5 no_pair: equal 469 MB
+full T1 k=8 N=5 no_pair: equal 480 MB
+full T1 k=16 N=5 no_pair: equal 528 MB
+full T1 k=32 N=5 no_pair: equal 747 MB
+full T1 k=0 N=8 no_pair: equal 465 MB
+full T1 k=4 N=8 no_pair: equal 485 MB
+full T1 k=8 N=8 no_pair: equal 523 MB
+full T1 k=16 N=8 no_pair: equal 719 MB
+full T1 k=32 N=8 no_pair: equal 1488 MB
+full T1 k=0 N=12 no_pair: equal 467 MB
+full T1 k=4 N=12 no_pair: equal 521 MB
+full T1 k=8 N=12 no_pair: equal 633 MB
+full T1 k=16 N=12 no_pair: equal 1085 MB
+full T1 k=32 N=12 no_pair: equal 2805 MB
+full T1 k=0 N=5 no_static: equal 461 MB
+full T1 k=4 N=5 no_static: equal 469 MB
+full T1 k=8 N=5 no_static: equal 482 MB
+full T1 k=16 N=5 no_static: equal 528 MB
+full T1 k=32 N=5 no_static: equal 747 MB
+full T1 k=0 N=8 no_static: equal 465 MB
+full T1 k=4 N=8 no_static: equal 485 MB
+full T1 k=8 N=8 no_static: equal 523 MB
+full T1 k=16 N=8 no_static: equal 720 MB
+full T1 k=32 N=8 no_static: equal 1489 MB
+full T1 k=0 N=12 no_static: equal 468 MB
+full T1 k=4 N=12 no_static: equal 521 MB
+full T1 k=8 N=12 no_static: equal 634 MB
+full T1 k=16 N=12 no_static: equal 1086 MB
+full T1 k=32 N=12 no_static: equal 2805 MB
+full T2 k=0 N=5 all: equal 461 MB
+full T2 k=4 N=5 all: equal 462 MB
+full T2 k=8 N=5 all: equal 467 MB
+full T2 k=16 N=5 all: equal 476 MB
+full T2 k=32 N=5 all: equal 497 MB
+full T2 k=0 N=8 all: equal 465 MB
+full T2 k=4 N=8 all: equal 466 MB
+full T2 k=8 N=8 all: equal 478 MB
+full T2 k=16 N=8 all: equal 497 MB
+full T2 k=32 N=8 all: equal 580 MB
+full T2 k=0 N=12 all: equal 467 MB
+full T2 k=4 N=12 all: equal 487 MB
+full T2 k=8 N=12 all: equal 498 MB
+full T2 k=16 N=12 all: equal 547 MB
+full T2 k=32 N=12 all: equal 719 MB
+full T2 k=0 N=5 none: equal 464 MB
+full T2 k=4 N=5 none: equal 465 MB
+full T2 k=8 N=5 none: equal 467 MB
+full T2 k=16 N=5 none: equal 476 MB
+full T2 k=32 N=5 none: equal 498 MB
+full T2 k=0 N=8 none: equal 464 MB
+full T2 k=4 N=8 none: equal 471 MB
+full T2 k=8 N=8 none: equal 481 MB
+full T2 k=16 N=8 none: equal 497 MB
+full T2 k=32 N=8 none: equal 581 MB
+full T2 k=0 N=12 none: equal 468 MB
+full T2 k=4 N=12 none: equal 493 MB
+full T2 k=8 N=12 none: equal 493 MB
+full T2 k=16 N=12 none: equal 551 MB
+full T2 k=32 N=12 none: equal 720 MB
+full T2 k=0 N=5 no_candidate: equal 461 MB
+full T2 k=4 N=5 no_candidate: equal 462 MB
+full T2 k=8 N=5 no_candidate: equal 467 MB
+full T2 k=16 N=5 no_candidate: equal 477 MB
+full T2 k=32 N=5 no_candidate: equal 495 MB
+full T2 k=0 N=8 no_candidate: equal 465 MB
+full T2 k=4 N=8 no_candidate: equal 469 MB
+full T2 k=8 N=8 no_candidate: equal 481 MB
+full T2 k=16 N=8 no_candidate: equal 494 MB
+full T2 k=32 N=8 no_candidate: equal 579 MB
+full T2 k=0 N=12 no_candidate: equal 467 MB
+full T2 k=4 N=12 no_candidate: equal 487 MB
+full T2 k=8 N=12 no_candidate: equal 498 MB
+full T2 k=16 N=12 no_candidate: equal 547 MB
+full T2 k=32 N=12 no_candidate: equal 720 MB
+full T2 k=0 N=5 no_pair: equal 462 MB
+full T2 k=4 N=5 no_pair: equal 466 MB
+full T2 k=8 N=5 no_pair: equal 467 MB
+full T2 k=16 N=5 no_pair: equal 478 MB
+full T2 k=32 N=5 no_pair: equal 492 MB
+full T2 k=0 N=8 no_pair: equal 465 MB
+full T2 k=4 N=8 no_pair: equal 469 MB
+full T2 k=8 N=8 no_pair: equal 481 MB
+full T2 k=16 N=8 no_pair: equal 497 MB
+full T2 k=32 N=8 no_pair: equal 580 MB
+full T2 k=0 N=12 no_pair: equal 467 MB
+full T2 k=4 N=12 no_pair: equal 487 MB
+full T2 k=8 N=12 no_pair: equal 496 MB
+full T2 k=16 N=12 no_pair: equal 546 MB
+full T2 k=32 N=12 no_pair: equal 719 MB
+full T2 k=0 N=5 no_static: equal 462 MB
+full T2 k=4 N=5 no_static: equal 465 MB
+full T2 k=8 N=5 no_static: equal 467 MB
+full T2 k=16 N=5 no_static: equal 477 MB
+full T2 k=32 N=5 no_static: equal 496 MB
+full T2 k=0 N=8 no_static: equal 466 MB
+full T2 k=4 N=8 no_static: equal 466 MB
+full T2 k=8 N=8 no_static: equal 481 MB
+full T2 k=16 N=8 no_static: equal 496 MB
+full T2 k=32 N=8 no_static: equal 579 MB
+full T2 k=0 N=12 no_static: equal 467 MB
+full T2 k=4 N=12 no_static: equal 487 MB
+full T2 k=8 N=12 no_static: equal 497 MB
+full T2 k=16 N=12 no_static: equal 547 MB
+full T2 k=32 N=12 no_static: equal 719 MB
+full T3 k=0 N=5 all: equal 462 MB
+full T3 k=4 N=5 all: equal 469 MB
+full T3 k=8 N=5 all: equal 494 MB
+full T3 k=16 N=5 all: equal 585 MB
+full T3 k=32 N=5 all: equal 965 MB
+full T3 k=0 N=8 all: equal 465 MB
+full T3 k=4 N=8 all: equal 493 MB
+full T3 k=8 N=8 all: equal 553 MB
+full T3 k=16 N=8 all: equal 826 MB
+full T3 k=32 N=8 all: equal 1968 MB
+full T3 k=0 N=12 all: equal 466 MB
+full T3 k=4 N=12 all: equal 537 MB
+full T3 k=8 N=12 all: equal 724 MB
+full T3 k=16 N=12 all: equal 1508 MB
+full T3 k=32 N=12 all: error -15 None MB
+full T3 k=0 N=5 none: equal 463 MB
+full T3 k=4 N=5 none: equal 469 MB
+full T3 k=8 N=5 none: equal 492 MB
+full T3 k=16 N=5 none: equal 585 MB
+full T3 k=32 N=5 none: equal 967 MB
+full T3 k=0 N=8 none: equal 465 MB
+full T3 k=4 N=8 none: equal 493 MB
+full T3 k=8 N=8 none: equal 552 MB
+full T3 k=16 N=8 none: equal 830 MB
+full T3 k=32 N=8 none: equal 1969 MB
+full T3 k=0 N=12 none: equal 467 MB
+full T3 k=4 N=12 none: equal 539 MB
+full T3 k=8 N=12 none: equal 722 MB
+full T3 k=16 N=12 none: equal 1510 MB
+full T3 k=32 N=12 none: error -15 None MB
+full T3 k=0 N=5 no_candidate: equal 461 MB
+full T3 k=4 N=5 no_candidate: equal 469 MB
+full T3 k=8 N=5 no_candidate: equal 490 MB
+full T3 k=16 N=5 no_candidate: equal 585 MB
+full T3 k=32 N=5 no_candidate: equal 967 MB
+full T3 k=0 N=8 no_candidate: equal 465 MB
+full T3 k=4 N=8 no_candidate: equal 493 MB
+full T3 k=8 N=8 no_candidate: equal 553 MB
+full T3 k=16 N=8 no_candidate: equal 830 MB
+full T3 k=32 N=8 no_candidate: equal 1968 MB
+full T3 k=0 N=12 no_candidate: equal 464 MB
+full T3 k=4 N=12 no_candidate: equal 537 MB
+full T3 k=8 N=12 no_candidate: equal 723 MB
+full T3 k=16 N=12 no_candidate: equal 1506 MB
+full T3 k=32 N=12 no_candidate: error -15 None MB
+full T3 k=0 N=5 no_pair: equal 461 MB
+full T3 k=4 N=5 no_pair: equal 469 MB
+full T3 k=8 N=5 no_pair: equal 493 MB
+full T3 k=16 N=5 no_pair: equal 584 MB
+full T3 k=32 N=5 no_pair: equal 965 MB
+full T3 k=0 N=8 no_pair: equal 465 MB
+full T3 k=4 N=8 no_pair: equal 494 MB
+full T3 k=8 N=8 no_pair: equal 553 MB
+full T3 k=16 N=8 no_pair: equal 829 MB
+full T3 k=32 N=8 no_pair: equal 1967 MB
+full T3 k=0 N=12 no_pair: equal 468 MB
+full T3 k=4 N=12 no_pair: equal 537 MB
+full T3 k=8 N=12 no_pair: equal 723 MB
+full T3 k=16 N=12 no_pair: equal 1507 MB
+full T3 k=32 N=12 no_pair: error -15 None MB
+full T3 k=0 N=5 no_static: equal 461 MB
+full T3 k=4 N=5 no_static: equal 466 MB
+full T3 k=8 N=5 no_static: equal 492 MB
+full T3 k=16 N=5 no_static: equal 587 MB
+full T3 k=32 N=5 no_static: equal 972 MB
+full T3 k=0 N=8 no_static: equal 466 MB
+full T3 k=4 N=8 no_static: equal 491 MB
+full T3 k=8 N=8 no_static: equal 555 MB
+full T3 k=16 N=8 no_static: equal 832 MB
+full T3 k=32 N=8 no_static: equal 1997 MB
+full T3 k=0 N=12 no_static: equal 466 MB
+full T3 k=4 N=12 no_static: equal 535 MB
+full T3 k=8 N=12 no_static: equal 723 MB
+full T3 k=16 N=12 no_static: equal 1499 MB
+full T3 k=32 N=12 no_static: error -15 None MB
+done; full-encode check: 290 equal, 0 memout, 0 skipped, 0 differ

@@ -403,13 +403,117 @@ Every goal:
 | `B/exists_or_eq_right/1` | failed | 2 | `fun α#0 y#1 p#2 => Or.inr(rfl)` | backtracking order | the proof needs `Or.inr`, which is not in `H`; the `constructor` discharger takes the first constructor that applies (`… |
 | `B/left_eq_ite_iff/26` | heartbeats | 5 | `fun α#0 p#1 inst#2 x#3 y#4 h5@g0 => Iff.intro(fun x0@g2 a1@g2 => x0@g2, fun x0@g4 => x0@g…` | its budget | `solve_by_elim` would need 9 steps (0 intros of the goal's binders, 4 intros inside the proof, 5 applications), within … |
 
-## R5 Synthetic scaling
+## R5 Synthetic scaling (§4.1)
 
-*Pending 7c.*
+SPEC 7.3's chain `x ≤ w` from `x ≤ y`, `y ≤ z`, `z ≤ w` with `Nat.le_trans` and k distractors `∀ m n, R m n → R (f m) (f n)` of one family (`Test/Synth.lean`): S, one shared `s : Nat → Nat` and `≤` on `Nat`; T1, distinct `fᵢ : Nat → Nat`; T2, distinct structures `Cᵢ` with their own `LE` instances and `fᵢ : Cᵢ → Cᵢ`; T3, distinct predicates `Pᵢ : Nat → Nat → Prop` with one shared `s`. Every cell goes through the Lean compile path and is counted with `countOnly`; nothing is solved (`eval/scaling_synthetic.jsonl`, commit `49cd3c6`). Configurations: *all* refinements on; *none* (all milestone 6 refinements off; static typing stays on); *no_candidate*, *no_pair*: all on except candidate or pair pruning; *no_static*: all on with static typing off.
+
+Cells: 300; not counted or with a rejected constant: 0.
+
+Clauses per family at N = 8, all refinements on:
+
+| family | k | node assignment | tree shape | context | matching | decomposition | links | eigenvariables, occurs check, scope | groundness | symmetry breaking | total | groundness + decomposition % |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| S | 0 | 153 | 598 | 519 | 6,912 | 0 | 11,808 | 744 | 28,440 | 161 | 49,335 | 57.6 |
+| S | 4 | 441 | 854 | 663 | 39,872 | 175,392 | 25,392 | 2,888 | 380,248 | 161 | 625,911 | 88.8 |
+| S | 8 | 697 | 1,110 | 807 | 97,152 | 739,648 | 37,248 | 4,904 | 1,133,464 | 161 | 2,015,191 | 92.9 |
+| S | 16 | 1,209 | 1,622 | 1,095 | 289,408 | 3,100,800 | 61,200 | 8,904 | 3,897,880 | 161 | 7,362,279 | 95.1 |
+| S | 32 | 2,233 | 2,646 | 1,671 | 994,560 | 12,950,784 | 110,240 | 16,872 | 14,631,192 | 161 | 28,710,359 | 96.1 |
+| T1 | 0 | 153 | 598 | 519 | 6,912 | 0 | 11,808 | 744 | 28,440 | 161 | 49,335 | 57.6 |
+| T1 | 4 | 441 | 854 | 663 | 41,216 | 42,720 | 26,496 | 2,920 | 391,512 | 161 | 506,983 | 85.7 |
+| T1 | 8 | 697 | 1,110 | 807 | 99,968 | 89,280 | 38,800 | 4,936 | 1,162,648 | 161 | 1,398,407 | 89.5 |
+| T1 | 16 | 1,209 | 1,622 | 1,095 | 304,000 | 190,080 | 66,096 | 8,968 | 4,077,080 | 161 | 4,650,311 | 91.8 |
+| T1 | 32 | 2,233 | 2,646 | 1,671 | 1,061,760 | 403,200 | 122,960 | 16,968 | 15,557,400 | 161 | 17,168,999 | 93.0 |
+| T2 | 0 | 153 | 598 | 519 | 6,912 | 0 | 11,808 | 744 | 28,440 | 161 | 49,335 | 57.6 |
+| T2 | 4 | 441 | 854 | 663 | 43,200 | 43,680 | 27,600 | 2,952 | 86,360 | 161 | 205,911 | 63.2 |
+| T2 | 8 | 697 | 1,110 | 807 | 104,576 | 91,200 | 40,352 | 4,968 | 139,160 | 161 | 383,031 | 60.1 |
+| T2 | 16 | 1,209 | 1,622 | 1,095 | 316,928 | 193,920 | 68,544 | 9,000 | 252,952 | 161 | 845,431 | 52.9 |
+| T2 | 32 | 2,233 | 2,646 | 1,671 | 1,103,616 | 410,880 | 127,200 | 17,000 | 489,752 | 161 | 2,155,159 | 41.8 |
+| T3 | 0 | 153 | 598 | 519 | 6,912 | 0 | 11,808 | 744 | 28,440 | 161 | 49,335 | 57.6 |
+| T3 | 4 | 441 | 854 | 663 | 11,904 | 175,392 | 25,392 | 2,888 | 380,248 | 161 | 597,943 | 92.9 |
+| T3 | 8 | 697 | 1,110 | 807 | 15,872 | 739,648 | 37,248 | 4,904 | 1,133,464 | 161 | 1,933,911 | 96.9 |
+| T3 | 16 | 1,209 | 1,622 | 1,095 | 24,448 | 3,100,800 | 61,200 | 8,904 | 3,897,880 | 161 | 7,097,319 | 98.6 |
+| T3 | 32 | 2,233 | 2,646 | 1,671 | 44,800 | 12,950,784 | 110,240 | 16,872 | 14,631,192 | 161 | 27,760,599 | 99.4 |
+
+Total clauses at k = 32 by configuration:
+
+| family | N | all | none | no_candidate | no_pair | no_static |
+| --- | --- | --- | --- | --- | --- | --- |
+| S | 5 | 9,147,103 | 9,156,810 | 9,147,103 | 9,147,103 | 9,385,343 |
+| S | 8 | 28,710,359 | 28,732,640 | 28,710,359 | 28,710,359 | 29,307,399 |
+| S | 12 | 74,116,103 | 74,164,472 | 74,116,103 | 74,116,103 | 75,443,375 |
+| T1 | 5 | 5,645,823 | 5,656,190 | 5,645,823 | 5,645,823 | 5,645,823 |
+| T1 | 8 | 17,168,999 | 17,192,912 | 17,168,999 | 17,168,999 | 17,168,999 |
+| T1 | 12 | 43,528,703 | 43,580,672 | 43,528,703 | 43,528,703 | 43,528,703 |
+| T2 | 5 | 894,623 | 905,210 | 894,623 | 894,623 | 894,623 |
+| T2 | 8 | 2,155,159 | 2,179,616 | 2,155,159 | 2,155,159 | 2,155,159 |
+| T2 | 12 | 4,629,671 | 4,682,840 | 4,629,671 | 4,629,671 | 4,629,671 |
+| T3 | 5 | 8,675,103 | 8,684,810 | 8,675,103 | 8,675,103 | 8,899,903 |
+| T3 | 8 | 27,760,599 | 27,782,880 | 27,760,599 | 27,760,599 | 28,336,135 |
+| T3 | 12 | 72,457,991 | 72,506,360 | 72,457,991 | 72,457,991 | 73,753,007 |
+
+Configurations whose counts equal *all* in every cell: *no_candidate*, *no_pair*.
+
+Growth exponent in k: log-log slope of total clauses from k = 8 to k = 32 (log(c₃₂ / c₈) / log 4). SPEC 7.3 reports about 2.
+
+| family | configuration | N = 5 | N = 8 | N = 12 |
+| --- | --- | --- | --- | --- |
+| S | all | 1.93 | 1.92 | 1.91 |
+| S | none | 1.92 | 1.91 | 1.91 |
+| S | no_candidate | 1.93 | 1.92 | 1.91 |
+| S | no_pair | 1.93 | 1.92 | 1.91 |
+| S | no_static | 1.92 | 1.91 | 1.91 |
+| T1 | all | 1.83 | 1.81 | 1.80 |
+| T1 | none | 1.82 | 1.80 | 1.79 |
+| T1 | no_candidate | 1.83 | 1.81 | 1.80 |
+| T1 | no_pair | 1.83 | 1.81 | 1.80 |
+| T1 | no_static | 1.83 | 1.81 | 1.80 |
+| T2 | all | 1.35 | 1.25 | 1.15 |
+| T2 | none | 1.33 | 1.23 | 1.13 |
+| T2 | no_candidate | 1.35 | 1.25 | 1.15 |
+| T2 | no_pair | 1.35 | 1.25 | 1.15 |
+| T2 | no_static | 1.31 | 1.25 | 1.15 |
+| T3 | all | 1.93 | 1.92 | 1.92 |
+| T3 | none | 1.93 | 1.92 | 1.91 |
+| T3 | no_candidate | 1.93 | 1.92 | 1.92 |
+| T3 | no_pair | 1.93 | 1.92 | 1.92 |
+| T3 | no_static | 1.93 | 1.92 | 1.91 |
+
+Share of groundness plus decomposition (%), all refinements on:
+
+| family | N | k = 0 | k = 4 | k = 8 | k = 16 | k = 32 |
+| --- | --- | --- | --- | --- | --- | --- |
+| S | 5 | 52.7 | 85.3 | 90.2 | 92.8 | 94.1 |
+| S | 8 | 57.6 | 88.8 | 92.9 | 95.1 | 96.1 |
+| S | 12 | 60.7 | 90.8 | 94.5 | 96.3 | 97.2 |
+| T1 | 5 | 52.7 | 81.4 | 85.7 | 88.3 | 89.6 |
+| T1 | 8 | 57.6 | 85.7 | 89.5 | 91.8 | 93.0 |
+| T1 | 12 | 60.7 | 88.2 | 91.8 | 93.8 | 94.9 |
+| T2 | 5 | 52.7 | 55.4 | 51.0 | 42.5 | 31.5 |
+| T2 | 8 | 57.6 | 63.2 | 60.1 | 52.9 | 41.8 |
+| T2 | 12 | 60.7 | 68.4 | 66.7 | 60.8 | 50.7 |
+| T3 | 5 | 52.7 | 91.6 | 96.3 | 98.4 | 99.2 |
+| T3 | 8 | 57.6 | 92.9 | 96.9 | 98.6 | 99.4 |
+| T3 | 12 | 60.7 | 93.7 | 97.2 | 98.7 | 99.4 |
+
+Family S against SPEC 7.3 (untyped `bench` forests); *before* is all refinements off, *after* all on:
+
+| 7.3 row / S | N | 7.3 vars after | S vars | ratio | 7.3 clauses before | S none | ratio | 7.3 clauses after | S all | ratio |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 lemma / k = 0 | 5 | 1,237 | 1,377 | 1.113 | 16,910 | 19,590 | 1.158 | 14,283 | 16,523 | 1.157 |
+| 1 lemma / k = 0 | 8 | 2,829 | 3,053 | 1.079 | 52,800 | 59,104 | 1.119 | 44,119 | 49,335 | 1.118 |
+| 1 lemma / k = 0 | 12 | 5,723 | 6,059 | 1.059 | 141,128 | 154,616 | 1.096 | 116,999 | 128,087 | 1.095 |
+| 5 lemmas / k = 4 | 5 | 19,292 | 20,412 | 1.058 | 193,350 | 212,310 | 1.098 | 189,563 | 208,083 | 1.098 |
+| 5 lemmas / k = 4 | 8 | 58,101 | 58,341 | 1.004 | 620,176 | 638,496 | 1.030 | 608,135 | 625,911 | 1.029 |
+| 5 lemmas / k = 4 | 12 | 151,055 | 151,415 | 1.002 | 1,681,688 | 1,721,936 | 1.024 | 1,649,015 | 1,688,063 | 1.024 |
+| 9 lemmas / k = 8 | 5 | 69,242 | 69,472 | 1.003 | 618,190 | 638,490 | 1.033 | 613,943 | 634,023 | 1.033 |
+| 9 lemmas / k = 8 | 8 | 215,493 | 215,861 | 1.002 | 1,978,320 | 2,028,704 | 1.025 | 1,965,351 | 2,015,191 | 1.025 |
+| 9 lemmas / k = 8 | 12 | 553,199 | 553,751 | 1.001 | 5,159,936 | 5,271,320 | 1.022 | 5,126,687 | 5,236,871 | 1.021 |
+
+**`countOnly` against a full encode (§10.9, 4.1 decision 1).** Every cell was also encoded in full under the 2,500 MB cap (`eval/scaling_synthetic.fullcheck.jsonl`): 290 equal, 10 memout. The largest equal cell has 43,580,672 clauses. The memouts are S k = 32 N = 12 all; S k = 32 N = 12 no_candidate; S k = 32 N = 12 no_pair; S k = 32 N = 12 no_static; S k = 32 N = 12 none; T3 k = 32 N = 12 all; T3 k = 32 N = 12 no_candidate; T3 k = 32 N = 12 no_pair; T3 k = 32 N = 12 no_static; T3 k = 32 N = 12 none.
 
 ## R6 Real distractors
 
-*Pending 7c.*
+*Pending the full 4.2 run (EVAL_PLAN §10.9).*
 
 ## R7 Soft completeness (§3.4)
 

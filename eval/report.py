@@ -22,7 +22,7 @@ Inputs, all under eval/:
                                          before the fix; nothing in it is read or counted here.
 Only the standard library is used; there are no charts (matplotlib is not installed).
 """
-import collections, json, os, random, re, statistics, sys
+import collections, json, math, os, random, re, statistics, sys
 
 E = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(E)
@@ -122,6 +122,10 @@ class Data:
                 # only top-level review files; reviews/before_fix/ (a directory) is never read
                 if f.endswith(".jsonl") and not f.endswith(".evidence.jsonl") and os.path.isfile(os.path.join(rd, f)):
                     self.reviews[f[:-6]] = [x for x in load(os.path.join(rd, f)) if not x.get("superseded")]
+        # 7c, EVAL_PLAN §4.1 (R5): the synthetic grid and its full-encode check
+        self.synth = [r for r in load(os.path.join(E, "scaling_synthetic.jsonl")) if "header" not in r]
+        self.synth_hdr = next((r for r in load(os.path.join(E, "scaling_synthetic.jsonl")) if "header" in r), None)
+        self.synth_full = load(os.path.join(E, "scaling_synthetic.fullcheck.jsonl"))
         self.checks = []
         self._acceptance()
 
@@ -533,6 +537,88 @@ def r4(d):
     return out
 
 
+# SPEC 7.3 as published (Test/bench.py): (lemmas, N) -> (variables after, clauses before, clauses after)
+SPEC73 = {(1, 5): (1237, 16910, 14283), (1, 8): (2829, 52800, 44119), (1, 12): (5723, 141128, 116999),
+          (5, 5): (19292, 193350, 189563), (5, 8): (58101, 620176, 608135), (5, 12): (151055, 1681688, 1649015),
+          (9, 5): (69242, 618190, 613943), (9, 8): (215493, 1978320, 1965351), (9, 12): (553199, 5159936, 5126687)}
+SYN_FAMS = ["S", "T1", "T2", "T3"]
+SYN_KS = [0, 4, 8, 16, 32]
+SYN_NS = [5, 8, 12]
+SYN_CFGS = ["all", "none", "no_candidate", "no_pair", "no_static"]
+
+
+def gd_share(x):
+    fm = x["families"]
+    return (fm.get("8 groundness", 0) + fm.get("5 decomposition", 0)) / max(1, x["clauses"])
+
+
+def r5(d):
+    out = ["## R5 Synthetic scaling (§4.1)", ""]
+    if not d.synth:
+        return out + ["*Pending 7c.*"]
+    R = {(x["family"], x["k"], x["N"], x["config"]): x for x in d.synth}
+    h = d.synth_hdr or {}
+    out += [f"SPEC 7.3's chain `x ≤ w` from `x ≤ y`, `y ≤ z`, `z ≤ w` with `Nat.le_trans` and k distractors "
+            "`∀ m n, R m n → R (f m) (f n)` of one family (`Test/Synth.lean`): S, one shared `s : Nat → Nat` and `≤` on "
+            "`Nat`; T1, distinct `fᵢ : Nat → Nat`; T2, distinct structures `Cᵢ` with their own `LE` instances and "
+            "`fᵢ : Cᵢ → Cᵢ`; T3, distinct predicates `Pᵢ : Nat → Nat → Prop` with one shared `s`. Every cell goes through "
+            "the Lean compile path and is counted with `countOnly`; nothing is solved "
+            f"(`eval/scaling_synthetic.jsonl`, commit `{h.get('git_commit', '?')}`). Configurations: *all* refinements on; "
+            "*none* (all milestone 6 refinements off; static typing stays on); *no_candidate*, *no_pair*: all on except "
+            "candidate or pair pruning; *no_static*: all on with static typing off.", ""]
+    bad = [x for x in d.synth if x["status"] != "ok" or x.get("H_rejected")]
+    out += [f"Cells: {len(d.synth)}; not counted or with a rejected constant: {len(bad)}.", ""]
+    fams = sorted({f for x in d.synth for f in x["families"]}, key=lambda f: int(f.split()[0]))
+    rows = []
+    for fa in SYN_FAMS:
+        for k in SYN_KS:
+            x = R[(fa, k, 8, "all")]
+            rows.append([fa, k] + [x["families"].get(f, 0) for f in fams] + [x["clauses"], f"{100 * gd_share(x):.1f}"])
+    out += ["Clauses per family at N = 8, all refinements on:", "",
+            table(["family", "k"] + [f.split(" ", 1)[1].split(" (")[0] for f in fams] + ["total", "groundness + decomposition %"], rows), ""]
+    rows = []
+    for fa in SYN_FAMS:
+        for n in SYN_NS:
+            rows.append([fa, n] + [R[(fa, 32, n, c)]["clauses"] for c in SYN_CFGS])
+    out += ["Total clauses at k = 32 by configuration:", "", table(["family", "N"] + SYN_CFGS, rows), ""]
+    same = {c: all(R[(fa, k, n, c)]["clauses"] == R[(fa, k, n, "all")]["clauses"] and
+                   R[(fa, k, n, c)]["families"] == R[(fa, k, n, "all")]["families"]
+                   for fa in SYN_FAMS for k in SYN_KS for n in SYN_NS) for c in SYN_CFGS[1:]}
+    out += ["Configurations whose counts equal *all* in every cell: "
+            + (", ".join(f"*{c}*" for c, v in same.items() if v) or "none") + ".", ""]
+    rows = []
+    for fa in SYN_FAMS:
+        for c in SYN_CFGS:
+            rows.append([fa, c] + [f"{math.log(R[(fa, 32, n, c)]['clauses'] / R[(fa, 8, n, c)]['clauses']) / math.log(4):.2f}"
+                                   for n in SYN_NS])
+    out += ["Growth exponent in k: log-log slope of total clauses from k = 8 to k = 32 "
+            "(log(c₃₂ / c₈) / log 4). SPEC 7.3 reports about 2.", "",
+            table(["family", "configuration"] + [f"N = {n}" for n in SYN_NS], rows), ""]
+    rows = []
+    for fa in SYN_FAMS:
+        for n in SYN_NS:
+            rows.append([fa, n] + [f"{100 * gd_share(R[(fa, k, n, 'all')]):.1f}" for k in SYN_KS])
+    out += ["Share of groundness plus decomposition (%), all refinements on:", "",
+            table(["family", "N"] + [f"k = {k}" for k in SYN_KS], rows), ""]
+    rows = []
+    for (l, n), (v, cb, ca) in SPEC73.items():
+        a, b = R[("S", l - 1, n, "all")], R[("S", l - 1, n, "none")]
+        rows.append([f"{l} lemma{'s' if l > 1 else ''} / k = {l - 1}", n, v, a["vars"], f"{a['vars'] / v:.3f}",
+                     cb, b["clauses"], f"{b['clauses'] / cb:.3f}", ca, a["clauses"], f"{a['clauses'] / ca:.3f}"])
+    out += ["Family S against SPEC 7.3 (untyped `bench` forests); *before* is all refinements off, *after* all on:", "",
+            table(["7.3 row / S", "N", "7.3 vars after", "S vars", "ratio", "7.3 clauses before", "S none", "ratio",
+                   "7.3 clauses after", "S all", "ratio"], rows), ""]
+    fc = collections.Counter(x["full"] for x in d.synth_full)
+    mo = sorted((x["family"], x["k"], x["N"], x["config"]) for x in d.synth_full if x["full"] == "memout")
+    eqmax = max((R[(x["family"], x["k"], x["N"], x["config"])]["clauses"] for x in d.synth_full if x["full"] == "equal"), default=0)
+    out += [f"**`countOnly` against a full encode (§10.9, 4.1 decision 1).** Every cell was also encoded in full under the "
+            f"{h.get('limits', {}).get('cap_mb', 2500):,} MB cap (`eval/scaling_synthetic.fullcheck.jsonl`): "
+            + ", ".join(f"{v} {k}" for k, v in sorted(fc.items())) + f". The largest equal cell has {eqmax:,} clauses. "
+            "The memouts are " + "; ".join(f"{a} k = {b} N = {c} {e}" for a, b, c, e in mo) + "."
+            if mo else f"**`countOnly` against a full encode.** " + ", ".join(f"{v} {k}" for k, v in sorted(fc.items())) + "."]
+    return out
+
+
 def r7(d):
     out = ["## R7 Soft completeness (§3.4)", "",
            "A Tier B goal is oracle-in-class if the compiler accepts the goal and every `H_main` constant, the "
@@ -771,7 +857,7 @@ def main():
            "`code_version`.", ""]
     out += effect(d) + [""]
     out += r1(d) + [""] + r1b(d) + [""] + r2(d) + [""] + r3(d) + [""] + r4(d) + [""]
-    out += ["## R5 Synthetic scaling", "", "*Pending 7c.*", "", "## R6 Real distractors", "", "*Pending 7c.*", ""]
+    out += r5(d) + ["", "## R6 Real distractors", "", "*Pending the full 4.2 run (EVAL_PLAN §10.9).*", ""]
     out += r7(d) + [""] + checks(d) + [""] + exploratory(d)
     open(os.path.join(ROOT, "EVAL.md"), "w").write("\n".join(out) + "\n")
     print("wrote EVAL.md")

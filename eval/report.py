@@ -16,6 +16,8 @@ Inputs, all under eval/:
   corpus_hcompile.jsonl                  compiler acceptance of the goal and of each H
                                          constant, recomputed (checked here against the
                                          results that record it)
+  scaling_synthetic*.jsonl               7c, EVAL_PLAN §4.1 (R5)
+  specs_scaling.jsonl, scaling_full/     7c, EVAL_PLAN §4.2 (R6): results, countOnly sizes, header
   reviews/*.jsonl                        the hand reviews (7d-1 step 3, redrawn after the merge).
                                          `*.evidence.jsonl` files are review evidence, not reviews.
                                          reviews/before_fix/ holds the reviews of the samples drawn
@@ -126,6 +128,12 @@ class Data:
         self.synth = [r for r in load(os.path.join(E, "scaling_synthetic.jsonl")) if "header" not in r]
         self.synth_hdr = next((r for r in load(os.path.join(E, "scaling_synthetic.jsonl")) if "header" in r), None)
         self.synth_full = load(os.path.join(E, "scaling_synthetic.fullcheck.jsonl"))
+        # 7c, EVAL_PLAN §4.2 (R6): the full run with real distractors and its countOnly sizes
+        self.sc_specs = {s["key"]: s for s in load(os.path.join(E, "specs_scaling.jsonl")) if "key" in s}
+        self.sc_res = {r["key"]: r for r in load(os.path.join(E, "scaling_full", "results.jsonl"))}
+        self.sc_size = {r["key"]: r for r in load(os.path.join(E, "scaling_full", "sizes.jsonl"))}
+        hp = os.path.join(E, "scaling_full", "header.json")
+        self.sc_hdr = json.load(open(hp)) if os.path.exists(hp) else None
         self.checks = []
         self._acceptance()
 
@@ -619,6 +627,94 @@ def r5(d):
     return out
 
 
+SC_KS = [2, 4, 8, 16, 32]
+SC_BUCKETS = ["1", "2", "3-4", "5+"]
+
+
+def r6(d):
+    out = ["## R6 Real distractors (§4.2)", ""]
+    if not d.sc_res or not d.sc_hdr:
+        return out + ["*Pending the full 4.2 run (EVAL_PLAN §10.9).*"]
+    S, R, Z, h = d.sc_specs, d.sc_res, d.sc_size, d.sc_hdr
+    goals = sorted({k.split(":", 3)[3] for k in S})
+    nb = collections.Counter(S["scale:none:0:" + g]["bucket"] for g in goals)
+    short = sorted((k, S[k]["k_actual"]) for k in S if S[k]["k_actual"] < S[k]["k"])
+    oc = collections.Counter(r["outcome"] for r in R.values())
+    out += [f"{len(goals)} main-run goals proved in `eval/final/`, drawn by proved N (EVAL_PLAN §10.9 decision 1: "
+            + ", ".join(f"{nb[b]} at N {'= ' if b in ('1', '2') else ''}{b.replace('-', '–').replace('+', ' or more')}" for b in SC_BUCKETS)
+            + "). Distractors are compiler-accepted core theorems (`eval/scaling_pool.jsonl`), nested in k, chosen "
+            "uniformly (*random*) or with a matching head symbol (*near*). Each goal runs once at k = 0 and at "
+            "k = 2, 4, 8, 16 and 32 in each mode, with N from 1 up to its original N "
+            f"({len(R):,} runs; `eval/scaling_full/`, commit `{h['git_commit'][:7]}`, the 7b limits: solver "
+            f"{h['solver_s']} s per call, N loop {h['loop_s']} s, memory cap {h['cap_mb']:,} MB, P = {h['parallel_shards']}; "
+            f"{h['machine']['cpu']}, {h['machine']['ram_mib']:,} MiB). Every run's clauses at the original N are also "
+            "counted with `countOnly` (`eval/scaling_full/sizes.jsonl`), so crashed runs have sizes too. "
+            + (f"Too few near candidates for k = 32: " + "; ".join(f"`{k.split(':', 3)[3]}` ({a})" for k, a in short) + ". " if short else "")
+            + "Outcomes: " + ", ".join(f"{v:,} {k}" for k, v in sorted(oc.items())) + ".", ""]
+    k0 = collections.Counter(R["scale:none:0:" + g]["outcome"] for g in goals)
+    below = sum(1 for r in R.values() if r.get("below_original"))
+    used = sum(1 for r in R.values() if r.get("distractors_used"))
+    stops = sum(1 for r in R.values() if "stop" in r)
+    out += [f"**Stop rules (§10.9 decision 9).** No run stopped: every run within the limits found a proof at or below "
+            f"its original N, and the k = 0 runs agree with `eval/final/` ({', '.join(f'{v} {k}' for k, v in k0.items())}). "
+            f"Runs with a `stop` field: {stops}. Proofs shorter than the original N: {below}. Proofs that use a "
+            f"distractor: {used}.", ""]
+    rows = []
+    for m in ("random", "near"):
+        for k in SC_KS:
+            ks = [x for x in S if S[x]["mode"] == m and S[x]["k"] == k]
+            c = collections.Counter(R[x]["outcome"] for x in ks)
+            cl = [Z[x]["clauses"] for x in ks]
+            ratio = [Z[x]["clauses"] / Z["scale:none:0:" + x.split(":", 3)[3]]["clauses"] for x in ks]
+            t = [R[x]["total_ms"] for x in ks if R[x]["outcome"] == "proved"]
+            rows.append([m, k, c.get("proved", 0), c.get("crash", 0), c.get("timeout", 0), int(med(cl)), max(cl),
+                         f"{med(ratio):.1f}", int(med(t)) if t else "–"])
+    c0 = [Z["scale:none:0:" + g]["clauses"] for g in goals]
+    t0 = [R["scale:none:0:" + g]["total_ms"] for g in goals]
+    out += [f"Outcomes, clauses at the original N (`countOnly`) and time against k. At k = 0: median "
+            f"{int(med(c0)):,} clauses (max {max(c0):,}), median {int(med(t0)):,} ms. *Growth* is the median over goals "
+            "of clauses at k over clauses at k = 0. Time is the whole run (compile, encode, solve, decode, all N), "
+            "proved runs only. Every crash is the memory cap.", "",
+            table(["mode", "k", "proved", "memory crash", "timeout", "median clauses", "max clauses", "growth",
+                   "median ms (proved)"], rows), ""]
+    cr = [Z[k]["clauses"] for k in R if R[k]["outcome"] == "crash"]
+    pr = [Z[k]["clauses"] for k in R if R[k]["outcome"] == "proved"]
+    out += [f"The smallest crashed run has {min(cr):,} clauses at the original N; the largest proved run {max(pr):,}.", ""]
+
+    def feas(g, m):
+        fe = {0: R["scale:none:0:" + g]["outcome"] == "proved"}
+        for k in SC_KS:
+            fe[k] = R[f"scale:{m}:{k}:{g}"]["outcome"] == "proved"
+        pre = None
+        for k in [0] + SC_KS:
+            if not fe[k]:
+                break
+            pre = k
+        alone = max((k for k in [0] + SC_KS if fe[k]), default=None)
+        return pre, alone
+
+    F = {(g, m): feas(g, m) for g in goals for m in ("random", "near")}
+    rows = []
+    for m in ("random", "near"):
+        for i, what in ((0, "every k′ ≤ k feasible"), (1, "largest feasible k alone")):
+            v = [F[(g, m)][i] for g in goals]
+            dist = collections.Counter(v)
+            rows.append([m, what] + [dist.get(k, 0) for k in [0] + SC_KS] + [fmt(med(v))])
+    same = sum(1 for x in F.values() if x[0] == x[1])
+    out += ["**Largest feasible k** per goal (§10.9 decision 8: a proof at or below the original N within the "
+            "limits). Number of goals by largest feasible k, and the median:", "",
+            table(["mode", "definition"] + [f"k = {k}" for k in [0] + SC_KS] + ["median"], rows), "",
+            f"The two definitions agree for {same} of {len(F)} goal–mode pairs.", ""]
+    rows = []
+    for b in SC_BUCKETS:
+        gs = [g for g in goals if S["scale:none:0:" + g]["bucket"] == b]
+        rows.append([b.replace("-", "–"), len(gs)] + [fmt(med([F[(g, m)][0] for g in gs])) for m in ("random", "near")]
+                    + [sum(1 for g in gs if F[(g, m)][0] == 32) for m in ("random", "near")])
+    out += ["By original N (bucket): median largest feasible k, and goals feasible at every k up to 32:", "",
+            table(["original N", "goals", "median random", "median near", "all k random", "all k near"], rows)]
+    return out
+
+
 def r7(d):
     out = ["## R7 Soft completeness (§3.4)", "",
            "A Tier B goal is oracle-in-class if the compiler accepts the goal and every `H_main` constant, the "
@@ -857,7 +953,7 @@ def main():
            "`code_version`.", ""]
     out += effect(d) + [""]
     out += r1(d) + [""] + r1b(d) + [""] + r2(d) + [""] + r3(d) + [""] + r4(d) + [""]
-    out += r5(d) + ["", "## R6 Real distractors", "", "*Pending the full 4.2 run (EVAL_PLAN §10.9).*", ""]
+    out += r5(d) + [""] + r6(d) + [""]
     out += r7(d) + [""] + checks(d) + [""] + exploratory(d)
     open(os.path.join(ROOT, "EVAL.md"), "w").write("\n".join(out) + "\n")
     print("wrote EVAL.md")

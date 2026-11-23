@@ -511,9 +511,48 @@ Family S against SPEC 7.3 (untyped `bench` forests); *before* is all refinements
 
 **`countOnly` against a full encode (§10.9, 4.1 decision 1).** Every cell was also encoded in full under the 2,500 MB cap (`eval/scaling_synthetic.fullcheck.jsonl`): 290 equal, 10 memout. The largest equal cell has 43,580,672 clauses. The memouts are S k = 32 N = 12 all; S k = 32 N = 12 no_candidate; S k = 32 N = 12 no_pair; S k = 32 N = 12 no_static; S k = 32 N = 12 none; T3 k = 32 N = 12 all; T3 k = 32 N = 12 no_candidate; T3 k = 32 N = 12 no_pair; T3 k = 32 N = 12 no_static; T3 k = 32 N = 12 none.
 
-## R6 Real distractors
+## R6 Real distractors (§4.2)
 
-*Pending the full 4.2 run (EVAL_PLAN §10.9).*
+50 main-run goals proved in `eval/final/`, drawn by proved N (EVAL_PLAN §10.9 decision 1: 12 at N = 1, 12 at N = 2, 13 at N 3–4, 13 at N 5 or more). Distractors are compiler-accepted core theorems (`eval/scaling_pool.jsonl`), nested in k, chosen uniformly (*random*) or with a matching head symbol (*near*). Each goal runs once at k = 0 and at k = 2, 4, 8, 16 and 32 in each mode, with N from 1 up to its original N (550 runs; `eval/scaling_full/`, commit `814c522`, the 7b limits: solver 20 s per call, N loop 120 s, memory cap 2,500 MB, P = 1; Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz, 7,735 MiB). Every run's clauses at the original N are also counted with `countOnly` (`eval/scaling_full/sizes.jsonl`), so crashed runs have sizes too. Too few near candidates for k = 32: `main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_contains_eq_false/37` (24); `main:B/Std.DTreeMap.Raw.Equiv.constGetEntryGED_eq/1` (24). Outcomes: 166 crash, 382 proved, 2 timeout.
+
+**Stop rules (§10.9 decision 9).** No run stopped: every run within the limits found a proof at or below its original N, and the k = 0 runs agree with `eval/final/` (50 proved). Runs with a `stop` field: 0. Proofs shorter than the original N: 0. Proofs that use a distractor: 0.
+
+Outcomes, clauses at the original N (`countOnly`) and time against k. At k = 0: median 67,980 clauses (max 8,053,878), median 560 ms. *Growth* is the median over goals of clauses at k over clauses at k = 0. Time is the whole run (compile, encode, solve, decode, all N), proved runs only. Every crash is the memory cap.
+
+| mode | k | proved | memory crash | timeout | median clauses | max clauses | growth | median ms (proved) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| random | 2 | 48 | 2 | 0 | 262,910 | 22,212,035 | 2.9 | 1,021 |
+| random | 4 | 46 | 4 | 0 | 781,401 | 31,329,330 | 10.1 | 2,375 |
+| random | 8 | 35 | 14 | 1 | 2,104,255 | 50,913,286 | 27.7 | 3,658 |
+| random | 16 | 28 | 22 | 0 | 10,131,542 | 297,809,719 | 103.6 | 7,120 |
+| random | 32 | 13 | 37 | 0 | 40,948,726 | 824,974,773 | 522.8 | 7,882 |
+| near | 2 | 46 | 4 | 0 | 293,449 | 58,568,487 | 3.7 | 1,174 |
+| near | 4 | 41 | 9 | 0 | 1,073,621 | 399,096,590 | 14.0 | 2,047 |
+| near | 8 | 36 | 14 | 0 | 2,553,032 | 427,388,856 | 57.1 | 3,206 |
+| near | 16 | 25 | 25 | 0 | 11,654,023 | 1,575,090,067 | 150.5 | 6,114 |
+| near | 32 | 14 | 35 | 1 | 45,913,053 | 3,255,302,514 | 474.5 | 11,883 |
+
+The smallest crashed run has 10,409,783 clauses at the original N; the largest proved run 12,363,567.
+
+**Largest feasible k** per goal (§10.9 decision 8: a proof at or below the original N within the limits). Number of goals by largest feasible k, and the median:
+
+| mode | definition | k = 0 | k = 2 | k = 4 | k = 8 | k = 16 | k = 32 | median |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| random | every k′ ≤ k feasible | 2 | 2 | 11 | 7 | 15 | 13 | 16.0 |
+| random | largest feasible k alone | 2 | 2 | 11 | 7 | 15 | 13 | 16.0 |
+| near | every k′ ≤ k feasible | 4 | 5 | 5 | 11 | 11 | 14 | 12.0 |
+| near | largest feasible k alone | 4 | 5 | 5 | 11 | 11 | 14 | 12.0 |
+
+The two definitions agree for 100 of 100 goal–mode pairs.
+
+By original N (bucket): median largest feasible k, and goals feasible at every k up to 32:
+
+| original N | goals | median random | median near | all k random | all k near |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 12 | 32.0 | 32.0 | 10 | 9 |
+| 2 | 12 | 16.0 | 16.0 | 3 | 4 |
+| 3–4 | 13 | 8 | 8 | 0 | 1 |
+| 5+ | 13 | 4 | 4 | 0 | 0 |
 
 ## R7 Soft completeness (§3.4)
 

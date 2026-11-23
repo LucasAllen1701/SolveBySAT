@@ -94,12 +94,9 @@ specs in NOTES.md before a full run.
   - 4.2 is set up and committed: `eval/scaling_goals.jsonl`, `eval/scaling_pool.jsonl`,
     `eval/specs_scaling.jsonl` (550) and `eval/specs_scaling_pilot.jsonl` (44), with md5 sums
     in NOTES.md. The pilot is in `eval/scaling_pilot/`; it projects the full run at about 4 h.
-  - **Next: the full 4.2 run, only after the owner approves it.** Run it as
-    `python3 Test/eval_driver.py run eval/specs_scaling.jsonl eval/scaling_full`, then
-    `python3 Test/eval_sizes.py eval/specs_scaling.jsonl eval/scaling_full/sizes.jsonl`.
-    The shard stops with exit 6 on a decision 9 stop rule (monotonicity, or a k = 0 run that
-    differs from `eval/final/`); investigate it as a completeness bug. R6 stays pending until then.
-- 7d-2 comes after the full 4.2 run.
+  - The full 4.2 run is done (owner-approved): `eval/scaling_full/` (550 runs and their `countOnly`
+    sizes; NOTES.md, "7c: the full 4.2 run"). No stop rule fired. R6 is in EVAL.md.
+- **Next: 7d-2** (R5 and R6 are in; the reading of EVAL_PLAN §7), with its prompt still to come.
 
 ## Running the evaluation
 

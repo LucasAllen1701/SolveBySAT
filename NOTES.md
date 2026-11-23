@@ -2301,3 +2301,42 @@ gives byte-identical files.
   identical to the run before the change, and equal to `eval/fix_check3/named`. The full-encode
   check is 290 equal, 10 memout, 0 different. The pilot ended with driver exit 0 and no stop
   rule fired.
+
+### 7c: the full 4.2 run (EVAL_PLAN §4.2, §10.9; 23 November 2026)
+
+- **Approval and run.** The owner approved the full run after the pilot with no reduction. It ran on
+  this machine (Intel i7-10510U, 4 cores / 8 threads, 7,735 MiB, kernel 7.3.5-arch1-1,
+  `vm.overcommit_memory = 1`), from a clean tree at `814c522`, with the pre-registered specs
+  (`eval/specs_scaling.jsonl`, md5 as committed) and the 7b limits. `eval/scaling_full_run.sh` ran
+  the driver and then the sizes pass, detached; its log is `eval/scaling_full_driver.log`.
+  - Runs: 12:03:48 to 14:59:26, 2 h 56 min (pilot projection 2.4 h), driver exit 0.
+  - Sizes (`countOnly` at the original N, decision 7): 14:59 to 19:46:42, 4 h 47 min (pilot
+    projection 1.6 h), exit 0, 550 of 550 `ok`, none hit the cap. The large near-mode cells
+    (up to 3.26 × 10⁹ clauses, almost all decomposition) are slow to count even without storing
+    clauses; that is where the projection was low.
+  - Total 7 h 43 min against the projected ~4 h; the uncertainty note of the pilot (small H_main in
+    the pilot goals) was right.
+- **Completeness.** `results.jsonl` and `sizes.jsonl` each have exactly one line for each of the 550
+  spec keys: none missing, duplicated or extra. The 44 pilot keys have the same outcome and N in the
+  full run as in the pilot.
+- **Stop rules.** None fired (no shard exit 6, no `stop` field). All 50 k = 0 runs are proved and
+  match `eval/final/`. Every non-proved run is a resource limit: 166 memory crashes (all `oom`)
+  and 2 timeouts (`near:32` of `Std.DTreeMap.Raw.Equiv.constGetEntryGED_eq/1` at N = 2,
+  `random:8` of `Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/10` at N = 3; both unsat
+  below that N, so neither is a violation).
+- **Outcomes.** 382 proved, 166 memory crash, 2 timeout. No proof is shorter than the original N
+  and no proof uses a distractor. Two near sets at k = 32 have only 24 candidates (recorded as
+  `k_actual`, decision 5).
+- **Feasible k (decision 8).** For every goal and mode the two definitions agree (feasibility is
+  monotone in k in this data). Goals by largest feasible k (0, 2, 4, 8, 16, 32):
+  random 2, 2, 11, 7, 15, 13 (median 16); near 4, 5, 5, 11, 11, 14 (median 12). By bucket the
+  median is 32, 16, 8 and 4 for original N 1, 2, 3–4 and 5+ in both modes. Median clause growth over
+  k = 0 is about 3–4× at k = 2 and about 500× at k = 32. The smallest crashed run has 10.4 M clauses
+  at the original N and the largest proved run 12.4 M, so the 2.5 GB cap sits at about 10–12 M
+  clauses. These are facts only; the reading against EVAL_PLAN §7 is 7d-2's.
+- **EVAL.md.** R6 is written by `eval/report.py` from `eval/specs_scaling.jsonl` and
+  `eval/scaling_full/`. Regenerated twice, byte-identical, and identical under `PYTHONHASHSEED` 1
+  and 777 (md5 `53e3f1036031`). The only other change to EVAL.md is R6.
+- **Regression (end of the full 4.2 run):** no Lean, encoder, decoder or harness code changed since
+  `814c522`, whose regression line is above (`Test/run_all.sh` exit 0, named cases 36/36); only
+  `eval/report.py` (R6) changed. EVAL.md regenerates byte-identically.

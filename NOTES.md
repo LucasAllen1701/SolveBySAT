@@ -2344,3 +2344,130 @@ gives byte-identical files.
 - **Regression (end of the full 4.2 run):** no Lean, encoder, decoder or harness code changed since
   `814c522`, whose regression line is above (`Test/run_all.sh` exit 0, named cases 36/36); only
   `eval/report.py` (R6) changed. EVAL.md regenerates byte-identically.
+
+### 7d-2: reading, summary, R2 breakdown, E5, E6 (EVAL_PLAN §10.10; 24 November 2026)
+
+Same machine as 7c (Intel i7-10510U, 7,735 MiB, kernel 7.3.5-arch1-1, `vm.overcommit_memory = 1`).
+§10.10 and the new status line were added to EVAL_PLAN.md first (`b050237`). Only the status
+sentence in bold was replaced; the rest of that paragraph is unchanged.
+
+- **Checks before 7d-2.** `git pull` on `eval-m7`: already up to date with `origin/eval-m7` (`e11e197`).
+  Rebuilt. `Test/run_all.sh` exit 0 (M0 902/902, M1 19/19, M4 4/4, M5 10/10, `countOnly` 22/22; M2, M3, M4Lean, M5Lean and M7Lean pass; `eval/d2_check/run_all.log`). The 36 named cases (`eval/d2_check/named`) equal `eval/fix_check3/named` in outcome, N and skeleton, 36/36.
+- **Decision 1.** `eval/scaling_goals.jsonl` gives 35 goals with `c:Eq` in S (19 with S = {`c:Eq`}).
+  A dated correction is under the original line in "7c: synthetic scaling and the 4.2 pilot"; the
+  original line is kept. The 31 matches no field of the file (for example, 32 goals have a near
+  pool ≥ 24,906, and 25 of the 35 are Tier B). It entered no computation.
+- **Decision 4 (R2 breakdown), in EVAL.md "R2: what blocks reason 2".** Equal to the owner's preview in
+  every number: goals A 1,823 / B 1,617; "clause variable applied to arguments" A 1,591 / B 1,395;
+  "clause variable as head symbol" A 1,377 / B 819; Tier B `congrArg` 1,224, `congrFun'` 480,
+  `propext` 398, `congr` 266, `of_eq_true` 243; Tier A `congrArg` 1,345, `of_eq_true` 871,
+  `congrFun'` 777; one blocking constant A 449 (`congrArg` 112) / B 582 (`congrArg` 294, `propext` 86).
+  Reason 2 is exactly the population "accepted, not proved, some `H_main` constant rejected" (checked:
+  the same 1,823 and 1,617 keys either way).
+- **Decision 5 (R6 additions).** Per-goal exponent log(c₃₂ / c₈) / log 4 at the original N, from
+  `countOnly` sizes. Medians equal the preview: 1.87 random, 1.73 near; with `c:Eq` 1.98 / 1.62 (35
+  goals), without 1.40 / 2.08 (15). *Decision:* k is nominal. With `k_actual` (two near sets have 24)
+  the near median is 1.77; EVAL.md states both. R6's main table and the feasible-k table are split by
+  `c:Eq`.
+- **Decision 6 (E5).** Order kept: the table `eval/m8_families.json` (md5 `24b74f9310c1`) was committed
+  (`98636b6`) before any E5 count. Then the structural facts were committed (`73e46ad`):
+  `Test/M8Facts.lean` (read-only; `lake env lean --run`, under the cap, peak 2,258 MB, 11 s) gives
+  `eval/m8_obstacles.jsonl` (md5 `d9cea64c7c95`; 1,404 constants: 180 matchers, 17 recursors, 44
+  auxiliary recursors, 1,163 other, 0 missing).
+  - *Facts, not names.* About 200 of the 248 elimination constants are matchers (`…match_1`,
+    `….splitter`), so the family of a matcher is read from its discriminants' types (head, or head
+    after `whnf`, when it is an inductive type). Recursors and `casesOn` go by their inductive type.
+    To write the table I looked at the list of distinct obstacle names, but not at any count.
+  - *Table judgments* (listed in the file): Eq's own `casesOn`, `recOn`, `substr`; `of_eq_false`,
+    `eq_false'`, `eq_true'`; connective congruence lemmas plus `ite_congr`, `dite_congr`; and every
+    `congr_simp` lemma are 3A. `Not.elim`, `And.elim` and `Iff.elim` are family 1. Eq is the only
+    inductive type whose eliminators are 3A. Induction principles that are not recursors are found
+    by name (`induct|recon|caseson|cases_on|rec_on`).
+  - *Result.* Obstacles all in 3A: **Tier B 946, Tier A 522** (preview 925 and 504). All in 1: B 0, A 4.
+    All in 2: B 12, A 53. No out-of-reach obstacle: B 991, A 722. No obstacle at all: B 201, A 695.
+  - *Difference from the preview* (computed after the counts, only to explain them): my additions
+    move 15 goals per tier into "all 3A" (`ite_congr` B 10 / A 4, `Eq.casesOn` 2 / 7,
+    `GetElem.getElem.congr_simp` 1 / 3, `Eq.substr` 2 / 1). With §10.10's list only (plus connective
+    congruence) the counts are B 931, A 507. The remaining 6 and 3 are detail-level differences between
+    the two tables, which I cannot see without the preview's table.
+  - *Known gap, not changed after counting:* `Nat.casesAuxOn` (23 Tier A goals) and `Nat.recAux` (21)
+    are case analysis and induction on `Nat` but escape the name rule, so the table puts them out of
+    reach. As family 2 they would change the single-family counts by one goal (Tier A "all in 2" 54).
+- **Decision 7 (E6).** `eval_scaling` gained a sixth configuration, `no_typing` (`staticTyping` and
+  `candidatePruning` off). The harness changed; the encoder did not. `Test/eval_scaling_e6.py` counted
+  the 60 cells with `countOnly`, each in its own capped process, from a clean tree at `4a03ef1`, into
+  `eval/scaling_synthetic_e6.jsonl` (md5 `30411a68b7ce`, header fields as the grid's). 60/60 ok, none
+  near the cap (peak ≤ 499 MB), 7.5 min of counting in all. The pre-registered grid file is untouched.
+  - **T2:** both off gives 7.2–10.1× the clauses of *all* at k = 32. Either filter alone gives exactly
+    the count of both. The exponent with both off is 1.78–1.81, against 1.15–1.35, so T2's low exponent
+    is typing, and either filter suffices.
+  - **S and T3:** static typing alone removes 2–3%, candidate pruning alone almost nothing. **T1:**
+    candidate pruning or static typing alone gives *all*; both off adds 0.1–0.3%.
+  - One phrase of §10.10 ("typing acts only in T2") is inexact. Static typing also acts in S and T3, by
+    2–3%, and the pre-registered grid already shows it (*no_static* is above *all* there, R5). What
+    holds is that T2 is the only family where it matters much.
+- **Decisions 2, 3 and 8.** `eval/report.py` now writes, from the data files alone: "Summary: answers to
+  Q1–Q4" at the top; "Reading the results (EVAL_PLAN §7)", one subsection per rule with its condition,
+  numbers and a "Holds?" line, then "Where the rules point different ways"; and "Threats to validity".
+  It does not recommend.
+  - *Main-run crash share:* 1,297 of 6,000 main-run goals (21.6%). §10.10 says 21.5%, which is
+    1,356 of all 6,300 runs, R1b included. EVAL.md gives both.
+- **EVAL.md determinism.** Regenerated twice, then under `PYTHONHASHSEED` 1 and 777: all four byte-identical (md5 `5cc0ca775729`). Against 7c's EVAL.md, the only lines removed are the title, the introduction and R5's k = 32 table, which gains the E6 column. Everything else is added.
+- **Regression (end of 7d-2):** `Test/run_all.sh` exit 0 and named cases 36/36 at the start of 7d-2 (above). No compiler, encoder or decoder code changed in 7d-2. Lean changes: the read-only `Test/M8Facts.lean` and `eval_scaling`'s extra `no_typing` configuration. Nothing was rerun except the 60 E6 counts. EVAL.md regenerates byte-identically from the data files.
+
+### Milestone 7: summary
+
+**What was built.**
+- *Corpus (7a):* 3,000 Tier A theorem statements and 3,000 Tier B goals inside proofs from Lean core and
+  `Std`, with oracle H (`H_main`, and `H_full` for R1b) by §2.3, §10.2 and §10.4. Deterministic
+  (`eval_corpus`), with md5 sums in CLAUDE.md.
+- *Coverage harness (7b):* `eval_run` shards under a 2.5 GB cgroup cap, driven by
+  `Test/eval_driver.py` (lock, resume, crash records, `PR_SET_PDEATHSIG`). It runs the N loop to 10 and
+  the baselines (`solve_by_elim` like-for-like and default, `exact?`, `apply?`). The full run is in
+  `eval/full/`, and merged with the 10.7 rerun in `eval/final/`.
+- *Annotations and reviews (7d-1):* exact numeral rule (`eval/corpus_numerals.jsonl`), recomputed
+  compiler acceptance (`eval/corpus_hcompile.jsonl`), and seeded hand reviews (`eval/reviews/`).
+- *Scaling (7c):* `countOnly` (the only encoder change of milestone 7, with its test). The synthetic
+  grid (`Test/Synth.lean`, `eval_scaling`, 300 cells + full-encode check) and the 4.2 run with real
+  distractors (550 runs + sizes).
+- *7d-2:* the reading, the summary and the threats in EVAL.md; R2's breakdown; E5 (`Test/M8Facts.lean`,
+  `eval/m8_families.json`); and E6 (`no_typing`, 60 cells).
+- `EVAL.md` is generated by `eval/report.py` from the data files alone.
+
+**What was found.**
+- *Three bugs, all found by the evaluation and fixed with tests* (`Test/M7Lean.lean`):
+  1. Decoder, `List.getLast_eq_head_reverse` (7b): head unification assigned a premise
+     metavariable before its child was replayed (a premise mentioned in a head). Premise
+     metavariables are now synthetic opaque.
+  2. Decoder, `Nat.pred_eq_self_iff` (7b): the decoder used its caller's unifier configuration. It now
+     sets `foApprox`/`ctxApprox` itself, as the elaborator does.
+  3. Compiler, type templates (7d-1, §10.7): templates were built from the raw inferred type, without
+     SPEC 4.1's preprocessing. It was a completeness bug, found by an E1 review. The 1,028 goals whose
+     forest changed were rerun and merged.
+- *Coverage:* `solve_by_sat` proves 836 of 3,000 Tier B goals (27.9%) and 140 of 3,000 Tier A goals
+  (4.7%) with oracle H at N ≤ 10. When the goal and all of `H_main` compile, it proves 75.4% of Tier B
+  goals. Proofs are small (median N 1 in Tier B). The main obstacle is higher-order constants of
+  elaborated `simp` proofs (`congrArg` in 75.7% of Tier B's reason 2 goals). E5 bounds a rewriting
+  extension (3A) at 946 more Tier B goals.
+- *Baselines:* like-for-like `solve_by_elim` finds 96.3% of `solve_by_sat`'s Tier B proofs. On goals both close,
+  the median time ratio is about 80 (1 ms against 84 ms). It also closes 1,264 Tier B goals that `solve_by_sat` does not prove, mostly by
+  definitional unfolding.
+- *Scaling:* SPEC 7.3's growth of about k² holds on typed problems (exponents 1.8–1.9) except T2. In T2
+  either typing filter brings the exponent to 1.15–1.35 (E6). With real distractors, the median largest
+  feasible k is 16 (random) and 12 (near), falling from 32 at N = 1 to 4 at N ≥ 5. The limit is always
+  memory (about 10–12 M clauses under 2.5 GB).
+
+**Open questions for the owner.**
+1. Scope or scale (§10.11). The reading: rule 1 holds in part (dominance yes, Tier B's 27.9% against
+   about 20% no), rule 2's R6 condition holds, rule 3 does not, rule 4 holds for Tier B.
+2. If scope: does a rewriting extension (3A) handle `congrArg` chains within N ≤ 10? E5 is an upper
+   bound only, and elaborated `simp` proofs may overstate the need.
+3. Instances and definitional unfolding are behind most unexplained failures and R7's reviews, and
+   behind most E1 goals. They are outside SPEC §2 and outside every milestone 8 family.
+4. The R6 sample is all proved goals, by proved N, with near close to random for 35 of 50. Is a second
+   scaling measurement needed, for example with a premise selector?
+5. Before SPEC.md takes in the results: the two decoder fixes and the type-template fix (§10.10, "Order").
+- **Regression (end of milestone 7, the 7d acceptance criterion):** EVAL.md regenerates from the JSONL and JSON
+  files alone, byte-identically (md5 `5cc0ca775729`). NOTES.md has the Milestone 7 sections. `Test/run_all.sh` exit 0
+  and named cases 36/36 equal to `eval/fix_check3/named` on the final code; the library (`SolveBySat/`) last
+  changed at `49cd3c6` (`countOnly`, the only encoder addition of milestone 7).

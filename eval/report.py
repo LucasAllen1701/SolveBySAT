@@ -1263,6 +1263,19 @@ def p1(a, b):
     return 100 * a / b if b else 0.0
 
 
+def R5_all(d, fa, n):
+    return next(x["clauses"] for x in d.synth if (x["family"], x["k"], x["N"], x["config"]) == (fa, 32, n, "all"))
+
+
+def e6_note(d):
+    if not d.e6:
+        return ""
+    X = {(x["family"], x["k"], x["N"]): x for x in d.e6}
+    r = {fa: [X[(fa, 32, n)]["clauses"] / R5_all(d, fa, n) for n in SYN_NS] for fa in SYN_FAMS}
+    return (f" (E6: with both typing filters off, T2 has {rng(r['T2'], '.1f')} times the clauses at k = 32; S and T3 "
+            f"{rng([100 * (x - 1) for x in r['S'] + r['T3']], '.0f')}% more)")
+
+
 def summary(d, F):
     """§10.10 decision 3: Q1–Q4 of EVAL_PLAN §1, in numbers, each pointing to its table."""
     nA, nB = F.n["A"], F.n["B"]
@@ -1290,7 +1303,7 @@ def summary(d, F):
                f"refinements on) is {min(se['S']):.2f}–{max(se['S']):.2f} for S, {min(se['T1']):.2f}–{max(se['T1']):.2f} for T1, "
                f"{min(se['T2']):.2f}–{max(se['T2']):.2f} for T2 and {min(se['T3']):.2f}–{max(se['T3']):.2f} for T3; groundness plus "
                f"decomposition is still {min(F.syn_gd['S']):.0f}–{max(F.syn_gd['S']):.0f}% of the clauses at k = 32 in S, and "
-               f"{min(F.syn_gd['T2']):.0f}–{max(F.syn_gd['T2']):.0f}% in T2, the only family where typing acts. With real "
+               f"{min(F.syn_gd['T2']):.0f}–{max(F.syn_gd['T2']):.0f}% in T2, where typing removes most of them{e6_note(d)}. With real "
                f"distractors, the median per-goal exponent is {F.sc_exp['random']:.2f} (random) and {F.sc_exp['near']:.2f} (near), "
                f"clauses at k = 32 are about {F.sc_growth32:,.0f} times those at k = 0, and the median largest feasible k is "
                f"{fn(med(F.feas['random']))} (random) and {fn(med(F.feas['near']))} (near); every infeasible run hit the memory "
@@ -1373,8 +1386,16 @@ def reading(d, F):
             "- *Groundness plus decomposition at k = 32*, all refinements on: "
             + ", ".join(f"{fa} {rng(sg[fa], '.0f')}%" for fa in SYN_FAMS)
             + ". With all refinements on, groundness and decomposition are still most of the clauses in every family except T2.",
-            "- *Holds?* **No**, except in T2, the family with distinct carrier types, where both parts hold in part (E6 separates "
-            "the two typing filters).", ""]
+            ]
+    if d.e6:
+        X = {(x["family"], x["k"], x["N"]): x for x in d.e6}
+        e6x = [math.log(X[("T2", 32, n)]["clauses"] / X[("T2", 8, n)]["clauses"]) / math.log(4) for n in SYN_NS]
+        e6r = [X[("T2", 32, n)]["clauses"] / R5_all(d, "T2", n) for n in SYN_NS]
+        out.append(f"- *T2 and the typing filters (E6, exploratory):* with static typing and candidate pruning both off, T2's "
+                   f"exponent is {rng(e6x, '.2f')} and it has {rng(e6r, '.1f')} times the clauses at k = 32. Either filter alone "
+                   "gives the count of both, so T2's low exponent comes from typing, and either filter is enough.")
+    out += ["- *Holds?* **No**, except in T2, the family with distinct carrier types, where the exponent is lower and groundness "
+            "plus decomposition is a minority.", ""]
     # rule 4
     tB, tA = F.time["B"], F.time["A"]
     so = F.rev.get("sbs_only")

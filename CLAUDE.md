@@ -77,7 +77,7 @@ Machine differences (CPU speed, RAM) change times and possibly which goals hit t
 The pilot's projection was made on the original machine, so record the new machine's
 specs in NOTES.md before a full run.
 
-## Where milestone 7 stands (23 November 2026)
+## Where milestone 7 stands (24 November 2026)
 
 - 7a (corpus) is accepted, including the H_main amendments (EVAL_PLAN §10.2, §10.4).
 - 7b is done. The full run is in `eval/full/` (6,300 goals; NOTES.md, "7b: full run, final
@@ -96,7 +96,12 @@ specs in NOTES.md before a full run.
     in NOTES.md. The pilot is in `eval/scaling_pilot/`; it projects the full run at about 4 h.
   - The full 4.2 run is done (owner-approved): `eval/scaling_full/` (550 runs and their `countOnly`
     sizes; NOTES.md, "7c: the full 4.2 run"). No stop rule fired. R6 is in EVAL.md.
-- **Next: 7d-2** (R5 and R6 are in; the reading of EVAL_PLAN §7), with its prompt still to come.
+- 7d-2 is done (EVAL_PLAN §10.10; NOTES.md, "7d-2: …" and "Milestone 7: summary"). EVAL.md opens with the
+  Q1–Q4 summary and has "Reading the results (§7)", "Threats to validity", R2's breakdown, R6's additions,
+  E5 (`eval/m8_families.json`, `eval/m8_obstacles.jsonl` from `Test/M8Facts.lean`) and E6
+  (`eval/scaling_synthetic_e6.jsonl`, `eval_scaling` config `no_typing`, `Test/eval_scaling_e6.py`).
+- **Next: the owner's scope-or-scale decision (EVAL_PLAN §10.11).** Then the end of milestone 7: SPEC.md
+  takes in the two decoder fixes, the type-template fix and the evaluation results.
 
 ## Running the evaluation
 

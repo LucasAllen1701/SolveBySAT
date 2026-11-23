@@ -38,7 +38,9 @@ def run(specs, out):
     rows = []
     for k, s in sp.items():
         n = last_n(res[k]) or 1
-        for m in sorted({5, n}):
+        # §2.4: N = 5 and the run's last N; for a control also its original N, for §2.7's comparison
+        # with milestone 7 at the original N (a crashed control may stop below it)
+        for m in sorted({5, n} | ({s["orig_N"]} if s.get("probe_group") == "control" else set())):
             rows.append(dict(s, key=f"{k}@N{m}", nmax=m, size_of=k, size_N=m))
     sizes_specs = os.path.join(out, "sizes_specs.jsonl")
     with open(sizes_specs, "w") as f:
@@ -47,8 +49,12 @@ def run(specs, out):
     q = subprocess.run([sys.executable, os.path.join(ROOT, "Test/eval_sizes.py"), sizes_specs,
                         os.path.join(out, "sizes.jsonl")], cwd=ROOT)
     t2 = time.time()
-    with open(os.path.join(out, "timing.json"), "w") as f:
-        json.dump({"runs_s": round(t1 - t0, 1), "sizes_s": round(t2 - t1, 1), "n_runs": len(sp), "n_sizes": len(rows)}, f)
+    # accumulated over passes, so a resumed pass adds its time instead of replacing the first pass's
+    tp = os.path.join(out, "timing.json")
+    old = json.load(open(tp)) if os.path.exists(tp) else {"runs_s": 0.0, "sizes_s": 0.0}
+    with open(tp, "w") as f:
+        json.dump({"runs_s": round(old["runs_s"] + t1 - t0, 1), "sizes_s": round(old["sizes_s"] + t2 - t1, 1),
+                   "n_runs": len(sp), "n_sizes": len(rows)}, f)
     return q.returncode
 
 
@@ -59,16 +65,21 @@ def summary(out):
     res = {r["key"]: r for r in load(os.path.join(out, "results.jsonl"))}
     siz = {r["key"]: r for r in load(os.path.join(out, "sizes.jsonl"))}
     tm = json.load(open(os.path.join(out, "timing.json")))
-    print("| group | goal | outcome | N | rules | accepted rules | time s | clauses at last N | clauses at N = 5 | uses rule |")
+    rules = {r["key"]: r for r in load(os.path.join(ROOT, "eval", "m8a", "rules.jsonl"))}
+
+    def secs(r):   # the shard's total time, or for a crash the driver's elapsed time
+        return (r["total_ms"] / 1000) if r.get("total_ms") is not None else r.get("elapsed_s", 300.0)
+    print("| group | goal | outcome | N (crash: last N reached) | rules | accepted rules | time s | clauses at last N | clauses at N = 5 | uses rule |")
     print("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
     for k, r in res.items():
         g = goals[k[4:]]
         n = last_n(r)
-        rej = sum(1 for c, _ in r.get("H_rejected", []) if c.startswith("_probe."))
+        ru = rules[k]   # rule counts from eval/m8a/rules.jsonl (the same generator; a crash record has none)
+        nr = ru["probe_rules"]
+        rej = sum(1 for c, _ in ru["H_rejected"] if c.startswith("_probe."))
         z5, zl = siz.get(f"{k}@N5", {}), siz.get(f"{k}@N{n}", {})
         cl = r.get("clauses") or zl.get("clauses")
-        print(f"| {g['group']} | `{g['id']}` | {r['outcome']} | {n} | {r.get('probe_rules', '?')} | "
-              f"{r.get('probe_rules', 0) - rej if 'probe_rules' in r else '?'} | {(r.get('total_ms') or 0) / 1000:.1f} | "
+        print(f"| {g['group']} | `{g['id']}` | {r['outcome']} | {n} | {nr} | {nr - rej} | {secs(r):.1f} | "
               f"{cl if cl is not None else zl.get('status', '–')} | {z5.get('clauses', z5.get('status', '–'))} | {r.get('uses_rule', '–')} |")
     print()
     for k, r in res.items():
@@ -87,10 +98,10 @@ def summary(out):
         c8 = z.get("clauses")
         print(f"| `{g['id']}` | {n0} | {r['outcome']} | {r.get('N', r.get('last_N'))} | {c8 if c8 else z.get('status')} | {m7:,} | "
               f"{c8 / m7:.1f}× |" if c8 else f"| `{g['id']}` | {n0} | {r['outcome']} | – | {z.get('status')} | {m7:,} | – |")
-    # projection: per group, the mean pilot wall time per run (the shard's total_ms, or the watchdog for a
-    # crash) and per sizes record, plus the driver's and the sizes pass's overhead spread over the runs
+    # projection: per group, the mean pilot wall time per run (the shard's total_ms, or the driver's
+    # elapsed_s for a crash) and per sizes record, plus the driver's and the sizes pass's overhead spread over the runs
     print()
-    tot_run = sum((r.get("total_ms") or 300000) for r in res.values()) / 1000
+    tot_run = sum(secs(r) for r in res.values())
     tot_siz = sum((z.get("ms") or 0) for z in siz.values()) / 1000
     over_run = max(0.0, tm["runs_s"] - tot_run) / len(res)
     over_siz = max(0.0, tm["sizes_s"] - tot_siz) / max(1, len(siz))
@@ -101,7 +112,7 @@ def summary(out):
         ks = [k for k in res if goals[k[4:]]["group"] == grp]
         if not ks:
             continue
-        a = statistics.mean((res[k].get("total_ms") or 300000) / 1000 + over_run for k in ks)
+        a = statistics.mean(secs(res[k]) + over_run for k in ks)
         b = statistics.mean(sum(((siz[x].get("ms") or 0) / 1000 + over_siz) for x in siz if x.startswith(k + "@")) for k in ks)
         h = FULL[grp] * (a + b) / 3600
         proj += h

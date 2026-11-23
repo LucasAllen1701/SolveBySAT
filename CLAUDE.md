@@ -44,6 +44,7 @@ lake build eval_corpus eval_run    # milestone 7 executables
 lake build Test.EvalNamed          # loaded at run time by the named harness
 lake build eval_numerals           # 7d-1 annotations, forest dumps, invariant check
 lake build eval_scaling eval_pool test_countonly SynthLib   # 7c
+lake build eval_run Test.M8Probe     # 8a: probe harness and hand examples
 ```
 
 ## Layout and where the data lives
@@ -86,7 +87,18 @@ machine's specs in NOTES.md before a full run.
 - Bugs found by milestone 7 and fixed: two decoder bugs (R1, R2 in `Test/M7Lean.lean`) and the
   type-template fix (EVAL_PLAN §10.7). `countOnly` (`EncodeOptions.countOnly`, tested by `test_countonly`)
   is the only encoder addition of milestone 7.
-- **Next: milestone 8 (`M8_PLAN.md`), on branch `m8`.** 8a is the rewriting probe; 8b the scale design.
+- **Milestone 8 (`M8_PLAN.md`), on branch `m8`.** 8a, the rewriting probe, is set up and piloted
+  (NOTES.md, "8a: probe set-up and pilot"): the inputs from `m7-data` are in `eval/m8a/inputs/` (md5 sums in
+  NOTES.md), the sample is `eval/m8a/goals.jsonl`, the specs are `eval/m8a/specs.jsonl` (200) and
+  `specs_pilot.jsonl` (20), and the pilot is in `eval/m8a/pilot/`.
+  - Tools: `Test/M8Rules.lean` (rule generator, harness only), `Test/M8Probe.lean` (hand examples, in
+    `run_all.sh`), `eval_run`'s `probe` spec fields and the `probe-rules` subcommand, `Test/m8a_setup.py`
+    (`inputs`, `sample`, `specs`), `Test/m8a_run.py` (`run`, `summary`).
+  - **Next: the owner's approval of the full 8a run** (projection 3.3 h; the `↔` rules cannot be accepted
+    by the unchanged compiler, see NOTES.md). Then `eval/m8a/report.py` and `PROBE.md` (§2.7), then 8b.
+- Milestone 8 rules: as milestone 7's. Do not change `SolveBySat/` in 8a. Filters, seeds, sample sizes and
+  limits are pre-registered in `M8_PLAN.md` and NOTES.md; a decoder failure on a satisfiable CNF, or a
+  §2.5 stop rule, stops the run.
 
 ## Running the evaluation
 

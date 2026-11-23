@@ -2588,3 +2588,98 @@ seed 80101: SHA-256 of `"80101:<key>"`, ascending, first 100 Tier B and 50 Tier 
 | rewriting, Tier B | 100 | 4 / 9 / 11 | 2 | no proof ≤ 10: 82, memory crash: 18 |
 | rewriting, Tier A | 50 | 8 / 12 / 17 | 5 | no proof ≤ 10: 28, memory crash: 22 |
 | control | 50 | 1 / 8 / 11 | 1 | proved: 50 (original N 1: 12, 2: 12, 3: 10, 4: 3, 5: 6, 6: 4, 7: 1, 8: 2) |
+
+#### The rules (§2.3): `Test/M8Rules.lean` (harness only; `SolveBySat/` unchanged)
+
+- *Symbols.* The constants of the goal's statement and of its accepted H_main constants' statements, both
+  preprocessed with `SolveBySat.preprocess` (SPEC 4.1). *Decision:* the H constants' statements are
+  preprocessed too, for consistency with the goal.
+- *Predicate and function symbols.* A predicate symbol's type ends in `Prop`, and a function symbol's
+  type ends in a type that is not a sort. Type formers and proofs get no rules. Positions are the
+  binders of the symbol's type, without reduction, numbered from 0.
+- *Eligible positions* as §2.3 says. A `Prop` position uses `↔`. Proofs:
+  `congrArg (fun y => f … y …) h`, `Eq.mpr (congrArg (fun y => P … y …) h) hp`, and `propext h` for `↔`.
+  They are built with `mkAppM ``congrArg`, not `Meta.mkCongrArg`, which rewrites special cases.
+- *Names.* `_probe.<symbol>.<kind>.«<i>»`, where kind is `congr`, `subst`, `congr_iff` or `subst_iff`.
+  **Deviation:** `<i>` is a *string* component. A numeric component is read back as a hygiene macro
+  scope when the name goes through syntax, and the test tactic could not name the rule ("Unknown
+  constant `_probe.Eq.subst✝`").
+- *H* is the accepted H_main constants, then `Eq.refl`, `Eq.symm`, `Eq.trans` if absent, then the rules
+  sorted by `Name.toString`. In the shard, each goal's rules are added to a fresh copy of the base
+  environment.
+- *Harness (`Test/EvalRun.lean`).* New optional spec fields `probe` and `probe_group`; specs without them
+  run as before. A probe run watches every H constant outside H_main (`probe_extra_used`, `uses_rule`)
+  and records the rule counts and failures. It also applies the stop rules of §2.5:
+  - a control uses the 4.2 monotonicity rule. 4.2's k = 0 rule (same N as `eval/final/`) is *not*
+    applied to probe specs, because rules may legitimately shorten a proof;
+  - a rewriting goal proved with H_main constants only stops the run (exit 6).
+
+  `eval_run sizes` builds the same H. The new `eval_run probe-rules` subcommand writes the rule
+  bookkeeping without solving anything.
+- **Hand examples (`Test/M8Probe.lean`, now in `Test/run_all.sh`).** A test-only tactic,
+  `solve_by_sat_probe`, generates the rules for the goal and calls the unchanged `solve_by_sat`. It drops
+  compiler-rejected constants first, as the harness does. Inside a proof, Lean 4.36 accepts new
+  declarations only under the current theorem's prefix, so the file sets `Elab.async false`.
+  - P1, `a = b → f a = f b`: proved at N = 2 (`_probe.f.congr.«0» a b h`); none at 1.
+  - P2, `h : x = y ⊢ P (f x) → P (f y)`: proved at N = 5,
+    `_probe.P.subst.«0» (f y) (f x) (_probe.f.congr.«0» y x (Eq.symm h)) hp`; none at 4.
+  - **P3, P4: a `Prop` position with `↔` cannot be proved as M8_PLAN §2.3 is written.** The rules build
+    and the kernel accepts them (`_probe.Q.subst_iff.«0» : ∀ (a b : Prop), (a ↔ b) → Q b → Q a`). But
+    the unchanged compiler rejects every `↔` rule: the premise `a ↔ b` over Prop variables compiles to
+    clauses whose head is a clause variable (SPEC §2). The test records this outcome with `#guard_msgs`.
+    As §2.3 says for rejected rules, the `↔` rules are kept in the generator and recorded, and the probe
+    runs as written. Alternatives are proposed to the owner, not adopted.
+- **No rules, no change.** The 36 named cases through the probe harness (`eval/m8a/named_check`, specs
+  read from `m7-data`) equal `m7-data`'s `eval/fix_check3/named` in outcome, N and skeleton: 36/36.
+- **Rules over the 200 goals** (`eval/m8a/rules.jsonl`, `eval_run probe-rules`, 15 s, peak 742 MB):
+
+  | group | rules: median / p90 / max | accepted by the compiler: median / p90 / max |
+  | --- | --- | --- |
+  | rewriting, Tier B | 9 / 16 / 29 | 8 / 15 / 29 |
+  | rewriting, Tier A | 11 / 18 / 25 | 9.5 / 17 / 23 |
+  | control | 8 / 11 / 14 | 6 / 10 / 14 |
+
+  - Built: 1,092 `congr`, 699 `subst`, 162 `subst_iff`, 0 `congr_iff`.
+  - **Failed to build: 116.** In every one, the symbol's *result type* depends on the rewritten argument
+    (`OfNat Nat y` 63, `Decidable (y < m)` and its variants 22, `BitVec y` 4, `y.Pos`, …), so the
+    `congrArg` motive is ill-typed. §2.3 excludes positions that *another argument's* type depends on, but
+    not ones the result type depends on, so these are built, fail and are recorded, as §2.3 says.
+  - **Rejected by the compiler: 184.** All 162 `subst_iff` rules (`And`, `Or`, `Iff`: the `↔` premise, as
+    in P3), plus 22 whose clause variable is applied to arguments (higher order).
+  - No H_main constant is rejected.
+
+#### Pilot (§2.6): `eval/m8a/pilot/`
+
+`python3 Test/m8a_run.py run eval/m8a/specs_pilot.jsonl eval/m8a/pilot`, from a clean tree at `9329aca`.
+It runs the driver with milestone 7's limits, then the `countOnly` sizes. Runs took 791 s; sizes, 38 counts
+(N = 5 and the last N), took 400 s. Driver exit 0. **No stop rule fired.**
+- *Sizes for the controls (addition):* a control's original N is also counted, for §2.7's comparison with
+  milestone 7. The crashed control stopped at N = 4, below its original N of 6.
+- *Pilot bookkeeping:* the sizes pass was run a second time, from scratch, after `m8a_run.py` was fixed
+  (rule counts for crash records from `rules.jsonl`, crash times from the driver's `elapsed_s`, timing
+  accumulated over passes). The runs were not repeated. Their time (791 s) is the driver's own record.
+- `eval/m8a/pilot_summary.md` has every pilot run (`python3 Test/m8a_run.py summary eval/m8a/pilot`).
+
+| group | runs | proved | memory crash | proved with a rule |
+| --- | --- | --- | --- | --- |
+| rewriting, Tier B | 10 | 1 (N = 2) | 9 | 1 |
+| rewriting, Tier A | 5 | 0 | 5 | – |
+| control | 5 | 4 (each at its original N) | 1 | 0 |
+
+- The rewriting proof: `B/Int.ediv_gcd_ne_zero_of_ne_zero_right/5` at N = 2,
+  `_probe.Nat.cast.congr.«2»(Int.gcd_comm)`. Milestone 7 found no proof ≤ 10.
+- **Every crash is the 2.5 GB cap,** at last N 3–10, with 9.7–26 M clauses at the last N. Groundness plus
+  decomposition is 95–99% of them. Where milestone 7 has a CNF at the same N, the rules multiply it
+  5–17× (for example 0.87 M → 15.0 M at N = 6).
+- **Controls, clauses at the original N:** 1,079 → 42,094 (39×), 3,234 → 39,282 (12×),
+  246,708 → 2,981,513 (12×), 1,284,012 → 2,489,298 (1.9×). One control, proved at N = 6 in milestone 7
+  with 8.05 M clauses, has 28.9 M with the rules and crashed at N = 4: the rules made it infeasible.
+  That is a resource limit, which §2.5 allows.
+- **Projection for the 200 runs: 3.3 h** (runs and sizes; rewriting Tier B 1.8 h, Tier A 1.2 h, control
+  0.4 h). That is well under about 24 h, so no reduction is proposed. The full run waits for the owner's
+  approval.
+- **Regression (end of the 8a set-up and pilot):** `Test/run_all.sh` exit 0 on `m8` at `52e4f79`, with
+  `Test/M8Probe.lean` added (M0 902/902, M1 19/19, M4 4/4, M5 10/10, `countOnly` 22/22; M2, M3, M4Lean,
+  M5Lean, M7Lean and M8Probe pass; `eval/m8a/run_all.log`). The named cases are 36/36 with the probe
+  harness and no rules. `SolveBySat/` is unchanged since milestone 7. After `52e4f79` only Python files
+  (`Test/m8a_run.py`) and data changed.

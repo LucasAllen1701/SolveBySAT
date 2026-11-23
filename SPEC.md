@@ -1,8 +1,8 @@
 # Solve By SAT: revised specification
 
-Lucas Allen · 18 November 2026
+Lucas Allen · 18 November 2026; revised 24 November 2026
 
-**Status: implemented.** Milestones 0 to 6 are complete on Lean 4.36.0, and this revision describes the system as built. It folds in every amendment and deviation from the implementation's NOTES.md; section 11 lists them.
+**Status: implemented and evaluated.** Milestones 0 to 6 are complete on Lean 4.36.0, and milestone 7 evaluated the tactic on 6,300 real Lean goals. This revision describes the system as built. It folds in every amendment and deviation from the implementation's NOTES.md, including milestone 7's three fixes (sections 4.5 and 8) and its encoder addition `countOnly` (section 3), and it summarises the evaluation (sections 7.4 and 9.5). Section 11 lists the changes. The full evaluation is in `EVAL.md` and `EVAL_PLAN.md` in the repository.
 
 ## 1. Overview and contract
 
@@ -103,7 +103,7 @@ The size of a proof is its number of nodes.
 | Type class resolution | an instance argument that is not syntactically the expected one | instances are found only by unification |
 | Proof-dependent types | a binder whose type mentions an earlier proof variable | rejected at compile time |
 | Lemma reuse | a sub-proof needed twice | proofs are trees, so it is counted twice; there is no `have` |
-| Large problems | 9 lemmas at 12 nodes is already 5.1 million clauses | groundness and decomposition grow quadratically in `H` (section 7) |
+| Large problems | 9 lemmas at 12 nodes is already 5.1 million clauses; on real goals, 21.6% exceed 2.5 GB at N ≤ 10 | groundness and decomposition grow quadratically in `H` (sections 7.3 and 7.4) |
 
 ## 3. Architecture
 
@@ -126,6 +126,7 @@ The implementation is a four-stage pipeline in which only the first and last sta
 | `SolveBySat/Tactic.lean` | `solve_by_sat [h₁, …] (nodes := N)` and its options | yes |
 | `SolveBySat/Reference.lean` | brute-force prover over forests with binders, data and groundness; the test oracle | no |
 | `Test/` | fixed tests, differential tests, Lean examples, scripts | mixed |
+| `Test/Eval*.lean`, `Test/eval_*.py`, `eval/` | the milestone 7 evaluation: corpus extraction, coverage harness and driver, scaling runs, and `eval/report.py`, which writes `EVAL.md` | mixed |
 
 **Solver.** Lean 4.36.0 ships CaDiCaL 2.1.2 in the toolchain's `bin/`. `Solver.findSolver` tries, in order: the environment variable `SOLVE_BY_SAT_SOLVER`, `IO.appPath.parent/cadical`, `Lean.findSysroot/bin/cadical`, and `cadical` on `PATH`. Every model returned is checked against the CNF, so a faulty solver cannot produce a false proof.
 
@@ -137,14 +138,17 @@ The implementation is a four-stage pipeline in which only the first and last sta
 | `solve_by_sat.verbose` | false | reports CNF size, the skeleton found, and context hypotheses that were ignored |
 | `solve_by_sat.refinements` | true | `false` switches off all five refinements of 6.10 |
 | `solve_by_sat.staticTyping`, `typingClause`, `forgetTypes` | true, true, false | testing only: switch off the static typing filter or the typing clause, or treat every type as unknown |
+| `solve_by_sat.checkTemplates` | false | testing only: fail with an internal error if a type template is changed by preprocessing (section 4.5) |
 
 `EncodeOptions` has one flag per refinement (`symmetry`, `pairPruning`, `candidatePruning`, `framePruning`, `ladderAmo`), plus `protoRank` (the prototype's rank width) and `openBit`, `dataFilter` for mutation tests.
+
+`EncodeOptions.countOnly` (default false) counts variables and clauses, per family, without storing any clause. The clause builder does all its constant folding and counting as before and only skips storing the clause, so the counts equal a full encode's; a test checks this on every instance of section 7.3. It is used to measure CNFs too large to build in memory (section 7.4).
 
 **Dependencies.** Lean core and `Std` only, no Mathlib.
 
 **Reference prototype.** The Python prototype (`enc.py`, `tests.py`, `diff.py`, `cdcl.c`) is now historical. The Lean implementation is authoritative. With all refinements off and `protoRank` on, the encoder still reproduces the prototype's CNF sizes exactly on tests T1 to T9.
 
-**Environment.** The development machine has about 3.8 GB of memory and no swap. Lake builds occasionally fail with "not enough memory" when spawning `lean`, and a retry succeeds. The differential tests use 4 worker threads, because 8 exhausted memory.
+**Environment.** The development machine has about 3.8 GB of memory and no swap. Lake builds occasionally fail with "not enough memory" when spawning `lean`. The cause is the kernel's heuristic overcommit refusing `lake`'s fork, and `vm.overcommit_memory = 1` fixes it. The differential tests use 4 worker threads, because 8 exhausted memory. The evaluation ran on a second machine (Intel i7-10510U, 7.6 GB), one process at a time under a 2.5 GB cgroup cap.
 
 ## 4. Compilation: from Lean to a clause forest
 
@@ -228,7 +232,9 @@ For each template node, compilation records:
 
 - whether it is **ground** (no static variables), and for a ground term a **representative** Lean expression when it has a closed one;
 - whether it is **open** (it contains a loose `bvar`);
-- for term-kind static variables, non-ground positions and ground terms, a **type template** from `inferType`. A type that cannot be compiled, or that mentions a variable bound inside the term, is **unknown**.
+- for term-kind static variables, non-ground positions and ground terms, a **type template** from `inferType`, preprocessed as in 4.1. A type that cannot be compiled, or that mentions a variable bound inside the term, is **unknown**.
+
+Every template the compiler records is unchanged by preprocessing. The testing option `solve_by_sat.checkTemplates` checks this, and it holds on every goal and H constant of the milestone 7 corpus. Before milestone 7, type templates of ground terms and positions were built from the raw inferred type. The typing clause (6.8) then compared an unnormalised type with a normalised one, which could exclude a real proof: a completeness bug, never a soundness one.
 
 Term binders are opened as local declarations during compilation, so types can still be inferred, and their variables are converted back to `bvar:i`.
 
@@ -394,11 +400,11 @@ Pair pruning must keep the `idx`-differs clause. Dropping the pair outright woul
 - A set of first-order equations has a unifier exactly when the terms can be labelled so that equated terms share a label, same-label rigid terms have the same symbol and pairwise same-label children, and every rigid term ranks above its children. Families 6.4 to 6.7 state precisely this for the equations of the chosen tree.
 - From a real proof, label every object by its fully instantiated value. This satisfies every family, including the refinements by the arguments in 6.10, which gives completeness.
 - From a model, equal labels define the substitution. Groundness guarantees each variable has a rigid member in its class, and the rank order makes the values finite, which gives soundness.
-- The kernel check in section 8 is a backstop, not part of the argument. It has caught three encoder bugs during implementation, each rejected rather than accepted as a proof: two missed label caches and the missing data-child link.
+- The kernel check in section 8 is a backstop, not part of the argument. It has caught three encoder bugs during implementation (two missed label caches and the missing data-child link) and two decoder bugs on real goals in milestone 7 (section 8), each rejected rather than accepted as a proof. It cannot catch completeness bugs: milestone 7's type-template bug (4.5) was found by reviewing failures by hand.
 
 ## 7. Clause counts
 
-The number of clauses grows as N³ in the node bound and quadratically in the total size of the hypothesis list. Two families dominate: groundness (6.8) and decomposition (6.5), which together are over 90% of the clauses on larger problems, and the refinements of 6.10 do not reduce either.
+The number of clauses grows as N³ in the node bound and quadratically in the total size of the hypothesis list. Two families dominate: groundness (6.8) and decomposition (6.5), which together are over 90% of the clauses on larger problems. The refinements of 6.10 do not reduce either, except typing when the lemmas have distinct types (7.4).
 
 ### 7.1 Parameters
 
@@ -463,6 +469,34 @@ What the refinements change:
 
 With all refinements off and the prototype's rank width, the encoder reproduces the original prototype's counts exactly, for example 571,956 variables and 5,354,456 clauses at 9 lemmas and N = 12.
 
+### 7.4 Typed and real-goal scaling (milestone 7)
+
+Milestone 7 measured scaling through the Lean compile path, so type templates are real, using `countOnly` for CNFs too large to build (`EVAL.md`, R5, R6, E3 and E6).
+
+**Synthetic families.** The chain of 7.3 with k distractors `∀ m n, R m n → R (f m) (f n)`, for k = 0, 4, 8, 16, 32 and N = 5, 8, 12. Exponents are the log-log slope of total clauses from k = 8 to k = 32; shares are at k = 32, all refinements on.
+
+| Family | Distractors | Growth exponent | Groundness + decomposition |
+| --- | --- | --- | --- |
+| S | one shared `s : Nat → Nat`, `≤` on `Nat` | 1.91–1.93 | 94–97% |
+| T1 | distinct `fᵢ : Nat → Nat`, `≤` on `Nat` | 1.80–1.83 | 90–95% |
+| T2 | distinct carrier types `Tᵢ`, each with its own `LE` | 1.15–1.35 | 31–51% |
+| T3 | distinct predicates `Pᵢ` | 1.92–1.93 | 99% |
+
+- Switching off pair pruning alone, or candidate pruning alone, changes no cell.
+- Typing matters only when the lemmas have distinct types (T2). With static typing and candidate pruning both off, T2 has 7.2–10.1 times the clauses at k = 32, with exponent about 1.8. Either filter alone does the whole job.
+- Static typing also removes 2–3% of the clauses in S and T3.
+
+**Real goals.**
+
+- **Coverage runs.** At the final N, groundness plus decomposition is 85–96% of the clauses for every size of H, and about 70–74% even for one-node proofs.
+- **Real distractors.** 50 proved goals, spread across proof sizes, each run with k = 2 to 32 compiler-accepted core lemmas added, chosen at random or with a matching head symbol:
+  - the median per-goal growth exponent is 1.87 (random) and 1.73 (near);
+  - at k = 32 the median CNF is about 500 times its size at k = 0;
+  - the median largest k at which the original proof is still found within the limits is 16 (random) and 12 (near): 32 for one-node proofs, 16 for two, 8 for three or four, and 4 for five or more;
+  - almost every failure is the 2.5 GB memory cap, which falls at about 10 to 12 million clauses.
+
+So the quadratic growth of 7.2 holds on real, typed problems. Reducing groundness and decomposition remains the main open problem (9.4).
+
 ## 8. Decoding: from a model to a checked proof
 
 The decoder replays the proof tree in `MetaM`, finishes any argument that unification leaves open with the value the model chose, and has the kernel check the result.
@@ -471,7 +505,7 @@ The decoder replays the proof tree in `MetaM`, finishes any argument that unific
 2. **Replay a node.** Starting from a metavariable for the goal:
    - introduce the binders of the goal position, recording the new free variables against the node;
    - build the head term: a constant via `mkConstWithFreshMVarLevels`, after preprocessing its type with its own parameter names, recording its level metavariables against the level slots; the free variable recorded at the introducing node; the split recipe (`And.left`, `And.right`, `Iff.mp` or `Iff.mpr` with the extra premise as a metavariable); or the built-in constructor;
-   - open its binders as metavariables and unify its conclusion with the target using `isDefEq` under reducible transparency;
+   - open its non-Prop binders as metavariables and its premises, including the extra premise of `Iff.mp` or `Iff.mpr`, as **synthetic opaque** metavariables, then unify its conclusion with the target using `isDefEq` under reducible transparency. Head unification therefore cannot assign a premise, which only its child fills; this matters when a head mentions its own premise, as in `List.head_reverse`. It still compares such a premise with the target's proof by proof irrelevance, so clause variables determined through the premise's type stay determined;
    - replay each premise child on its metavariable. A data child (`replayData`) unifies the data clause's result type with the variable's type, then its value with the variable.
 3. **Ground what is left from the model.** For each slot still unassigned, term or level, take the candidate whose `sv` is true and rebuild its expression:
    - a ground term: its representative;
@@ -482,17 +516,19 @@ The decoder replays the proof tree in `MetaM`, finishes any argument that unific
    A ground term containing a proof that mentions a hypothesis has no representative valid in the decoder. It takes its expression from an occurrence of the same term in the replay instead, which proof irrelevance makes correct. Each value is type-checked in the variable's own local context, so Lean checks scope, before it is assigned.
 4. **Finish.** Instantiate metavariables, fail if any remains, run `Meta.check`, and close the user's goal so the kernel checks the term.
 
+**Unifier settings.** The whole decode runs with `foApprox` and `ctxApprox` on, the settings the elaborator gives tactics, whoever calls it. A caller with every approximation off, such as a bare `MetaM`, could otherwise fail on a valid model, because a value's metavariable sometimes has to be restricted to a smaller local context. The restriction is sound, because the scope clauses (6.7) guarantee that every grounding is in scope.
+
 Messages:
 
 - **CNF unsatisfiable:** "no proof with at most N nodes exists in the class".
-- **Satisfiable but the decoder fails:** "decoder failed (bug)", with the skeleton. This has only ever been caused by encoder bugs, each of which the decoder rejected rather than accepted.
+- **Satisfiable but the decoder fails:** "decoder failed (bug)", with the skeleton. This has been caused by three encoder bugs (before milestone 7) and by the two decoder bugs fixed above (in milestone 7). The decoder rejected every one of them, and never accepted one as a proof.
 - **A grounding with an unknown type is rejected by Lean:** a "documented limitation" message naming the variable and node.
 
 Lean's `isDefEq` is stronger than the encoder's matching; for example, it solves `Nat.succ ?n =?= 1` by literal arithmetic. That is harmless, because every model is consistent syntactically.
 
 ## 9. Status and tests
 
-All seven milestones are complete, and the full suite (`Test/run_all.sh`) passes with all refinements on.
+Milestones 0 to 7 are complete, and the full suite (`Test/run_all.sh`) passes with all refinements on.
 
 | # | Milestone | Key acceptance result |
 | --- | --- | --- |
@@ -503,6 +539,7 @@ All seven milestones are complete, and the full suite (`Test/run_all.sh`) passes
 | 4 | Typing and universe levels | `Eq.refl`, F2, F3, and the ill-typed grounding case E3 |
 | 5 | Built arguments | D1 to D7, local data functions, level normalisation (N1) |
 | 6 | Refinements | identical answers with each refinement on or off; benchmark of 7.3 |
+| 7 | Evaluation on real goals | 6,300 goals from Lean core and `Std` (9.5); three bugs found and fixed with regression tests M7-R1 to M7-R3; `countOnly` equal to a full encode on every check; `EVAL.md` regenerates byte-identically from the data files |
 
 ### 9.1 Named tests
 
@@ -538,6 +575,11 @@ Every success is also run with one node fewer and must fail with the exact no-pr
 | D5 | A3 with `[Nat.zero, Nat.succ]` added | no proof at 6 |
 | D6 | `∃ n, Nat.succ n = 1`: the numeral limitation | no proof at 6 |
 | D7 | `∃ n : Nat, n = 1` with `[Eq.refl]` | 2 |
+| M7-R1a to R1e | a clause whose head mentions its own premise, with and without binders, and the real goal `List.getLast_eq_head_reverse` | succeed (synthetic opaque premises, section 8) |
+| M7-R2a, R2b | `∀ x : Nat, x ≠ x.succ` from `Ne.symm` and `Nat.succ_ne_self`, and the real goal from `Nat.pred_eq_self_iff`, decoded with every approximation off in the caller | 4 nodes; succeed (unifier settings, section 8) |
+| M7-R3a, R3b | `decide (¬ b = true) = decide (b = false)` with `[Decidable.decide.congr_simp, Bool.not_eq_true]`; `x = x` for `x : List (α × β)` with `[Eq.refl]` | 2; 1 (type templates preprocessed, 4.5) |
+
+The tests of milestone 7 are in `Test/M7Lean.lean`, named R1 to R3 there; here they are prefixed M7 to keep them apart from the rejection tests R1 to R4 of milestone 2. A mutation check shows that M7-R3 fails with the template fix reverted, and the template invariant (4.5) fails on 1,036 corpus goals with it reverted.
 
 ### 9.2 Validation
 
@@ -546,20 +588,40 @@ Every success is also run with one node fewer and must fail with the exact no-pr
 - **Mutation checks** fire: switching off scope, the occurs check, the open bit, or the data kind filter each produces mismatches.
 - **Option invariance.** The Lean suite gives identical answers with the static typing filter off and with all refinements off.
 - **Unit tests** check that every object kind's label is allocated exactly once.
+- **`countOnly`** equals a full encode, in variables and in every family's count, on all 22 checks (each instance of 7.3, with all refinements on and all off).
 
 ### 9.3 Running the tests
 
-- `Test/run_all.sh`: the full suite, including every test above.
+- `Test/run_all.sh`: the full suite, including every test above and the `countOnly` test.
 - `Test/refinements.sh`: the three differentials with each refinement on its own.
 - `Test/bench.py`: the benchmark of section 7.3.
 - `SOLVE_BY_SAT_SOLVER=<path>` runs everything against another DIMACS solver.
+- `python3 eval/report.py` regenerates `EVAL.md` from the evaluation's data files, which are kept on the archived `eval-m7` branch (tag `m7-data`).
 
 ### 9.4 Open directions
 
-1. **Shrink groundness and decomposition.** They are over 90% of the CNF on larger problems and limit the size of `H`. No approach has been tried yet.
-2. **Evaluate on real goals.** Every test so far is small and hand-written. Measuring what fraction of real Lean goals fall inside the class, and how the tactic compares with `exact?` or `apply?`, would show whether the fragment is useful.
-3. **Search over N.** The tactic needs `N`. A wrapper that tries increasing values would return a minimal proof without the user choosing a bound.
+1. **Shrink groundness and decomposition.** They are 85–99% of the CNF on larger problems, real and synthetic, and limit the size of `H` (7.4). This is milestone 8, which starts with a probe of rewriting by equality rules.
+2. **Rewriting, case analysis and induction.** These are proposed for milestone 9, where the motive is forced or chosen from finitely many candidates. Rewriting comes first, because it would reach the most goals (9.5).
+3. **Search over N.** The tactic needs `N`. A wrapper that tries increasing values would return a minimal proof without the user choosing a bound. The evaluation harness's N loop is a prototype.
 4. **A written correctness proof.** Section 6.11 is an argument, not a proof; a careful write-up, or a Lean formalisation of the encoding, would back the soundness and completeness claims.
+
+### 9.5 Evaluation on real goals (milestone 7)
+
+Milestone 7 ran the tactic on 3,000 theorem statements of Lean core and `Std` (Tier A) and 3,000 goals from inside their proofs (Tier B). Each goal's H is the set of lemmas its real proof uses (the oracle H), N ≤ 10, under a 2.5 GB memory cap. `EVAL.md` has every table; this is a summary.
+
+| | Tier A | Tier B |
+| --- | --- | --- |
+| proved | 140 (4.7%) | 836 (27.9%) |
+| proved, among goals whose statement and H the compiler fully accepts | 92 of 857 (10.7%) | 765 of 1,015 (75.4%) |
+| median N of the proofs | 3 | 1 |
+| memory crash at the cap | 807 | 490 |
+| like-for-like `solve_by_elim` (same H) closes | 977 | 2,069 |
+
+- **Why goals fail.** The commonest reason, for 74.7% of unproved Tier B goals, is that the compiler rejects an H constant, almost always because a clause variable is applied to arguments. `congrArg` alone is rejected in 75.7% of those goals. These are the rewriting constants that elaborated `simp` proofs leave behind.
+- **What rewriting could reach.** At most 946 more Tier B goals have only rewriting constants as obstacles. Only 12 have only case-analysis or induction obstacles on data, and none has only case-split obstacles. This is an upper bound: definitional unfolding, instances and proof size can still block a goal.
+- **Against the baseline.** Like-for-like `solve_by_elim` also closes 96.3% of the Tier B goals `solve_by_sat` proves, about 80 times faster. Most of the 89 goals only `solve_by_sat` proves use a built-in `↔` or `∧` projection. The tactic's distinctive contributions are minimal proofs and certified "no proof with at most N nodes" answers.
+- **Hand reviews.** Where `solve_by_elim` wins, the obstacle is definitional unfolding, instances or a rejected constant, never proof size. Among goals the tactic should be able to prove and does not, the commonest cause is an instance argument: instances are dropped from H.
+
 
 ## 10. Changes from the original PDF draft
 
@@ -599,3 +661,8 @@ The first version of this specification was written before any code. Implementat
 | 8 | Open arguments are grounded from the model; representatives of proof-containing terms come from the replay | the original decoder could not finish a grounded but unforced argument |
 | 9 | `∃ n : Nat, n = 1` with `Eq.refl` is provable in 2 nodes (D7); D6 is the numeral limitation | the original expectation was wrong: the witness is forced to `1` |
 | 7.3 | Benchmark lemmas share the symbol `s` | needed to reproduce the original table |
+| 4.5 | Type templates are built from the preprocessed inferred type; the invariant is checked by `solve_by_sat.checkTemplates` | milestone 7: the raw type made the typing clause compare unnormalised with normalised types, excluding real proofs |
+| 8 | Premises are opened as synthetic opaque metavariables | milestone 7: a head that mentions its own premise let head unification assign the premise before its child |
+| 8 | The decode runs with `foApprox` and `ctxApprox` on, whoever calls it | milestone 7: a caller with every approximation off failed on a valid model |
+| 3 | `EncodeOptions.countOnly` | milestone 7: counting CNFs too large to build in memory |
+| 3 | `vm.overcommit_memory = 1` on the development machine | the intermittent "not enough memory" was the kernel refusing `lake`'s fork |

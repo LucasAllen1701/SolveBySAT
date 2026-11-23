@@ -1,0 +1,9 @@
+44 specs, 0 done, 44 to run
+crash(shard, oom) on scale:random:32:main:B/Nat.exists_testBit_of_ne_zero/1
+crash(shard, oom) on scale:random:32:main:B/Nat.lcm_div/28
+crash(shard, oom) on scale:near:4:main:B/Nat.lcm_div/28
+crash(shard, oom) on scale:near:8:main:B/Nat.lcm_div/28
+crash(shard, oom) on scale:near:16:main:B/Nat.lcm_div/28
+crash(shard, oom) on scale:near:32:main:B/Nat.lcm_div/28
+shard 0: done; 44 results; 682 s
+driver exit 0

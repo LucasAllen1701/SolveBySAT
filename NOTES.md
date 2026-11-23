@@ -2670,7 +2670,7 @@ It runs the driver with milestone 7's limits, then the `countOnly` sizes. Runs t
   `_probe.Nat.cast.congr.«2»(Int.gcd_comm)`. Milestone 7 found no proof ≤ 10.
 - **Every crash is the 2.5 GB cap,** at last N 3–10, with 9.7–26 M clauses at the last N. Groundness plus
   decomposition is 95–99% of them. Where milestone 7 has a CNF at the same N, the rules multiply it
-  5–17× (for example 0.87 M → 15.0 M at N = 6).
+  2.3–17× (0.87 M → 15.0 M at N = 6; 5.16 M → 11.8 M at N = 10).
 - **Controls, clauses at the original N:** 1,079 → 42,094 (39×), 3,234 → 39,282 (12×),
   246,708 → 2,981,513 (12×), 1,284,012 → 2,489,298 (1.9×). One control, proved at N = 6 in milestone 7
   with 8.05 M clauses, has 28.9 M with the rules and crashed at N = 4: the rules made it infeasible.

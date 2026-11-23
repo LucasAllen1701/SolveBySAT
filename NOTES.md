@@ -2082,6 +2082,10 @@ gives byte-identical files.
     has an `Eq` head. For those goals, "near" as decision 4 defines it is close to "random".
     Only goals with a specific predicate (`…Impl.WF`, `SPred.entails`, `List.Perm`, …) get a
     small, truly near pool.
+  - *Correction (24 November 2026, 7d-2, EVAL_PLAN §10.10 decision 1):* the count above is wrong.
+    `eval/scaling_goals.jsonl` gives **35** of the 50 goals with `c:Eq` in S (19 with S = {`c:Eq`}
+    alone, 16 with other symbols too). The 31 could not be traced to any field of the file; it was
+    not used in any computation, and nothing else in this section depends on it.
 - **Runs (decision 6).**
   - `specs_scaling.jsonl` has 11 specs per goal: `scale:none:0:<goal>`, and
     `scale:<mode>:<k>:<goal>` for k ∈ {2, 4, 8, 16, 32}.

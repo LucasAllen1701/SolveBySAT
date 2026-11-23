@@ -2,7 +2,7 @@
 
 Lucas Allen · 18 November 2026
 
-**Status: 7a, 7b, 7c and 7d-1 are done. Next: 7d-2 (section 10.10), then the scope-or-scale decision.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
+**Status: every stage is done (7a to 7d-2), and the scope-or-scale decision is taken (section 10.11). Next: the end of milestone 7, then milestone 8.** This plan covers open directions 1 and 2 of SPEC 9.4 as far as measurement goes: how much real Lean the class covers, and how CNF size behaves on typed problems. It does not change the encoder, except for an optional count-only mode (section 4.1).
 
 ## 1. Questions
 
@@ -537,3 +537,33 @@ Soundness is unaffected, because the typing clause only excludes models and ever
 9. **Close the record.** NOTES.md gets a section "Milestone 7: summary", ending with the Regression line (the 7d acceptance criterion). Nothing is rerun except the E6 counts.
 
 **Order.** 7d-2, then the owner's scope-or-scale decision (10.11), then the end of milestone 7: SPEC.md takes in the two decoder fixes, the type-template fix and the evaluation results.
+
+### 10.11 The scope-or-scale decision (24 November 2026)
+
+**7d-2 record.** 7d-2 is done (NOTES.md "7d-2" and "Milestone 7: summary"; EVAL.md "Reading the results"). Its counts were checked independently: EVAL.md regenerates byte-identically, and the R2 breakdown, the R6 exponents and E6 recompute from the data files. The reading of section 7:
+
+- **Rule 1 (scope first)** holds only in part. R2 is dominated by one reason (a rejected H constant, mostly `congrArg`), and E5 bounds a rewriting extension at 946 more Tier B goals. But Tier B's 27.9% is 7.9 points above the indicative 20%.
+- **Rule 2 (scale first):** its R6 condition holds. The median largest feasible k with near distractors is 12, and 4 for proofs of 5 or more nodes.
+- **Rule 3 (scale less urgent)** does not hold, except in T2.
+- **Rule 4 (value against baselines)** holds for Tier B.
+
+**Correction to 10.10.** "Typing acts only in T2" is inexact. Static typing also removes 2–3% of the clauses in S and T3; T2 is the only family where it matters much (E6).
+
+**Decision: scale first, with a cheap rewriting probe.**
+
+- **Why.** The owner leans towards scope, and the two are linked. A rewrite costs about d + 1 nodes and adds clauses mostly to groundness, and feasible k already collapses at N ≥ 5 (R6). So the goals that rewriting would unlock are the ones where memory runs out first.
+- **Milestone 8 is scale:** shrinking groundness and decomposition (SPEC 9.4, direction 1). None of its approaches has been tried, so it starts with a design note, before any implementation.
+- **The rewriting probe comes first in milestone 8 (8a).** It is cheap, and it tells the scale work what rewriting will need. It measures rewriting by first-order equality rules without changing the tactic:
+  - for each goal, generate the congruence and substitution rules for the symbols of its goal and H_main, specialised per symbol and argument position, as ordinary Lean lemmas, and pass them in H;
+  - measure how many of the goals whose E5 obstacles are all rewriting constants become provable within N ≤ 10 and the 2.5 GB cap, at what N and CNF size, and what the rules cost on goals already proved;
+  - pre-register its sample, rule set and limits before any run.
+- **Eliminators and rewriting in the tactic itself**, proposed as "milestone 8" in the claude.ai project's design note, become milestone 9; the note is now `M9_DESIGN.md` there. Their order follows E5 and the probe: rewriting first.
+
+**The end of milestone 7.**
+
+- SPEC.md takes in the two decoder fixes, the type-template fix, `countOnly` and a summary of the evaluation.
+- The code and the reports of `eval-m7` are merged into `main` by a true merge, so every commit that EVAL.md and NOTES.md cite stays reachable. The reports are EVAL.md, NOTES.md, EVAL_PLAN.md, CLAUDE.md, `eval/report.py`, `eval/merge.py` and the hand reviews in `eval/reviews/`.
+- The bulk data stays only on `eval-m7`, which is kept as an archive and tagged `m7-data`. That covers every run folder, the corpus and annotation files, the specs, the scaling data and the forest dumps.
+- EVAL.md regenerates on `m7-data`, not on `main`.
+
+**Order.** The end of milestone 7, then milestone 8: the probe (8a, `M8_PLAN.md`), the scale design, and its implementation.

@@ -10,8 +10,12 @@ name = "TestUtil"
 roots = ["Test.Util"]
 
 [[lean_lib]]
+name = "EvalLib"
+roots = ["Test.EvalCommon", "Test.EvalNamed"]
+
+[[lean_lib]]
 name = "LeanTests"
-roots = ["Test.M2", "Test.M3", "Test.M4Lean", "Test.M5Lean"]
+roots = ["Test.M2", "Test.M3", "Test.M4Lean", "Test.M5Lean", "Test.M7Lean"]
 
 [[lean_exe]]
 name = "test_m0"
@@ -32,4 +36,38 @@ root = "Test.M5"
 [[lean_exe]]
 name = "bench"
 root = "Test.Bench"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_corpus"
+root = "Test.EvalCorpus"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_run"
+root = "Test.EvalRun"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_numerals"
+root = "Test.EvalNumerals"
+supportInterpreter = true
+
+[[lean_lib]]
+name = "SynthLib"
+roots = ["Test.Synth", "Test.BenchForests"]
+
+[[lean_exe]]
+name = "test_countonly"
+root = "Test.CountOnly"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_scaling"
+root = "Test.EvalScaling"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "eval_pool"
+root = "Test.EvalPool"
 supportInterpreter = true

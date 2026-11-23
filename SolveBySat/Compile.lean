@@ -16,6 +16,18 @@ open Lean Meta
 
 /-! ## Preprocessing (SPEC §4.1) -/
 
+register_option solve_by_sat.checkTemplates : Bool := {
+  defValue := false
+  descr := "solve_by_sat (testing only): assert that every type template is built from a type \
+    that preprocessing leaves unchanged (EVAL_PLAN §10.7)"
+}
+
+/-- Remove every `mdata` node (the templates ignore metadata). -/
+def stripMData (e : Expr) : MetaM Expr :=
+  Core.transform e (pre := fun x => match x with
+    | .mdata _ y => return .visit y
+    | _ => return .continue)
+
 /-- Definitions unfolded by preprocessing, and nothing else. -/
 def unfoldedConsts : List Name := [``Not, ``Ne, ``GE.ge, ``GT.gt]
 
@@ -204,6 +216,14 @@ with de Bruijn `bvar:i` leaves, so closed types compare up to binder names. Anyt
 cannot be compiled (including a type that mentions a variable bound inside a term) gives
 `none`: unknown type, the candidate is kept. -/
 partial def compileType (ty : Expr) : CompileM (Option Term) := do
+  -- EVAL_PLAN §10.7 decision 2 (testing only): every type a template is built from must be
+  -- unchanged by preprocessing, so that it compares syntactically with the preprocessed terms
+  if solve_by_sat.checkTemplates.get (← getOptions) then
+    let p ← preprocess ty
+    let s ← stripMData ty
+    if p != s then
+      throwError "solve_by_sat: internal: a type template is built from a type that preprocessing \
+        changes: {ty} ⇒ {p}"
   try some <$> go ty catch _ => return none
 where
   go (e : Expr) : CompileM Term := do
@@ -227,16 +247,18 @@ where
         return .app sym args
 
 /-- Record the type template of a compiled template node: per position if non-ground,
-per term (with a closed representative when there is one) if ground. -/
+per term (with a closed representative when there is one) if ground. The inferred type is
+preprocessed (SPEC §4.1) before it becomes a template, like every other type: otherwise it
+would not compare syntactically with the preprocessed terms (EVAL_PLAN §10.7). -/
 def recordNode (t : Term) (e : Expr) (path : Array Nat) : CompileM Unit := do
   if t.isGround then
     unless (← get).groundTypes.contains t do
-      let ty ← compileType (← inferType e)
+      let ty ← compileType (← preprocess (← inferType e))
       modify fun s => { s with groundTypes := s.groundTypes.insert t ty, groundOrder := s.groundOrder.push t }
     unless e.hasFVar || (← get).groundExprs.contains t do
       modify fun s => { s with groundExprs := s.groundExprs.insert t e }
   else
-    let ty ← compileType (← inferType e)
+    let ty ← compileType (← preprocess (← inferType e))
     modify fun s => { s with posTypes := s.posTypes.push (path, ty) }
 
 /-- Compile an argument term of an atom (SPEC §4.4). Binders inside the term are opened

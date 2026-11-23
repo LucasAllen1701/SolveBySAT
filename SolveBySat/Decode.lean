@@ -162,7 +162,14 @@ def instantiateClause (C : Compiled) (n : SkelNode) : DecodeM (Expr × Expr × A
         | .static b =>
           modify fun s => { s with slotMVars := s.slotMVars.push ((a, b), mv) }
           vmap := vmap.insert b mv
-        | .prem j => prems := prems.set! j (some mv)
+        | .prem j =>
+          -- a premise is filled only by its child. The clause's head may mention the premise
+          -- (a proof inside a term, compiled to `⟨proof⟩`), and unifying it with the target
+          -- would otherwise assign the premise to the target's proof before the child is
+          -- replayed. As synthetic opaque, it is compared by proof irrelevance instead, which
+          -- still unifies its type. (Full run of 7b, `List.getLast_eq_head_reverse`.)
+          mv.mvarId!.setKind .syntheticOpaque
+          prems := prems.set! j (some mv)
         | .hyp => throwError "internal: a clause binder marked as a hypothesis"
     | .andLeft | .andRight =>
       let some (A, B) := binApp? ``And T | throwError "clause {cl.name}: {T} is not a conjunction"
@@ -172,7 +179,7 @@ def instantiateClause (C : Compiled) (n : SkelNode) : DecodeM (Expr × Expr × A
     | .iffMp j | .iffMpr j =>
       let some (A, B) := binApp? ``Iff T | throwError "clause {cl.name}: {T} is not an iff"
       let mp := st matches .iffMp _
-      let p ← mkFreshExprMVar (if mp then A else B)
+      let p ← mkFreshExprMVar (if mp then A else B) (kind := .syntheticOpaque)
       e := mkApp4 (mkConst (if mp then ``Iff.mp else ``Iff.mpr)) A B e p
       T := if mp then B else A
       prems := prems.set! j (some p)
@@ -367,8 +374,17 @@ def groundOpen (C : Compiled) (E : Encoding) (sk : Array SkelNode) (model : Arra
         throwError "grounding of level {v} at node {a} to {l} was rejected"
       progress := true
 
-/-- Decode a model into a proof of the preprocessed goal type. -/
-def decode (C : Compiled) (E : Encoding) (model : Array Bool) : MetaM Expr := do
+/-- Decode a model into a proof of the preprocessed goal type.
+
+The unifier runs with the approximations a tactic gets from the elaborator (`foApprox`,
+`ctxApprox`), whatever the caller's configuration. Without `ctxApprox`, a clause variable
+created under a hypothesis that a node introduced cannot be the value of a variable from
+outside that node, even when its own value will be in scope (and the encoder's scope
+clauses, SPEC §6.7, say it will). The decoder then failed on a satisfiable CNF when called
+from a bare `MetaM`, as the evaluation harness does, but not from the tactic. (Full run of
+7b, `Nat.pred_eq_self_iff`; see NOTES.md.) -/
+def decode (C : Compiled) (E : Encoding) (model : Array Bool) : MetaM Expr :=
+  withConfig (fun c => { c with foApprox := true, ctxApprox := true }) do
   let sk ← match readSkeleton C.forest E.vars model with
     | .ok sk => pure sk
     | .error e => throwError "solve_by_sat: decoder failed on a satisfiable CNF (bug): {e}"

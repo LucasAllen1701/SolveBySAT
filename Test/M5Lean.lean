@@ -113,6 +113,19 @@ Exists.intro 1 (Eq.refl 1) -/
 
 /-- error: solve_by_sat: no proof with at most 1 nodes exists in the class -/
 #guard_msgs in
+set_option solve_by_sat.nodeBounds false in
+set_option solve_by_sat.exclusivePairs false in
+example : ∃ n : Nat, n = 1 := by
+  solve_by_sat [Eq.refl] (nodes := 1)
+
+-- 8c-1: the same call with R1 on (M8_PLAN 3.4.3): the early exit, which says why with verbose
+/--
+info: solve_by_sat: early exit (node bounds): every proof has at least 2 nodes, more than N = 1
+---
+error: solve_by_sat: no proof with at most 1 nodes exists in the class
+-/
+#guard_msgs in
+set_option solve_by_sat.nodeBounds true in
 example : ∃ n : Nat, n = 1 := by
   solve_by_sat [Eq.refl] (nodes := 1)
 

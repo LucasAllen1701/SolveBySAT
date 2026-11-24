@@ -16,7 +16,9 @@ def main (args : List String) : IO UInt32 := do
   IO.FS.createDirAll outdir
   for l in [1, 5, 9] do
     for n in [5, 8, 12] do
-      for (cfg, o) in [("on", ({} : EncodeOptions)), ("off", EncodeOptions.allOff)] do
+      -- the milestone 8 flags pinned off (8c-1: the off-switch test compares with 8b's DIMACS)
+      for (cfg, o) in [("on", ({ nodeBounds := false, exclusivePairs := false } : EncodeOptions)),
+                       ("off", EncodeOptions.allOff)] do
         let P := table73 l
         let E := encode P n o
         if mode == "on" then M8Diag.analyze P n o E (fun _ _ => pure ())

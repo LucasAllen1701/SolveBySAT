@@ -1,0 +1,50 @@
+PASS off Test/M2.lean
+PASS off Test/M3.lean
+PASS off Test/M4Lean.lean
+PASS off Test/M5Lean.lean
+PASS off Test/M7Lean.lean
+PASS off Test/M8Probe.lean
+FAIL r1 Test/M2.lean
+Test/M2.lean:104:2: error: solve_by_sat: no proof with at most 3 nodes exists in the class
+Test/M2.lean:102:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+  error: solve_by_sat: no proof with at most 3 nodes exists in the class
+FAIL r1 Test/M3.lean
+Test/M3.lean:51:2: error: solve_by_sat: no proof with at most 2 nodes exists in the class
+Test/M3.lean:49:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+  error: solve_by_sat: no proof with at most 2 nodes exists in the class
+Test/M3.lean:56:2: error: solve_by_sat: no proof with at most 1 nodes exists in the class
+Test/M3.lean:54:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+PASS r1 Test/M4Lean.lean
+FAIL r1 Test/M5Lean.lean
+Test/M5Lean.lean:117:2: error: solve_by_sat: no proof with at most 1 nodes exists in the class
+Test/M5Lean.lean:115:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+  error: solve_by_sat: no proof with at most 1 nodes exists in the class
+PASS r1 Test/M7Lean.lean
+FAIL r1 Test/M8Probe.lean
+Test/M8Probe.lean:43:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+FAIL r1r2 Test/M2.lean
+Test/M2.lean:104:2: error: solve_by_sat: no proof with at most 3 nodes exists in the class
+Test/M2.lean:102:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+  error: solve_by_sat: no proof with at most 3 nodes exists in the class
+FAIL r1r2 Test/M3.lean
+Test/M3.lean:51:2: error: solve_by_sat: no proof with at most 2 nodes exists in the class
+Test/M3.lean:49:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+  error: solve_by_sat: no proof with at most 2 nodes exists in the class
+Test/M3.lean:56:2: error: solve_by_sat: no proof with at most 1 nodes exists in the class
+Test/M3.lean:54:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+PASS r1r2 Test/M4Lean.lean
+FAIL r1r2 Test/M5Lean.lean
+Test/M5Lean.lean:117:2: error: solve_by_sat: no proof with at most 1 nodes exists in the class
+Test/M5Lean.lean:115:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+  error: solve_by_sat: no proof with at most 1 nodes exists in the class
+PASS r1r2 Test/M7Lean.lean
+FAIL r1r2 Test/M8Probe.lean
+Test/M8Probe.lean:43:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
+M2.lean: 6 decoded proofs per setting
+M3.lean: 12 decoded proofs per setting
+M4Lean.lean: 7 decoded proofs per setting
+M5Lean.lean: 8 decoded proofs per setting
+M7Lean.lean: 0 decoded proofs per setting
+M8Probe.lean: 0 decoded proofs per setting
+FAIL Lean suite in three settings
+exit=1

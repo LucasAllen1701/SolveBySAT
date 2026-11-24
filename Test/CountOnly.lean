@@ -1,7 +1,8 @@
 /-
 Milestone 7c (EVAL_PLAN §4.1, §10.9 4.1 decision 1): `countOnly` must count exactly what a full
 encode produces. On every instance of the SPEC 7.3 table (the `bench` forests with 1, 5 and 9
-lemmas at N = 5, 8, 12; L1 at N = 5; D3 at N = 3), with all refinements on and with all off, a
+lemmas at N = 5, 8, 12; L1 at N = 5; D3 at N = 3), with all refinements on and with all off, and
+(8c-1) with R1, and with R1 and R2, on, a
 `countOnly` encode must equal a full encode in variables, in total clauses and in every
 family's clause count (same families, same order), and must store no clause.
 -/
@@ -31,7 +32,10 @@ def main : IO UInt32 := do
   IO.println "| instance | N | config | vars (full = count) | clauses (full = count) | families equal | stored (count) |"
   IO.println "| --- | --- | --- | --- | --- | --- | --- |"
   for (label, P, N) in cases do
-    for (cfg, o) in [("all on", ({} : EncodeOptions)), ("all off", EncodeOptions.allOff)] do
+    for (cfg, o) in [("all on", ({} : EncodeOptions)), ("all off", EncodeOptions.allOff),
+                     -- 8c-1 (M8_PLAN 4.4): the milestone 8 flags on
+                     ("R1", ({ nodeBounds := true, exclusivePairs := false } : EncodeOptions)),
+                     ("R1 R2", ({ nodeBounds := true, exclusivePairs := true } : EncodeOptions))] do
       let full := encode P N o
       let cnt := encode P N { o with countOnly := true }
       let okV := full.cnf.nVars == cnt.cnf.nVars
@@ -43,5 +47,5 @@ def main : IO UInt32 := do
         fails := fails + 1
         IO.println s!"FAIL {label} N = {N} {cfg}: full {full.cnf.nVars} vars [{fmtFams full.cnf.familyCounts}], count {cnt.cnf.nVars} vars [{fmtFams cnt.cnf.familyCounts}]"
       IO.println s!"| {label} | {N} | {cfg} | {full.cnf.nVars} = {cnt.cnf.nVars} | {full.cnf.clauses.size} = {cnt.cnf.numClauses} | {if okF then s!"yes ({full.cnf.familyCounts.size})" else "NO"} | {cnt.cnf.clauses.size} |"
-  IO.println s!"countOnly: {cases.size * 2 - fails} passed, {fails} failed"
+  IO.println s!"countOnly: {cases.size * 4 - fails} passed, {fails} failed"
   return if fails == 0 then 0 else 1

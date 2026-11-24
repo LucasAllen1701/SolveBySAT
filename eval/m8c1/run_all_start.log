@@ -1,0 +1,40 @@
+Build completed successfully (69 jobs).
+== test_m0
+solver: /home/tom/.elan/toolchains/leanprover--lean4---v4.36.0/bin/cadical
+  pigeonhole 7→6: 42 vars, 133 clauses, UNSAT [104 ms]
+  random CNFs: 300 instances, 110 SAT / 190 UNSAT
+  gadgets: 300 eq/lt/amo/ladder-amo instances checked exhaustively
+M0: 902 passed, 0 failed
+== test_m1
+solver: /home/tom/.elan/toolchains/leanprover--lean4---v4.36.0/bin/cadical; refinements: all
+PASS T1 le_trans chain: min N = (some 5) (expected (some 5)) fun x y z w h1 h2 h3 => le_trans(le_trans(h1, h2), h3)  [562 ms, last CNF 1237 vars 14283 clauses]
+PASS T2 out-of-scope hypothesis: min N = none (expected none)   [534 ms, last CNF 140 vars 706 clauses]
+PASS T2b with A available: min N = (some 4) (expected (some 4)) m(fun ha => bb(ha), a)  [323 ms, last CNF 69 vars 338 clauses]
+PASS T3 eigenvariable escape: min N = none (expected none)   [496 ms, last CNF 422 vars 2722 clauses]
+PASS T3b forall y, y = y: min N = (some 2) (expected (some 2)) ex(fun y => refl)  [180 ms, last CNF 43 vars 155 clauses]
+PASS T4 undetermined argument: min N = none (expected none)   [532 ms, last CNF 248 vars 784 clauses]
+PASS T4b determined argument: min N = (some 2) (expected (some 2)) h(q)  [163 ms, last CNF 45 vars 85 clauses]
+PASS T5 occurs check: min N = none (expected none)   [542 ms, last CNF 695 vars 3985 clauses]
+PASS T6 jointly inconsistent: min N = none (expected none)   [630 ms, last CNF 1189 vars 9348 clauses]
+PASS T6b consistent: min N = (some 4) (expected (some 4)) k(f1, f2, f3)  [387 ms, last CNF 517 vars 3094 clauses]
+PASS T7 nested intro: min N = (some 3) (expected (some 3)) fun a => m(fun y hp => pq(hp))  [325 ms, last CNF 303 vars 1691 clauses]
+PASS T8 local hypothesis reused: min N = (some 3) (expected (some 3)) fun o h0 hf => hf(hf(h0))  [326 ms, last CNF 786 vars 3425 clauses]
+PASS T9 outer instance of a re-introduced hypothesis: min N = (some 6) (expected (some 6)) L(fun hP => r1(L(fun hP => r2(hP, hP))))  [598 ms, last CNF 296 vars 2209 clauses]
+PASS CNF sizes equal the prototype's for T1-T9 at N = 1..6 (78 instances, prototype rank width, all refinements off)
+  T1 at N=5 (prototype rank width): { W := 16, SB := 1, IB := 5, RB := 5, pairs := 0, rigid := 0, ground := 0, typeRigid := 0, typing := 0 }
+  families: #[(1 node assignment, 96), (2 tree shape, 204), (3 context (local hypotheses, ancestors), 155), (4 matching, 3840), (6 links (environment copies), 7680), (7 eigenvariables, occurs check, scope, 380), (8 groundness, 9915)]
+differential: 7500 comparisons, 2551 provable instances, 0 mismatches, min-size histogram [(1, 389), (2, 117), (3, 39), (4, 10), (5, 1)], 167 forests with min size ≥ 2 [178s]
+PASS differential (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+PASS mutation 'scope clauses of 6.7 off': mismatches found, e.g. [seed 460 N 4 (ref false, sat true), seed 774 N 2 (ref false, sat true), seed 1347 N 5 (ref false, sat true)]
+PASS mutation 'occurs check off': mismatches found, e.g. [seed 1444 N 2 (ref false, sat true), seed 1242 N 2 (ref false, sat true)]
+differential with binders: 7500 comparisons, 2346 provable instances, 0 mismatches, min-size histogram [(1, 388), (2, 77), (3, 27), (4, 6), (5, 5)], 115 forests with min size ≥ 2, 770 of 1500 forests contain a bound variable [232s]
+PASS differential with binders (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+PASS mutation 'open bit off' (forests with binders): mismatches found, e.g. [seed 1472 N 2 (ref false, sat true), seed 269 N 5 (ref false, sat true), seed 26 N 2 (ref false, sat true)]
+M1: 19 passed, 0 failed
+== test_m4
+PASS N = 1: 13 objects, each label allocated once and cached with width W = 11; objects per kind [(term slot, 4), (level slot, 2), (rigid term, 1), (rigid level, 1), (ground term, 2), (ground level, 2), (type template, 1)]; 4 typing clauses
+PASS N = 2: 22 objects, each label allocated once and cached with width W = 12; objects per kind [(term slot, 8), (level slot, 4), (rigid term, 2), (rigid level, 2), (ground term, 2), (ground level, 2), (type template, 2)]; 12 typing clauses
+PASS N = 3: 31 objects, each label allocated once and cached with width W = 15; objects per kind [(term slot, 12), (level slot, 6), (rigid term, 3), (rigid level, 3), (ground term, 2), (ground level, 2), (type template, 3)]; 24 typing clauses
+PASS the unit forest is satisfiable at N = 1
+M4 unit: 4 passed, 0 failed
+== test_m5

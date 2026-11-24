@@ -115,6 +115,17 @@ def parseSpec (names : Std.HashMap String Name) (j : Json) : Except String Spec 
            probe := (j.getObjValAs? Bool "probe").toOption.getD false,
            probeGroup := (j.getObjValAs? String "probe_group").toOption.getD "" }
 
+/-- 8c-1 (M8_PLAN 4.4): the milestone 8 flags of a run, from the environment variable
+`SOLVE_BY_SAT_EVAL_FLAGS`, a comma list of `nodeBounds` and `exclusivePairs`. Unset or empty:
+both off, whatever `EncodeOptions`' defaults are, so the milestone 7 and 8a harness keeps
+building exactly the CNFs it built. -/
+def evalFlags : IO (List String) := do
+  let s := (← IO.getEnv "SOLVE_BY_SAT_EVAL_FLAGS").getD ""
+  return (s.splitOn ",").filter (· != "")
+
+def withEvalFlags (fl : List String) (o : EncodeOptions) : EncodeOptions :=
+  { o with nodeBounds := fl.contains "nodeBounds", exclusivePairs := fl.contains "exclusivePairs" }
+
 /-- The closed goal type and its binder count (the Tier B context). -/
 def goalOf (s : Spec) : MetaM (Expr × Nat) := do
   let some ci := (← getEnv).find? s.thm | throwError "unknown {s.thm}"
@@ -201,7 +212,9 @@ def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat 
   let C ← try compile goal acc
     catch e => return (Json.mkObj (base ++ [("outcome", jStr "compile_error"), ("reason", jStr (← msgOf e))]), false)
   let C := if opts.contains "forgettypes" then { C with forest := C.forest.forgetTypes } else C
-  let eopts : EncodeOptions := { staticTyping := !opts.contains "nostatic" }
+  let flags ← evalFlags
+  let eopts : EncodeOptions := withEvalFlags flags { staticTyping := !opts.contains "nostatic" }
+  let base := if flags.isEmpty then base else base ++ [("enc_flags", toJson flags)]
   -- 3. N = 1 … Nmax
   let mut log := #[]
   for N in [1:nmax+1] do
@@ -214,6 +227,18 @@ def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat 
     let E := encode C.forest N eopts
     let nCl := E.cnf.clauses.size   -- forces the encoding
     let encMs ← msSince te
+    -- R1's early exit (8c-1): s(root) > N, so no proof with N nodes; nothing is solved
+    if E.info.earlyExit then
+      log := log.push (Json.mkObj [("N", toJson N), ("vars", toJson E.cnf.nVars), ("clauses", toJson nCl),
+        ("encode_ms", toJson encMs), ("solve_s", toJson (0.0 : Float)), ("solver_peak_mb", toJson (0 : Nat)),
+        ("result", jStr "early_exit"), ("root_size", toJson E.info.rootSize)])
+      if N == nmax then
+        return (Json.mkObj (base ++ [("outcome", jStr "no_proof_le_Nmax"), ("N", toJson N),
+          ("vars", toJson E.cnf.nVars), ("clauses", toJson nCl),
+          ("families", Json.mkObj (E.cnf.familyCounts.toList.map fun (f, k) => (f, Json.num k))),
+          ("encode_ms", toJson encMs), ("solve_s", toJson (0.0 : Float)), ("solver_peak_mb", toJson (0 : Nat)),
+          ("per_N", Json.arr log), ("loop_ms", toJson (← msSince t0))]), false)
+      continue
     let remaining := (loopSeconds * 1000 - (← msSince t0)) / 1000
     if remaining == 0 then
       return (Json.mkObj (base ++ [("outcome", jStr "timeout"), ("N", toJson (N)), ("timeout_kind", jStr "loop"),
@@ -355,7 +380,47 @@ def readKeys (path : System.FilePath) : IO (Std.HashSet String) := do
       if let .ok k := j.getObjValAs? String "key" then ks := ks.insert k
   return ks
 
+/-- 8c-1 (M8_PLAN 4.4): a reference run's answers per goal: the N where it was UNSAT (per-N rows
+`unsat`; for a crash record, every N below `last_N`) and the N of its proof, if any. -/
+def loadReference (path : System.FilePath) : IO (Std.HashMap String (Array Nat × Option Nat)) := do
+  let mut m := {}
+  for l in (← IO.FS.readFile path).splitOn "\n" do
+    let .ok j := Json.parse l | continue
+    let .ok k := j.getObjValAs? String "key" | continue
+    let outcome := (j.getObjValAs? String "outcome").toOption.getD ""
+    let mut unsat : Array Nat := #[]
+    if outcome == "crash" then
+      unsat := (List.range ((j.getObjValAs? Nat "last_N").toOption.getD 1)).toArray.filter (· ≥ 1)
+    for r in (j.getObjValAs? (Array Json) "per_N").toOption.getD #[] do
+      if (r.getObjValAs? String "result").toOption == some "unsat" then
+        if let .ok n := r.getObjValAs? Nat "N" then unsat := unsat.push n
+    let proved := if outcome == "proved" then (j.getObjValAs? Nat "N").toOption else none
+    m := m.insert k (unsat, proved)
+  return m
+
+/-- The exactness stop rules of M8_PLAN 4.4 for one result against the reference: a proof at an N
+where the reference was UNSAT; UNSAT or the early exit at the N of the reference's proof; both
+proved at different N. -/
+def exactnessStop (ref : Array Nat × Option Nat) (sat : Json) : Option String := Id.run do
+  let (unsat, proved) := ref
+  let outcome := (sat.getObjValAs? String "outcome").toOption.getD ""
+  let nFound := if outcome == "proved" then (sat.getObjValAs? Nat "N").toOption else none
+  if let some n := nFound then
+    if unsat.contains n then return some s!"a proof at N = {n}, where the reference run was UNSAT"
+    if let some p := proved then
+      if p != n then return some s!"a proof at N = {n}, the reference run's proof is at N = {p}"
+  for r in (sat.getObjValAs? (Array Json) "per_N").toOption.getD #[] do
+    let res := (r.getObjValAs? String "result").toOption.getD ""
+    let n := (r.getObjValAs? Nat "N").toOption.getD 0
+    if (res == "unsat" || res == "early_exit") && proved == some n then
+      return some s!"{res} at N = {n}, where the reference run found a proof"
+  return none
+
 unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UInt32 := do
+  -- 8c-1: the reference run for the exactness stop rules of M8_PLAN 4.4, if any
+  let reference : Option (Std.HashMap String (Array Nat × Option Nat)) ← match (← IO.getEnv "SOLVE_BY_SAT_EVAL_COMPARE") with
+    | some p => if p.isEmpty then pure none else some <$> loadReference p
+    | none => pure none
   let lines := (← IO.FS.readFile specsPath).splitOn "\n" |>.filter (· != "")
   let js ← lines.mapM fun l => IO.ofExcept (Json.parse l)
   let named := js.any fun j => j.getObjValD "run" == jStr "named"
@@ -444,6 +509,12 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
       let stop := if s.probe && s.probeGroup.startsWith "rewrite" && outcome == "proved" &&
           ((sat.getObjValAs? (Array String) "probe_extra_used").toOption.getD #[]).isEmpty then
           stop <|> some "a rewriting goal proved with its H_main constants only (M8_PLAN 2.5)" else stop
+      -- 8c-1 (M8_PLAN 4.4): the exactness stop rules against the reference run
+      let exact : Option String := reference.bind fun m =>
+        match m.get? s.key with
+        | some ref => (exactnessStop ref sat).map ("exactness (M8_PLAN 4.4): " ++ ·)
+        | none => some "exactness (M8_PLAN 4.4): the goal is not in the reference run"
+      let stop := stop <|> exact
       let j := (Json.mkObj head).mergeObj sat |>.mergeObj bl |>.mergeObj scal |>.mergeObj
         (Json.mkObj ([("total_ms", Json.num (← msSince t0)),
                      ("rss_mb", Json.num rss), ("hwm_mb", Json.num hwm)] ++
@@ -485,7 +556,10 @@ unsafe def runSizes (specsPath results started : System.FilePath) : IO UInt32 :=
       for c in H do
         try discard <| compile goal #[c]; acc := acc.push c catch _ => pure ()
       let C ← compile goal acc
-      let E := encode C.forest s.nmax { countOnly := true }
+      let flags ← evalFlags
+      let E := encode C.forest s.nmax (withEvalFlags flags { countOnly := true })
+      let extra := if flags.isEmpty then extra else extra ++ [("enc_flags", toJson flags),
+        ("early_exit", toJson E.info.earlyExit), ("gp_dead", toJson E.info.gpDead), ("cl_dead", toJson E.info.clDead)]
       return Json.mkObj ([("N", toJson s.nmax), ("vars", toJson E.cnf.nVars), ("clauses", toJson E.cnf.numClauses),
         ("families", Json.mkObj (E.cnf.familyCounts.toList.map fun (f, k) => (f, Json.num k))),
         ("H_accepted", toJson acc.size)] ++ extra)
@@ -544,16 +618,66 @@ unsafe def specsEnv (specsPath : System.FilePath) : IO (Environment × Array Spe
   let specs ← js.mapM fun j => IO.ofExcept (parseSpec names j)
   return (env, specs.toArray)
 
-/-- M1 to M4 at node bound `N` with `countOnly`: one line per finished section, so a point that
-runs out of memory keeps the sections it completed. -/
-unsafe def runDiag (specsPath results started : System.FilePath) (N : Nat) : IO UInt32 := do
+/-- 8c-1 (M8_PLAN 4.4): the three settings of the size measurements, with `countOnly`: both
+milestone 8 flags off, R1 on, R1 and R2 on; every other option at its default. -/
+def settingOpts : String → Option EncodeOptions
+  | "off" => some { countOnly := true, nodeBounds := false, exclusivePairs := false }
+  | "r1" => some { countOnly := true, nodeBounds := true, exclusivePairs := false }
+  | "r1r2" => some { countOnly := true, nodeBounds := true, exclusivePairs := true }
+  | _ => none
+
+/-- 8c-1 (M8_PLAN 4.4): `countOnly` sizes per family at node bound `N` in each setting. One line
+per (point, setting), keyed `<point>|<setting>`; a marker goes to `started` before each, so a
+wrapper can tell which one a crash hit. The forest is built once per point. -/
+unsafe def runSizes8c (specsPath results started : System.FilePath) (N : Nat) (settings : List String) :
+    IO UInt32 := do
   let (env, specs) ← specsEnv specsPath
   let done ← readKeys results
+  for s in specs do
+    let todo := settings.filter fun st => !done.contains s!"{s.key}|{st}"
+    if todo.isEmpty then continue
+    appendLine started (Json.mkObj [("key", jStr s!"{s.key}|{todo.head!}"), ("phase", jStr "forest")]).compress
+    let tf ← IO.monoMsNow
+    let (P, _) ← runMeta env (specForest s)
+    let forestMs ← msSince tf
+    for st in todo do
+      let some opts := settingOpts st | IO.eprintln s!"unknown setting {st}"; return 2
+      appendLine started (Json.mkObj [("key", jStr s!"{s.key}|{st}")]).compress
+      let t0 ← IO.monoMsNow
+      let E := encode P N opts
+      let n := E.cnf.numClauses
+      let ms ← msSince t0
+      let (_, hwm) ← memMB
+      let i := E.info
+      -- R1's excluded pairs from the bounds themselves (also at the early exit, where none is encoded)
+      let (gx, cx) := if opts.nodeBounds then
+          let B := opts.bounds P
+          ((List.range N).foldl (fun n a => n + ((List.range P.goals.size).filter (!B.gpLive N a ·)).length) 0,
+           (List.range N).foldl (fun n a => n + ((List.range P.clauses.size).filter (!B.clLive N a ·)).length) 0)
+        else (0, 0)
+      appendLine results (Json.mkObj [("key", jStr s!"{s.key}|{st}"), ("point", jStr s.key), ("setting", jStr st),
+        ("status", jStr "ok"), ("N", toJson N), ("vars", toJson E.cnf.nVars), ("clauses", toJson n),
+        ("families", Json.mkObj (E.cnf.familyCounts.toList.map fun (f, k) => (f, toJson k))),
+        ("early_exit", toJson i.earlyExit), ("root_size", toJson i.rootSize), ("gp_dead", toJson i.gpDead),
+        ("cl_dead", toJson i.clDead), ("gp_excluded", toJson gx), ("cl_excluded", toJson cx),
+        ("exclusive_skipped", toJson i.exclusiveSkipped),
+        ("gp_pairs", toJson (N * P.goals.size)), ("cl_pairs", toJson (N * P.clauses.size)),
+        ("W", toJson i.W), ("IB", toJson i.IB), ("RB", toJson i.RB), ("rigid", toJson i.rigid),
+        ("type_rigid", toJson i.typeRigid), ("full_pairs", toJson i.pairs),
+        ("encode_ms", toJson ms), ("forest_ms", toJson forestMs), ("hwm_mb", toJson hwm)]).compress
+  return 0
+
+/-- M1 to M4 at node bound `N` with `countOnly`: one line per finished section, so a point that
+runs out of memory keeps the sections it completed. -/
+unsafe def runDiag (specsPath results started : System.FilePath) (N : Nat) (setting : String := "off") :
+    IO UInt32 := do
+  let (env, specs) ← specsEnv specsPath
+  let done ← readKeys results
+  let some opts := settingOpts setting | IO.eprintln s!"unknown setting {setting}"; return 2
   for s in specs.filter (!done.contains ·.key) do
     appendLine started (Json.mkObj [("key", jStr s.key)]).compress
     let t0 ← IO.monoMsNow
     let (P, _) ← runMeta env (specForest s)
-    let opts : EncodeOptions := { countOnly := true }
     let E := encode P N opts
     let emit := fun (sec : String) (j : Json) => do
       let (_, hwm) ← memMB
@@ -577,7 +701,8 @@ unsafe def runDiagModels (specsPath results : System.FilePath) : IO UInt32 := do
     let r ← runMeta env do
       let (P, C) ← specForest s
       let (goal, _) ← goalOf s
-      let E := encode P s.nmax {}
+      -- the milestone 8 flags pinned off: the model check is of proofs found without R1
+      let E := encode P s.nmax { nodeBounds := false, exclusivePairs := false }
       let (res, wall, _) ← solveLimited E.cnf solverSeconds
       match res with
       | .sat model =>
@@ -588,7 +713,7 @@ unsafe def runDiagModels (specsPath results : System.FilePath) : IO UInt32 := do
             if t.hasMVar then pure "decoded term has metavariables"
             else if let some err ← kernelCheck goal t then pure s!"kernel: {err}" else pure "ok"
           | .error m => pure m
-        match M8Diag.models P s.nmax {} E model with
+        match M8Diag.models P s.nmax { nodeBounds := false, exclusivePairs := false } E model with
         | .ok j => return j.mergeObj (Json.mkObj [("result", jStr "sat"), ("proof", jStr proof), ("solve_s", toJson wall)])
         | .error m => return Json.mkObj [("result", jStr "sat"), ("proof", jStr proof), ("error", jStr m)]
       | .unsat => return Json.mkObj [("result", jStr "unsat")]
@@ -616,14 +741,19 @@ unsafe def runDimacs (specsPath outdir : System.FilePath) (mode : String) : IO U
     match ← (runMeta env (specForest s)).toBaseIO with
     | .error e => IO.FS.writeFile (outdir / s!"{i}.rejected") s!"{e}\n"
     | .ok (P, _) =>
-      let E := encode P s.nmax {}
-      if mode == "on" then M8Diag.analyze P s.nmax {} E (fun _ _ => pure ())
+      -- the milestone 8 flags pinned off (8c-1: the off-switch test compares with 8b's DIMACS)
+      let o : EncodeOptions := { nodeBounds := false, exclusivePairs := false }
+      let E := encode P s.nmax o
+      if mode == "on" then M8Diag.analyze P s.nmax o E (fun _ _ => pure ())
       writeDimacs E.cnf (outdir / s!"{i}.cnf")
   return 0
 
 unsafe def main (args : List String) : IO UInt32 := do
   match args with
   | ["diag", specs, results, started, n] => runDiag specs results started n.toNat!
+  | ["diag", specs, results, started, n, setting] => runDiag specs results started n.toNat! setting
+  | ["sizes8c", specs, results, started, n, settings] =>
+    runSizes8c specs results started n.toNat! (settings.splitOn ",")
   | ["diag-models", specs, results] => runDiagModels specs results
   | ["dimacs", specs, outdir, mode] => runDimacs specs outdir mode
   | ["probe-rules", specs, results] => runProbeRules specs results

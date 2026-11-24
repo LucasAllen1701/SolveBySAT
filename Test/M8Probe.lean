@@ -36,12 +36,19 @@ example : ∀ a b : Nat, a = b → f a = f b := by solve_by_sat_probe [] (nodes 
 
 /-! ## P2 -/
 
+-- the term printed below is the one the milestone 8 flags off find; with R1 the CNF differs and
+-- another 5-node proof can come first (8c-1), so P2 is pinned, and the example after the print
+-- proves it in whatever setting the suite runs
+set_option solve_by_sat.nodeBounds false in
+set_option solve_by_sat.exclusivePairs false in
 theorem P2 (x y : Nat) (h : x = y) : P (f x) → P (f y) := by solve_by_sat_probe [] (nodes := 5)
 
 /-- info: theorem P2 : ∀ (x y : Nat), x = y → P (f x) → P (f y) :=
 fun x y h a => _probe.P.subst.«0» (f y) (f x) (_probe.f.congr.«0» y x (Eq.symm h)) a -/
 #guard_msgs in
 #print P2
+
+example (x y : Nat) (h : x = y) : P (f x) → P (f y) := by solve_by_sat_probe [] (nodes := 5)
 
 /-- error: solve_by_sat: no proof with at most 4 nodes exists in the class -/
 #guard_msgs in

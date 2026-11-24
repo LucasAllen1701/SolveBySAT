@@ -55,13 +55,33 @@ structure EncodeOptions where
   EVAL_PLAN §4.1 and §10.9). The encoding is built exactly as otherwise; the resulting
   `cnf.clauses` is empty, so it cannot be solved. Only the measurement harness sets it. -/
   countOnly : Bool := false
+  -- Refinements of milestone 8 (M8_PLAN section 3). Exact reductions, each a flag.
+  /-- R1, node–clause bounds (M8_PLAN 3.4): from the least depth d(g) of a goal position
+  (with the scope term e(c) of a local clause) and its least proof size s(g), `gp(α, g)` and
+  `cl(α, c)` are false in every model unless d ≤ α and α + s ≤ N. Those literals get unit
+  clauses and are folded as constant false; their objects, labels and clauses are never built.
+  If s(root) > N the CNF is the empty clause (the early exit). -/
+  nodeBounds : Bool := false
+  /-- R2, exclusive pairs (M8_PLAN 3.5): no decomposition clauses and no pair-pruning clause for
+  two objects at the same node whose activation literals are two different members of one
+  at-most-one group (`cl(α, ·)` or `gp(α, ·)`): they are never active together. -/
+  exclusivePairs : Bool := false
+  /-- The scope term e(c) of R1. Switched off only by the mutation check (it only weakens the
+  bounds). -/
+  boundsScope : Bool := true
+  /-- Mutation check only: R1's size bound tightened by one (`α + s ≤ N − 1`), which is unsound. -/
+  boundsTight : Bool := false
+  /-- Mutation check only: R2 also applied to a goal object and a head object at the same node
+  (`gp(α, g)` with `cl(α, c)`), which can be active together; unsound. -/
+  exclusiveMutant : Bool := false
 
 /-- A named refinement configuration, for testing each refinement on its own: `all`
-(the default), `none`, or exactly one of `symmetry`, `pair`, `candidate`, `frame`, `ladder`
-on and the others off. -/
+(the default), `none`, or exactly one of `symmetry`, `pair`, `candidate`, `frame`, `ladder`,
+`bounds`, `exclusive` on and the others off. -/
 def EncodeOptions.config (name : String) (o : EncodeOptions := {}) : Option EncodeOptions :=
   let off := { o with symmetry := false, pairPruning := false, candidatePruning := false,
-                      framePruning := false, ladderAmo := false }
+                      framePruning := false, ladderAmo := false, nodeBounds := false,
+                      exclusivePairs := false }
   match name with
   | "all" => some o
   | "none" => some off
@@ -70,12 +90,108 @@ def EncodeOptions.config (name : String) (o : EncodeOptions := {}) : Option Enco
   | "candidate" => some { off with candidatePruning := true }
   | "frame" => some { off with framePruning := true }
   | "ladder" => some { off with ladderAmo := true }
+  | "bounds" => some { off with nodeBounds := true }
+  | "exclusive" => some { off with exclusivePairs := true }
+  -- milestone 8 (M8_PLAN 4.4): every other option as given, the milestone 8 flags set
+  | "m8off" => some { o with nodeBounds := false, exclusivePairs := false }
+  | "r1" => some { o with nodeBounds := true, exclusivePairs := false }
+  | "r1r2" => some { o with nodeBounds := true, exclusivePairs := true }
   | _ => none
 
-/-- All milestone 6 refinements off (the milestone 5 encoding). -/
+/-- All refinements off (the milestone 5 encoding): those of milestone 6 and of milestone 8. -/
 def EncodeOptions.allOff (o : EncodeOptions := {}) : EncodeOptions :=
   { o with symmetry := false, pairPruning := false, candidatePruning := false,
-           framePruning := false, ladderAmo := false }
+           framePruning := false, ladderAmo := false, nodeBounds := false, exclusivePairs := false }
+
+/-! ## R1: least depth and least size (M8_PLAN 3.4.1) -/
+
+/-- `c ▷ g`: clause `c` passes the static tests of 6.4 (and 6.9's data filter) for goal position
+`g`; a built-in clause matches only the goal position that owns it (6.3). -/
+def Forest.canMatch (P : Forest) (dataFilter : Bool) (g c : Nat) : Bool :=
+  let G := P.goals[g]!
+  let C := P.clauses[c]!
+  !(dataFilter && G.dataVar.isSome != C.dataVal.isSome) && G.tgt.symKey == C.head.symKey &&
+  (!C.builtin || C.localOf == some g)
+
+/-- The fixpoints of R1. `none` is infinity. -/
+structure NodeBounds where
+  /-- Least depth of a node solving goal position `g`. -/
+  d : Array (Option Nat)
+  /-- Least number of nodes of a subtree solving `g`. -/
+  s : Array (Option Nat)
+  /-- Least number of nodes of a subtree applying clause `c`: 1 + Σ s(p) over its premises. -/
+  cs : Array (Option Nat)
+  /-- Least depth at which clause `c` can be applied: min over `g` with `c ▷ g` of
+  max(d(g), e(c)), where e(c) = d(g₀) for a clause local to g₀ and 0 for a global clause. -/
+  cd : Array (Option Nat)
+  deriving Inhabited
+
+namespace NodeBounds
+
+private def oLt : Option Nat → Option Nat → Bool
+  | some x, some y => x < y
+  | some _, none => true
+  | _, _ => false
+
+private def oMax : Option Nat → Option Nat → Option Nat
+  | some x, some y => some (max x y)
+  | _, _ => none
+
+/-- Compute d, s, cs and cd (M8_PLAN 3.4.1). `scope := false` drops e(c) (mutation check). -/
+def compute (P : Forest) (dataFilter : Bool := true) (scope : Bool := true) : NodeBounds := Id.run do
+  let G := P.goals.size
+  let C := P.clauses.size
+  let mut matchG : Array (Array Nat) := Array.replicate C #[]
+  for c in [0:C] do
+    for g in [0:G] do
+      if P.canMatch dataFilter g c then matchG := matchG.modify c (·.push g)
+  -- least depth: a shortest-path fixpoint from infinity, the root at 0
+  let mut d : Array (Option Nat) := (Array.range G).map fun g => if g == 0 then some 0 else none
+  let e := fun (d : Array (Option Nat)) (c : Nat) => match P.clauses[c]!.localOf with
+    | some g₀ => if scope then d[g₀]! else some 0
+    | none => some 0
+  let mut ch := true
+  while ch do
+    ch := false
+    for c in [0:C] do
+      let base := matchG[c]!.foldl (fun m g => let v := oMax d[g]! (e d c); if oLt v m then v else m) none
+      let some b := base | continue
+      for k in P.clauses[c]!.prems ++ P.clauses[c]!.dataPos.map (·.2) do
+        if oLt (some (b + 1)) d[k]! then d := d.set! k (some (b + 1)); ch := true
+  let cd := (Array.range C).map fun c =>
+    matchG[c]!.foldl (fun m g => let v := oMax d[g]! (e d c); if oLt v m then v else m) none
+  -- least sizes: a least fixpoint by relaxation from infinity (data positions count 0)
+  let mut s : Array (Option Nat) := Array.replicate G none
+  let mut cs : Array (Option Nat) := Array.replicate C none
+  ch := true
+  while ch do
+    ch := false
+    for c in [0:C] do
+      let v := P.clauses[c]!.prems.foldl (fun acc p => match acc, s[p]! with
+        | some x, some y => some (x + y)
+        | _, _ => none) (some 1)
+      if oLt v cs[c]! then cs := cs.set! c v; ch := true
+      for g in matchG[c]! do
+        if oLt cs[c]! s[g]! then s := s.set! g cs[c]!; ch := true
+  return { d, s, cs, cd }
+
+/-- `gp(α, g)` is possible: d(g) ≤ α and α + s(g) ≤ N (with `tight`, ≤ N − 1: mutation only). -/
+def gpLive (B : NodeBounds) (N α g : Nat) (tight : Bool := false) : Bool :=
+  match B.d[g]!, B.s[g]! with
+  | some dg, some sg => dg ≤ α && α + sg + (if tight then 1 else 0) ≤ N
+  | _, _ => false
+
+/-- `cl(α, c)` is possible: some g with c ▷ g has max(d(g), e(c)) ≤ α, and α + cs(c) ≤ N. -/
+def clLive (B : NodeBounds) (N α c : Nat) (tight : Bool := false) : Bool :=
+  match B.cd[c]!, B.cs[c]! with
+  | some dc, some sc => dc ≤ α && α + sc + (if tight then 1 else 0) ≤ N
+  | _, _ => false
+
+end NodeBounds
+
+/-- R1's bounds under the options (scope term, data filter). -/
+def EncodeOptions.bounds (o : EncodeOptions) (P : Forest) : NodeBounds :=
+  NodeBounds.compute P o.dataFilter o.boundsScope
 
 inductive Side where
   | goal
@@ -139,6 +255,15 @@ structure EncodeInfo where
   typeRigid : Nat := 0
   /-- Typing clauses emitted (6.8). -/
   typing : Nat := 0
+  /-- R1: s(root) > N, so the CNF is the empty clause and nothing else was encoded. -/
+  earlyExit : Bool := false
+  /-- R1: s(root), the least number of nodes of any proof (`none`: no proof at any N). -/
+  rootSize : Option Nat := none
+  /-- R1: the `gp(α, g)` and `cl(α, c)` literals excluded (unit clauses). -/
+  gpDead : Nat := 0
+  clDead : Nat := 0
+  /-- R2: object pairs that got no clause because they are never active together. -/
+  exclusiveSkipped : Nat := 0
   deriving Repr, Inhabited
 
 structure Encoding where
@@ -211,6 +336,16 @@ partial def buildGround (t : Term) : StateM Struct Obj := do
     modify fun S => { S with children := S.children.insert o kids, actlit := S.actlit.insert o .tt,
                              groundApps := if kids.isEmpty then S.groundApps else S.groundApps.push o }
   return o
+
+/-- R1: the shared ground objects that building `t` (an atom argument, a value argument, or a
+type template) would create, in the same order, for an owner whose literal is dead. The ground
+objects are shared by all nodes, so they are built exactly as without R1. -/
+partial def buildGroundParts (t : Term) : StateM Struct Unit := do
+  match t with
+  | .var _ => pure ()
+  | .app _ as =>
+    if t.isGround then discard <| buildGround t
+    else for a in as do buildGroundParts a
 
 /-- Build node `a`'s objects for the type template `t` of `owner`; variables are the slots
 of `side` at `a`, and the objects are active with `al`. -/
@@ -296,6 +431,14 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
   let C := P.clauses.size
   let G := P.goals.size
   let A := P.maxPrems
+  -- R1 (M8_PLAN 3.4): the bounds; the early exit when s(root) > N
+  let NB : Option NodeBounds := if opts.nodeBounds then some (opts.bounds P) else none
+  if let some B := NB then
+    if !B.gpLive N 0 0 opts.boundsTight then
+      let ((), F) := buildCNF (do setFamily "11 node bounds"; addClause #[]) { countOnly := opts.countOnly }
+      return { cnf := F, vars := default,
+               info := { W := 0, SB := 0, IB := 0, RB := 0, pairs := 0, rigid := 0, ground := 0,
+                         earlyExit := true, rootSize := B.s[0]? |>.join } }
   -- structural variables, allocated in the prototype's order
   let go : CnfM Vars := do
     let cl ← (List.range N).toArray.mapM fun _ => newLits C
@@ -311,6 +454,20 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
     let mut u := {}
     for b in [0:N] do
       for g in [0:b+1] do u := u.insert (b, g) (← newLit)
+    -- R1: the dead `cl` and `gp` literals get a unit clause and become the constant false
+    let mut cl := cl
+    let mut gp := gp
+    if let some B := NB then
+      setFamily "11 node bounds"
+      for a in [0:N] do
+        for c in [0:C] do
+          unless B.clLive N a c opts.boundsTight do
+            let l ← kill cl[a]![c]!
+            cl := cl.modify a fun r => r.set! c l
+        for g in [0:G] do
+          unless B.gpLive N a g opts.boundsTight do
+            let l ← kill gp[a]![g]!
+            gp := gp.modify a fun r => r.set! g l
     return { N, A, act, cl, gp, y, anc, u }
   let (V, F0) := buildCNF go { countOnly := opts.countOnly }
   let act := V.act
@@ -387,19 +544,31 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
   let nonGround := fun (t? : Option Term) => match t? with
     | some t => if t.isGround then none else some t
     | none => none
+  -- R1: an owner whose literal is the constant false gets no objects of its own, only the
+  -- shared ground objects (in the same order, so the ground objects are those without R1)
+  let dead := fun (l : BLit) => l == BLit.ff
   let buildAll : StateM Struct Unit := do
     for a in [0:N] do
       for h : g in [0:G] do
         let args := P.goals[g]!.tgt.args
+        if dead gp[a]![g]! then
+          for x in args do buildGroundParts x
+          continue
         let mut os := #[]
         for h : i in [0:args.size] do os := os.push (← build a .goal g gp[a]![g]! args[i] #[i])
         modify fun S => { S with root := S.root.insert (a, .goal, g) os }
       for h : c in [0:C] do
         let args := P.clauses[c]!.head.args
+        if dead cl[a]![c]! then
+          for x in args do buildGroundParts x
+          continue
         let mut os := #[]
         for h : i in [0:args.size] do os := os.push (← build a .clause c cl[a]![c]! args[i] #[i])
         modify fun S => { S with root := S.root.insert (a, .clause, c) os }
       for (c, v) in values do
+        if dead cl[a]![c]! then
+          for x in v.args do buildGroundParts x
+          continue
         let o ← buildValue a c cl[a]![c]! v #[] true
         modify fun S => { S with valueRoot := S.valueRoot.insert (a, c) o }
     for (t, _) in P.groundTypes do discard <| buildGround t
@@ -408,6 +577,7 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
         if t.isGround then discard <| buildGround t
       for a in [0:N] do
         let addTy (owner : TyOwner) (side : Side) (al : BLit) (T : Term) : StateM Struct Unit := do
+          if dead al then buildGroundParts T; return
           let o ← buildType a owner side al T #[]
           modify fun S => { S with tyRoot := S.tyRoot.insert (a, owner) o }
         for h : c in [0:C] do
@@ -478,14 +648,14 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
     | .trigid _ owner path _ _ => (ownerType owner).bind (subAt · path)
     | .value _ c path _ _ => (P.clauses[c]!.dataVal).bind (subAt · path)
     | .slot .. => none
-  let families : EncM (Nat × Nat × Std.HashMap (Nat × Nat × String) (Array (Obj × BLit × Bool))) := do
+  let families : EncM (Nat × Nat × Std.HashMap (Nat × Nat × String) (Array (Obj × BLit × Bool)) × Nat) := do
     let lab := Encode.lab L
     -- 6.1 node assignment
     setFamily "1 node assignment"
     for a in [0:N] do
-      amo cl[a]! opts.ladderAmo; addClause (#[neg act[a]!] ++ cl[a]!)
+      amo (cl[a]!.filter (!dead ·)) opts.ladderAmo; addClause (#[neg act[a]!] ++ cl[a]!)
       for c in [0:C] do addClause #[neg cl[a]![c]!, act[a]!]
-      amo gp[a]! opts.ladderAmo; addClause (#[neg act[a]!] ++ gp[a]!)
+      amo (gp[a]!.filter (!dead ·)) opts.ladderAmo; addClause (#[neg act[a]!] ++ gp[a]!)
       for g in [0:G] do addClause #[neg gp[a]![g]!, act[a]!]
       if a > 0 then addClause #[neg act[a]!, act[a-1]!]
     addClause #[act[0]!]; addClause #[gp[0]![0]!]
@@ -551,6 +721,8 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
     for a in [0:N] do
       for g in [0:G] do
         for c in [0:C] do
+          -- R1: every clause of the pair is conditioned on a constant false literal
+          if dead gp[a]![g]! || dead cl[a]![c]! then continue
           let dataGoal := P.goals[g]!.dataVar
           let dataVal := P.clauses[c]!.dataVal
           -- 6.9 static filter: proof clauses only at proposition positions, data clauses only
@@ -580,6 +752,19 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
       unless bysym.contains s do keys := keys.push s
       bysym := bysym.insert s ((bysym.getD s #[]).push o)
     let mut npairs := 0
+    let mut nexcl := 0
+    -- R2: the at-most-one group of an activation literal: (goal side?, node, member)
+    let mut group : Std.HashMap BLit (Bool × Nat × Nat) := {}
+    if opts.exclusivePairs then
+      for a in [0:N] do
+        for g in [0:G] do
+          unless dead gp[a]![g]! do group := group.insert gp[a]![g]! (true, a, g)
+        for c in [0:C] do
+          unless dead cl[a]![c]! do group := group.insert cl[a]![c]! (false, a, c)
+    let exclusive := fun (o1 o2 : Obj) => match group.get? (actlit o1), group.get? (actlit o2) with
+      | some (k1, a1, i1), some (k2, a2, i2) =>
+        a1 == a2 && ((k1 == k2 && i1 != i2) || (opts.exclusiveMutant && k1 != k2))
+      | _, _ => false
     for s in keys do
       let os := bysym[s]!
       for i in [0:os.size] do
@@ -587,6 +772,8 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
           let o1 := os[i]!
           let o2 := os[j]!
           if (o1 matches .ground _) && (o2 matches .ground _) then continue
+          -- R2: never active together, so no clause (M8_PLAN 3.5)
+          if opts.exclusivePairs && exclusive o1 o2 then nexcl := nexcl + 1; continue
           let l1 ← lab o1
           let l2 ← lab o2
           -- 6.10 pair pruning: templates that do not unify (variables renamed apart) never
@@ -628,6 +815,7 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
     for a in [0:N] do
       for b in [a+1:N] do
         for c in [0:C] do
+          if dead cl[a]![c]! then continue
           -- every child: premises and data positions (a data child must see the variable
           -- it builds, 6.9)
           let cc := P.clauses[c]!
@@ -640,7 +828,7 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
     for b in [0:N] do
       for g in [0:b+1] do
         for c in [0:C] do
-          if P.clauses[c]!.localOf.isSome then
+          if P.clauses[c]!.localOf.isSome && !dead cl[b]![c]! then
             for v in P.clauses[c]!.env do
               -- 6.10 frame pruning: only the variables that occur in the clause
               if opts.framePruning && !(belowC[c]!.contains v) then continue
@@ -650,6 +838,7 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
     for a in [0:N] do
       for h : i in [0:eigs.size] do
         let (g, b) := eigs[i]
+        if dead gp[a]![g]! then continue
         let code := 1 + a * eigs.size + i
         let cst := constBits 0 SB ++ constBits code IB ++ constBits 0 RB ++
           (Array.range N).map (fun x => BLit.const (x == a)) ++ L.openBits false
@@ -664,6 +853,7 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
     if opts.scope then
       for a in [0:N] do
         for c in [0:C] do
+          if dead cl[a]![c]! then continue
           for b in P.clauses[c]!.vars do
             let E := L.esc (← lab (slot a .clause b))
             for g in [0:N] do
@@ -690,9 +880,11 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
         if t.isLevel then levelCands := levelCands.push (.ground t, BLit.tt)
         else if t.isTermKind then termCands := termCands.push (.ground t, BLit.tt)
       for a in [0:N] do
-        for (g, b) in eigs do termCands := termCands.push (slot a .goal b, gp[a]![g]!)
+        for (g, b) in eigs do
+          unless dead gp[a]![g]! do termCands := termCands.push (slot a .goal b, gp[a]![g]!)
       for a in [0:N] do
         for c in [0:C] do
+          if dead cl[a]![c]! then continue
           for b in P.clauses[c]!.vars do
             let lv := isLevelVar b
             let tb := if lv then none else tyObj a (.var .clause b) .clause (varType b)
@@ -725,11 +917,14 @@ def encode (P : Forest) (N : Nat) (opts : EncodeOptions := {}) : Encoding := Id.
               kept := kept.push (o, sv, typed)
             addClause (#[neg cl[a]![c]!] ++ svs)
             svMap := svMap.insert (a, c, b) kept
-    return (npairs, ntyping, svMap)
-  let (((pairs, ntyping, svMap), ls), F) := (families.run {}).run F0
+    return (npairs, ntyping, svMap, nexcl)
+  let (((pairs, ntyping, svMap, nexcl), ls), F) := (families.run {}).run F0
   return { cnf := F, vars := V, sv := svMap, labels := ls.labels, allocs := ls.allocs,
            info := { W, SB, IB, RB, pairs, rigid := S.rigid.size, ground := groundList.size,
-                     typeRigid := S.trigid.size, typing := ntyping } }
+                     typeRigid := S.trigid.size, typing := ntyping, exclusiveSkipped := nexcl,
+                     rootSize := NB.bind (·.s[0]?.join),
+                     gpDead := gp.foldl (fun n r => n + (r.filter dead).size) 0,
+                     clDead := cl.foldl (fun n r => n + (r.filter dead).size) 0 } }
 
 /-! ## Reading the proof skeleton from a model (SPEC §8 step 1) -/
 

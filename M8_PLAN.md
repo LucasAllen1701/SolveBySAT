@@ -2,7 +2,7 @@
 
 Lucas Allen · 24 November 2026
 
-**Status: 8a (the rewriting probe) is pre-registered, and nothing has run yet. The scale design (8b) is still to be written.** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
+**Status: 8a (the rewriting probe) is set up and piloted. Amendment 4.1 changes the rules at Prop positions before the full run. The scale design (8b) is still to be written.** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
 
 ## 1. Aims
 
@@ -89,4 +89,37 @@ This section is to be written, after the 8a report, in the claude.ai project, an
 
 ## 4. Amendments
 
-None yet.
+### 4.1 Before the full 8a run (24 November 2026)
+
+**Pilot record.** NOTES.md ("8a: probe set-up and pilot") has the details.
+
+- **Runs.** 20 runs, and no stop rule fired.
+  - Rewriting goals: 1 of 15 proved (Tier B, N = 2, with a congruence rule). The other 14 hit the 2.5 GB cap at N = 3 to 10, with groundness plus decomposition at 95–99% of the clauses.
+  - Controls: 4 of 5 proved at their original N. One became infeasible with the rules (memory).
+- **Cost of the rules.** Where milestone 7 has a CNF at the same N, the rules multiply a rewriting goal's CNF by 2.3 to 17. They multiply a control's CNF at its original N by 1.9 to 39.
+- **Projection** for the 200 runs: 3.3 hours.
+
+**Finding: no `↔` rule is usable.**
+
+- The unchanged compiler rejects all 162 `subst_iff` rules, and no `congr_iff` rule was built. Their premise `a ↔ b` over Prop variables compiles to clauses whose head is a clause variable. So the rules as written give nothing at a Prop position.
+- This is a defect of the rule set, found during the set-up. It is not a result: no pilot outcome depends on it, because the pilot's failures are memory crashes.
+- It matters. 38 of the 150 sampled rewriting goals (428 of the 1,468 in the population) have `propext` among their obstacles, and 9 (86) have only `propext`. Many of these are equations between propositions, closed by `propext` applied to an `↔` lemma that is already in H_main. For example, `(¬p ≤ s.startPos) = (s.startPos < p)` follows from `Std.not_le`.
+
+**Decisions.**
+
+1. **Rules at Prop positions use `=`.** At a position of type `Prop`, the congruence and substitution rules take `a = b`, like every other position, in place of `a ↔ b`. The `↔` rules are no longer generated.
+2. **`propext` equations.** Take each accepted H_main constant, and each split path of its statement (SPEC 4.2) whose head is `L ↔ R`. For each, generate `_probe.<constant>.propext.«<path>»`, with the same binders and premises and the head `L = R`, proved through `propext`. This is what `rw` does with an `↔` lemma. It turns every `↔` lemma into an equation that the congruence and substitution rules can use, without a Prop variable as a head.
+3. **Eligibility.** A position on which the symbol's result type depends is not eligible. Such rules cannot build (for example `OfNat Nat y` and `Decidable (y < m)`), so they are no longer attempted. Record how many positions are skipped for this reason.
+4. **The full run repeats the 20 pilot specs** with the amended rules, so all 200 runs use one rule set. The pilot's results stay as a record in `eval/m8a/pilot/` and are not merged into the full run's.
+5. **Hand examples.** Add these to `Test/M8Probe.lean`, each with its minimality check. The first two replace P3 and P4.
+   - `(¬ a ≤ b) = (b < a)` for `a b : Nat`, from `Nat.not_le`, at 1 node.
+   - `Q (¬ a ≤ b) → Q (b < a)` for `Q : Prop → Prop`, from `Nat.not_le`, through a substitution rule at a Prop position.
+   - `A ∧ B` from `hA : A`, `h : B ↔ C` and `hC : C`, with no rules at all. Rewriting with `↔` under a logical connective in the goal is already in the tactic's class, through `And.intro` and `Iff.mpr`.
+6. **Report additions (2.7).** Report the goals with `propext` among their obstacles separately. For each proof, record whether it uses a `propext` equation.
+7. **Set-up decisions accepted** (NOTES.md):
+   - the controls are ranked by the same hash rule and seed;
+   - rule indices are string name components;
+   - there is no k = 0 stop rule for the controls, and the monotonicity rule is kept;
+   - the controls are also sized at their original N.
+
+**A limit of the probe.** A local hypothesis `h : L ↔ R` (a binder of the goal) gets no `propext` equation, because the probe can only add global lemmas. The tactic-level design for milestone 9 covers local hypotheses too.

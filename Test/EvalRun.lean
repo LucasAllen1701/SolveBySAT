@@ -19,6 +19,7 @@ import Lean
 import SolveBySat
 import Test.EvalCommon
 import Test.M8Rules
+import Test.M8Diag
 
 open Lean Meta SolveBySat Eval
 
@@ -518,8 +519,113 @@ unsafe def runProbeRules (specsPath results : System.FilePath) : IO UInt32 := do
       (Json.mkObj [("ms", toJson (← msSince t0))])).compress
   return 0
 
+/-! ## 8b (M8_PLAN §4.3): measurements. Read-only; the CNF is built exactly as by `runSat`. -/
+
+/-- The forest a spec's run builds: H as in `runSat` (probe rules when `probe`), each constant
+compiled on its own and the rejected ones left out. -/
+def specForest (s : Spec) : MetaM (Forest × Compiled) := do
+  let (goal, _) ← goalOf s
+  let H ← if s.probe then do
+      let R ← M8.generate goal s.H
+      pure (M8.probeH s.H R.rules)
+    else pure s.H
+  let mut acc := #[]
+  for c in H do
+    try discard <| compile goal #[c]; acc := acc.push c catch _ => pure ()
+  let C ← compile goal acc
+  return (C.forest, C)
+
+unsafe def specsEnv (specsPath : System.FilePath) : IO (Environment × Array Spec) := do
+  let lines := (← IO.FS.readFile specsPath).splitOn "\n" |>.filter (· != "")
+  let js ← lines.mapM fun l => IO.ofExcept (Json.parse l)
+  let named := js.any fun j => j.getObjValD "run" == jStr "named"
+  let env ← importEnv (if named then #[`Init, `Std, `Test.EvalNamed] else #[`Init, `Std])
+  let names := nameTable env
+  let specs ← js.mapM fun j => IO.ofExcept (parseSpec names j)
+  return (env, specs.toArray)
+
+/-- M1 to M4 at node bound `N` with `countOnly`: one line per finished section, so a point that
+runs out of memory keeps the sections it completed. -/
+unsafe def runDiag (specsPath results started : System.FilePath) (N : Nat) : IO UInt32 := do
+  let (env, specs) ← specsEnv specsPath
+  let done ← readKeys results
+  for s in specs.filter (!done.contains ·.key) do
+    appendLine started (Json.mkObj [("key", jStr s.key)]).compress
+    let t0 ← IO.monoMsNow
+    let (P, _) ← runMeta env (specForest s)
+    let opts : EncodeOptions := { countOnly := true }
+    let E := encode P N opts
+    let emit := fun (sec : String) (j : Json) => do
+      let (_, hwm) ← memMB
+      appendLine started (Json.mkObj [("key", jStr s.key), ("section", jStr sec), ("data", j),
+        ("ms", toJson (← msSince t0)), ("hwm_mb", toJson hwm)]).compress
+    emit "encode" (Json.mkObj [("N", toJson N), ("vars", toJson E.cnf.nVars), ("clauses", toJson E.cnf.numClauses),
+      ("goals", toJson P.goals.size), ("clauses_in_forest", toJson P.clauses.size)])
+    M8Diag.analyze P N opts E emit
+    let (_, hwm) ← memMB
+    appendLine results (Json.mkObj [("key", jStr s.key), ("status", jStr "ok"), ("ms", toJson (← msSince t0)),
+      ("hwm_mb", toJson hwm)]).compress
+  return 0
+
+/-- M5 (and the M4 check on models): solve each spec at its `nmax`, decode and kernel-check the
+proof, and classify the model. -/
+unsafe def runDiagModels (specsPath results : System.FilePath) : IO UInt32 := do
+  let (env, specs) ← specsEnv specsPath
+  let done ← readKeys results
+  for s in specs.filter (!done.contains ·.key) do
+    let t0 ← IO.monoMsNow
+    let r ← runMeta env do
+      let (P, C) ← specForest s
+      let (goal, _) ← goalOf s
+      let E := encode P s.nmax {}
+      let (res, wall, _) ← solveLimited E.cnf solverSeconds
+      match res with
+      | .sat model =>
+        let t? ← try pure (Except.ok (← decode C E model)) catch e => pure (Except.error (← msgOf e))
+        let proof ← match t? with
+          | .ok t =>
+            let t ← instantiateMVars t
+            if t.hasMVar then pure "decoded term has metavariables"
+            else if let some err ← kernelCheck goal t then pure s!"kernel: {err}" else pure "ok"
+          | .error m => pure m
+        match M8Diag.models P s.nmax {} E model with
+        | .ok j => return j.mergeObj (Json.mkObj [("result", jStr "sat"), ("proof", jStr proof), ("solve_s", toJson wall)])
+        | .error m => return Json.mkObj [("result", jStr "sat"), ("proof", jStr proof), ("error", jStr m)]
+      | .unsat => return Json.mkObj [("result", jStr "unsat")]
+      | .timeout => return Json.mkObj [("result", jStr "timeout")]
+      | .killed sig => return Json.mkObj [("result", jStr s!"killed {sig}")]
+      | .error m => return Json.mkObj [("result", jStr "solver_error"), ("reason", jStr m)]
+    appendLine results ((Json.mkObj [("key", jStr s.key), ("N", toJson s.nmax)]).mergeObj r |>.mergeObj
+      (Json.mkObj [("ms", toJson (← msSince t0))])).compress
+  return 0
+
+/-- Write the DIMACS file of one encoding, clause by clause. -/
+def writeDimacs (F : CNF) (path : System.FilePath) : IO Unit := do
+  let h ← IO.FS.Handle.mk path .write
+  h.putStr s!"p cnf {F.nVars} {F.clauses.size}\n"
+  for c in F.clauses do
+    h.putStr (" ".intercalate (c.toList.map toString) ++ " 0\n")
+
+/-- §4.3 "Rules": the DIMACS of each spec at its `nmax`, with the 8b analysis run on the encoding
+first (`on`) or not (`off`). -/
+unsafe def runDimacs (specsPath outdir : System.FilePath) (mode : String) : IO UInt32 := do
+  let (env, specs) ← specsEnv specsPath
+  IO.FS.createDirAll outdir
+  for h : i in [0:specs.size] do
+    let s := specs[i]
+    match ← (runMeta env (specForest s)).toBaseIO with
+    | .error e => IO.FS.writeFile (outdir / s!"{i}.rejected") s!"{e}\n"
+    | .ok (P, _) =>
+      let E := encode P s.nmax {}
+      if mode == "on" then M8Diag.analyze P s.nmax {} E (fun _ _ => pure ())
+      writeDimacs E.cnf (outdir / s!"{i}.cnf")
+  return 0
+
 unsafe def main (args : List String) : IO UInt32 := do
   match args with
+  | ["diag", specs, results, started, n] => runDiag specs results started n.toNat!
+  | ["diag-models", specs, results] => runDiagModels specs results
+  | ["dimacs", specs, outdir, mode] => runDimacs specs outdir mode
   | ["probe-rules", specs, results] => runProbeRules specs results
   | ["run", specs, results, started, warmup] => runShard specs results started warmup
   | ["sizes", specs, results, started] => runSizes specs results started

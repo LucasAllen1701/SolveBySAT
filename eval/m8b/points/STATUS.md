@@ -1,7 +1,7 @@
 # eval/m8b/points: status
 
-Updated 2026-11-24 18:34:26. Phase: running.
+Updated 2026-11-24 18:50:39. Phase: running.
 
-- Points done: 286 of 400
-- By status: ok 286
+- Points done: 400 of 400
+- By status: ok 400
 - Recount checks failed: 0

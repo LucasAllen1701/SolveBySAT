@@ -2,7 +2,7 @@
 
 Lucas Allen · 24 November 2026
 
-**Status: 8a (the rewriting probe) is set up and piloted. Amendment 4.1 changes the rules at Prop positions before the full run. The scale design (8b) is still to be written.** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
+**Status: 8a (the rewriting probe) is complete (sections 2, 4.1 and 4.2). 8b has started: Claude Code measures the structure of the CNF (4.3), then the scale design note is written in the claude.ai project. The encoding stays one-shot (4.2).** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
 
 ## 1. Aims
 
@@ -123,3 +123,61 @@ This section is to be written, after the 8a report, in the claude.ai project, an
    - the controls are also sized at their original N.
 
 **A limit of the probe.** A local hypothesis `h : L ↔ R` (a binder of the goal) gets no `propext` equation, because the probe can only add global lemmas. The tactic-level design for milestone 9 covers local hypotheses too.
+
+### 4.2 After the full 8a run (24 November 2026)
+
+**8a record.** NOTES.md ("8a: the full run") and `eval/m8a/PROBE.md` have the details. The run was checked independently: the 200 results recount, no stop rule fired, every rewriting proof uses a constant outside H_main, and PROBE.md regenerates byte-identically.
+
+| group | runs | proved | memory crash | solver timeout | no proof ≤ N |
+| --- | --- | --- | --- | --- | --- |
+| rewriting, Tier B | 100 | 16 | 52 | 31 | 1 |
+| rewriting, Tier A | 50 | 5 | 33 | 10 | 2 |
+| control | 50 | 43 | 6 | 1 | 0 |
+
+- **Rewriting works where the CNF fits.** 21 goals that milestone 7 did not prove are proved, at N = 1 to 8. `propext` equations prove 8 of the 28 Tier B goals with a `propext` obstacle.
+- **The rules are expensive.** They multiply the CNF at N = 5 by a median of 13–18 (5 for the controls), with groundness plus decomposition at 95–96%. No rewriting goal with more than 10 accepted rules is proved.
+- **Limits replace answers.** 87 of the 110 rewriting goals with a certified "no proof ≤ 10" in milestone 7 now end at a resource limit. 42 of all runs end at the 20 s solver limit, so solving time is a limit as well as memory.
+
+**Decision: the encoding stays one-shot.**
+
+- The owner keeps SPEC 1's one-shot property for milestone 8. The CNF is built once, before the solver runs, and nothing is fed back from Lean or from the solver.
+- So the scale design (8b) makes the single CNF smaller. It does not add clauses lazily.
+- A possibly very large CNF is an acceptable output. The user decides whether to solve it, and with which solver.
+
+**Deferred: a lazy option.** An incremental mode would solve with most decomposition and groundness clauses left out, check the model, add the clauses it violates, and repeat, as SMT solvers do for congruence. It is to be revisited when the project is complete, as an option for the user alongside the one-shot mode, not in its place. It is not part of milestone 8.
+
+### 4.3 8b starts with measurements (24 November 2026)
+
+The scale design (8b) is written in the claude.ai project. It needs numbers that neither milestone 7 nor 8a recorded: where the groundness and decomposition clauses come from, and which of them a proof can ever use. Claude Code measures these first, without changing the CNF the tactic builds.
+
+**Points.**
+
+- **Structure (M1 to M4).** The 200 goals of 8a at N = 5, each twice: with the 8a rules (amendment 4.1), and with milestone 7's H, without rules. That makes 400 points.
+- **Models (M5).** The 64 proved runs of 8a (21 rewriting goals and 43 controls), at the N where each was proved.
+
+**Measurements.**
+
+- **M1, label width.** The bits of each label field (`sym`, `idx`, `rank`, `esc`, `open`; SPEC 5.3), and W.
+- **M2, groundness by candidate.** Clauses and `sv` variables (SPEC 6.8), split:
+  - by the candidate's kind: ground object, eigenvariable slot, rigid position or value object;
+  - by the candidate's node index against the slot's: the same node, a smaller index, or a larger one.
+  Also count the candidates that the static typing decision drops.
+- **M3, decomposition by pair.** Clauses (SPEC 6.5), split:
+  - by whether the two objects belong to the same node or to different nodes;
+  - per symbol, for the 10 symbols with the most clauses;
+  - by whether the two objects' templates lie in the same static may-equal component. Claude Code defines that component and records the rule. A natural rule joins template positions linked by matching, by links and by groundness candidates, with all node copies of a template identified.
+- **M4, node–clause bounds.**
+  - For each goal or data position g, compute its least depth d(g) in the forest, and its least proof size s(g), by a fixpoint that ignores unification.
+  - In any proof tree whose parents precede their children, a node at index α has depth at most α. Its subtree has at least as many nodes as the size of its own proof, all of them with indices of α or more.
+  - So `gp(α, g)` is possible only if d(g) ≤ α and α + s(g) ≤ N. A pair (α, c) is possible only if some goal position g that c can match passes this test, with c's own minimal size (1 plus its premises' least sizes) in place of s(g).
+  - Report the share of `gp` and `cl` pairs that the bounds exclude, and the share of groundness and decomposition clauses that depend only on excluded pairs.
+  - Claude Code checks the argument against the encoding before counting, and records any flaw.
+- **M5, models.** For each proved run, read from the model:
+  - for every grounded slot, the kind of the chosen candidate, and its node's relation to the slot's node in the decoded tree (the same node, an ancestor, a descendant, or neither);
+  - the `gp` and `cl` pairs used. Every one must pass the M4 bounds. A violation means the bounds are wrong, and it stops the work.
+
+**Rules.**
+
+- The CNF the tactic builds does not change. Diagnostic code is new code, or hooks that are off by default. The 36 named cases and the SPEC 7.3 instances must give byte-identical DIMACS with and without it.
+- The measurements are facts for the design. Reading them is for the design note.
+- **Report.** `eval/m8b/report.py` writes `eval/m8b/DIAG.md` from the data files alone. It must regenerate byte-identically.

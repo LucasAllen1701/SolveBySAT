@@ -1,10 +1,10 @@
 # eval/m8a/full: status
 
-Updated 2026-11-24 14:43:44. Phase: runs.
+Updated 2026-11-24 15:39:58. Phase: finished (runs and sizes).
 
 - Goals done: 200 of 200
 - Stops: 0
-- Sizes done: 0
+- Sizes done: 378
 
 | group | done | proved | no proof ≤ N | memory crash | timeout | other |
 | --- | --- | --- | --- | --- | --- | --- |

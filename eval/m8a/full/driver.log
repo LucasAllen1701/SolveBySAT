@@ -95,3 +95,5 @@ crash(shard, oom) on m8a:main:B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_cont
 crash(shard, oom) on m8a:main:B/Std.HashMap.Raw.getElem!_eq_getD_default/0
 crash(shard, oom) on m8a:main:B/Std.DTreeMap.Internal.Impl.get_diff!/1
 shard 3: done; 200 results; 7892 s
+sizes: 378 specs done
+=== exit 0 2026-11-24 15:39:57

@@ -38,3 +38,23 @@
 {"hwm_mb":733,"key":"m8b:norules:main:B/Array.size_insertIdx/8","ms":361,"status":"ok"}
 {"hwm_mb":733,"key":"m8b:rules:main:B/BitVec.not_self_ne/2","ms":1574,"status":"ok"}
 {"hwm_mb":733,"key":"m8b:norules:main:B/BitVec.not_self_ne/2","ms":191,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:rules:main:B/String.Slice.utf8ByteSize_sliceFrom/2","ms":13896,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:norules:main:B/String.Slice.utf8ByteSize_sliceFrom/2","ms":1710,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:rules:main:B/BitVec.getMsbD_rotateRight/31","ms":1332,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:norules:main:B/BitVec.getMsbD_rotateRight/31","ms":14,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:rules:main:B/UInt16.sub_mul/5","ms":5238,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:norules:main:B/UInt16.sub_mul/5","ms":568,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.DHashMap.Const.getKey_alter_self/16", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Std.DHashMap.Const.getKey_alter_self/16","ms":12,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:rules:main:B/Nat.gcd_def/2","ms":3357,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:norules:main:B/Nat.gcd_def/2","ms":247,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:rules:main:B/Int.ediv_eq_iff_eq_mul_left/2","ms":4112,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:norules:main:B/Int.ediv_eq_iff_eq_mul_left/2","ms":152,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:rules:main:B/List.take_reverse/120","ms":1431,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:norules:main:B/List.take_reverse/120","ms":183,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:rules:main:B/Rat.intCast_inj/14","ms":433,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:norules:main:B/Rat.intCast_inj/14","ms":126,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_mem/3", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_mem/3","ms":17,"status":"ok"}
+{"key": "m8b:rules:main:B/Array.find?_map/12", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Array.find?_map/12","ms":425,"status":"ok"}

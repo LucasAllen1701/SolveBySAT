@@ -58,3 +58,23 @@
 {"hwm_mb":729,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_mem/3","ms":17,"status":"ok"}
 {"key": "m8b:rules:main:B/Array.find?_map/12", "status": "memout", "exit": -15, "last_section": "m7"}
 {"hwm_mb":728,"key":"m8b:norules:main:B/Array.find?_map/12","ms":425,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/6", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":727,"key":"m8b:norules:main:B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/6","ms":512,"status":"ok"}
+{"hwm_mb":727,"key":"m8b:rules:main:B/UInt64.lt_add_one/5","ms":1741,"status":"ok"}
+{"hwm_mb":727,"key":"m8b:norules:main:B/UInt64.lt_add_one/5","ms":278,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:rules:main:B/Int8.lt_of_le_of_ne/2","ms":3246,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:norules:main:B/Int8.lt_of_le_of_ne/2","ms":30,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:rules:main:B/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos/18","ms":1406,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:norules:main:B/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos/18","ms":24,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:rules:main:B/Int.Internal.Linear.Poly.denote_combine/2","ms":4091,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:norules:main:B/Int.Internal.Linear.Poly.denote_combine/2","ms":387,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:rules:main:B/Int.Internal.Linear.cooper_left_split_dvd/42","ms":703,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:norules:main:B/Int.Internal.Linear.cooper_left_split_dvd/42","ms":46,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:rules:main:B/Int16.le_of_lt/2","ms":2087,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:norules:main:B/Int16.le_of_lt/2","ms":16,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:rules:main:B/Array.contains_filter/15","ms":8164,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:norules:main:B/Array.contains_filter/15","ms":523,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:rules:main:B/BitVec.getMsbD_rotateRight/33","ms":4316,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:norules:main:B/BitVec.getMsbD_rotateRight/33","ms":61,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:rules:main:B/Nat.toArray_rco_eq_singleton_append_iff/10","ms":12793,"status":"ok"}
+{"hwm_mb":742,"key":"m8b:norules:main:B/Nat.toArray_rco_eq_singleton_append_iff/10","ms":1055,"status":"ok"}

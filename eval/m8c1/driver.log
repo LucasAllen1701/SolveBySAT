@@ -35,3 +35,6 @@ diag r1r2 N=5: 57 of 20, 46 s
 diag r1r2 N=5: m8b:rules:main:B/Array.find?_map/12: memout (exit -15)
 diag r1r2 N=5: 59 of 20, 59 s
 diag r1r2 N=5: 60 of 20, 61 s
+diag r1r2 N=5: m8b:rules:main:B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/6: memout (exit -15)
+diag r1r2 N=5: 61 of 20, 8 s
+diag r1r2 N=5: 80 of 20, 51 s

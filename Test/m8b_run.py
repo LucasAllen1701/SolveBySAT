@@ -2,6 +2,7 @@
 """Milestone 8b (M8_PLAN.md §4.3): run M1-M4 on the measurement points, one capped process at a time.
 
   python3 Test/m8b_run.py points SPECS OUTDIR N [--publish]
+  python3 Test/m8b_run.py publish-loop SPECS OUTDIR SECONDS   publish STATUS.md periodically until the run ends
 
 Runs `eval_run diag SPECS OUTDIR/results.jsonl OUTDIR/sections.jsonl N` under the 2.5 GB cap
 (`Test/capped.sh`). The diag process writes each finished section of a point to sections.jsonl and a
@@ -87,8 +88,22 @@ def points(specs, out, n, pub):
     return 0
 
 
+def publish_loop(specs, out, every_s):
+    """Publish OUTDIR's status every `every_s` seconds until OUTDIR/timing.json exists (the run has
+    ended; the driver then publishes the final status itself)."""
+    keys = [json.loads(l)["key"] for l in open(specs) if l.strip()]
+    while not os.path.exists(os.path.join(out, "timing.json")):
+        time.sleep(every_s)
+        if os.path.exists(os.path.join(out, "timing.json")):
+            break
+        status(out, keys, "running")
+        publish(out, f"eval/m8b/points: {len(load(os.path.join(out, 'results.jsonl')))} of {len(keys)}")
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
     if a[:1] == ["points"] and len(a) in (4, 5):
         sys.exit(points(a[1], a[2], int(a[3]), a[4:] == ["--publish"]))
+    if a[:1] == ["publish-loop"] and len(a) == 4:
+        publish_loop(a[1], a[2], int(a[3])); sys.exit(0)
     print(__doc__); sys.exit(2)

@@ -88,3 +88,10 @@ crash(shard, oom) on m8a:main:A/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_cont
 crash(shard, oom) on m8a:main:A/BitVec.toInt_emod_two_pow
 crash(shard, oom) on m8a:main:A/Std.DTreeMap.Raw.contains_eq_false_iff_not_mem
 shard 2: done; 150 results; 7171 s
+crash(shard, oom) on m8a:main:B/Std.DHashMap.Raw.getD_alter_self/2
+crash(shard, oom) on m8a:main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/50
+crash(shard, oom) on m8a:main:B/Int8.lt_of_le_of_ne/0
+crash(shard, oom) on m8a:main:B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left/19
+crash(shard, oom) on m8a:main:B/Std.HashMap.Raw.getElem!_eq_getD_default/0
+crash(shard, oom) on m8a:main:B/Std.DTreeMap.Internal.Impl.get_diff!/1
+shard 3: done; 200 results; 7892 s

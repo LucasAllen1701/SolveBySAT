@@ -2678,6 +2678,38 @@ It runs the driver with milestone 7's limits, then the `countOnly` sizes. Runs t
 - **Projection for the 200 runs: 3.3 h** (runs and sizes; rewriting Tier B 1.8 h, Tier A 1.2 h, control
   0.4 h). That is well under about 24 h, so no reduction is proposed. The full run waits for the owner's
   approval.
+#### Open decisions for the owner (before the full 8a run)
+
+1. **Approve the full run (§2.6).** 200 runs (100 Tier B and 50 Tier A rewriting goals, 50 controls) with
+   the pre-registered limits; the pilot's projection is 3.3 h, so no reduction is proposed. The full run
+   repeats the 20 pilot specs, as 4.2 did, unless the owner prefers to keep the pilot's results and run
+   only the other 180.
+2. **The `↔` rules (§2.3).** The unchanged compiler rejects every `↔` rule (P3, P4 above; all 162
+   `subst_iff` rules over the 200 goals), so Prop positions get no usable rule. Options:
+   - **(a) keep §2.3 as written** (recommended): the `↔` rules stay in the generator, are recorded as
+     rejected, and the report states that rewriting at a Prop position is outside the class of the
+     unchanged tactic;
+   - **(b) `=` between Props** in place of `↔`: likely accepted, but of little use, because the only
+     source of such equalities is `propext`, which the compiler also rejects;
+   - **(c) instantiate the `↔` rules** at the Prop subterms of the goal and H, so that no Prop variable is a
+     head: closest to the plan's intent, but the rules are then no longer universally quantified (§2.3),
+     and it is an amendment to record in M8_PLAN §4.
+3. **Decisions taken here that the owner may overrule** (each recorded above):
+   - the controls are ranked by the same hash rule and seed as the rewriting goals (the plan gives no
+     ranking for them);
+   - rule indices are string name components (`«0»`), not numeric ones;
+   - 4.2's k = 0 stop rule (same N as `eval/final/`) does not apply to probe controls, because rules may
+     shorten a proof; the monotonicity rule does apply;
+   - each control is also sized at its original N, in addition to N = 5 and its last N;
+   - rules whose result type depends on the rewritten argument are attempted, fail to build (116) and are
+     recorded, since §2.3 excludes only positions on which another *argument's* type depends;
+   - on `main`, the owner's deletions of `SPEC(out of date).md` and `SPEC.pdf` were kept in the merge (both
+     files remain on `m7-data`).
+4. **What the pilot already suggests** (facts for 8b, not a decision): with the rules, 14 of 15 rewriting
+   goals and 1 of 5 controls exceed the 2.5 GB cap before N = 10, with groundness plus decomposition at
+   95–99% of the clauses. The full run will likely measure mostly where memory runs out, as §10.11
+   anticipated.
+
 - **Regression (end of the 8a set-up and pilot):** `Test/run_all.sh` exit 0 on `m8` at `52e4f79`, with
   `Test/M8Probe.lean` added (M0 902/902, M1 19/19, M4 4/4, M5 10/10, `countOnly` 22/22; M2, M3, M4Lean,
   M5Lean, M7Lean and M8Probe pass; `eval/m8a/run_all.log`). The named cases are 36/36 with the probe

@@ -27,3 +27,4 @@ diag r1r2 N=5: 8 of 20, 36 s
 diag r1r2 N=5: m8b:rules:main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/5: memout (exit -15)
 diag r1r2 N=5: 17 of 20, 123 s
 diag r1r2 N=5: 20 of 20, 125 s
+diag r1r2 N=5: 40 of 20, 50 s

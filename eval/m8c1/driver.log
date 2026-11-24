@@ -19,3 +19,11 @@ sizes N=5: 1020 of 60, 209 s
 sizes N=5: 1080 of 60, 102 s
 sizes N=5: 1140 of 60, 107 s
 sizes N=5: 1200 of 60, 101 s
+=== sizes N=5 done 2026-11-25 10:53:39
+diag r1r2 N=5: m8b:rules:main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0: memout (exit -15)
+diag r1r2 N=5: 7 of 20, 33 s
+diag r1r2 N=5: m8b:norules:main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0: memout (exit -15)
+diag r1r2 N=5: 8 of 20, 36 s
+diag r1r2 N=5: m8b:rules:main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/5: memout (exit -15)
+diag r1r2 N=5: 17 of 20, 123 s
+diag r1r2 N=5: 20 of 20, 125 s

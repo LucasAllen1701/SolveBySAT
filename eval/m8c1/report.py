@@ -344,6 +344,14 @@ def rerun_section(out):
                 ["solving, per-pair ratio 8a / rerun (8a ≥ 0.1 s)", "", "", quart([a / b for a, b in ss if b and a >= 0.1])]]
         out += ["### Times where both runs gave the same answer at the same N", ""]
         out += table(["", "8a", "rerun", "8a / rerun"], rows) + [""]
+    # goal by goal, all runs
+    rows = []
+    for k in sorted(new, key=lambda k: (specs[k].get("probe_group", ""), specs[k]["id"])):
+        a, b = old[k], new[k]
+        rows.append([f"`{specs[k]['id']}`", specs[k].get("probe_group", ""), a["outcome"], lastn(a),
+                     b["outcome"], lastn(b), "same" if (a["outcome"], lastn(a)) == (b["outcome"], lastn(b)) else "changed"])
+    out += [f"### Goal by goal ({len(rows)} runs)", ""]
+    out += table(["goal", "group", "8a outcome", "8a N", "rerun outcome", "rerun N", ""], rows) + [""]
     ee = sum(1 for r in new.values() for x in r.get("per_N", []) if x["result"] == "early_exit")
     out += [f"Early exits in the rerun's per-N records: {ee}.", ""]
     # sizes of the rerun at N = 5 against 8a's

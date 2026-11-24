@@ -217,3 +217,8 @@ rejected by the compiler: [_probe.Iff.subst.«0»: solve_by_sat: the head of x0@
 rejected by the compiler: [_probe.Iff.subst.«0»: solve_by_sat: the head of x0@g3 b has the clause variable b#4 as its head symbol,
  _probe.Iff.subst.«1»: solve_by_sat: the head of x0@g3 a has the clause variable a#2 as its head symbol]
 == test_m1, test_m5: m8off
+differential: 7500 comparisons, 2551 provable instances, 0 mismatches, min-size histogram [(1, 389), (2, 117), (3, 39), (4, 10), (5, 1)], 167 forests with min size ≥ 2 [201s]
+PASS differential (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+differential with binders: 7500 comparisons, 2346 provable instances, 0 mismatches, min-size histogram [(1, 388), (2, 77), (3, 27), (4, 6), (5, 5)], 115 forests with min size ≥ 2, 770 of 1500 forests contain a bound variable [205s]
+PASS differential with binders (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+M1: 20 passed, 0 failed

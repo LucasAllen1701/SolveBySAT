@@ -166,3 +166,54 @@ solve_by_sat: N = 5, 1377 variables, 16523 clauses; proof with 5 nodes: fun x#0 
 solve_by_sat: N = 1, 46 variables, 147 clauses; proof with 1 nodes: fun n#0 => Eq.refl
 solve_by_sat: N = 1, 60 variables, 190 clauses; proof with 1 nodes: fun n#0 => Eq.refl
 == Test/M5Lean.lean
+solve_by_sat: N = 3, 288 variables, 1260 clauses; proof with 3 nodes: Exists.intro(Nat.le_refl, n:=Nat.zero)
+solve_by_sat: N = 3, 186 variables, 588 clauses; proof with 3 nodes: Exists.intro(True.intro, n:=Nat.zero)
+Test/M5Lean.lean:41:12: warning: Variable name `n` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _n
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+solve_by_sat: N = 3, 1155 variables, 4602 clauses; proof with 3 nodes: fun Q#0 q => Exists.intro(q(m:=Nat.zero))
+solve_by_sat: N = 4, 585 variables, 2326 clauses; proof with 4 nodes: Exists.intro(True.intro, i:=Int.ofNat(a:=Nat.zero))
+Test/M5Lean.lean:71:15: warning: Variable name `i` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _i
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+solve_by_sat: N = 2, 216 variables, 800 clauses; proof with 2 nodes: Exists.intro(Eq.refl)
+solve_by_sat: N = 4, 761 variables, 3102 clauses; proof with 4 nodes: fun f#0 => Exists.intro(True.intro, i:=f(a:=Nat.zero))
+Test/M5Lean.lean:135:15: warning: Variable name `f` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _f
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+Test/M5Lean.lean:135:32: warning: Variable name `i` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _i
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+solve_by_sat: N = 6, 3359 variables, 19771 clauses; proof with 6 nodes: fun f#0 => And.intro(fun g#2 => True.intro, Exists.intro(True.intro, i:=f(a:=Nat.zero)))
+Test/M5Lean.lean:155:29: warning: Variable name `g` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _g
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+Test/M5Lean.lean:155:54: warning: Variable name `i` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _i
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+solve_by_sat: N = 1, 1176 variables, 4307 clauses; proof with 1 nodes: fun f#0 => maxL
+== Test/M7Lean.lean
+== Test/M8Probe.lean
+rejected by the compiler: [_probe.Iff.subst.«0»: solve_by_sat: the head of x0@g3 b has the clause variable b#4 as its head symbol,
+ _probe.Iff.subst.«1»: solve_by_sat: the head of x0@g3 a has the clause variable a#2 as its head symbol]
+rejected by the compiler: [_probe.Iff.subst.«0»: solve_by_sat: the head of x0@g3 b has the clause variable b#4 as its head symbol,
+ _probe.Iff.subst.«1»: solve_by_sat: the head of x0@g3 a has the clause variable a#2 as its head symbol]
+== test_m1, test_m5: m8off

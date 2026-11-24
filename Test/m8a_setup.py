@@ -126,7 +126,9 @@ def specs():
     for r in rows:
         s = {"key": "m8a:" + r["key"], "id": r["id"], "run": "m8a", "tier": r["tier"], "thm": r["thm"],
              "pos": r["pos"], "nctx": r["nctx"], "H": r["H_main_accepted"], "probe": True,
-             "probe_group": r["group"], "rank": r["rank"], "baselines": False}
+             "probe_group": r["group"], "rank": r["rank"], "baselines": False,
+             # the rule set the shard generates (Test/M8Rules.lean); recorded, not read by the shard
+             "probe_rules": "amendment 4.1"}
         if r["group"] == "control":
             s.update({"nmax": r["orig_N"], "orig_N": r["orig_N"], "orig_outcome": "proved"})
         out.append(s)
@@ -134,7 +136,9 @@ def specs():
     pilot = ([s for s in out if s["probe_group"] == "rewrite_B" and s["rank"] < 10]
              + [s for s in out if s["probe_group"] == "rewrite_A" and s["rank"] < 5]
              + [s for s in out if s["probe_group"] == "control" and s["rank"] < 5])
-    dump(os.path.join(OUT, "specs_pilot.jsonl"), pilot)
+    # the pilot's specs are its record (pilot rule set): written once, never rewritten
+    if not os.path.exists(os.path.join(OUT, "specs_pilot.jsonl")):
+        dump(os.path.join(OUT, "specs_pilot.jsonl"), pilot)
     print(f"specs: {len(out)}; pilot: {len(pilot)}")
     for p in ("specs.jsonl", "specs_pilot.jsonl", "goals.jsonl"):
         print(f"  {md5(os.path.join(OUT, p))[:12]}  eval/m8a/{p}")

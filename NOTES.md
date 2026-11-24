@@ -2715,3 +2715,62 @@ It runs the driver with milestone 7's limits, then the `countOnly` sizes. Runs t
   M5Lean, M7Lean and M8Probe pass; `eval/m8a/run_all.log`). The named cases are 36/36 with the probe
   harness and no rules. `SolveBySat/` is unchanged since milestone 7. After `52e4f79` only Python files
   (`Test/m8a_run.py`) and data changed.
+
+### 8a: the full run (M8_PLAN §2.4–2.6, amendment 4.1; 24 November 2026)
+
+#### Before the run
+
+- **Plan.** Amendment 4.1 and the new status line were added to M8_PLAN.md as written (`cbce65e`).
+- **Machine checks.** `vm.overcommit_memory` = 1. The user session delegates the memory controller,
+  and `systemd-run --user --scope -p MemoryMax=200M` killed a 400 MB allocation (exit 137). 6.6 GB was
+  available outside the slice. `Test/run_all.sh` exit 0 before the change (`eval/m8a/run_all_before_4.1.log`).
+- **Rules (decisions 1–3), `Test/M8Rules.lean`.** `SolveBySat/` is unchanged.
+  - A `Prop` position takes `a = b`, like every other position. The `_iff` rules are gone.
+  - A position the symbol's result type depends on is skipped and counted (`probe_skipped_dep`).
+  - `propext` equations: for each accepted H_main constant, the split paths of SPEC 4.2 are walked
+    without reduction. `∧` gives `l` and `r`; `↔` gives `mp` (extra premise: the left side) and `mpr`
+    (extra premise: the right side); a `∀` component adds binders, at most 6 steps deep. Every path whose
+    head is `L ↔ R` gives `_probe.<c>.propext.«<path>»` (`root`, or the steps joined by `_`). It has the
+    same binders and premises, head `L = R`, and is proved by `propext` of the projected proof. Each one
+    is kernel-checked by `addDecl`.
+  - The shard records `uses_propext`. The pilot's bookkeeping is kept as `eval/m8a/rules_pilot.jsonl`.
+- **Rules over the 200 goals** (`eval/m8a/rules.jsonl`, `eval_run probe-rules`, 15 s):
+  - built: 1,092 `congr`, 861 `subst` (699 before, plus the 162 Prop positions now on `=`), 79 `propext`
+    (77 at the root, 2 on an `mp` path);
+  - failed to build: 0 (pilot 116); positions skipped because the result type depends on them: **116**,
+    the pilot's 116 failures;
+  - rejected by the compiler: 184, as in the pilot, but different rules. 162 are `subst` rules at a Prop
+    position of a *connective* (`Iff` 134, `And` 22, `Or` 6): the connective's head splits (SPEC 4.2) into
+    the variable heads `a`, `b`. The other 22 have a clause variable applied to arguments. No `propext`
+    equation is rejected.
+
+  | group | rules: median / p90 / max (pilot) | accepted (pilot) | goals with a `propext` equation |
+  | --- | --- | --- | --- |
+  | rewriting, Tier B | 10 / 17 / 29 (9 / 16 / 29) | 9 / 15 / 29 (8 / 15 / 29) | 28 |
+  | rewriting, Tier A | 11 / 19 / 26 (11 / 18 / 25) | 10 / 17 / 24 (9.5 / 17 / 23) | 15 |
+  | control | 8 / 12 / 15 (8 / 11 / 14) | 7 / 11 / 14 (6 / 10 / 14) | 13 |
+
+  **All 38 sampled rewriting goals with a `propext` obstacle get at least one `propext` equation,** and
+  so do all 9 whose only obstacle is `propext`. 56 of the 200 goals get one.
+- **Hand examples (decision 5), `Test/M8Probe.lean`.** P3 and P4 are replaced, and P5 is added, each with
+  its minimality check:
+  - P3, `(¬ a ≤ b) = (b < a)` from `Nat.not_le`: 1 node, `_probe.Nat.not_le.propext.root`. With N = 1
+    there is no smaller N to check; the test pins the equation's statement instead.
+  - P4, `Q (¬ a ≤ b) → Q (b < a)`: **proved** at 4 nodes,
+    `_probe.Q.subst.«0» (b < a) (a ≤ b → False) (Eq.symm _probe.Nat.not_le.propext.root) h`, through a
+    substitution rule at a Prop position. There is no proof at 3. The probe tactic also logs that
+    `Iff`'s own substitution rules are rejected, as above; the minimality check matches errors only
+    (`#guard_msgs (error, drop info)`).
+  - P5, `A ∧ B` from `hA`, `h : B ↔ C`, `hC`, with no rules: 4 nodes, `⟨hA, h.mpr hC⟩`; none at 3.
+- **No rules, no change.** The 36 named cases through the amended harness (`eval/m8a/named_check_4.1`)
+  equal `m7-data`'s `eval/fix_check3/named` in outcome, N and skeleton: 36/36.
+- **Acceptance with the amended rules.** `Test/run_all.sh` exit 0 (M0 902/902, M1 19/19, M4 4/4, M5 10/10,
+  `countOnly` 22/22; M2, M3, M4Lean, M5Lean, M7Lean and M8Probe pass; `eval/m8a/run_all_4.1.log`).
+- **Specs (decision 4).** `eval/m8a/specs.jsonl` was regenerated. The specs do not hold rules, because the
+  shard generates them, so each spec now records `"probe_rules": "amendment 4.1"`; the shard does not read
+  that field. md5 `86c57c212a83`. `specs_pilot.jsonl` (`529796ddec3a`) is the pilot's record and is no
+  longer rewritten. The full run repeats the 20 pilot specs.
+- **Detached run.** `Test/m8a_full.sh`, started with `setsid nohup`, runs `Test/m8a_run.py run` (the driver,
+  then the sizes). The after-shard hook is `Test/m8a_publish.sh`: it writes `eval/m8a/full/STATUS.md`,
+  commits `eval/m8a/full/` only, and pushes `m8`. The 7b scripts push `eval-m7`, which is now an archive,
+  so they are not used.

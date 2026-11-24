@@ -408,7 +408,8 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
           let used := (sat.getObjValAs? (Array String) "distractors_used").toOption.getD #[]
           return (sat.mergeObj (Json.mkObj (M8.rulesJson R ++
             [("probe_group", jStr s.probeGroup), ("probe_H_size", toJson H.size), ("probe_gen_ms", toJson genMs),
-             ("probe_extra_used", toJson used), ("uses_rule", toJson (used.any (·.startsWith "_probe.")))])), bug)
+             ("probe_extra_used", toJson used), ("uses_rule", toJson (used.any (·.startsWith "_probe."))),
+             ("uses_propext", toJson (used.any fun u => (u.splitOn ".propext.").length > 1))])), bug)
         runSat goal s.H s.opts progress s.nmax s.distractors
       return (sat, Json.mkObj blInfo, bug)).toBaseIO
     let (rss, hwm) ← memMB

@@ -6,10 +6,13 @@ kernel checks each one) and runs the unchanged `solve_by_sat` with H as in §2.3
 
 - P1: congruence, `a = b → f a = f b`.
 - P2: substitution under a function, `h : x = y ⊢ P (f x) → P (f y)`.
-- P3, P4: a `Prop` position rewritten with an `↔`. The rules build and the kernel accepts them,
-  but the unchanged compiler rejects every `↔` rule: its premise `a ↔ b` over Prop variables
-  compiles to clauses whose head is a clause variable (SPEC §2). So no proof exists in the class.
-  This is recorded, as M8_PLAN §2.3 says for rejected rules, and reported to the owner.
+- P3: `(¬ a ≤ b) = (b < a)` from `Nat.not_le`, through its `propext` equation (amendment 4.1).
+- P4: `Q (¬ a ≤ b) → Q (b < a)`, through a substitution rule at a `Prop` position.
+- P5: `A ∧ B` from `hA : A`, `h : B ↔ C`, `hC : C`, with no rules at all.
+The pilot's P3 and P4 (`↔` rules, rejected by the compiler) are replaced: amendment 4.1 removed them.
+Messages that the probe tactic logs about rejected rules (`Iff`'s own substitution rules, whose
+`↔` head splits into variable heads) are not part of what these examples check, so P4's minimality
+check matches errors only.
 -/
 import Test.M8Rules
 
@@ -17,8 +20,6 @@ set_option Elab.async false   -- the rules are top-level declarations added duri
 
 axiom f : Nat → Nat
 axiom P : Nat → Prop
-axiom Q : Prop → Prop
-axiom g : Prop → Nat
 
 /-! ## P1 -/
 
@@ -46,41 +47,46 @@ fun x y h a => _probe.P.subst.«0» (f y) (f x) (_probe.f.congr.«0» y x (Eq.sy
 #guard_msgs in
 example (x y : Nat) (h : x = y) : P (f x) → P (f y) := by solve_by_sat_probe [] (nodes := 4)
 
-/-! ## P3, P4: `↔` rules build but are outside the class -/
+/-! ## P3, P4, P5 (M8_PLAN amendment 4.1 decision 5; P3 and P4 replace the `↔` examples)
 
-/--
-info: rejected by the compiler: [_probe.Iff.subst_iff.«0»: solve_by_sat: the head of x0@g4 a has the clause variable a#2 as its head symbol,
- _probe.Iff.subst_iff.«1»: solve_by_sat: the head of x0@g4 b✝ has the clause variable b#3 as its head symbol,
- _probe.Q.subst_iff.«0»: solve_by_sat: the head of x0@g4 a✝ has the clause variable a#2 as its head symbol]
----
-error: solve_by_sat: no proof with at most 3 nodes exists in the class
--/
+P3: an equation between propositions from an `↔` lemma, through its `propext` equation.
+P4: a substitution rule at a `Prop` position (`=` since amendment 4.1), with the `propext` equation
+turned round by `Eq.symm`.
+P5: rewriting with a local `↔` under a connective of the goal needs no rule: `And.intro` and the
+built-in `Iff.mpr` of the hypothesis are already in the class. -/
+
+axiom Q : Prop → Prop
+
+theorem P3 (a b : Nat) : (¬ a ≤ b) = (b < a) := by solve_by_sat_probe [Nat.not_le] (nodes := 1)
+
+/-- info: theorem P3 : ∀ (a b : Nat), (¬a ≤ b) = (b < a) :=
+fun a b => _probe.Nat.not_le.propext.root -/
 #guard_msgs in
-example (A B : Prop) (h : A ↔ B) : Q B → Q A := by solve_by_sat_probe [] (nodes := 3)
+#print P3
 
-/--
-info: rejected by the compiler: [_probe.Iff.subst_iff.«0»: solve_by_sat: the head of x0@g4 a has the clause variable a#2 as its head symbol,
- _probe.Iff.subst_iff.«1»: solve_by_sat: the head of x0@g4 b✝ has the clause variable b#3 as its head symbol,
- _probe.g.congr_iff.«0»: solve_by_sat: the head of x0@g4 a✝ has the clause variable a#2 as its head symbol]
----
-error: solve_by_sat: no proof with at most 2 nodes exists in the class
--/
+-- P3's minimal N is 1, so there is no smaller N to check. Its rule is the `propext` equation:
+/-- info: @_probe.Nat.not_le.propext.root : ∀ {a b : Nat}, (¬a ≤ b) = (b < a) -/
 #guard_msgs in
-example (A B : Prop) (h : A ↔ B) : g A = g B := by solve_by_sat_probe [] (nodes := 2)
+#check @«_probe».Nat.not_le.propext.root
 
-/-- The `↔` rules of P3 and P4, built at top level: `addDecl` has kernel-checked them. -/
-def showIffRules : Lean.Elab.TermElabM Unit := do
-  for stx in [← `(∀ (A B : Prop), (A ↔ B) → Q B → Q A), ← `(∀ (A B : Prop), (A ↔ B) → g A = g B)] do
-    let e ← Lean.Elab.Term.elabType stx
-    let R ← M8.generate e #[]
-    for r in R.rules do
-      if r.toString.endsWith "_iff.«0»" && (r.toString.startsWith "_probe.Q" || r.toString.startsWith "_probe.g") then
-        Lean.logInfo m!"{r} : {(← Lean.getConstInfo r).type}"
+theorem P4 (a b : Nat) : Q (¬ a ≤ b) → Q (b < a) := by solve_by_sat_probe [Nat.not_le] (nodes := 4)
 
-/--
-info: _probe.Q.subst_iff.«0» : ∀ (a b : Prop), (a ↔ b) → Q b → Q a
----
-info: _probe.g.congr_iff.«0» : ∀ (a b : Prop), (a ↔ b) → g a = g b
--/
+/-- info: theorem P4 : ∀ (a b : Nat), Q ¬a ≤ b → Q (b < a) :=
+fun a b a_1 => _probe.Q.subst.«0» (b < a) (a ≤ b → False) (Eq.symm _probe.Nat.not_le.propext.root) a_1 -/
 #guard_msgs in
-run_elab showIffRules
+#print P4
+
+/-- error: solve_by_sat: no proof with at most 3 nodes exists in the class -/
+#guard_msgs (error, drop info) in
+example (a b : Nat) : Q (¬ a ≤ b) → Q (b < a) := by solve_by_sat_probe [Nat.not_le] (nodes := 3)
+
+theorem P5 (A B C : Prop) (hA : A) (h : B ↔ C) (hC : C) : A ∧ B := by solve_by_sat [] (nodes := 4)
+
+/-- info: theorem P5 : ∀ (A B C : Prop), A → (B ↔ C) → C → A ∧ B :=
+fun A B C hA h hC => ⟨hA, h.mpr hC⟩ -/
+#guard_msgs in
+#print P5
+
+/-- error: solve_by_sat: no proof with at most 3 nodes exists in the class -/
+#guard_msgs in
+example (A B C : Prop) (hA : A) (h : B ↔ C) (hC : C) : A ∧ B := by solve_by_sat [] (nodes := 3)

@@ -3,6 +3,7 @@
 
   python3 Test/m8a_run.py run SPECS OUTDIR     the runs (Test/eval_driver.py), then the sizes
   python3 Test/m8a_run.py summary OUTDIR       the pilot tables and the projection for the 200 runs
+  python3 Test/m8a_run.py status OUTDIR SPECS PHASE   write OUTDIR/STATUS.md
 
 `run` calls `Test/eval_driver.py run SPECS OUTDIR` (the cgroup cap, the watchdog, crash records and
 the shard's stop rules: exit 3 decoder bug or solver error, 4 harness error, 6 a stop rule of §2.5).
@@ -27,9 +28,10 @@ def last_n(r):
     return r.get("N") if r.get("outcome") != "crash" else r.get("last_N")
 
 
-def run(specs, out):
+def run(specs, out, hook=None):
     t0 = time.time()
-    p = subprocess.run([sys.executable, os.path.join(ROOT, "Test/eval_driver.py"), "run", specs, out], cwd=ROOT)
+    p = subprocess.run([sys.executable, os.path.join(ROOT, "Test/eval_driver.py"), "run", specs, out]
+                       + (["--after-shard", hook] if hook else []), cwd=ROOT)
     t1 = time.time()
     if p.returncode != 0:
         print(f"STOP: driver exit {p.returncode}; sizes not computed"); return p.returncode
@@ -56,6 +58,27 @@ def run(specs, out):
         json.dump({"runs_s": round(old["runs_s"] + t1 - t0, 1), "sizes_s": round(old["sizes_s"] + t2 - t1, 1),
                    "n_runs": len(sp), "n_sizes": len(rows)}, f)
     return q.returncode
+
+
+def status(out, specs, phase):
+    """OUTDIR/STATUS.md: progress of a run (the after-shard hook of Test/m8a_full.sh)."""
+    sp = [s["key"] for s in load(specs)]
+    res = {r["key"]: r for r in load(os.path.join(out, "results.jsonl"))}
+    siz = load(os.path.join(out, "sizes.jsonl"))
+    grp = {s["key"]: s.get("probe_group") for s in load(specs)}
+    lines = [f"# {os.path.relpath(out, ROOT)}: status", "",
+             f"Updated {time.strftime('%Y-%m-%d %H:%M:%S')}. Phase: {phase}.", "",
+             f"- Goals done: {len(res)} of {len(sp)}",
+             f"- Stops: {sum(1 for r in res.values() if 'stop' in r)}"
+             + "".join(f"; `{k}`: {r['stop']}" for k, r in res.items() if "stop" in r),
+             f"- Sizes done: {len(siz)}", "",
+             "| group | done | proved | no proof ≤ N | memory crash | timeout | other |", "| --- | --- | --- | --- | --- | --- | --- |"]
+    for g in GROUPS:
+        rs = [r for k, r in res.items() if grp.get(k) == g]
+        c = {o: sum(1 for r in rs if r["outcome"] == o) for o in ("proved", "no_proof_le_Nmax", "crash", "timeout", "memout")}
+        lines.append(f"| {g} | {len(rs)} of {sum(1 for k in sp if grp[k] == g)} | {c['proved']} | {c['no_proof_le_Nmax']} | "
+                     f"{c['crash'] + c['memout']} | {c['timeout']} | {len(rs) - sum(c.values())} |")
+    open(os.path.join(out, "STATUS.md"), "w").write("\n".join(lines) + "\n")
 
 
 def summary(out):
@@ -123,8 +146,10 @@ def summary(out):
 
 if __name__ == "__main__":
     a = sys.argv[1:]
-    if a[:1] == ["run"] and len(a) == 3:
-        sys.exit(run(a[1], a[2]))
+    if a[:1] == ["run"] and len(a) in (3, 5) and (len(a) == 3 or a[3] == "--after-shard"):
+        sys.exit(run(a[1], a[2], a[4] if len(a) == 5 else None))
+    elif a[:1] == ["status"] and len(a) == 4:
+        status(a[1], a[2], a[3])
     elif a[:1] == ["summary"] and len(a) == 2:
         summary(a[1])
     else:

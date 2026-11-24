@@ -1,8 +1,8 @@
 # eval/m8c1: status
 
-Updated 2026-11-25 10:35:54.
+Updated 2026-11-25 10:42:33.
 
-- sizes_N5: 840 of 1200 (point, setting) records: ok 840
+- sizes_N5: 900 of 1200 (point, setting) records: ok 900
   - checks of 4.4 (flags-off equal to 8b, bound check, excluded pairs): all pass
 - sizes_N10: 0 of 1200 (point, setting) records
 - diag_N5 (M6 to M8, R1 and R2 on): 0 of 400 points

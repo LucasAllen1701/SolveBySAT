@@ -2,7 +2,7 @@
 
 Lucas Allen · 24 November 2026
 
-**Status: 8a (the rewriting probe) is complete (sections 2, 4.1 and 4.2). 8b has started: Claude Code measures the structure of the CNF (4.3), then the scale design note is written in the claude.ai project. The encoding stays one-shot (4.2).** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
+**Status: 8a (the rewriting probe) and 8b (the measurements and the scale design) are complete (sections 2 and 3, amendments 4.1 to 4.4). 8c-1 has started: Claude Code implements R1 and R2 and takes the measurements M6 to M8 (4.4). The encoding stays one-shot (4.2), and only exact reductions are accepted (4.4).** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
 
 ## 1. Aims
 
@@ -12,7 +12,7 @@ Milestone 8 shrinks groundness and decomposition, the two clause families behind
 | --- | --- |
 | 8a | Rewriting probe: rewriting by first-order equality rules, given to the unchanged tactic as generated lemmas (section 2) |
 | 8b | Scale design note, written in the claude.ai project with the 8a results in hand |
-| 8c and later | Implementing and evaluating the scale design, planned after 8b |
+| 8c and later | Implementing and evaluating the scale design, in the stages of 3.11 |
 
 The milestone 7 rules carry over: filters, seeds, samples and limits are pre-registered and not changed after seeing results. A decoder failure on a satisfiable CNF is a bug. Every result records its code version.
 
@@ -85,7 +85,238 @@ The report states facts. Reading them is for 8b.
 
 ## 3. The scale design (8b)
 
-This section is to be written, after the 8a report, in the claude.ai project, and then added here.
+Written in the claude.ai project on 25 November 2026 (`claude/M8_SCALE_DESIGN.md`), from the 8a probe (`eval/m8a/PROBE.md`) and the 8b measurements (`eval/m8b/DIAG.md`, NOTES.md "8b: measurements"), and accepted by the owner with the decisions in amendment 4.4. Bare section numbers such as 6.4 or 6.8 refer to SPEC.md. The stages after 8b are those of 3.11.
+
+### 3.1 Aim and constraints
+
+Shrink the CNF, above all its two dominant families, groundness (SPEC 6.8) and decomposition (SPEC 6.5), so that more goals fit under the memory cap and solve within the time limit. This applies with and without milestone 9's rewriting rules.
+
+- **One shot** (amendment 4.2). Every reduction happens while the CNF is built. Nothing is fed back from the solver. A large CNF is still an acceptable output.
+- **Exact only** (amendment 4.4). A reduction is *exact* if every model of the old CNF, restricted to the variables that remain, is a model of the new one, and every model of the new one extends to a model of the old one. Exact reductions change no answer and no minimal N. They need only the argument that they are exact, plus tests. Inexact reductions are not accepted in milestone 8.
+- **Every reduction is a refinement flag** (SPEC 6.10), on by default once it is accepted (amendment 4.4), so the CNF is small by default. With it off, the DIMACS output is byte-identical to the code before the flag; with every milestone 8 flag off, to the code at `5820197`.
+- **Every reduction has:**
+  - its exactness argument, written in NOTES.md and later in SPEC 6.10;
+  - identical answers on the three differential suites and the Lean suite, with the flag on and off;
+  - a mutation check showing that a slightly wrong version is caught;
+  - `countOnly` parity, and 8b's recount diagnostics extended to it.
+- **The decoder** must treat a variable that the encoder did not create as false.
+
+### 3.2 Where the clauses are
+
+From 8b, at N = 5, over the 200 8a goals, with the 8a rules (and without):
+
+| What | Share |
+| --- | --- |
+| Decomposition | 64% of all clauses (87%) |
+| Groundness | 34% (12%) |
+| Groundness from rigid-position candidates | 91% of groundness (84%) |
+| Decomposition between objects at different nodes | 82% of decomposition (84%) |
+| Decomposition on `lvl:succ`, `c:List`, `sort`, `lvl:max` | 32%, 20%, 10%, 4% of decomposition |
+| Clauses that depend only on node–clause pairs excluded by M4 | 50% of all clauses (65%), pooled |
+| Label width W | 18–35 bits, median 27 |
+
+In the models of 8b (the 64 proved 8a runs and the 26 named cases), most grounding candidates come from the same node or an ancestor. But of the 123 rigid-position and value-object candidates chosen, 33 come from a descendant and 11 from an unrelated node.
+
+### 3.3 One mechanism: implied units, folded at build time
+
+Every exact reduction in 3.4 to 3.7 has the same form. A set of literals is shown to be false in every model of the CNF, or a set of clauses is shown to be satisfiable by setting auxiliary variables only. The encoder then:
+
+- emits each such literal's negation as a unit clause;
+- treats the literal as a constant `false` in the clause builder. The builder already folds constant label bits, so a clause containing the literal in a condition disappears, and a disjunction loses the literal;
+- never allocates an object, label or auxiliary variable that only dead clauses would use.
+
+**Why this is exact.** If F ⊨ ¬x, then F ≡ F ∧ ¬x ≡ F[x := false] ∧ ¬x. Simplifying F[x := false] keeps exactly the models of F, restricted to the remaining variables. For auxiliaries (the `sm` and `dⱼ` of a decomposition pair, the `sv` of a candidate), dropping clauses is exact when every model of the rest can be extended by setting those auxiliaries.
+
+One mechanism means one implementation (a "dead literal" set in the clause builder, honoured by allocation, candidate lists and the pair loop), one diagnostic extension, and one test strategy.
+
+### 3.4 R1: node–clause bounds (exact; 8c-1)
+
+#### 3.4.1 Definitions
+
+Write c ▷ g ("c can match g") when clause c passes the static tests of SPEC 6.4 for goal or data position g: the kind filter, and the same predicate symbol and arity. A built-in clause matches only the position that owns it (SPEC 6.3: `cl(β, c) ⇒ u(β, β)`, and the introducer must solve its owner).
+
+- **Least depth** d(p). d(root) = 0. For a premise or data position p of a clause c:
+
+  d(p) = 1 + min { max(d(g), e(c)) : c ▷ g },
+
+  where e(c) = d(g₀) if c is local to the goal position g₀, and e(c) = 0 for a global clause. The term e(c) is the scope tightening: by 6.3, a local clause is used only at the node that introduced it or below, and that node solves g₀. Compute it as a shortest-path fixpoint from ∞.
+- **Least size.** s(g) = min { cs(c) : c ▷ g }, where cs(c) = 1 + Σ s(p) over the *premise* positions p of c. Data positions count 0, because they are optional (6.9). Compute it as a least fixpoint by relaxation from ∞. This is a shortest-hyperpath computation.
+- **The bounds.**
+  - `gp(α, g)` is possible only if d(g) ≤ α and α + s(g) ≤ N.
+  - `cl(α, c)` is possible only if some g with c ▷ g has max(d(g), e(c)) ≤ α, and α + cs(c) ≤ N.
+  - Every other `gp` and `cl` literal is dead.
+
+#### 3.4.2 Why the bounds hold in every model
+
+This is the argument that Claude Code checked against the encoding in 8b, with the scope tightening added.
+
+- **Depth.**
+  - `gp(0, root)` is forced, and there is at most one `gp` per node (6.1), so only node 0 solves the root.
+  - A node β ≥ 1 has exactly one parent edge `y(α, β, k)`. `cl(α, c) ∧ y(α, β, k)` forces `gp(β, g_k)`, and c is applied at α only if c ▷ g′ for the position g′ that α solves (6.4 forbids every other pairing). So depth(β) ≥ d(g′) + 1.
+  - If c is local to g₀, then `u(α, γ)` with γ ≤ α and `gp(γ, g₀)`, and γ is α or one of its ancestors (6.3). So depth(α) ≥ depth(γ) ≥ d(g₀).
+  - Parents have smaller indices, so depth(β) ≤ β.
+- **Size.** Every premise index of the clause applied at α has a child (6.2). Children are distinct nodes with larger indices. By induction on the subtree, the subtree of α has at least cs(c) ≥ s(g) nodes, all with indices in [α, N). So α + s(g) ≤ N.
+- **Only structural clauses are used**, so the bounds hold in every model of the CNF. Unification only adds conditions, so ignoring it keeps d and s lower bounds.
+- **Checked on models:** 0 of 492 `gp`/`cl` pairs used in 90 real models violate the bounds (8b). The scope tightening is new and must be checked on models in the same way.
+
+#### 3.4.3 What disappears
+
+- **Units.** `¬gp(α, g)` and `¬cl(α, c)` for the dead pairs, so the solver starts with them propagated.
+- **Objects.** The rigid and value objects of a dead `cl(α, c)` or `gp(α, g)`, and the type-template objects owned by them, are never built.
+- **Slots.** Slots used only by dead pairs are not allocated.
+- **Clauses that become trivial:**
+  - matching (6.4) under a dead pair;
+  - parent and introducer links (6.6) under a dead `cl`;
+  - all groundness (6.8) of a dead `cl(α, c)`;
+  - every grounding candidate whose object is dead;
+  - every decomposition pair with a dead object;
+  - the occurs-check and escape clauses of dead objects.
+- **Label width.** Fewer objects means a smaller "objects built" count, so the `idx` field can shrink by a bit or two.
+- **Early exit.** If s(root) > N, the CNF is the empty clause, and the tactic reports "no proof with at most N nodes" without encoding anything. The N loop can start at N = s(root).
+
+#### 3.4.4 Expected gain
+
+At N = 5, 8b found the clauses that depend only on dead pairs to be 50% of all clauses with the rules and 65% without, pooled, so weighted towards the large CNFs that crash. The per-point median is 39% and 33%. So a typical CNF shrinks about 1.5–1.6 times, and the large ones 2–3 times. The bonus clauses (matching, links, occurs check) and the solver's propagation of the units come on top. At N = 10 the shares will differ; 8c-1 measures them.
+
+#### 3.4.5 Tests
+
+- The flag off gives byte-identical DIMACS.
+- The three differential suites and the Lean suite give identical answers with it on and off.
+- **Mutation checks.**
+  - Tighten the size bound by one (α + s(g) ≤ N − 1). Every test that expects a proof at its minimal N must then fail: a proof of exactly N nodes uses every index, so the node at index N − 1 is a leaf, and it sits exactly on the bound.
+  - Drop the scope term e(c). This only weakens the bound, so it must change no answer, only sizes. That confirms the tightening is not doing the work of a bug.
+- A model check in the Lean suite: every decoded proof's pairs satisfy the bounds.
+
+### 3.5 R2: objects that can never be active together (exact; 8c-1)
+
+Two objects at the **same node** whose activation literals belong to the same at-most-one group can never be active together:
+
+- objects owned by `cl(α, c)` and `cl(α, c′)` with c ≠ c′ (6.1 allows one clause per node);
+- objects owned by `gp(α, g)` and `gp(α, g′)` with g ≠ g′;
+- a value object of c and a head object of c′ ≠ c;
+- type-template objects, by their owners' activation literals.
+
+**The rule.** For such a pair, emit no decomposition clauses and no pair-pruning `idx`-differs clause.
+
+**Why this is exact.** The pair's defining clause `¬act(o) ∨ ¬act(o′) ∨ d₁ ∨ … ∨ sm` is implied by the at-most-one constraint. `sm` occurs positively only there, so setting `sm` and every `dⱼ` to false satisfies all the pair's other clauses. Labels of inactive objects are constrained only by conditional clauses, so two never-co-active objects sharing a label is harmless.
+
+**Expected gain.** Same-node pairs are 18% of decomposition with the rules (16% without). Pairs within one template (two `List` positions of the same head) remain. 8c-1 measures the exact share, after R1.
+
+**Mutation check.** Apply the rule also to a goal object and a head object at the same node (`gp(α, g)` with `cl(α, c)`), which *can* be active together. The differential suites must then find mismatches.
+
+### 3.6 Types and universe levels (the largest remaining share; 8c-2, after more measurement)
+
+Decomposition with the rules is dominated by `lvl:succ`, `c:List`, `sort` and `lvl:max`. Almost all of these come from type templates, built only for the typing clause (6.8): types like `List.{u} α` and `Sort (succ u)`, copied at every node. These pairs grow with (copies × positions)², which is why types dominate. Two exact designs follow. 8c-1 measures first how much of decomposition each would remove (M6 in 3.9).
+
+#### 3.6.1 R3: typing by static unification, without whole type-template objects
+
+**Now.** `sv ⇒ L(type of b at α) = L(type of o)`, with both types built as objects that take part in decomposition.
+
+**Proposed.**
+
+1. At compile time, unify the two type templates: the variable's type T_b over its clause's frame, and the candidate's type T_o over its owner's frame. Rename them apart, unless the candidate is at the same node in the same frame, in which case the variables are shared.
+2. If they do not unify, drop the candidate. Candidate pruning already does the weaker unifiable-apart test.
+3. Otherwise, take the solved form that unification produces: equations x = t, where each t is a subterm of one of the two templates. Emit `sv ⇒ L(x) = L(⟦t⟧)` for each, where ⟦t⟧ is:
+   - a slot, when t is a variable;
+   - a ground object, when t is ground;
+   - a residual type object, built only for this subterm, when t has structure and variables.
+
+**Why it is exact.** A substitution σ makes the types equal if and only if σ unifies the two templates. That holds if and only if σ satisfies every equation of the solved form, since each step of unification preserves the set of unifiers. Labels encode σ, as in SPEC 6.11. The residual objects take part in decomposition, so their labels still mean terms.
+
+**What it saves.**
+
+- The whole type-template objects disappear. Only residual subterms remain: for example `List y` when one type is a bare type variable.
+- With them goes most of the level structure inside types, and the rank width shrinks (SPEC 5.3 counts type templates in rt + rh).
+- The cost moves to groundness: a few slot equalities per candidate instead of one type-label equality. That is linear, not quadratic.
+
+**Risks.**
+
+- Bare type variables (`?α` against `List Nat`) need residual or ground objects. Polymorphic rules have many of these, so M6 counts the solved-form equations by kind before R3 is built.
+- Unknown types keep today's policy (no typing clause).
+
+#### 3.6.2 R4: universe levels as a finite domain
+
+Level objects (`succ`, `max`, `imax`, parameters, `zero`) appear in type templates and as the level arguments of constants (SPEC 4.5). Their values are ground level terms over the goal's universe parameters.
+
+**Proposed.**
+
+- At compile time, compute Λ: the closure of the forest's ground level terms under its level templates, up to the depth that N nodes can build.
+- If |Λ| is at most a cap, set from M6's distribution of |Λ| (amendment 4.4), encode every level slot and level object as an index into Λ: ⌈log₂ |Λ|⌉ bits, with no `idx`, `rank` or `esc`.
+- Give each `succ` or `max` object static table clauses: for each λ in Λ, `child = λ ⇒ o = succ λ`, or `child ≠ λ` when `succ λ` is not in Λ.
+- Level equality is index equality. Level objects need no decomposition and no occurs check: the tables make the encoding a free term algebra restricted to Λ, so labels determine terms both ways, and the values are ground.
+- If |Λ| exceeds the cap, fall back to today's encoding, and record the fallback in the run's statistics.
+
+**Why it is exact.**
+
+- Λ contains every level value that a proof of at most N nodes can produce. With the tables, equal indices mean equal terms.
+- The semantics stays syntactic, as now (SPEC 2.2).
+- A later option could build the tables with `Level.normalize`. That would lift the "levels up to commutativity" limitation of SPEC 2.4, but it would change the proof class, so it is not part of milestone 8.
+
+**Order.** R3 removes most level objects (those inside types). R4 covers those left in term templates. M6 measures both shares. R4 is built only if M8 shows that level objects keep a meaningful share of decomposition after R1, R2 and R3 (amendment 4.4).
+
+### 3.7 Groundness
+
+#### 3.7.1 What the measurements rule out
+
+- **Locality is unsafe.** Real proofs ground variables with candidates at descendants and unrelated nodes (M5), so restricting candidates to ancestors would lose proofs.
+- **Dead candidates go with R1.** Candidates on dead pairs, about 38% of groundness, are removed by R1.
+
+#### 3.7.2 Why groundness cannot simply be dropped for head variables
+
+It is tempting to drop groundness for every clause variable that occurs in its clause's head, because matching equates it with part of the target. That is unsound.
+
+Suppose:
+
+- x occurs inside `f(x)` in the head at node 3;
+- the target there is a variable, linked to a slot at node 1;
+- that slot is grounded by a rigid object `f(z)` at node 4;
+- z, a head variable at node 4, is matched against a slot that node 2 grounds by the head object `f(x)` at node 3.
+
+Every clause is then satisfied, yet the class of x and z contains no rigid object, ground term or eigenvariable: both are undetermined. The decoder would fail, which the standing rule counts as a bug.
+
+#### 3.7.3 R5: rigidly matched head variables (exact; 8c-2, after M7)
+
+The cycle above needs a step through a variable of the target. Without one, the argument is safe.
+
+**The rule.** Let x be a clause variable at path π in head(c), and suppose that for **every** g with c ▷ g, the target tgt(g) has a rigid or ground position at π (not a variable leaf, and not open). Then matching, with decomposition along π, gives L(x) = L(tgt(g)|π at α): an object at the **same node**. That object's variables are goal slots of α, which are linked to the parent (a smaller index), so x is determined, by induction on the node index, with no cycle. Drop x's groundness clauses and its typing clauses.
+
+**The decoder** is unaffected: it already assigns x by unifying the head with the target during replay (SPEC 8, step 2), and matched values are well typed (SPEC 6.8).
+
+**Expected gain: unknown.** In rewriting chains, targets are often variables of other rules (`?t = ?s`), so the reach may be modest. M7 measures it before anything is built.
+
+**Mutation check.** Apply the rule to a variable matched against a variable leaf, as in 3.7.2. A hand-built forest with the cycle must then produce a model that does not decode.
+
+### 3.8 Label width, and what is not proposed
+
+- **Width.** W enters every equality gadget. R1 and R3 shrink `idx` and `rank` as by-products. A per-symbol `idx` width, where an object's high `idx` bits are constant 0 so equalities against it fold, is a small further gain. It is not proposed separately.
+- **Rejected: comparing labels on `sym` and `idx` only.** A slot's `esc` bits must equal its class's for the scope check (6.7). A slot compared with its candidate on `sym` and `idx` alone could escape the check, which is unsound.
+- **Rejected: locality restrictions on candidates** (M5, 3.7.1).
+- **Deferred: the lazy, incremental option** (amendment 4.2), until the project is complete.
+
+### 3.9 Measurements still needed (in 8c-1)
+
+8b's diagnostics extend with little work. On the same 400 points:
+
+- **M6.**
+  - Decomposition split by object kind (rigid term object, value object, type-template object, ground) crossed with level against term symbols.
+  - For R3, the solved-form equations over all kept candidates, counted by kind (slot, ground, residual), with the residual objects R3 would need.
+  - For R4, the size of Λ per point.
+- **M7.** Groundness clauses split by whether the variable is rigidly matched in the sense of R5.
+- **M8.** After R1 and R2, the same family shares, so that R3 to R5 are judged on what is left, not on what R1 already removed.
+
+### 3.10 What this means for rewriting
+
+The rules of 8a multiply the CNF 13–18 times at N = 5. R1 and R2 recover about 2 times on the large CNFs, and R3 to R5 an amount that M6 to M8 will show. So scale alone is unlikely to absorb the full cost of the rules.
+
+Milestone 9 should also generate fewer rules. In 8a, a goal received congruence and substitution rules for every symbol of its statement and H, and no goal with more than 10 rules was proved. Rules only for symbols on a possible rewriting path (between the two sides of an equation in H and the goal) would be far fewer. That belongs in M9_DESIGN 6.1.
+
+### 3.11 Stages
+
+| Stage | Work | Acceptance |
+| --- | --- | --- |
+| 8c-1 | R1 (with the early exit) and R2 as refinement flags, plus the M6 to M8 measurements | The flag off gives byte-identical DIMACS. Answers are identical on all differential suites and the Lean suite. The mutation checks fire. `countOnly` parity holds. The model check passes. Sizes on the 400 8b points, at N = 5 and N = 10. A rerun of 8a's 200 runs under the same limits, to measure feasibility. Pre-registered in 4.4. |
+| 8c-2 | R3 and R4, then R5, as M6 to M8 justify | The same, for each |
+| 8d | Evaluation: milestone 7's memory-crashed goals (a pre-registered sample) and 8a's rewriting goals, with every accepted refinement on | Pre-registered, as in milestone 7 |
 
 ## 4. Amendments
 
@@ -181,3 +412,55 @@ The scale design (8b) is written in the claude.ai project. It needs numbers that
 - The CNF the tactic builds does not change. Diagnostic code is new code, or hooks that are off by default. The 36 named cases and the SPEC 7.3 instances must give byte-identical DIMACS with and without it.
 - The measurements are facts for the design. Reading them is for the design note.
 - **Report.** `eval/m8b/report.py` writes `eval/m8b/DIAG.md` from the data files alone. It must regenerate byte-identically.
+
+### 4.4 The scale design is accepted, and 8c-1 starts (25 November 2026)
+
+**8b record.** NOTES.md ("8b: measurements") and `eval/m8b/DIAG.md` have the details. The measurements were checked independently:
+
+- `SolveBySat/` is unchanged since 8a;
+- DIAG.md regenerates byte-identically;
+- the M4 shares recompute from the raw sections;
+- the DIMACS identity covers the 36 named cases and 18 SPEC 7.3 encodings, with the diagnostics on and off, and against `5820197`;
+- 0 of 492 `gp` and `cl` pairs used in 90 real models violate the M4 bounds.
+
+Section 3 is the design written from them.
+
+**Owner decisions.**
+
+1. **Exact only.** Milestone 8 accepts only exact reductions (3.1), so no proof is lost. Heuristic reductions are out of scope.
+2. **On by default.** R1 and R2, and each later reduction, are on by default once accepted, so the CNF is small by default. The off-switch keeps the old CNF available.
+3. **R4's cap with a fallback**, with three conditions:
+   - R4 is built only if M8 shows that level objects keep a meaningful share of decomposition after R1, R2 and R3. Most level objects sit inside types, which R3 removes.
+   - The cap is set from M6's distribution of |Λ| on the 400 points, so that it covers all of them. It is not fixed in advance.
+   - Each run records whether it fell back.
+
+   Both encodings are exact, so a fallback can cost size but never an answer.
+
+**8c-1, pre-registered.**
+
+- **Work.** R1, with the early exit, and R2, as refinement flags (3.4, 3.5), with the tests of 3.1, 3.4.5 and 3.5. Then the measurements M6 to M8 (3.9).
+- **The scope tightening e(c) is new.** Before any size is measured, it is checked on models, as M4 was: the `gp` and `cl` pairs used in the 64 proved 8a runs and in the proofs of the 36 named cases must all pass the bounds with e(c). A violation stops the work.
+- **Sizes.** `countOnly` counts per family on the 400 points of 4.3, at N = 5 and at N = 10, in three settings:
+  - every milestone 8 flag off;
+  - R1 on;
+  - R1 and R2 on.
+
+  The flags-off counts at N = 5 must equal 8b's. A point that runs out of memory is recorded as such, with the last counts reached.
+- **Bound check.** At N = 5, at every point and in both settings with R1 on, the clause count less the unit clauses R1 adds must be at most 8b's total less its `groundness_dead` and `decomposition_dead`. Pooled, that is at most 1,498,749,386 clauses with the rules and 276,055,055 without. A point above its bound means that R1 misses clauses that M4 counted as dead. That stops the work until it is explained.
+- **Rerun of 8a.**
+  - The 200 runs of section 2 are repeated with R1 and R2 on, with the same specs (`eval/m8a/specs.jsonl`), rules, N loop and limits (2.4), and the same size records.
+  - **Stop rules: the exactness checks.** A rerun stops if it:
+    - reports a proof at an N where 8a's answer was UNSAT;
+    - reports UNSAT, or the early exit, at an N where 8a found a proof;
+    - finds a proof at an N other than 8a's for a goal that both runs prove.
+
+    The stop rules of 2.5 also apply.
+  - **Not a stop.** A goal proved in 8a whose rerun ends at a resource limit before 8a's N is recorded and explained, since a different CNF can take the solver longer.
+  - **Report.** It compares outcomes with 8a's, goal by goal, and solving and encoding times where both runs answered the same N.
+- **Report.** `eval/m8c1/report.py` writes `eval/m8c1/SCALE.md` from the data files alone, and it must regenerate byte-identically. It covers:
+  - the sizes, pooled and as per-point ratios, per family;
+  - M6 to M8;
+  - the rerun.
+
+  It states facts. Reading them, and choosing what 8c-2 builds, is for the claude.ai project.
+- **Defaults.** R1 and R2 become on by default only after every check above passes. Until then they are switched on explicitly.

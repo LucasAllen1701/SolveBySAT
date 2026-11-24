@@ -2833,3 +2833,107 @@ It runs the driver with milestone 7's limits, then the `countOnly` sizes. Runs t
   P3–P5 (`eval/m8a/run_all_4.1.log`). The named cases are 36/36 with the amended harness and no rules.
   `SolveBySat/` is unchanged since `m7-data` (empty `git diff`). After `55d25b4`, only data (`eval/m8a/full/`),
   `PROBE.md`, NOTES.md and CLAUDE.md changed. PROBE.md regenerates byte-identically.
+
+### 8b: measurements (M8_PLAN §4.2, §4.3; 24 November 2026)
+
+- **Plan.** Sections 4.2 and 4.3 and the new status line were added to M8_PLAN.md as written (`a108c9e`).
+- **Machine checks.** `vm.overcommit_memory` = 1. The memory controller is delegated, and a 400 MB allocation
+  under `MemoryMax=200M` was killed (exit 137). 5.4 GB was available. `Test/run_all.sh` exit 0 before any change.
+
+#### Diagnostics without changing the CNF (§4.3 "Rules")
+
+- **No hooks.** `SolveBySat/` is unchanged (empty `git diff 5820197 -- SolveBySat`).
+  - The diagnostics are a new module, `Test/M8Diag.lean`. It rebuilds the per-node object graph with the
+    encoder's own public builders (`Encode.build`, `buildValue`, `buildGround`, `buildType`) and copies the
+    encoder's candidate lists, typing decisions and pair loop.
+  - It replays each grounding candidate's and each decomposition pair's clauses with the encoder's own gadgets
+    (`addClause`, `eqUnder`), in a scratch counting CNF, with the encoding's real labels and `sv` literals.
+    So constant folding is identical, and every clause is attributed exactly.
+  - Every point checks itself: the replayed totals must equal the encoder's "8 groundness" and
+    "5 decomposition" counts, and the kept candidates must equal `Encoding.sv`.
+  - `eval_run` gains three subcommands: `diag` (M1–M4, with `countOnly`), `diag-models` (M5) and `dimacs`.
+    `m8b_dimacs73` writes the SPEC 7.3 encodings.
+- **DIMACS byte-identical** (`eval/m8b/dimacs_md5.txt`). The 36 named cases at their milestone 7 N, and the 9
+  SPEC 7.3 instances with all refinements on and all off (18 encodings), were compared three ways:
+  diagnostics run on the encoding first (`on`), not run (`off`), and the same tools built against
+  `SolveBySat/` at `5820197` (a worktree). All 54 files are equal in all three. The 7.3 counts match SPEC 7.3
+  (for example 9 lemmas, N = 12, all off: 5,159,936 clauses).
+- **Hand count (`test_m8diag`, in `Test/run_all.sh`).** L1 at N = 2: 48 `sv`, all eigenvariable slots (24 at the
+  same node, 12 at a smaller and 12 at a larger index), and no decomposition pair; recounts equal the
+  encoder's. The test caught a bug in the first version: the copy had left out the eigenvariable candidates
+  (0 `sv`, 6 kept-candidate mismatches). Fixed before any measurement.
+
+#### M4: the bounds argument, checked against the encoding
+
+- **Depth.**
+  - `gp(0, root)` is forced, and there is at most one `gp` per node (6.1), so node 0 solves exactly the root.
+  - A node β ≥ 1 has exactly one parent edge `y(α, β, k)` (6.2), and `cl(α, c) ∧ y(α, β, k) ⇒ gp(β, g_k)`
+    forces it to solve the premise or data position at index k of its parent's clause. The root is no clause's
+    premise, so only node 0 solves it.
+  - The parent solves some g′, and applies c only if c statically matches g′ (6.4 forbids every other pairing).
+    So depth(β) ≥ d(g′) + 1 ≥ d(g_k), by the fixpoint.
+  - Parents have smaller indices (5.1, 6.2), so depth(β) ≤ β.
+- **Size.**
+  - Every premise index of the applied clause needs a child (6.2). Data indices need none (6.9), so they count 0.
+    Children are distinct nodes with larger indices.
+  - By induction on the subtree, the subtree at α has at least s(g) nodes (cs(c) for the clause applied), all
+    with indices in [α, N). So α + s(g) ≤ N.
+- **What is ignored.** The fixpoint ignores unification and the scope of local clauses (6.3). Both only add
+  options, so d and s stay lower bounds.
+- **Strength of the claim.** The argument uses only structural clauses, so the bounds hold in *every model of
+  the CNF*, not only in decoded proofs. So a clause conditioned on an excluded `cl` or `gp` literal is
+  satisfied in every model: the "dead" shares are exact.
+- **No flaw was found.**
+- **On models (`eval/m8b/models/`, `diag-models`).**
+  - The 64 proved 8a runs (with the rules) and the 26 named cases with a proof (milestone 7's H) were
+    re-solved at their proved N (solver limit 20 s), decoded and kernel-checked: 64/64 and 26/26 SAT, every
+    proof valid, and every proof has exactly N nodes, so each re-solve gives a proof of the same N.
+  - All 374 + 118 `gp` and `cl` pairs used pass the bounds: **0 violations**.
+
+#### M1–M4 on the 400 points (`eval/m8b/points/`)
+
+- `python3 Test/m8b_run.py points eval/m8b/specs_points.jsonl eval/m8b/points 5 --publish`, detached, from
+  `5428a9c` (17:03 to 18:50, 6,452 s), one capped `eval_run diag` process at a time.
+- **No memout and no crash:** 400/400 `ok`. **Recount checks: 800/800 sections equal the encoder; 0
+  kept-candidate mismatches.**
+- *Publishing.* The driver published only between diag processes, and with no memout there was only one
+  process. So a separate loop (`m8b_run.py publish-loop`, every 20 minutes) pushed `STATUS.md` from 144
+  points on. It was stopped by PID at the end.
+- **Report.** `eval/m8b/report.py` writes `eval/m8b/DIAG.md`. Regenerated twice and under `PYTHONHASHSEED`
+  1 and 777: byte-identical (md5 `97b344cade3d`).
+
+#### Surprises
+
+1. **M4 removes a lot.**
+   - Least depth and least size exclude a third of all `gp` and `cl` pairs (33–36% with rules, 39–42%
+     without).
+   - The clauses that depend only on excluded pairs are **50% of all clauses with the rules and 65% without**
+     (pooled; groundness 38% / 47%, decomposition 58% / 68%).
+   - These clauses are satisfied in every model.
+2. **Decomposition is dominated by types and universe levels, not by the goals' terms.** With the rules, the
+   largest symbols are `lvl:succ/1` (32% of decomposition), `c:List/2` (20%) and `sort/1` (10%), then
+   `lvl:max/2`. These are mostly type-template objects (the typing clause), and in a point the largest
+   symbol alone is a median 46% of decomposition. Without rules, `c:List/2` is 45% pooled.
+3. **Decomposition is 82–84% between different nodes**, and with the rules 85% is between templates in the same
+   static may-equal component. So the component rule recorded in DIAG.md separates little once the rules
+   connect the symbols. Without rules it is 58% pooled, but a median 99%: a few large points have big
+   cross-component shares.
+4. **Groundness candidates.**
+   - 91% of the groundness clauses with the rules (84% without) come from rigid-position candidates.
+   - The split by node index is symmetric by construction (each slot considers every node's copies):
+     39 / 20 / 39% for smaller, same, larger.
+   - In the models, the chosen candidates are mostly at the same node or an ancestor. An eigenvariable slot is
+     never a descendant's or an unrelated node's.
+   - But rigid positions are chosen at a descendant (26 of 113) and at an unrelated node (9) too, and value
+     objects at a descendant (5 of 6) in the named cases.
+5. **Label width W is 18–35 bits** (median 27 with rules, 25 without). `idx` and `rank` are the variable parts
+   (6–13 and 3–11 bits); `esc` is N = 5.
+
+- **Slip, recorded.** In `1115737` a `sed` replacement containing `&` mangled `Test/run_all.sh`'s build line.
+  It was repaired in `5428a9c` before the suite was run with the new test. The 1.3 GB of DIMACS files written
+  for the identity check were on `/tmp`, a tmpfs here, and were deleted right after the check (CLAUDE.md's
+  lesson).
+- **Regression (end of 8b measurements):** `Test/run_all.sh` exit 0 at `5428a9c` with `test_m8diag` (M0
+  902/902, M1 19/19, M4 4/4, M5 10/10, `countOnly` 22/22, M8 diagnostics 10/10; M2, M3, M4Lean, M5Lean,
+  M7Lean, M8Probe pass; `eval/m8b/run_all.log`). The CNF is byte-identical to `5820197`'s on the 36 named cases
+  and the 18 SPEC 7.3 encodings. `SolveBySat/` is unchanged. DIAG.md regenerates byte-identically.

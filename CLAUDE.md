@@ -45,6 +45,7 @@ lake build Test.EvalNamed          # loaded at run time by the named harness
 lake build eval_numerals           # 7d-1 annotations, forest dumps, invariant check
 lake build eval_scaling eval_pool test_countonly SynthLib   # 7c
 lake build eval_run Test.M8Probe     # 8a: probe harness and hand examples
+lake build test_m8diag m8b_dimacs73  # 8b: diagnostics test and SPEC 7.3 DIMACS writer
 ```
 
 ## Layout and where the data lives
@@ -95,7 +96,13 @@ machine's specs in NOTES.md before a full run.
     result-dependent positions skipped; harness only), `Test/M8Probe.lean` (P1–P5, in `run_all.sh`),
     `eval_run`'s `probe` spec fields and the `probe-rules` subcommand, `Test/m8a_setup.py`, `Test/m8a_run.py`,
     `Test/m8a_full.sh` (detached run: `setsid nohup Test/m8a_full.sh &`) with `Test/m8a_publish.sh` (pushes `m8`).
-  - **Next: 8b, the scale design note**, written in the claude.ai project with PROBE.md in hand.
+  - 8b has started (M8_PLAN §4.2: the encoding stays one-shot; §4.3: measurements first). The measurements are
+    done (NOTES.md, "8b: measurements"): `eval/m8b/DIAG.md` from `python3 eval/m8b/report.py`, with the 400
+    points in `eval/m8b/points/`, the models in `eval/m8b/models/`, and the DIMACS identity in
+    `eval/m8b/dimacs_md5.txt`. Tools: `Test/M8Diag.lean` (read-only recount, checked against the encoder's
+    family counts), `eval_run diag | diag-models | dimacs`, `m8b_dimacs73`, `test_m8diag` (in `run_all.sh`),
+    `Test/m8b_setup.py`, `Test/m8b_run.py` (`points`, `publish-loop`).
+  - **Next: the 8b scale design note, written in the claude.ai project** with PROBE.md and DIAG.md in hand.
 - Milestone 8 rules: as milestone 7's. Do not change `SolveBySat/` in 8a. Filters, seeds, sample sizes and
   limits are pre-registered in `M8_PLAN.md` and NOTES.md; a decoder failure on a satisfiable CNF, or a
   §2.5 stop rule, stops the run.

@@ -2795,7 +2795,8 @@ It runs the driver with milestone 7's limits, then the `countOnly` sizes. Runs t
   2 for 5, 3 for 2, 4 for 3, 5 for 1). Every proof and its rules are in PROBE.md.
   - 8 Tier B proofs use a `propext` equation, all on goals with a `propext` obstacle: 8 of those 28, and
     none of the 10 such goals in Tier A (all 10 crashed).
-  - 17 use a generated congruence or substitution rule (with 9 different symbols).
+  - 11 use a generated congruence or substitution rule (6 in Tier B, all 5 in Tier A). The other 10 are the 8
+    `propext` proofs and 2 proofs that need only `Eq.refl` (surprise 2).
 - **Milestone 7's answer against 8a's, rewriting goals:**
   - no proof ≤ 10 → proved 20, memory crash 46, timeout 41, no proof ≤ 10 3;
   - memory crash → memory crash 39, proved 1.
@@ -2821,7 +2822,7 @@ It runs the driver with milestone 7's limits, then the `countOnly` sizes. Runs t
    them as all-3A because their oracle proofs use `congrArg`/`propext`. They failed in milestone 7 only
    because `Eq.refl` was not in their H_main, which the oracle H filter (§2.3) leaves out.
 3. **`propext` equations are the most effective rule.** They prove 8 of the 28 Tier B goals with a `propext`
-   obstacle (29%), against 8 of the 72 without one (11%). Five of those 8 proofs have 1 or 2 nodes.
+   obstacle (29%), against 8 of the 72 without one (11%). Seven of those 8 proofs have 1 or 2 nodes.
 4. **The pilot's one changed goal.** `B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/5` crashed in the
    pilot and is now proved at N = 1 by a `propext` equation, which amendment 4.1 added.
 5. **Substitution at Prop positions works only for opaque predicates.** For the connectives (`Iff`, `And`,

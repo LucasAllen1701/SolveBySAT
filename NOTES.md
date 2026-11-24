@@ -2774,3 +2774,61 @@ It runs the driver with milestone 7's limits, then the `countOnly` sizes. Runs t
   then the sizes). The after-shard hook is `Test/m8a_publish.sh`: it writes `eval/m8a/full/STATUS.md`,
   commits `eval/m8a/full/` only, and pushes `m8`. The 7b scripts push `eval-m7`, which is now an archive,
   so they are not used.
+
+#### The run (`eval/m8a/full/`)
+
+- Started detached from a clean tree at `55d25b4` (12:32). Runs finished at 14:44 (7,895 s); sizes, 378
+  `countOnly` counts, at 15:40 (3,371 s, all `ok`). Total 3.1 h, against the pilot's 3.3 h projection.
+  Wrapper exit 0. The hook pushed `STATUS.md` after each of the 4 shards and at the end (`2dc5ab8`).
+- **Stop rules (§2.5): none fired.** No decoder failure. Every control that is not proved hit a resource
+  limit. Every rewriting proof uses a constant outside H_main.
+- **Report.** `eval/m8a/report.py` writes `eval/m8a/PROBE.md` from the data files alone. Regenerated twice
+  and under `PYTHONHASHSEED` 1 and 777: byte-identical (md5 `44a850dbd2b1`).
+
+| group | runs | proved | no proof ≤ N | memory crash | solver timeout |
+| --- | --- | --- | --- | --- | --- |
+| rewriting, Tier B | 100 | 16 | 1 | 52 | 31 |
+| rewriting, Tier A | 50 | 5 | 2 | 33 | 10 |
+| control | 50 | 43 | 0 | 6 | 1 |
+
+- **Rewriting proofs:** 21 of 150 goals that milestone 7 did not prove, at N 1–8 (Tier B: N = 1 for 5 goals,
+  2 for 5, 3 for 2, 4 for 3, 5 for 1). Every proof and its rules are in PROBE.md.
+  - 8 Tier B proofs use a `propext` equation, all on goals with a `propext` obstacle: 8 of those 28, and
+    none of the 10 such goals in Tier A (all 10 crashed).
+  - 17 use a generated congruence or substitution rule (with 9 different symbols).
+- **Milestone 7's answer against 8a's, rewriting goals:**
+  - no proof ≤ 10 → proved 20, memory crash 46, timeout 41, no proof ≤ 10 3;
+  - memory crash → memory crash 39, proved 1.
+- **Size.** At N = 5 the rules multiply the clauses 17.7× (Tier B), 13.2× (Tier A) and 5.0× (controls), as a
+  median over goals with a milestone 7 count. Groundness plus decomposition is 95–96%. Over crashed runs
+  with a milestone 7 count at the same N, the median is 16.5× (range 2.3–258). The smallest crashed CNF has
+  9.47 M clauses.
+- **Controls:** 43 of 50 stay feasible. All 24 with original N ≤ 2 stay feasible, 11 of 13 at N 3–4 and 8 of
+  13 at N ≥ 5. Clauses at the original N grow by a median of 13.6× (range 2.4–183). The seven that are lost
+  (6 memory, 1 timeout) all had an original N of 3 or more. One control proof uses a rule
+  (`A/Lean.Grind.Order.eq_trans_false'`, at its original N 4).
+- **Proved share by rules:** no rewriting goal with more than 10 accepted rules is proved (0 of 56). With
+  10 or fewer, 21 of 94 are.
+
+#### Surprises
+
+1. **The rules mostly turn definite answers into resource limits.** 87 of the 110 rewriting goals with a
+   certified "no proof ≤ 10" in milestone 7 now end at a limit (46 memory, 41 solver timeout). Only 3 keep a
+   certified answer. The pilot had no timeouts; the full run has 42, all at the 20 s per-call solver limit,
+   at N 3–10 (mostly 6–8).
+2. **Two "rewriting" goals need no rewriting.** `B/List.mkSlice_ric_eq_mkSlice_rio/0` is proved by `Eq.refl`
+   alone (N = 1), and `B/Array.contains_filter/15` by an H_main lemma applied to `Eq.refl` (N = 2). E5 counted
+   them as all-3A because their oracle proofs use `congrArg`/`propext`. They failed in milestone 7 only
+   because `Eq.refl` was not in their H_main, which the oracle H filter (§2.3) leaves out.
+3. **`propext` equations are the most effective rule.** They prove 8 of the 28 Tier B goals with a `propext`
+   obstacle (29%), against 8 of the 72 without one (11%). Five of those 8 proofs have 1 or 2 nodes.
+4. **The pilot's one changed goal.** `B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/5` crashed in the
+   pilot and is now proved at N = 1 by a `propext` equation, which amendment 4.1 added.
+5. **Substitution at Prop positions works only for opaque predicates.** For the connectives (`Iff`, `And`,
+   `Or`) the `=` substitution rules are rejected, because their heads split into variable heads (162 of the
+   184 rejections). P4's `Q` works.
+
+- **Regression (end of the full 8a run):** `Test/run_all.sh` exit 0 at `55d25b4` with the amended rules and
+  P3–P5 (`eval/m8a/run_all_4.1.log`). The named cases are 36/36 with the amended harness and no rules.
+  `SolveBySat/` is unchanged since `m7-data` (empty `git diff`). After `55d25b4`, only data (`eval/m8a/full/`),
+  `PROBE.md`, NOTES.md and CLAUDE.md changed. PROBE.md regenerates byte-identically.

@@ -238,3 +238,8 @@
 {"hwm_mb":734,"key":"m8b:norules:main:B/Array.toList_fst_unzip/4","ms":2690,"status":"ok"}
 {"hwm_mb":734,"key":"m8b:rules:main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8","ms":27120,"status":"ok"}
 {"hwm_mb":734,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8","ms":865,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:rules:main:B/Nat.getElem!_toArray_ric/1","ms":27050,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:rules:main:B/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left/10","ms":3318,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left/10","ms":156,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:rules:main:B/Std.DTreeMap.Internal.Impl.Const.get!ₘ_eq_getValue!/0","ms":28720,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Const.get!ₘ_eq_getValue!/0","ms":1285,"status":"ok"}

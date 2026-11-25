@@ -139,98 +139,98 @@ Encoding time (countOnly), pooled: off 667 s, R1 206 s, R1 R2 199 s.
 
 | points | setting | records | ok | memout | crash | early exit |
 | --- | --- | --- | --- | --- | --- | --- |
-| with the 8a rules | both flags off | 1 | 1 | 0 | 0 | 0 |
-| with the 8a rules | R1 on | 1 | 1 | 0 | 0 | 0 |
-| with the 8a rules | R1 and R2 on | 1 | 1 | 0 | 0 | 0 |
-| milestone 7's H, no rules | both flags off | 1 | 1 | 0 | 0 | 0 |
-| milestone 7's H, no rules | R1 on | 1 | 1 | 0 | 0 | 1 |
-| milestone 7's H, no rules | R1 and R2 on | 1 | 1 | 0 | 0 | 1 |
+| with the 8a rules | both flags off | 51 | 51 | 0 | 0 | 0 |
+| with the 8a rules | R1 on | 50 | 50 | 0 | 0 | 0 |
+| with the 8a rules | R1 and R2 on | 50 | 50 | 0 | 0 | 0 |
+| milestone 7's H, no rules | both flags off | 50 | 50 | 0 | 0 | 0 |
+| milestone 7's H, no rules | R1 on | 50 | 50 | 0 | 0 | 7 |
+| milestone 7's H, no rules | R1 and R2 on | 50 | 50 | 0 | 0 | 7 |
 
-### Pooled, with the 8a rules (1 points complete in all three settings)
+### Pooled, with the 8a rules (50 points complete in all three settings)
 
 | clauses | off | R1 | R1 R2 | off / R1 | off / R1 R2 | R1 / R1 R2 |
 | --- | --- | --- | --- | --- | --- | --- |
-| total | 17,170,288 | 2,430,134 | 2,420,191 | 7.07× | 7.09× | 1.00× |
-| 1 node assignment | 1,711 | 440 | 440 | 3.89× | 3.89× | 1.00× |
-| 2 tree shape | 4,227 | 2,192 | 2,192 | 1.93× | 1.93× | 1.00× |
-| 3 context (local hypotheses, ancestors) | 2,005 | 1,378 | 1,378 | 1.46× | 1.46× | 1.00× |
-| 4 matching | 261,370 | 84,040 | 84,040 | 3.11× | 3.11× | 1.00× |
-| 5 decomposition | 6,507,055 | 592,209 | 582,266 | 10.99× | 11.18× | 1.02× |
-| 6 links (environment copies) | 356,730 | 79,104 | 79,104 | 4.51× | 4.51× | 1.00× |
-| 7 eigenvariables, occurs check, scope | 64,810 | 14,561 | 14,561 | 4.45× | 4.45× | 1.00× |
-| 8 groundness | 9,970,820 | 1,654,334 | 1,654,334 | 6.03× | 6.03× | 1.00× |
-| 10 symmetry breaking | 1,560 | 1,560 | 1,560 | 1.00× | 1.00× | 1.00× |
-| 11 node bounds | 0 | 316 | 316 | – | – | 1.00× |
-| variables | 1,651,343 | 181,681 | 179,269 | 9.09× | 9.21× | 1.01× |
+| total | 4,192,590,245 | 2,173,648,039 | 2,113,044,407 | 1.93× | 1.98× | 1.03× |
+| 1 node assignment | 69,710 | 49,245 | 49,245 | 1.42× | 1.42× | 1.00× |
+| 2 tree shape | 126,493 | 103,186 | 103,186 | 1.23× | 1.23× | 1.00× |
+| 3 context (local hypotheses, ancestors) | 83,355 | 66,928 | 66,928 | 1.25× | 1.25× | 1.00× |
+| 4 matching | 24,651,000 | 16,772,074 | 16,772,074 | 1.47× | 1.47× | 1.00× |
+| 5 decomposition | 2,948,995,025 | 1,429,574,344 | 1,368,970,712 | 2.06× | 2.15× | 1.04× |
+| 6 links (environment copies) | 12,532,170 | 8,827,278 | 8,827,278 | 1.42× | 1.42× | 1.00× |
+| 7 eigenvariables, occurs check, scope | 6,027,780 | 4,722,707 | 4,722,707 | 1.28× | 1.28× | 1.00× |
+| 8 groundness | 1,200,081,360 | 713,503,817 | 713,503,817 | 1.68× | 1.68× | 1.00× |
+| 10 symmetry breaking | 23,352 | 23,352 | 23,352 | 1.00× | 1.00× | 1.00× |
+| 11 node bounds | 0 | 5,108 | 5,108 | – | – | 1.00× |
+| variables | 660,657,321 | 311,644,975 | 295,751,924 | 2.12× | 2.23× | 1.05× |
 
-Per-point ratios, median [q1, q3], over the 1 points without the early exit (0 left out); points with a family emptied by R1 and R2 are left out of that family's ratios and counted in the last column:
+Per-point ratios, median [q1, q3], over the 50 points without the early exit (0 left out); points with a family emptied by R1 and R2 are left out of that family's ratios and counted in the last column:
 
 | clauses | off / R1 | off / R1 R2 | R1 / R1 R2 | emptied (R1 R2) |
 | --- | --- | --- | --- | --- |
-| total | 7.07 | 7.09 | 1.00 | 0 |
-| 5 decomposition | 10.99 | 11.18 | 1.02 | 0 |
-| 8 groundness | 6.03 | 6.03 | 1.00 | 0 |
-| 4 matching | 3.11 | 3.11 | 1.00 | 0 |
-| 6 links (environment copies) | 4.51 | 4.51 | 1.00 | 0 |
-| 7 eigenvariables, occurs check, scope | 4.45 | 4.45 | 1.00 | 0 |
+| total | 1.49 [1.22, 1.91] | 1.53 [1.24, 1.98] | 1.02 [1.01, 1.03] | 0 |
+| 5 decomposition | 1.46 [1.20, 2.05] | 1.56 [1.27, 2.17] | 1.05 [1.04, 1.06] | 0 |
+| 8 groundness | 1.51 [1.23, 1.96] | 1.51 [1.23, 1.96] | 1.00 [1.00, 1.00] | 0 |
+| 4 matching | 1.43 [1.26, 1.66] | 1.43 [1.26, 1.66] | 1.00 [1.00, 1.00] | 0 |
+| 6 links (environment copies) | 1.28 [1.02, 1.64] | 1.28 [1.02, 1.64] | 1.00 [1.00, 1.00] | 0 |
+| 7 eigenvariables, occurs check, scope | 1.18 [1.09, 1.39] | 1.18 [1.09, 1.39] | 1.00 [1.00, 1.00] | 0 |
 
 Per point, median [q1, q3] (early exits left out of the first five rows):
 
 |  | off | R1 | R1 R2 |
 | --- | --- | --- | --- |
-| W | 34.00 | 33.00 | 33.00 |
-| IB | 10.00 | 9.00 | 9.00 |
-| rigid | 380.00 | 114.00 | 114.00 |
-| type_rigid | 610.00 | 145.00 | 145.00 |
-| full_pairs | 44215.00 | 5049.00 | 4968.00 |
-| R2: pairs skipped | – | – | 97.00 |
-| R1: gp excluded / gp pairs | – | 0.72 | – |
-| R1: cl excluded / cl pairs | – | 0.71 | – |
+| W | 34.00 [33.00, 36.00] | 34.00 [32.00, 35.25] | 34.00 [32.00, 35.25] |
+| IB | 10.00 [10.00, 11.00] | 10.00 [9.00, 11.00] | 10.00 [9.00, 11.00] |
+| rigid | 430.00 [225.00, 702.50] | 357.50 [179.00, 578.00] | 357.50 [179.00, 578.00] |
+| type_rigid | 500.00 [257.50, 997.50] | 343.00 [200.25, 840.25] | 343.00 [200.25, 840.25] |
+| full_pairs | 72285.00 [28870.00, 197348.75] | 36681.50 [14575.50, 114689.50] | 35547.00 [13713.00, 108880.50] |
+| R2: pairs skipped | – | – | 1317.00 [686.00, 6307.75] |
+| R1: gp excluded / gp pairs | – | 0.20 [0.09, 0.37] | – |
+| R1: cl excluded / cl pairs | – | 0.23 [0.15, 0.36] | – |
 
-Encoding time (countOnly), pooled: off 12 s, R1 2 s, R1 R2 2 s.
+Encoding time (countOnly), pooled: off 3,388 s, R1 1,748 s, R1 R2 1,710 s.
 
-### Pooled, milestone 7's H, no rules (1 points complete in all three settings)
+### Pooled, milestone 7's H, no rules (50 points complete in all three settings)
 
 | clauses | off | R1 | R1 R2 | off / R1 | off / R1 R2 | R1 / R1 R2 |
 | --- | --- | --- | --- | --- | --- | --- |
-| total | 3,154,038 | 1 | 1 | 3154038.00× | 3154038.00× | 1.00× |
-| 1 node assignment | 491 | 0 | 0 | – | – | – |
-| 2 tree shape | 2,057 | 0 | 0 | – | – | – |
-| 3 context (local hypotheses, ancestors) | 1,400 | 0 | 0 | – | – | – |
-| 4 matching | 6,970 | 0 | 0 | – | – | – |
-| 5 decomposition | 1,680,110 | 0 | 0 | – | – | – |
-| 6 links (environment copies) | 125,070 | 0 | 0 | – | – | – |
-| 7 eigenvariables, occurs check, scope | 34,470 | 0 | 0 | – | – | – |
-| 8 groundness | 1,301,910 | 0 | 0 | – | – | – |
-| 10 symmetry breaking | 1,560 | 0 | 0 | – | – | – |
-| 11 node bounds | 0 | 1 | 1 | – | – | 1.00× |
-| variables | 410,261 | 0 | 0 | – | – | – |
+| total | 1,869,476,745 | 700,800,246 | 683,409,599 | 2.67× | 2.74× | 1.03× |
+| 1 node assignment | 16,230 | 8,126 | 8,126 | 2.00× | 2.00× | 1.00× |
+| 2 tree shape | 46,789 | 30,232 | 30,232 | 1.55× | 1.55× | 1.00× |
+| 3 context (local hypotheses, ancestors) | 43,200 | 30,824 | 30,824 | 1.40× | 1.40× | 1.00× |
+| 4 matching | 1,160,890 | 694,629 | 694,629 | 1.67× | 1.67× | 1.00× |
+| 5 decomposition | 1,753,618,220 | 650,894,477 | 633,503,830 | 2.69× | 2.77× | 1.03× |
+| 6 links (environment copies) | 3,111,120 | 1,359,356 | 1,359,356 | 2.29× | 2.29× | 1.00× |
+| 7 eigenvariables, occurs check, scope | 2,810,790 | 1,903,250 | 1,903,250 | 1.48× | 1.48× | 1.00× |
+| 8 groundness | 108,654,890 | 45,866,449 | 45,866,449 | 2.37× | 2.37× | 1.00× |
+| 10 symmetry breaking | 14,616 | 11,484 | 11,484 | 1.27× | 1.27× | 1.00× |
+| 11 node bounds | 0 | 1,419 | 1,419 | – | – | 1.00× |
+| variables | 408,399,232 | 149,919,624 | 142,682,647 | 2.72× | 2.86× | 1.05× |
 
-Per-point ratios, median [q1, q3], over the 0 points without the early exit (1 left out); points with a family emptied by R1 and R2 are left out of that family's ratios and counted in the last column:
+Per-point ratios, median [q1, q3], over the 43 points without the early exit (7 left out); points with a family emptied by R1 and R2 are left out of that family's ratios and counted in the last column:
 
 | clauses | off / R1 | off / R1 R2 | R1 / R1 R2 | emptied (R1 R2) |
 | --- | --- | --- | --- | --- |
-| total | – | – | – | 0 |
-| 5 decomposition | – | – | – | 0 |
-| 8 groundness | – | – | – | 0 |
-| 4 matching | – | – | – | 0 |
-| 6 links (environment copies) | – | – | – | 0 |
-| 7 eigenvariables, occurs check, scope | – | – | – | 0 |
+| total | 1.23 [1.07, 1.66] | 1.24 [1.08, 1.68] | 1.00 [1.00, 1.01] | 0 |
+| 5 decomposition | 1.07 [1.00, 1.61] | 1.08 [1.01, 1.63] | 1.00 [1.00, 1.02] | 0 |
+| 8 groundness | 1.23 [1.01, 1.67] | 1.23 [1.01, 1.67] | 1.00 [1.00, 1.00] | 5 |
+| 4 matching | 1.24 [1.14, 1.75] | 1.24 [1.14, 1.75] | 1.00 [1.00, 1.00] | 1 |
+| 6 links (environment copies) | 1.10 [1.02, 1.89] | 1.10 [1.02, 1.89] | 1.00 [1.00, 1.00] | 13 |
+| 7 eigenvariables, occurs check, scope | 1.05 [1.00, 1.29] | 1.05 [1.00, 1.29] | 1.00 [1.00, 1.00] | 0 |
 
 Per point, median [q1, q3] (early exits left out of the first five rows):
 
 |  | off | R1 | R1 R2 |
 | --- | --- | --- | --- |
-| W | – | – | – |
-| IB | – | – | – |
-| rigid | – | – | – |
-| type_rigid | – | – | – |
-| full_pairs | – | – | – |
-| R2: pairs skipped | – | – | – |
-| R1: gp excluded / gp pairs | – | – | – |
-| R1: cl excluded / cl pairs | – | – | – |
+| W | 32.00 [30.00, 35.00] | 32.00 [30.00, 35.00] | 32.00 [30.00, 35.00] |
+| IB | 9.00 [8.00, 10.00] | 9.00 [8.00, 10.00] | 9.00 [8.00, 10.00] |
+| rigid | 200.00 [90.00, 360.00] | 166.00 [80.00, 300.00] | 166.00 [80.00, 300.00] |
+| type_rigid | 100.00 [10.00, 290.00] | 70.00 [8.00, 197.00] | 70.00 [8.00, 197.00] |
+| full_pairs | 6810.00 [1225.00, 29110.00] | 6304.00 [1184.00, 17515.00] | 6254.00 [1156.00, 16985.00] |
+| R2: pairs skipped | – | – | 18.00 [0.00, 172.00] |
+| R1: gp excluded / gp pairs | – | 0.08 [0.05, 0.37] | – |
+| R1: cl excluded / cl pairs | – | 0.30 [0.05, 0.53] | – |
 
-Encoding time (countOnly), pooled: off 2 s, R1 0 s, R1 R2 0 s.
+Encoding time (countOnly), pooled: off 1,610 s, R1 577 s, R1 R2 597 s.
 
 ## M6 to M8 at N = 5, R1 and R2 on (3.9)
 

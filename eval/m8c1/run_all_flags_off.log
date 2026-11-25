@@ -285,3 +285,15 @@ PASS r1r2 Test/M2.lean
 PASS r1r2 Test/M3.lean
 PASS r1r2 Test/M4Lean.lean
 PASS r1r2 Test/M5Lean.lean
+PASS r1r2 Test/M7Lean.lean
+PASS r1r2 Test/M8Probe.lean
+PASS r1r2 Test/M8C1Lean.lean
+M2.lean: 6 decoded proofs per setting
+M3.lean: 12 decoded proofs per setting
+M4Lean.lean: 7 decoded proofs per setting
+M5Lean.lean: 8 decoded proofs per setting
+M7Lean.lean: 0 decoded proofs per setting
+M8Probe.lean: 0 decoded proofs per setting
+M8C1Lean.lean: 0 decoded proofs per setting
+PASS Lean suite in three settings, with the model check
+exit=0

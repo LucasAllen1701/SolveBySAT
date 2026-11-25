@@ -673,19 +673,26 @@ unsafe def runDiag (specsPath results started : System.FilePath) (N : Nat) (sett
     IO UInt32 := do
   let (env, specs) ← specsEnv specsPath
   let done ← readKeys results
-  let some opts := settingOpts setting | IO.eprintln s!"unknown setting {setting}"; return 2
+  -- 8c-2a (M8_PLAN 4.5): `r3` replays the encoder with R1 and R2 on (the defaults), R3 off and on
+  let r3 := setting == "r3"
+  let some opts := settingOpts (if r3 then "r1r2" else setting) | IO.eprintln s!"unknown setting {setting}"; return 2
   for s in specs.filter (!done.contains ·.key) do
     appendLine started (Json.mkObj [("key", jStr s.key)]).compress
     let t0 ← IO.monoMsNow
     let (P, _) ← runMeta env (specForest s)
-    let E := encode P N opts
     let emit := fun (sec : String) (j : Json) => do
       let (_, hwm) ← memMB
       appendLine started (Json.mkObj [("key", jStr s.key), ("section", jStr sec), ("data", j),
         ("ms", toJson (← msSince t0)), ("hwm_mb", toJson hwm)]).compress
-    emit "encode" (Json.mkObj [("N", toJson N), ("vars", toJson E.cnf.nVars), ("clauses", toJson E.cnf.numClauses),
-      ("goals", toJson P.goals.size), ("clauses_in_forest", toJson P.clauses.size)])
-    M8Diag.analyze P N opts E emit
+    if r3 then
+      emit "forest" (Json.mkObj [("N", toJson N), ("goals", toJson P.goals.size),
+        ("clauses_in_forest", toJson P.clauses.size)])
+      M8Diag.r3sim P N opts emit
+    else
+      let E := encode P N opts
+      emit "encode" (Json.mkObj [("N", toJson N), ("vars", toJson E.cnf.nVars), ("clauses", toJson E.cnf.numClauses),
+        ("goals", toJson P.goals.size), ("clauses_in_forest", toJson P.clauses.size)])
+      M8Diag.analyze P N opts E emit
     let (_, hwm) ← memMB
     appendLine results (Json.mkObj [("key", jStr s.key), ("status", jStr "ok"), ("ms", toJson (← msSince t0)),
       ("hwm_mb", toJson hwm)]).compress
@@ -714,6 +721,41 @@ unsafe def runDiagModels (specsPath results : System.FilePath) : IO UInt32 := do
             else if let some err ← kernelCheck goal t then pure s!"kernel: {err}" else pure "ok"
           | .error m => pure m
         match M8Diag.models P s.nmax { nodeBounds := false, exclusivePairs := false } E model with
+        | .ok j => return j.mergeObj (Json.mkObj [("result", jStr "sat"), ("proof", jStr proof), ("solve_s", toJson wall)])
+        | .error m => return Json.mkObj [("result", jStr "sat"), ("proof", jStr proof), ("error", jStr m)]
+      | .unsat => return Json.mkObj [("result", jStr "unsat")]
+      | .timeout => return Json.mkObj [("result", jStr "timeout")]
+      | .killed sig => return Json.mkObj [("result", jStr s!"killed {sig}")]
+      | .error m => return Json.mkObj [("result", jStr "solver_error"), ("reason", jStr m)]
+    appendLine results ((Json.mkObj [("key", jStr s.key), ("N", toJson s.nmax)]).mergeObj r |>.mergeObj
+      (Json.mkObj [("ms", toJson (← msSince t0))])).compress
+  return 0
+
+/-- 8c-2a (M8_PLAN 4.5): the model check. Each spec is solved at its `nmax` with the milestone 8 flags
+off, as 8c-1's models were (`runDiagModels`); the proof is decoded and kernel-checked, and every
+triangular binding of every chosen candidate with a typing clause is checked under the substitution read
+from the model (`M8Diag.r3ModelCheck`). -/
+unsafe def runR3Models (specsPath results : System.FilePath) : IO UInt32 := do
+  let (env, specs) ← specsEnv specsPath
+  let done ← readKeys results
+  for s in specs.filter (!done.contains ·.key) do
+    let t0 ← IO.monoMsNow
+    let r ← runMeta env do
+      let (P, C) ← specForest s
+      let (goal, _) ← goalOf s
+      let o : EncodeOptions := { nodeBounds := false, exclusivePairs := false }
+      let E := encode P s.nmax o
+      let (res, wall, _) ← solveLimited E.cnf solverSeconds
+      match res with
+      | .sat model =>
+        let t? ← try pure (Except.ok (← decode C E model)) catch e => pure (Except.error (← msgOf e))
+        let proof ← match t? with
+          | .ok t =>
+            let t ← instantiateMVars t
+            if t.hasMVar then pure "decoded term has metavariables"
+            else if let some err ← kernelCheck goal t then pure s!"kernel: {err}" else pure "ok"
+          | .error m => pure m
+        match M8Diag.r3ModelCheck P s.nmax o E model with
         | .ok j => return j.mergeObj (Json.mkObj [("result", jStr "sat"), ("proof", jStr proof), ("solve_s", toJson wall)])
         | .error m => return Json.mkObj [("result", jStr "sat"), ("proof", jStr proof), ("error", jStr m)]
       | .unsat => return Json.mkObj [("result", jStr "unsat")]
@@ -755,6 +797,7 @@ unsafe def main (args : List String) : IO UInt32 := do
   | ["sizes8c", specs, results, started, n, settings] =>
     runSizes8c specs results started n.toNat! (settings.splitOn ",")
   | ["diag-models", specs, results] => runDiagModels specs results
+  | ["r3-models", specs, results] => runR3Models specs results
   | ["dimacs", specs, outdir, mode] => runDimacs specs outdir mode
   | ["probe-rules", specs, results] => runProbeRules specs results
   | ["run", specs, results, started, warmup] => runShard specs results started warmup

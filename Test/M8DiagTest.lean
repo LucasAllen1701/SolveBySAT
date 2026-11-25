@@ -88,6 +88,124 @@ def kChecks (label : String) (N : Nat) (opts : EncodeOptions) (want : List (Stri
       IO.println s!"FAIL K, {label}, N = {N}, {k}: {g}, hand count {w}"
   return fails
 
+/-! ### 8c-2a (M8_PLAN 4.5): R3 simulated
+
+The typed forest R, at N = 1 with R1 and R2 on (the defaults):
+
+    goal g0: ∀ (E : Type) (e : L(E)) (u : E), P(e, k(u))       k(u) : L(E)
+    p:       ∀ (A : Type) (X : L(A)) (Y : A),  P(X, k(Y))      k(Y) : L(A)
+
+- Objects at node 0: rigid k(u) (goal, R_g) and k(Y) (clause, R_c); type-template objects (symbol L/1)
+  TX = L(A) (type of X), TPc = L(A) (type of k(Y)), Te = L(E) (type of e), TPg = L(E) (type of k(u)). The
+  types of E, A (Type) are ground and those of u, Y are variables, so they have no object. 4 built.
+- Candidates: R_g, R_c, and the eigenvariable slots E, e, u (no ground term in an atom).
+- Slot A (type Type): R_g, R_c and e are dropped (Type and L(·) clash); E is kept by the static typing
+  decision (no typing clause); u is kept with a typing clause, binding R|E ↦ Type (ground). 2 `sv`.
+- Slot X (type L(A)): E is dropped (clash). With a typing clause: R_g (L|A ↦ R|E, slot), R_c (same frame:
+  L(A) against L(A), no binding), e (L|A ↦ R|E, slot), u (R|E ↦ L(L|A), a shared residual object: TX, the
+  type-template object of L at path []). 4 `sv`.
+- Slot Y (type A): R_g (L|A ↦ L(R|E): residual, TPg), R_c (same frame: A against L(A) fails the occurs check,
+  although the templates unify renamed apart, so candidate pruning keeps it today: R3 drops it), E (L|A ↦
+  Type, ground), e (L|A ↦ L(R|E): residual, Te), u (L|A ↦ R|E, slot). 5 `sv`.
+- So: 10 typing clauses today, 9 whose templates unify and 1 that does not; bindings 3 slot, 2 ground,
+  3 shared residual (1 in L, 2 in R); `sv` 11 today, 10 with R3.
+- Retained: TX, TPg, Te (the ⟦t⟧ of the residual bindings; nothing lies below them but slots). TPc is
+  dropped. 4 built, 3 retained.
+- Full decomposition pairs: k/1: R_g with R_c (1); L/1: C(4, 2) = 6 today, C(3, 2) = 3 with R3. So 7 → 4.
+- In a model: matching forces X = e and Y = u, and then A = E; the chosen candidates with a typing
+  clause are e for X and u for Y, each with one slot binding (L|A ↦ R|E), which holds. 2 checked.
+-/
+
+def rForest : Forest :=
+  let c := fun (s : String) => SolveBySat.Term.const s
+  let V := fun (n : String) => SolveBySat.Term.var n
+  let ap := fun (p : String) (as : List SolveBySat.Term) => SolveBySat.Term.app p as.toArray
+  match Forest.build (GoalT.mk (ap "P" [V "e", ap "k" [V "u"]]) ["E", "e", "u"] [])
+      [.mk "p" (ap "P" [V "X", ap "k" [V "Y"]]) ["A", "X", "Y"] []] with
+  | .ok F =>
+    let ty := c "Type"
+    let F := { F with varTypes := #[("E", some ty), ("e", some (ap "L" [V "E"])), ("u", some (V "E")),
+                                    ("A", some ty), ("X", some (ap "L" [V "A"])), ("Y", some (V "A"))] }
+    let F := { F with goals := F.goals.modify 0 fun g => { g with tgtTypes := #[(#[1], some (ap "L" [V "E"]))] } }
+    { F with clauses := F.clauses.modify 0 fun cl => { cl with headTypes := #[(#[1], some (ap "L" [V "A"]))] } }
+  | .error e => panic! e
+
+/-- The copy in `simEncode` with R3 off must give `encode`'s counts: variables, clauses, every family
+(same order), full pairs, typing clauses, R2's skipped pairs, type-template objects; and the variables
+per family must add up. -/
+def simAgrees (label : String) (P : Forest) (N : Nat) (o : EncodeOptions) : IO Bool := do
+  let E := encode P N { o with countOnly := true }
+  let s := M8Diag.simEncode P N o false
+  let fv := s.famVars.foldl (fun n (_, k) => n + k) 0
+  let ok := s.clauses == E.cnf.numClauses && s.vars == E.cnf.nVars && s.famClauses == E.cnf.familyCounts &&
+    s.earlyExit == E.info.earlyExit && (s.earlyExit || (fv == s.vars && s.pairs == E.info.pairs &&
+      s.typing + s.typingNoUnify == E.info.typing && s.exclusive == E.info.exclusiveSkipped &&
+      s.typeRigid == E.info.typeRigid && s.anomalies == 0))
+  unless ok do
+    IO.println s!"FAIL R3 off ≠ encode: {label}, N = {N}: sim {s.vars} vars {s.clauses} clauses {s.famClauses}, pairs {s.pairs}, typing {s.typing}+{s.typingNoUnify}, family vars {fv}; encode {E.cnf.nVars} vars {E.cnf.numClauses} clauses {E.cnf.familyCounts}, pairs {E.info.pairs}, typing {E.info.typing}"
+  return ok
+
+def r3Checks (env : Environment) : IO (Nat × Nat) := do
+  let P := rForest
+  let mut fails := 0
+  let mut n := 0
+  -- the hand count
+  let off := M8Diag.simEncode P 1 {} false
+  let on := M8Diag.simEncode P 1 {} true
+  let E := encode P 1 {}
+  let checks : List (String × Nat × Nat) := [
+    ("typing clauses today", E.info.typing, 10),
+    ("typing clauses, templates unify", off.typing, 9), ("typing clauses, templates do not unify", off.typingNoUnify, 1),
+    ("bindings: slot", on.bSlot, 3), ("bindings: ground", on.bGround, 2), ("bindings: shared residual", on.bResidual, 3),
+    ("residual in L", on.resL, 1), ("residual in R", on.resR, 2),
+    ("type-template objects built", on.typeRigid, 4), ("retained", on.retained, 3), ("⟦t⟧ objects", on.residualTargets, 3),
+    ("R3 off: retained (all)", off.retained, 4),
+    ("sv today", off.sv, 11), ("sv with R3", on.sv, 10),
+    ("full pairs today", off.pairs, 7), ("full pairs with R3", on.pairs, 4),
+    ("anomalies", on.anomalies + off.anomalies, 0)]
+  for (name, got, want) in checks do
+    n := n + 1
+    if got != want then
+      fails := fails + 1
+      IO.println s!"FAIL R, {name}: {got}, hand count {want}"
+  -- the model check on R's model
+  match ← runSolver E.cnf with
+  | .unsat => fails := fails + 1; n := n + 1; IO.println "FAIL R: unsat at N = 1"
+  | .sat m =>
+    -- countOnly is off here, so the model can be checked
+    match M8Diag.r3ModelCheck P 1 {} E m with
+    | .error e => fails := fails + 1; n := n + 1; IO.println s!"FAIL R model check: {e}"
+    | .ok j =>
+      let num := fun (k : String) => (j.getObjValD k).getNat?.toOption.getD 999
+      let slotN := ((j.getObjValD "checked").getObjValD "slot" |>.getObjValD "clauses").getNat?.toOption.getD 0
+      let fl := match j.getObjValD "failures" with | .arr a => a.size | _ => 999
+      for (name, got, want) in [("model: chosen typed candidates", num "chosen_typed", 2),
+          ("model: slot bindings checked", slotN, 2), ("model: failures", fl, 0),
+          ("model: label mismatches", num "label_mismatch", 0), ("model: unreadable", num "unreadable", 0),
+          ("model: read-back conflicts", num "readback_conflicts", 0)] do
+        n := n + 1
+        if got != want then
+          fails := fails + 1
+          IO.println s!"FAIL R, {name}: {got}, hand count {want}"
+  -- the copy against the encoder
+  let compileLean (name : String) : IO Forest := do
+    let ((goal, H), _, _) ← (leanGoal name).toIO { fileName := "<m8diag>", fileMap := default } { env }
+    let (C, _, _) ← (compile goal H).toIO { fileName := "<m8diag>", fileMap := default } { env }
+    pure C.forest
+  let mut cases : Array (String × Forest × Nat) := #[("R", rForest, 1), ("R", rForest, 2), ("R", rForest, 3),
+    ("K", kForest, 3), ("K", kForest, 1)]
+  for l in [1, 5, 9] do
+    for N in [5, 8] do cases := cases.push (s!"§7.3, {l} lemmas", table73 l, N)
+  for nm in ["L1", "D3"] do
+    let F ← compileLean nm
+    for N in [2, 3, 5] do cases := cases.push (nm, F, N)
+  for (label, F, N) in cases do
+    for o in [({} : EncodeOptions), EncodeOptions.allOff, { nodeBounds := false, exclusivePairs := false },
+              { nodeBounds := true, exclusivePairs := false }] do
+      n := n + 1
+      unless ← simAgrees label F N o do fails := fails + 1
+  return (n - fails, fails)
+
 def main : IO UInt32 := do
   initSearchPath (← findSysroot)
   let env ← importModules #[{ module := `Init }] {}
@@ -141,4 +259,7 @@ def main : IO UInt32 := do
     kf := kf + (← kChecks label N o want)
     kn := kn + want.length
   IO.println s!"M8 diagnostics, R1 and R2 (K, N = 3 and 1): {kn - kf} passed, {kf} failed"
-  return if fails == 0 && kf == 0 then 0 else 1
+  -- 8c-2a: R3 simulated (forest R), and the copy in `simEncode` against `encode`
+  let (rp, rf) ← r3Checks env
+  IO.println s!"M8 diagnostics, R3 simulation (R, N = 1; R3 off against encode): {rp} passed, {rf} failed"
+  return if fails == 0 && kf == 0 && rf == 0 then 0 else 1

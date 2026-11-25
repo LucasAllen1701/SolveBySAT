@@ -118,3 +118,23 @@
 {"hwm_mb":728,"key":"m8b:norules:main:B/String.Slice.sliceTo_sliceTo/12","ms":4204,"status":"ok"}
 {"hwm_mb":728,"key":"m8b:rules:main:B/Int.zero_lcm/1","ms":824,"status":"ok"}
 {"hwm_mb":728,"key":"m8b:norules:main:B/Int.zero_lcm/1","ms":104,"status":"ok"}
+{"hwm_mb":732,"key":"m8b:rules:main:B/Lean.Grind.Linarith.zero_ne_one_of_field/11","ms":19313,"status":"ok"}
+{"hwm_mb":732,"key":"m8b:norules:main:B/Lean.Grind.Linarith.zero_ne_one_of_field/11","ms":2189,"status":"ok"}
+{"hwm_mb":753,"key":"m8b:rules:main:B/Std.DHashMap.Raw.Equiv.inter_congr/5","ms":56796,"status":"ok"}
+{"hwm_mb":753,"key":"m8b:norules:main:B/Std.DHashMap.Raw.Equiv.inter_congr/5","ms":17864,"status":"ok"}
+{"hwm_mb":753,"key":"m8b:rules:main:B/Int.zero_eq_toNat_sub_iff/6","ms":2165,"status":"ok"}
+{"hwm_mb":753,"key":"m8b:norules:main:B/Int.zero_eq_toNat_sub_iff/6","ms":8,"status":"ok"}
+{"hwm_mb":753,"key":"m8b:rules:main:B/Int16.toISize_mod/2","ms":3220,"status":"ok"}
+{"hwm_mb":753,"key":"m8b:norules:main:B/Int16.toISize_mod/2","ms":440,"status":"ok"}
+{"key": "m8b:rules:main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/176", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/176","ms":891,"status":"ok"}
+{"key": "m8b:rules:main:B/Array.toList_fst_unzip/4", "status": "memout", "exit": -15, "last_section": "m7"}
+{"key": "m8b:norules:main:B/Array.toList_fst_unzip/4", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/BitVec.toNat_shiftConcat/3","ms":19464,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/BitVec.toNat_shiftConcat/3","ms":570,"status":"ok"}
+{"hwm_mb":772,"key":"m8b:rules:main:B/Array.eq_iff_flatten_eq/49","ms":9549,"status":"ok"}
+{"hwm_mb":772,"key":"m8b:norules:main:B/Array.eq_iff_flatten_eq/49","ms":2667,"status":"ok"}
+{"hwm_mb":772,"key":"m8b:rules:main:B/String.Slice.Pos.next_eq_iff/21","ms":1089,"status":"ok"}
+{"hwm_mb":772,"key":"m8b:norules:main:B/String.Slice.Pos.next_eq_iff/21","ms":114,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8", "status": "memout", "exit": -15, "last_section": "m7"}
+{"key": "m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8", "status": "memout", "exit": -15, "last_section": "m7"}

@@ -1,0 +1,302 @@
+Build completed successfully (85 jobs).
+== test_m0
+solver: /home/tom/.elan/toolchains/leanprover--lean4---v4.36.0/bin/cadical
+  pigeonhole 7→6: 42 vars, 133 clauses, UNSAT [90 ms]
+  random CNFs: 300 instances, 110 SAT / 190 UNSAT
+  gadgets: 300 eq/lt/amo/ladder-amo instances checked exhaustively
+M0: 902 passed, 0 failed
+== test_m1
+solver: /home/tom/.elan/toolchains/leanprover--lean4---v4.36.0/bin/cadical; refinements: all
+PASS T1 le_trans chain: min N = (some 5) (expected (some 5)) fun x y z w h1 h2 h3 => le_trans(le_trans(h1, h2), h3)  [447 ms, last CNF 1009 vars 10461 clauses]
+PASS T2 out-of-scope hypothesis: min N = none (expected none)   [488 ms, last CNF 140 vars 590 clauses]
+PASS T2b with A available: min N = (some 4) (expected (some 4)) m(fun ha => bb(a), a)  [323 ms, last CNF 69 vars 220 clauses]
+PASS T3 eigenvariable escape: min N = none (expected none)   [494 ms, last CNF 356 vars 2128 clauses]
+PASS T3b forall y, y = y: min N = (some 2) (expected (some 2)) ex(fun y => refl)  [162 ms, last CNF 28 vars 71 clauses]
+PASS T4 undetermined argument: min N = none (expected none)   [489 ms, last CNF 221 vars 733 clauses]
+PASS T4b determined argument: min N = (some 2) (expected (some 2)) h(q)  [161 ms, last CNF 30 vars 56 clauses]
+PASS T5 occurs check: min N = none (expected none)   [499 ms, last CNF 551 vars 3023 clauses]
+PASS T6 jointly inconsistent: min N = none (expected none)   [511 ms, last CNF 868 vars 6253 clauses]
+PASS T6b consistent: min N = (some 4) (expected (some 4)) k(f1, f2, f3)  [327 ms, last CNF 315 vars 1502 clauses]
+PASS T7 nested intro: min N = (some 3) (expected (some 3)) fun a => m(fun y hp => pq(hp))  [245 ms, last CNF 151 vars 429 clauses]
+PASS T8 local hypothesis reused: min N = (some 3) (expected (some 3)) fun o h0 hf => hf(hf(h0))  [250 ms, last CNF 635 vars 2561 clauses]
+PASS T9 outer instance of a re-introduced hypothesis: min N = (some 6) (expected (some 6)) L(fun hP => r1(L(fun hP => r2(hP, hP))))  [489 ms, last CNF 290 vars 1509 clauses]
+PASS mutation 'R1 size bound tightened by one' (forest tests): 8 of 8 have no proof at their minimal N
+PASS CNF sizes equal the prototype's for T1-T9 at N = 1..6 (78 instances, prototype rank width, all refinements off)
+  T1 at N=5 (prototype rank width): { W := 16,
+  SB := 1,
+  IB := 5,
+  RB := 5,
+  pairs := 0,
+  rigid := 0,
+  ground := 0,
+  typeRigid := 0,
+  typing := 0,
+  earlyExit := false,
+  rootSize := none,
+  gpDead := 0,
+  clDead := 0,
+  exclusiveSkipped := 0 }
+  families: #[(1 node assignment, 96), (2 tree shape, 204), (3 context (local hypotheses, ancestors), 155), (4 matching, 3840), (6 links (environment copies), 7680), (7 eigenvariables, occurs check, scope, 380), (8 groundness, 9915)]
+differential: 7500 comparisons, 2551 provable instances, 0 mismatches, min-size histogram [(1, 389), (2, 117), (3, 39), (4, 10), (5, 1)], 167 forests with min size ≥ 2 [167s]
+PASS differential (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+PASS mutation 'scope clauses of 6.7 off': mismatches found, e.g. [seed 460 N 4 (ref false, sat true), seed 774 N 2 (ref false, sat true), seed 1347 N 5 (ref false, sat true)]
+PASS mutation 'occurs check off': mismatches found, e.g. [seed 1444 N 2 (ref false, sat true), seed 1242 N 2 (ref false, sat true)]
+differential with binders: 7500 comparisons, 2346 provable instances, 0 mismatches, min-size histogram [(1, 388), (2, 77), (3, 27), (4, 6), (5, 5)], 115 forests with min size ≥ 2, 770 of 1500 forests contain a bound variable [168s]
+PASS differential with binders (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+PASS mutation 'open bit off' (forests with binders): mismatches found, e.g. [seed 1472 N 2 (ref false, sat true), seed 269 N 5 (ref false, sat true), seed 26 N 2 (ref false, sat true)]
+PASS mutation 'R1 size bound tightened by one': 556 of 556 forests with a proof have none at their minimal N (556 mismatches in all)
+PASS mutation 'R1 without e(c)': 0 mismatches in 7500 comparisons; CNFs smaller than with e(c): 0, larger: 4351
+PASS mutation 'R2 on a goal object and a head object at one node': mismatches found, e.g. [seed 1209 N 3 (ref false, sat true)]
+PASS mutation 'R1 size bound tightened by one' (forests with binders): 503 of 503 forests with a proof have none at their minimal N (503 mismatches in all)
+PASS mutation 'R1 without e(c)' (forests with binders): 0 mismatches in 7500 comparisons; CNFs smaller than with e(c): 0, larger: 4551
+PASS mutation 'R2 on a goal object and a head object at one node' (forests with binders): mismatches found, e.g. [seed 576 N 1 (ref false, sat true), seed 914 N 2 (ref false, sat true)]
+M1: 26 passed, 0 failed
+== test_m4
+PASS N = 1: 13 objects, each label allocated once and cached with width W = 11; objects per kind [(term slot, 4), (level slot, 2), (rigid term, 1), (rigid level, 1), (ground term, 2), (ground level, 2), (type template, 1)]; 4 typing clauses
+PASS N = 2: 22 objects, each label allocated once and cached with width W = 12; objects per kind [(term slot, 8), (level slot, 4), (rigid term, 2), (rigid level, 2), (ground term, 2), (ground level, 2), (type template, 2)]; 12 typing clauses
+PASS N = 3: 31 objects, each label allocated once and cached with width W = 15; objects per kind [(term slot, 12), (level slot, 6), (rigid term, 3), (rigid level, 3), (ground term, 2), (ground level, 2), (type template, 3)]; 24 typing clauses
+PASS the unit forest is satisfiable at N = 1
+PASS N = 1, R1 and R2 on: 9 objects, each label allocated once and cached with width W = 10
+PASS N = 2, R1 and R2 on: 14 objects, each label allocated once and cached with width W = 12
+PASS N = 3, R1 and R2 on: 19 objects, each label allocated once and cached with width W = 14
+M4 unit: 7 passed, 0 failed
+== test_m5
+solver: /home/tom/.elan/toolchains/leanprover--lean4---v4.36.0/bin/cadical; refinements: all
+PASS Reference with groundness on T1: min N = (some 5) (expected (some 5))
+PASS Reference with groundness on T4: min N = none (expected none)
+PASS Reference with groundness on T4b: min N = (some 2) (expected (some 2))
+PASS Reference with groundness on T5: min N = none (expected none)
+PASS Reference with groundness on T6b: min N = (some 4) (expected (some 4))
+PASS data forest: no proof with 2 nodes (w must be built)
+PASS data forest: proof ex(p, w:=z); the groundness witness of w is some (SolveBySat.Obj.value 2 2 #[] ("z0", 0) false), a value object of its data child
+PASS data forest without the data clause: no proof with 6 nodes
+differential with data: 15000 comparisons, 3854 provable instances, 0 mismatches, min-size histogram [(1, 634), (2, 134), (3, 41), (4, 9), (5, 7)], 191 forests with min size ≥ 2, 325 SAT instances whose proof uses a data node [381s]
+PASS differential with data (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, ≥ 100 proofs using a data node, 0 mismatches)
+PASS mutation 'static filter of 6.9 off': mismatches found, e.g. [seed 68 N 1 (ref false, sat true), seed 17 N 1 (ref false, sat true), seed 154 N 1 (ref false, sat true)]
+PASS mutation 'R1 size bound tightened by one' (data): 825 of 825 forests with a proof have none at their minimal N (825 mismatches in all)
+PASS mutation 'R1 without e(c)' (data): 0 mismatches in 15000 comparisons; CNFs smaller than with e(c): 0, larger: 7852
+PASS mutation 'R2 on a goal object and a head object at one node' (data): mismatches found, e.g. [seed 770 N 3 (ref false, sat true), seed 159 N 2 (ref false, sat true)]
+M5: 13 passed, 0 failed
+== test_countonly
+| instance | N | config | vars (full = count) | clauses (full = count) | families equal | stored (count) |
+| --- | --- | --- | --- | --- | --- | --- |
+| §7.3, 1 lemma | 5 | all on | 1009 = 1009 | 10461 = 10461 | yes (9) | 0 |
+| §7.3, 1 lemma | 5 | all off | 1225 = 1225 | 16910 = 16910 | yes (7) | 0 |
+| §7.3, 1 lemma | 5 | R1 | 1009 = 1009 | 10461 = 10461 | yes (9) | 0 |
+| §7.3, 1 lemma | 5 | R1 R2 | 1009 = 1009 | 10461 = 10461 | yes (9) | 0 |
+| §7.3, 1 lemma | 8 | all on | 2493 = 2493 | 36681 = 36681 | yes (9) | 0 |
+| §7.3, 1 lemma | 8 | all off | 2744 = 2744 | 52800 = 52800 | yes (7) | 0 |
+| §7.3, 1 lemma | 8 | R1 | 2493 = 2493 | 36681 = 36681 | yes (9) | 0 |
+| §7.3, 1 lemma | 8 | R1 R2 | 2493 = 2493 | 36681 = 36681 | yes (9) | 0 |
+| §7.3, 1 lemma | 12 | all on | 5255 = 5255 | 103801 = 103801 | yes (9) | 0 |
+| §7.3, 1 lemma | 12 | all off | 5460 = 5460 | 141128 = 141128 | yes (7) | 0 |
+| §7.3, 1 lemma | 12 | R1 | 5255 = 5255 | 103801 = 103801 | yes (9) | 0 |
+| §7.3, 1 lemma | 12 | R1 R2 | 5255 = 5255 | 103801 = 103801 | yes (9) | 0 |
+| §7.3, 5 lemmas | 5 | all on | 11453 = 11453 | 119421 = 119421 | yes (10) | 0 |
+| §7.3, 5 lemmas | 5 | all off | 19215 = 19215 | 193350 = 193350 | yes (8) | 0 |
+| §7.3, 5 lemmas | 5 | R1 | 12989 = 12989 | 125661 = 125661 | yes (10) | 0 |
+| §7.3, 5 lemmas | 5 | R1 R2 | 11453 = 11453 | 119421 = 119421 | yes (10) | 0 |
+| §7.3, 5 lemmas | 8 | all on | 41877 = 41877 | 460965 = 460965 | yes (10) | 0 |
+| §7.3, 5 lemmas | 8 | all off | 57912 = 57912 | 620176 = 620176 | yes (8) | 0 |
+| §7.3, 5 lemmas | 8 | R1 | 45405 = 45405 | 475245 = 475245 | yes (10) | 0 |
+| §7.3, 5 lemmas | 8 | R1 R2 | 41877 = 41877 | 460965 = 460965 | yes (10) | 0 |
+| §7.3, 5 lemmas | 12 | all on | 121270 = 121270 | 1375973 = 1375973 | yes (10) | 0 |
+| §7.3, 5 lemmas | 12 | all off | 150636 = 150636 | 1681688 = 1681688 | yes (8) | 0 |
+| §7.3, 5 lemmas | 12 | R1 | 128134 = 128134 | 1403693 = 1403693 | yes (10) | 0 |
+| §7.3, 5 lemmas | 12 | R1 R2 | 121270 = 121270 | 1375973 = 1375973 | yes (10) | 0 |
+| §7.3, 9 lemmas | 5 | all on | 37730 = 37730 | 368781 = 368781 | yes (10) | 0 |
+| §7.3, 9 lemmas | 5 | all off | 69125 = 69125 | 618190 = 618190 | yes (8) | 0 |
+| §7.3, 9 lemmas | 5 | R1 | 45346 = 45346 | 399693 = 399693 | yes (10) | 0 |
+| §7.3, 9 lemmas | 5 | R1 R2 | 37730 = 37730 | 368781 = 368781 | yes (10) | 0 |
+| §7.3, 9 lemmas | 8 | all on | 149200 = 149200 | 1450613 = 1450613 | yes (10) | 0 |
+| §7.3, 9 lemmas | 8 | all off | 215240 = 215240 | 1978320 = 1978320 | yes (8) | 0 |
+| §7.3, 9 lemmas | 8 | R1 | 166448 = 166448 | 1520389 = 1520389 | yes (10) | 0 |
+| §7.3, 9 lemmas | 8 | R1 R2 | 149200 = 149200 | 1450613 = 1450613 | yes (10) | 0 |
+| §7.3, 9 lemmas | 12 | all on | 434646 = 434646 | 4207117 = 4207117 | yes (10) | 0 |
+| §7.3, 9 lemmas | 12 | all off | 552684 = 552684 | 5159936 = 5159936 | yes (8) | 0 |
+| §7.3, 9 lemmas | 12 | R1 | 466678 = 466678 | 4336477 = 4336477 | yes (10) | 0 |
+| §7.3, 9 lemmas | 12 | R1 R2 | 434646 = 434646 | 4207117 = 4207117 | yes (10) | 0 |
+| L1 | 5 | all on | 1131 = 1131 | 12093 = 12093 | yes (9) | 0 |
+| L1 | 5 | all off | 1365 = 1365 | 19590 = 19590 | yes (7) | 0 |
+| L1 | 5 | R1 | 1131 = 1131 | 12093 = 12093 | yes (9) | 0 |
+| L1 | 5 | R1 R2 | 1131 = 1131 | 12093 = 12093 | yes (9) | 0 |
+| D3 | 3 | all on | 661 = 661 | 2373 = 2373 | yes (10) | 0 |
+| D3 | 3 | all off | 1155 = 1155 | 4793 = 4793 | yes (8) | 0 |
+| D3 | 3 | R1 | 661 = 661 | 2373 = 2373 | yes (10) | 0 |
+| D3 | 3 | R1 R2 | 661 = 661 | 2373 = 2373 | yes (10) | 0 |
+countOnly: 44 passed, 0 failed
+== test_m8diag
+M8 diagnostics (L1, N = 2): 10 passed, 0 failed
+M8 diagnostics, R1 and R2 (K, N = 3 and 1): 41 passed, 0 failed
+== Test/M2.lean
+solve_by_sat: N = 5, 1131 variables, 12093 clauses; proof with 5 nodes: fun x#0 y#1 z#2 w#3 h1 h2 h3 => Nat.le_trans(Nat.le_trans(h1, h2), h3)
+solve_by_sat: N = 3, 177 variables, 877 clauses; proof with 3 nodes: fun A#0 B#1 C#2 a3@g0 a4@g0 a5@g0 => a4@g0(a3@g0(a5@g0))
+solve_by_sat: N = 2, 108 variables, 359 clauses; proof with 2 nodes: fun P#0 Q#1 a#2 h hp => h(hp)
+solve_by_sat: N = 1, 21 variables, 65 clauses; proof with 1 nodes: fun n#0 => Nat.le_refl
+Test/M2.lean:37:0: warning: declaration uses `sorry`
+solve_by_sat: N = 2, 87 variables, 209 clauses; proof with 2 nodes: fun Q#0 P0#1 k#2 h q => h(q)
+solve_by_sat: N = 1, 5 variables, 10 clauses; proof with 1 nodes: True.intro
+== Test/M3.lean
+solve_by_sat: N = 3, 132 variables, 529 clauses; proof with 3 nodes: fun A#0 B#1 ha hb => And.intro(ha, hb)
+solve_by_sat: N = 2, 68 variables, 250 clauses; proof with 2 nodes: fun A#0 B#1 hb => Or.inr(hb)
+solve_by_sat: N = 2, 261 variables, 589 clauses; proof with 2 nodes: fun a#0 b#1 h => Exists.intro(h)
+solve_by_sat: N = 1, 26 variables, 63 clauses; proof with 1 nodes: fun A#0 B#1 h h.left h.right => h.right
+Test/M3.lean:37:0: warning: declaration uses `sorry`
+solve_by_sat: N = 1, 28 variables, 62 clauses; proof with 1 nodes: fun A#0 B#1 h => h
+solve_by_sat: N = 1, 29 variables, 63 clauses; proof with 1 nodes: fun A#0 B#1 h h.left h.right => h
+solve_by_sat: N = 1, 102 variables, 191 clauses; proof with 1 nodes: fun P#0 h => h
+solve_by_sat: N = 2, 70 variables, 285 clauses; proof with 2 nodes: fun A#0 B#1 h h.mp h.mpr ha => h.mp(ha)
+solve_by_sat: hypothesis bad is introduced but gives no clause:
+solve_by_sat: the clause variable f#1 is applied to arguments in f 0: not first order
+solve_by_sat: N = 1, 14 variables, 33 clauses; proof with 1 nodes: fun A#0 ha => ha
+Test/M3.lean:131:20: warning: Variable name `bad` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _bad
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+solve_by_sat: N = 2, 249 variables, 617 clauses; proof with 2 nodes: fun R#0 y#1 r => Exists.intro(r)
+solve_by_sat: N = 3, 674 variables, 2782 clauses; proof with 3 nodes: fun g#0 k#1 Q#2 R#3 P0#4 h q r => h(q, r)
+theorem A4a : ∀ (g : Nat → Int) (k : Nat) (Q R : Int → Prop) (P0 : Prop),
+  (∀ (y : Int) (u : Nat), Q y → R (g u) → P0) → (∀ (y' : Int), Q y') → (∀ (t : Int), R t) → P0 :=
+fun g k Q R P0 h q r => h (g k) k (q (g k)) (r (g k))
+solve_by_sat: N = 4, 681 variables, 2697 clauses; proof with 4 nodes: fun R0#0 Q#1 T#2 hp h q t => And.intro(h(q), t)
+theorem A4b : ∀ (R0 : Prop) (Q T : { x // x = 3 } → Prop) (hp : 3 = 3),
+  (∀ (s : { x // x = 3 }), Q s → R0) → (∀ (s : { x // x = 3 }), Q s) → (∀ (s : { x // x = 3 }), T s) → R0 ∧ T ⟨3, hp⟩ :=
+fun R0 Q T hp h q t => ⟨h ⟨3, hp⟩ (q ⟨3, hp⟩), t ⟨3, hp⟩⟩
+== Test/M4Lean.lean
+solve_by_sat: N = 1, 60 variables, 190 clauses; proof with 1 nodes: fun n#0 => Eq.refl
+Test/M4Lean.lean:50:0: warning: declaration uses `sorry`
+Test/M4Lean.lean:54:0: warning: declaration uses `sorry`
+solve_by_sat: N = 2, 261 variables, 707 clauses; proof with 2 nodes: fun y#0 => Exists.intro(Eq.refl)
+solve_by_sat: N = 1, 101 variables, 327 clauses; proof with 1 nodes: fun T#0 P0#1 t#2 Q#3 h => h
+Test/M4Lean.lean:74:43: warning: Variable name `Q` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _Q
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+Test/M4Lean.lean:74:76: warning: Variable name `y` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _y
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+expected error: solve_by_sat: documented limitation (NOTES.md, milestone 4): the model grounds y#2 at node 0 to a candidate whose type, or the variable's type, is unknown to the encoder, so no typing clause applied to the pair; Lean rejects it: ill-typed grounding of y#2 at node 0: the model gives Q✝ : Nat →
+Test/M4Lean.lean:102:0: warning: declaration uses `sorry`
+solve_by_sat: N = 5, 1131 variables, 12093 clauses; proof with 5 nodes: fun x#0 y#1 z#2 w#3 h1 h2 h3 => Nat.le_trans(Nat.le_trans(h1, h2), h3)
+solve_by_sat: N = 5, 1131 variables, 12093 clauses; proof with 5 nodes: fun x#0 y#1 z#2 w#3 h1 h2 h3 => Nat.le_trans(Nat.le_trans(h1, h2), h3)
+solve_by_sat: N = 1, 46 variables, 147 clauses; proof with 1 nodes: fun n#0 => Eq.refl
+solve_by_sat: N = 1, 60 variables, 190 clauses; proof with 1 nodes: fun n#0 => Eq.refl
+== Test/M5Lean.lean
+solve_by_sat: N = 3, 176 variables, 730 clauses; proof with 3 nodes: Exists.intro(Nat.le_refl, n:=Nat.zero)
+solve_by_sat: N = 3, 123 variables, 362 clauses; proof with 3 nodes: Exists.intro(True.intro, n:=Nat.zero)
+Test/M5Lean.lean:41:12: warning: Variable name `n` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _n
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+solve_by_sat: N = 3, 661 variables, 2373 clauses; proof with 3 nodes: fun Q#0 q => Exists.intro(q(m:=Nat.zero))
+solve_by_sat: N = 4, 361 variables, 1319 clauses; proof with 4 nodes: Exists.intro(True.intro, i:=Int.ofNat(a:=Nat.zero))
+Test/M5Lean.lean:71:15: warning: Variable name `i` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _i
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+solve_by_sat: N = 2, 104 variables, 371 clauses; proof with 2 nodes: Exists.intro(Eq.refl)
+solve_by_sat: N = 4, 475 variables, 1769 clauses; proof with 4 nodes: fun f#0 => Exists.intro(True.intro, i:=f(a:=Nat.zero))
+Test/M5Lean.lean:135:15: warning: Variable name `f` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _f
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+Test/M5Lean.lean:135:32: warning: Variable name `i` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _i
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+solve_by_sat: N = 6, 1802 variables, 9182 clauses; proof with 6 nodes: fun f#0 => And.intro(fun g#2 => True.intro, Exists.intro(True.intro, i:=f(a:=Nat.zero)))
+Test/M5Lean.lean:155:29: warning: Variable name `g` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _g
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+Test/M5Lean.lean:155:54: warning: Variable name `i` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _i
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+solve_by_sat: N = 1, 1176 variables, 4307 clauses; proof with 1 nodes: fun f#0 => maxL
+== Test/M7Lean.lean
+== Test/M8Probe.lean
+rejected by the compiler: [_probe.Iff.subst.«0»: solve_by_sat: the head of x0@g3 b has the clause variable b#4 as its head symbol,
+ _probe.Iff.subst.«1»: solve_by_sat: the head of x0@g3 a has the clause variable a#2 as its head symbol]
+rejected by the compiler: [_probe.Iff.subst.«0»: solve_by_sat: the head of x0@g3 b has the clause variable b#4 as its head symbol,
+ _probe.Iff.subst.«1»: solve_by_sat: the head of x0@g3 a has the clause variable a#2 as its head symbol]
+== Test/M8C1Lean.lean
+== test_m1, test_m5: m8off
+differential: 7500 comparisons, 2551 provable instances, 0 mismatches, min-size histogram [(1, 389), (2, 117), (3, 39), (4, 10), (5, 1)], 167 forests with min size ≥ 2 [175s]
+PASS differential (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+differential with binders: 7500 comparisons, 2346 provable instances, 0 mismatches, min-size histogram [(1, 388), (2, 77), (3, 27), (4, 6), (5, 5)], 115 forests with min size ≥ 2, 770 of 1500 forests contain a bound variable [180s]
+PASS differential with binders (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+M1: 20 passed, 0 failed
+differential with data: 15000 comparisons, 3854 provable instances, 0 mismatches, min-size histogram [(1, 634), (2, 134), (3, 41), (4, 9), (5, 7)], 191 forests with min size ≥ 2, 415 SAT instances whose proof uses a data node [521s]
+PASS differential with data (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, ≥ 100 proofs using a data node, 0 mismatches)
+M5: 10 passed, 0 failed
+== test_m1, test_m5: r1
+differential: 7500 comparisons, 2551 provable instances, 0 mismatches, min-size histogram [(1, 389), (2, 117), (3, 39), (4, 10), (5, 1)], 167 forests with min size ≥ 2 [167s]
+PASS differential (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+differential with binders: 7500 comparisons, 2346 provable instances, 0 mismatches, min-size histogram [(1, 388), (2, 77), (3, 27), (4, 6), (5, 5)], 115 forests with min size ≥ 2, 770 of 1500 forests contain a bound variable [169s]
+PASS differential with binders (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+M1: 20 passed, 0 failed
+differential with data: 15000 comparisons, 3854 provable instances, 0 mismatches, min-size histogram [(1, 634), (2, 134), (3, 41), (4, 9), (5, 7)], 191 forests with min size ≥ 2, 325 SAT instances whose proof uses a data node [380s]
+PASS differential with data (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, ≥ 100 proofs using a data node, 0 mismatches)
+M5: 10 passed, 0 failed
+== test_m1, test_m5: r1r2
+differential: 7500 comparisons, 2551 provable instances, 0 mismatches, min-size histogram [(1, 389), (2, 117), (3, 39), (4, 10), (5, 1)], 167 forests with min size ≥ 2 [167s]
+PASS differential (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+differential with binders: 7500 comparisons, 2346 provable instances, 0 mismatches, min-size histogram [(1, 388), (2, 77), (3, 27), (4, 6), (5, 5)], 115 forests with min size ≥ 2, 770 of 1500 forests contain a bound variable [168s]
+PASS differential with binders (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)
+M1: 20 passed, 0 failed
+differential with data: 15000 comparisons, 3854 provable instances, 0 mismatches, min-size histogram [(1, 634), (2, 134), (3, 41), (4, 9), (5, 7)], 191 forests with min size ≥ 2, 325 SAT instances whose proof uses a data node [381s]
+PASS differential with data (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, ≥ 100 proofs using a data node, 0 mismatches)
+M5: 10 passed, 0 failed
+== off-switch
+PASS off-switch: 54 of 54 DIMACS files byte-identical to eval/m8b/dimacs_md5.txt
+== Lean suite, three settings
+PASS off Test/M2.lean
+PASS off Test/M3.lean
+PASS off Test/M4Lean.lean
+PASS off Test/M5Lean.lean
+PASS off Test/M7Lean.lean
+PASS off Test/M8Probe.lean
+PASS off Test/M8C1Lean.lean
+PASS r1 Test/M2.lean
+PASS r1 Test/M3.lean
+PASS r1 Test/M4Lean.lean
+PASS r1 Test/M5Lean.lean
+PASS r1 Test/M7Lean.lean
+PASS r1 Test/M8Probe.lean
+PASS r1 Test/M8C1Lean.lean
+PASS r1r2 Test/M2.lean
+PASS r1r2 Test/M3.lean
+PASS r1r2 Test/M4Lean.lean
+PASS r1r2 Test/M5Lean.lean
+PASS r1r2 Test/M7Lean.lean
+PASS r1r2 Test/M8Probe.lean
+PASS r1r2 Test/M8C1Lean.lean
+M2.lean: 6 decoded proofs per setting
+M3.lean: 12 decoded proofs per setting
+M4Lean.lean: 7 decoded proofs per setting
+M5Lean.lean: 8 decoded proofs per setting
+M7Lean.lean: 0 decoded proofs per setting
+M8Probe.lean: 0 decoded proofs per setting
+M8C1Lean.lean: 0 decoded proofs per setting
+PASS Lean suite in three settings, with the model check
+exit=0

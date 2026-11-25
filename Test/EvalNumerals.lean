@@ -331,9 +331,10 @@ def diag (spec : Json) (names : Std.HashMap String Name) (N : Nat) : MetaM Json 
     if ← (try discard <| compile g #[c]; pure true catch _ => pure false) then accH := accH.push c
   let C ← compile g accH
   let mut out := #[]
-  for (name, F, o) in [("as run", C.forest, ({} : EncodeOptions)),
+  -- milestone 7's encodings: the milestone 8 flags (on by default since 8c-1) pinned off
+  for (name, F, o) in [("as run", C.forest, ({ nodeBounds := false, exclusivePairs := false } : EncodeOptions)),
                        ("static typing off", C.forest, ({ staticTyping := false } : EncodeOptions)),
-                       ("types forgotten", C.forest.forgetTypes, ({} : EncodeOptions))] do
+                       ("types forgotten", C.forest.forgetTypes, ({ nodeBounds := false, exclusivePairs := false } : EncodeOptions))] do
     let E := encode F N o
     let r ← runSolver E.cnf
     let sk := match r with

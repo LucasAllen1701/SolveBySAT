@@ -46,6 +46,8 @@ lake build eval_numerals           # 7d-1 annotations, forest dumps, invariant c
 lake build eval_scaling eval_pool test_countonly SynthLib   # 7c
 lake build eval_run Test.M8Probe     # 8a: probe harness and hand examples
 lake build test_m8diag m8b_dimacs73  # 8b: diagnostics test and SPEC 7.3 DIMACS writer
+Test/m8c1_offswitch.sh              # 8c-1: flags off give 8b's DIMACS (in run_all.sh)
+Test/m8c1_lean.sh                   # 8c-1: the Lean suite with the flags off, R1, R1 and R2 (in run_all.sh)
 ```
 
 ## Layout and where the data lives
@@ -80,7 +82,7 @@ Requirements:
 Machine differences (CPU speed, RAM) change times and possibly which goals hit the cap. Record the
 machine's specs in NOTES.md before a full run.
 
-## Status (24 November 2026)
+## Status (25 November 2026)
 
 - **Milestone 7 (evaluation) is done** and merged into `main` (NOTES.md, "Milestone 7: summary" and "End
   of milestone 7: spec, archive tag and merge"; EVAL_PLAN §10.11). The owner decided: scale first, with a
@@ -102,8 +104,25 @@ machine's specs in NOTES.md before a full run.
     `eval/m8b/dimacs_md5.txt`. Tools: `Test/M8Diag.lean` (read-only recount, checked against the encoder's
     family counts), `eval_run diag | diag-models | dimacs`, `m8b_dimacs73`, `test_m8diag` (in `run_all.sh`),
     `Test/m8b_setup.py`, `Test/m8b_run.py` (`points`, `publish-loop`).
-  - **Next: the 8b scale design note, written in the claude.ai project** with PROBE.md and DIAG.md in hand.
-- Milestone 8 rules: as milestone 7's. Do not change `SolveBySat/` in 8a. Filters, seeds, sample sizes and
+  - The scale design is M8_PLAN section 3, accepted with amendment 4.4 (exact reductions only; each one a flag,
+    on by default once accepted).
+  - **8c-1 is done** (NOTES.md, "8c-1: node bounds and exclusive pairs"): R1 (`EncodeOptions.nodeBounds`, option
+    `solve_by_sat.nodeBounds`: node–clause bounds with the scope term e(c), and the early exit when s(root) > N)
+    and R2 (`exclusivePairs`, `solve_by_sat.exclusivePairs`), **both on by default**; `solve_by_sat.refinements
+    := false` switches them off too. Dead `cl`/`gp` literals become constant false through `CNF.kill` (unit clause
+    in family "11 node bounds"). Mutation-only options `boundsScope`, `boundsTight`, `exclusiveMutant`; testing-only
+    tactic option `solve_by_sat.checkBounds` (the model check). Report `eval/m8c1/SCALE.md` from
+    `python3 eval/m8c1/report.py`; data in `eval/m8c1/` (sizes at N = 5 and 10 in three settings, M6–M8 in `diag_N5/`,
+    the 8a rerun in `rerun/`, the e(c) model check in `models/`).
+  - Harness since 8c-1: `SOLVE_BY_SAT_EVAL_FLAGS=nodeBounds,exclusivePairs` sets the flags of `eval_run run|sizes`
+    (unset: both off, so milestone 7 and 8a runs rebuild their CNFs); `SOLVE_BY_SAT_EVAL_COMPARE=<results.jsonl>`
+    applies 4.4's exactness stop rules (exit 6). `eval_run sizes8c` and `eval_run diag … SETTING`; `Test/m8c1_run.py`,
+    `Test/m8c1_full.sh`. The 8b and milestone 7 tools (`dimacs`, `diag-models`, `m8b_dimacs73`, `eval_scaling`,
+    `eval_numerals`, the 8b hand count, `test_m4`'s milestone 4 check) pin both flags off. Exact-output Lean guards
+    that differ under R1 are pinned to the flags off, each with an R1 twin.
+  - **Next: choosing what 8c-2 builds (R3, R4, R5), in the claude.ai project**, with SCALE.md in hand.
+- Milestone 8 rules: as milestone 7's. Only exact reductions (M8_PLAN 3.1, 4.4); SPEC.md is revised in the claude.ai
+  project, not here. Do not change `SolveBySat/` in 8a. Filters, seeds, sample sizes and
   limits are pre-registered in `M8_PLAN.md` and NOTES.md; a decoder failure on a satisfiable CNF, or a
   §2.5 stop rule, stops the run.
 
@@ -127,6 +146,8 @@ machine's specs in NOTES.md before a full run.
 - An orphaned shard plus a new run once exhausted RAM and forced a reboot. The driver now
   takes a lock and its children die with it (`PR_SET_PDEATHSIG`); keep it that way.
 - `/tmp` may be a tmpfs (RAM). Solver inputs go to `OUTDIR/tmp` on disk.
+- Bash reads a script while it runs: never edit `Test/run_all.sh` (or rebuild what it runs) while it is running. Do not
+  rebuild `eval_run` while a detached run uses it.
 - In Lean 4.36 `try … catch` in `MetaM` does not catch heartbeat or recursion-depth
   exceptions; use `tryCatchRuntimeEx`.
 - CaDiCaL 2.1.2 at its `-t` limit prints `c UNKNOWN` (a comment line) and exits 0.

@@ -60,12 +60,14 @@ structure EncodeOptions where
   (with the scope term e(c) of a local clause) and its least proof size s(g), `gp(α, g)` and
   `cl(α, c)` are false in every model unless d ≤ α and α + s ≤ N. Those literals get unit
   clauses and are folded as constant false; their objects, labels and clauses are never built.
-  If s(root) > N the CNF is the empty clause (the early exit). -/
-  nodeBounds : Bool := false
+  If s(root) > N the CNF is the empty clause (the early exit). On by default since 8c-1
+  (M8_PLAN amendment 4.4). -/
+  nodeBounds : Bool := true
   /-- R2, exclusive pairs (M8_PLAN 3.5): no decomposition clauses and no pair-pruning clause for
   two objects at the same node whose activation literals are two different members of one
-  at-most-one group (`cl(α, ·)` or `gp(α, ·)`): they are never active together. -/
-  exclusivePairs : Bool := false
+  at-most-one group (`cl(α, ·)` or `gp(α, ·)`): they are never active together. On by default
+  since 8c-1 (M8_PLAN amendment 4.4). -/
+  exclusivePairs : Bool := true
   /-- The scope term e(c) of R1. Switched off only by the mutation check (it only weakens the
   bounds). -/
   boundsScope : Bool := true

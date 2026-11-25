@@ -460,8 +460,9 @@ def lambdaClosure (P : Forest) (N : Nat) (cap : Nat := 100000) : Option Nat × N
       -- every assignment of the template's variables from the current Λ
       let mut asg : Array (Std.HashMap String Term) := #[{}]
       for v in vs do
+        -- check the size before building the product (8c-1: building it first ran out of memory)
+        if asg.size * cur.size > cap then return (none, n0, tl.size, rounds)
         asg := asg.flatMap fun σ => cur.map (σ.insert v)
-        if asg.size > cap then return (none, n0, tl.size, rounds)
       for σ in asg do
         next := next.insert (tm.subst (σ.get? ·))
         if next.size > cap then return (none, n0, tl.size, rounds)

@@ -94,9 +94,11 @@ def main : IO UInt32 := do
   let ((goal, H), _, _) ← (leanGoal "L1").toIO { fileName := "<m8diag>", fileMap := default } { env }
   let (C, _, _) ← (compile goal H).toIO { fileName := "<m8diag>", fileMap := default } { env }
   let P := C.forest
-  let E := encode P 2 {}
+  -- 8b's hand count is of the encoding without the milestone 8 flags (on by default since 8c-1)
+  let o0 : EncodeOptions := { nodeBounds := false, exclusivePairs := false }
+  let E := encode P 2 o0
   let out ← IO.mkRef (#[] : Array (String × Json))
-  M8Diag.analyze P 2 {} E (fun sec j => out.modify (·.push (sec, j)))
+  M8Diag.analyze P 2 o0 E (fun sec j => out.modify (·.push (sec, j)))
   let secs ← out.get
   let get := fun (sec : String) => (secs.find? (·.1 == sec)).map (·.2) |>.getD Json.null
   let m2 := get "m2"
@@ -124,15 +126,15 @@ def main : IO UInt32 := do
              ("recount: kept candidates mismatch", 0)]
   let r1c := rc ++ [("recount: units equal", 1), ("recount: R2 skipped equal", 1)]
   let cases : List (String × Nat × EncodeOptions × List (String × Nat)) := [
-    ("flags off", 3, {}, rc ++ [("gp dead", 0), ("cl dead", 0), ("rigid objects", 6), ("full pairs", 21),
+    ("flags off", 3, { nodeBounds := false, exclusivePairs := false }, rc ++ [("gp dead", 0), ("cl dead", 0), ("rigid objects", 6), ("full pairs", 21),
       ("R2 skipped", 0), ("sv", 48)]),
-    ("R1", 3, { nodeBounds := true }, r1c ++ [("gp dead", 4), ("cl dead", 4), ("unit clauses", 8),
+    ("R1", 3, { nodeBounds := true, exclusivePairs := false }, r1c ++ [("gp dead", 4), ("cl dead", 4), ("unit clauses", 8),
       ("rigid objects", 3), ("full pairs", 6), ("R2 skipped", 0), ("sv", 15)]),
     ("R1 and R2", 3, { nodeBounds := true, exclusivePairs := true }, r1c ++ [("gp dead", 4), ("cl dead", 4),
       ("rigid objects", 3), ("full pairs", 5), ("R2 skipped", 1), ("sv", 15)]),
-    ("R2", 3, { exclusivePairs := true }, rc ++ [("rigid objects", 6), ("full pairs", 18), ("R2 skipped", 3),
+    ("R2", 3, { nodeBounds := false, exclusivePairs := true }, rc ++ [("rigid objects", 6), ("full pairs", 18), ("R2 skipped", 3),
       ("recount: R2 skipped equal", 1)]),
-    ("R1, early exit", 1, { nodeBounds := true }, [("early exit", 1), ("clauses", 1)])]
+    ("R1, early exit", 1, { nodeBounds := true, exclusivePairs := false }, [("early exit", 1), ("clauses", 1)])]
   let mut kf := 0
   let mut kn := 0
   for (label, N, o, want) in cases do

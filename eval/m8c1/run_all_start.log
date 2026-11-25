@@ -250,3 +250,10 @@ PASS off Test/M2.lean
 PASS off Test/M3.lean
 PASS off Test/M4Lean.lean
 PASS off Test/M5Lean.lean
+PASS off Test/M7Lean.lean
+PASS off Test/M8Probe.lean
+PASS off Test/M8C1Lean.lean
+PASS r1 Test/M2.lean
+PASS r1 Test/M3.lean
+PASS r1 Test/M4Lean.lean
+PASS r1 Test/M5Lean.lean

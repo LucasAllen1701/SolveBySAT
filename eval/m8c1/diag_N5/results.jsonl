@@ -98,3 +98,23 @@
 {"hwm_mb":728,"key":"m8b:norules:main:B/Int32.xor_right_inj/1","ms":4552,"status":"ok"}
 {"key": "m8b:rules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13", "status": "memout", "exit": -15, "last_section": "m7"}
 {"key": "m8b:norules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/UInt16.add_eq_left/1","ms":9264,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/UInt16.add_eq_left/1","ms":1942,"status":"ok"}
+{"key": "m8b:rules:main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/12", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/12","ms":4921,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.DHashMap.getKey?_eq_some_getKeyD/3", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Std.DHashMap.getKey?_eq_some_getKeyD/3","ms":9,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Int8.not_inj/3","ms":4910,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/Int8.not_inj/3","ms":1445,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Int.lcm_eq_natAbs_left_iff_dvd/1","ms":1568,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/Int.lcm_eq_natAbs_left_iff_dvd/1","ms":143,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3", "status": "memout", "exit": -15, "last_section": "m7"}
+{"key": "m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":732,"key":"m8b:rules:main:B/List.zipIdx_eq_nil_iff/5","ms":2481,"status":"ok"}
+{"hwm_mb":732,"key":"m8b:norules:main:B/List.zipIdx_eq_nil_iff/5","ms":241,"status":"ok"}
+{"hwm_mb":732,"key":"m8b:rules:main:B/Int16.toInt_mul/17","ms":5043,"status":"ok"}
+{"hwm_mb":732,"key":"m8b:norules:main:B/Int16.toInt_mul/17","ms":125,"status":"ok"}
+{"key": "m8b:rules:main:B/String.Slice.sliceTo_sliceTo/12", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/String.Slice.sliceTo_sliceTo/12","ms":4204,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:rules:main:B/Int.zero_lcm/1","ms":824,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Int.zero_lcm/1","ms":104,"status":"ok"}

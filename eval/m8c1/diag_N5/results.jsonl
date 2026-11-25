@@ -178,3 +178,23 @@
 {"hwm_mb":729,"key":"m8b:norules:main:B/Lean.Grind.CommRing.Stepwise.d_step1C/17","ms":1915,"status":"ok"}
 {"hwm_mb":729,"key":"m8b:rules:main:B/Int.sub_bmod_bmod/8","ms":5033,"status":"ok"}
 {"hwm_mb":729,"key":"m8b:norules:main:B/Int.sub_bmod_bmod/8","ms":278,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/UInt64.toUInt8_le/7","ms":4822,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/UInt64.toUInt8_le/7","ms":67,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Int16.toInt_mul/7","ms":6815,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/Int16.toInt_mul/7","ms":242,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Int64.toBitVec32_toISize/6","ms":814,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/Int64.toBitVec32_toISize/6","ms":56,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/UInt8.and_le_left/5","ms":2092,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/UInt8.and_le_left/5","ms":111,"status":"ok"}
+{"hwm_mb":745,"key":"m8b:rules:main:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/10","ms":3645,"status":"ok"}
+{"hwm_mb":745,"key":"m8b:norules:main:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/10","ms":1396,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.TreeMap.inter_equiv_empty_comm/13", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Std.TreeMap.inter_equiv_empty_comm/13","ms":1598,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:rules:main:B/Int64.xor_not/5","ms":3420,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Int64.xor_not/5","ms":440,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2","ms":33,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/ByteArray.isSome_utf8Decode?_iff/4","ms":1723,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/ByteArray.isSome_utf8Decode?_iff/4","ms":56,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/String.Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar?/151","ms":8366,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/String.Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar?/151","ms":339,"status":"ok"}

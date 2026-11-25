@@ -228,3 +228,8 @@
 {"hwm_mb":733,"key":"m8b:rules:main:B/Std.TreeMap.inter_equiv_empty_comm/14","ms":5917,"status":"ok"}
 {"hwm_mb":744,"key":"m8b:rules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13","ms":60104,"status":"ok"}
 {"hwm_mb":744,"key":"m8b:norules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13","ms":11362,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:rules:main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/12","ms":49959,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:rules:main:B/Std.DHashMap.getKey?_eq_some_getKeyD/3","ms":5713,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:rules:main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3","ms":19192,"status":"ok"}
+{"hwm_mb":741,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3","ms":491,"status":"ok"}
+{"hwm_mb":740,"key":"m8b:rules:main:B/String.Slice.sliceTo_sliceTo/12","ms":19132,"status":"ok"}

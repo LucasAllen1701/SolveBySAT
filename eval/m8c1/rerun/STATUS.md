@@ -1,8 +1,8 @@
 # eval/m8c1/rerun: status
 
-Updated 2026-11-25 13:31:50. Phase: runs.
+Updated 2026-11-25 13:35:52. Phase: runs.
 
-- Goals done: 150 of 200
+- Goals done: 200 of 200
 - Stops: 0
 - Sizes done: 0
 
@@ -10,4 +10,4 @@ Updated 2026-11-25 13:31:50. Phase: runs.
 | --- | --- | --- | --- | --- | --- | --- |
 | rewrite_B | 100 of 100 | 16 | 3 | 35 | 46 | 0 |
 | rewrite_A | 50 of 50 | 5 | 3 | 29 | 13 | 0 |
-| control | 0 of 50 | 0 | 0 | 0 | 0 | 0 |
+| control | 50 of 50 | 50 | 0 | 0 | 0 | 0 |

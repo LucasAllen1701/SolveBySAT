@@ -246,3 +246,5 @@
 {"hwm_mb":734,"key":"m8b:rules:main:B/Std.Sat.AIG.relabel_size_eq_size/0","ms":5269,"status":"ok"}
 {"hwm_mb":735,"key":"m8b:rules:main:B/Std.TreeMap.inter_equiv_empty_comm/13","ms":5762,"status":"ok"}
 {"hwm_mb":735,"key":"m8b:rules:main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2","ms":24056,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:rules:main:A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right","ms":16576,"status":"ok"}
+{"hwm_mb":735,"key":"m8b:norules:main:A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right","ms":2315,"status":"ok"}

@@ -90,3 +90,11 @@ diag r1r2 N=5: 221 of 20, 16 s
 diag r1r2 N=5: m8b:norules:main:A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right: memout (exit -15)
 diag r1r2 N=5: 222 of 20, 20 s
 diag r1r2 N=5: 240 of 20, 131 s
+diag r1r2 N=5: m8b:rules:main:A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem: memout (exit -15)
+diag r1r2 N=5: 245 of 20, 38 s
+diag r1r2 N=5: m8b:norules:main:A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem: memout (exit -15)
+diag r1r2 N=5: 246 of 20, 50 s
+=== stopped by hand 2026-11-25 11:23:04: diag memouts from a bug in M8Diag.lambdaClosure (product built before the cap check); fixed, 32 memout records and their partial sections removed
+=== start 2026-11-25 11:23:04
+=== sizes N=5 done 2026-11-25 11:23:35
+diag r1r2 N=5: 223 of 20, 25 s

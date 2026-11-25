@@ -63,7 +63,7 @@ def quart(xs):
 
 
 def ratio(a, b):
-    return f"{a / b:.2f}×" if b else "–"
+    return f"{a / b:.2f}×" if a and b else "–"
 
 
 def variant(key):
@@ -83,7 +83,7 @@ def sizes_section(n, out):
     t = os.path.join(D, f"sizes_N{n}", "timing.json")
     if os.path.exists(t):
         tm = json.load(open(t))
-        out += [f"Wall time {tm['wall_s'] / 3600:.2f} h for {tm['n']} (point, setting) records"
+        out += [f"Wall time {tm['wall_s'] / 3600:.2f} h for {len(rs)} (point, setting) records (all passes of the driver)"
                 f"{'' if tm.get('finished') else ' (not finished)'}.", ""]
     # status per setting
     rows = []
@@ -111,7 +111,9 @@ def sizes_section(n, out):
                      ratio(sum(by[p]["off"]["vars"] for p in pts), sum(by[p]["r1r2"]["vars"] for p in pts)),
                      ratio(sum(by[p]["r1"]["vars"] for p in pts), sum(by[p]["r1r2"]["vars"] for p in pts))])
         out += table(["clauses", "off", "R1", "R1 R2", "off / R1", "off / R1 R2", "R1 / R1 R2"], rows) + [""]
-        # per-point ratios
+        # per-point ratios, without the early exits (one empty clause)
+        ee = [p for p in pts if by[p]["r1"].get("early_exit")]
+        pts_all, pts = pts, [p for p in pts if not by[p]["r1"].get("early_exit")]
         rows = []
         for f in ["total", "5 decomposition", "8 groundness", "4 matching", "6 links (environment copies)",
                   "7 eigenvariables, occurs check, scope"]:
@@ -120,8 +122,8 @@ def sizes_section(n, out):
             r2 = [get(by[p]["off"]) / get(by[p]["r1r2"]) for p in pts if get(by[p]["r1r2"])]
             r12 = [get(by[p]["r1"]) / get(by[p]["r1r2"]) for p in pts if get(by[p]["r1r2"])]
             rows.append([f, quart(r1), quart(r2), quart(r12), sum(1 for p in pts if get(by[p]["r1r2"]) == 0)])
-        out += ["Per-point ratios, median [q1, q3]; points with a family emptied by R1 and R2 are left out of"
-                " that family's ratios and counted in the last column:", ""]
+        out += [f"Per-point ratios, median [q1, q3], over the {len(pts)} points without the early exit ({len(ee)} left out); "
+                "points with a family emptied by R1 and R2 are left out of that family's ratios and counted in the last column:", ""]
         out += table(["clauses", "off / R1", "off / R1 R2", "R1 / R1 R2", "emptied (R1 R2)"], rows) + [""]
         # label width and objects
         rows = []
@@ -134,6 +136,7 @@ def sizes_section(n, out):
                                                              for p in pts if by[p]["r1"]["cl_pairs"]]), "–"])
         out += ["Per point, median [q1, q3] (early exits left out of the first five rows):", ""]
         out += table(["", "off", "R1", "R1 R2"], rows) + [""]
+        pts = pts_all
         enc = [[by[p][s]["encode_ms"] / 1000 for p in pts] for s, _ in SETTINGS]
         out += [f"Encoding time (countOnly), pooled: off {sum(enc[0]):,.0f} s, R1 {sum(enc[1]):,.0f} s, "
                 f"R1 R2 {sum(enc[2]):,.0f} s.", ""]
@@ -224,9 +227,9 @@ def diag_section(out):
             for lab, x in sec[k]["m3"]["by"].items():
                 by[lab] += x["clauses"]
         out += [f"**M6: decomposition by object kinds**, pooled over {dt:,} decomposition clauses:", ""]
-        rows = [[lab[len("kinds:"):], by[lab], pct(by[lab], dt)] for lab in sorted(by, key=lambda l: (-by[l], l))
+        rows = [[*lab[len("kinds:"):].split("|"), by[lab], pct(by[lab], dt)] for lab in sorted(by, key=lambda l: (-by[l], l))
                 if lab.startswith("kinds:")]
-        out += table(["kinds of the pair | symbol class", "clauses", "share"], rows) + [""]
+        out += table(["kinds of the pair", "symbol class", "clauses", "share"], rows) + [""]
         rows = [[lab, by[lab], pct(by[lab], dt)] for lab in sorted(by, key=lambda l: (-by[l], l))
                 if lab.startswith("symclass:") or lab.startswith("node:") and "|" not in lab]
         out += table(["class", "clauses", "share"], rows) + [""]

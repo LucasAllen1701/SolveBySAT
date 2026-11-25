@@ -2,7 +2,7 @@
 
 Lucas Allen · 24 November 2026
 
-**Status: 8a (the rewriting probe) and 8b (the measurements and the scale design) are complete (sections 2 and 3, amendments 4.1 to 4.4). 8c-1 has started: Claude Code implements R1 and R2 and takes the measurements M6 to M8 (4.4). The encoding stays one-shot (4.2), and only exact reductions are accepted (4.4).** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
+**Status: 8a, 8b and 8c-1 are complete (sections 2 and 3, amendments 4.1 to 4.5), and R1 and R2 are on by default. 8c-2a has started: Claude Code simulates R3 with shared residual objects, without changing the tactic (4.5). R4 is set aside and R5 is dropped. The encoding stays one-shot (4.2), and only exact reductions are accepted (4.4).** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
 
 ## 1. Aims
 
@@ -464,3 +464,66 @@ Section 3 is the design written from them.
 
   It states facts. Reading them, and choosing what 8c-2 builds, is for the claude.ai project.
 - **Defaults.** R1 and R2 become on by default only after every check above passes. Until then they are switched on explicitly.
+
+### 4.5 After 8c-1: R3 is measured before it is built (26 November 2026)
+
+**8c-1 record.** NOTES.md ("8c-1: node bounds and exclusive pairs") and `eval/m8c1/SCALE.md` have the details. The stage was checked independently:
+
+- the bound check recomputes at all 400 points, and R1's excluded pairs are never fewer than 8b's;
+- the flags-off counts equal 8b's;
+- the rerun agrees with 8a at every N where both answered (776 UNSAT answers and 64 proofs, with no conflict), and every proof is at 8a's N;
+- SCALE.md regenerates byte-identically.
+
+The results:
+
+- **Sizes.** At N = 5, pooled, R1 and R2 shrink the CNF 2.50 times with the rules and 3.38 times without. At N = 10, they shrink it 1.70 and 2.11 times.
+- **Early exits.** 14 points have s(root) = ∞, so no proof tree exists at any N.
+- **The rerun.** Every control is now proved (7 new proofs), 3 crashes became certified "no proof ≤ 10", 18 crashes became solver timeouts, and solving is 1.75 times faster pooled.
+- **No rewriting goal gained a proof.**
+
+R1 and R2 are accepted and on by default.
+
+**What M6 to M8 show.**
+
+- **Decomposition and groundness** are still 97% of the clauses with the rules after R1 and R2.
+- **Type-template objects** take part in 80% of decomposition with the rules, and level symbols in 38%.
+- **R5** would reach 0.1% of groundness with the rules (5.8% without).
+- **R4's Λ** exceeds the diagnostic cap of 100,000 at 62 of 199 points with the rules (32 of 187 without).
+- **R3 as measured would add objects.** M6 counted one set of residual objects per typing clause: 3,408,919 pooled with the rules, against 59,757 type-template objects. But each binding of a triangular solved form has a right side that is a subterm of one of the two templates. So a residual object can be the existing type-template object for that subterm, shared by every candidate. With that sharing, R3 keeps at most today's type-template objects. What it saves is not yet measured.
+
+**Decisions.**
+
+1. **R5 is dropped.** It is not built in milestone 8.
+2. **R4 is set aside.** It is not built in milestone 8. A tighter Λ, for example one built from the level instances that matching can actually produce, is an open direction.
+3. **R3 is simulated first (8c-2a)**, with shared residual objects, in diagnostic code only. It is built (8c-2b) only if the simulation shows a real gain, by the rule below.
+4. **Then 8d**, with every accepted refinement on.
+
+**8c-2a, pre-registered.**
+
+- **R3 with shared residual objects.** For each kept candidate o of a slot b with a typing clause:
+  - unify the two type templates, renamed apart as in 3.6.1;
+  - take the **triangular** solved form, before any binding is applied to another, so that every binding x ↦ t has t a subterm of one of the two templates at a definite path.
+  - The binding becomes `sv ⇒ L(x) = L(⟦t⟧)`, where ⟦t⟧ is:
+    - the slot, if t is a variable;
+    - the ground object, if t is ground;
+    - otherwise the type-template object of that template at (node, owner, path), shared by every candidate.
+  - **Retained.** A type-template object is retained if it is such a ⟦t⟧, or lies below one. Every other type-template object is dropped, with every clause that exists only for it.
+  - **Non-unifiable templates.** A candidate whose templates do not unify is dropped, with its groundness clauses.
+- **Projection.** Replay the encoder in the counting CNF with R3 applied, as 8b's recount does, on the 400 points of 4.3 at N = 5 and N = 10, with R1 and R2 on. Per point and per family, record:
+  - the projected clauses and variables;
+  - the type-template objects built today and those retained;
+  - the bindings, by kind;
+  - the candidates dropped.
+- **Consistency checks.** With R3 off, the replay must equal 8c-1's R1-and-R2 counts. Pooled, that is:
+
+  | points | N | clauses | decomposition |
+  | --- | --- | --- | --- |
+  | with the rules | 5 | 1,198,832,528 | 691,355,524 |
+  | without rules | 5 | 233,142,772 | 191,867,245 |
+  | with the rules | 10 | 8,783,597,441 | 5,427,950,094 |
+  | without rules | 10 | 1,886,439,639 | 1,621,030,607 |
+
+  At N = 5, the typing clauses must equal M6's: 4,422,137 with the rules and 334,786 without.
+- **Model check, a stop rule.** In the 90 models of 8c-1 (`eval/m8c1/models/`), every triangular binding of every chosen candidate with a typing clause must hold under the decoded substitution. A failure means the simulation's solved form is wrong, and it stops the work.
+- **Decision rule.** R3 is recommended for building if its projected pooled clause count with the rules at N = 5 is at most 0.8 of the R1-and-R2 count (1.25 times smaller or better). Otherwise R3 is not built, and milestone 8 goes to 8d. The owner decides on the report.
+- **Rules.** `SolveBySat/` does not change. The 54 encodings of `eval/m8b/dimacs_md5.txt` stay byte-identical with the flags off. `eval/m8c2a/report.py` writes `eval/m8c2a/R3SIM.md` from the data files alone, and it must regenerate byte-identically. It states facts.

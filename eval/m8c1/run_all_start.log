@@ -257,3 +257,10 @@ PASS r1 Test/M2.lean
 PASS r1 Test/M3.lean
 PASS r1 Test/M4Lean.lean
 PASS r1 Test/M5Lean.lean
+PASS r1 Test/M7Lean.lean
+PASS r1 Test/M8Probe.lean
+PASS r1 Test/M8C1Lean.lean
+PASS r1r2 Test/M2.lean
+PASS r1r2 Test/M3.lean
+PASS r1r2 Test/M4Lean.lean
+PASS r1r2 Test/M5Lean.lean

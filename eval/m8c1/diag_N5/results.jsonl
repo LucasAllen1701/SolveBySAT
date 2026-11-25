@@ -233,3 +233,8 @@
 {"hwm_mb":739,"key":"m8b:rules:main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3","ms":19192,"status":"ok"}
 {"hwm_mb":741,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3","ms":491,"status":"ok"}
 {"hwm_mb":740,"key":"m8b:rules:main:B/String.Slice.sliceTo_sliceTo/12","ms":19132,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/176","ms":28045,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Array.toList_fst_unzip/4","ms":23650,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/Array.toList_fst_unzip/4","ms":2690,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8","ms":27120,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8","ms":865,"status":"ok"}

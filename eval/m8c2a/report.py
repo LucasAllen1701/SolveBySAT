@@ -101,9 +101,10 @@ def models_section(out):
                   "bindings: slot", "bindings: ground", "bindings: shared residual", "failures", "label mismatches",
                   "unreadable", "read-back conflicts"], rows) + [""]
     out += [f"Bindings checked: {sum(tot.values()):,}. Failures: {len(fails)}." + "".join(f"\n- {f}" for f in fails[:20]), ""]
-    t = os.path.join(D, "models", "timing.json")
-    if os.path.exists(t):
-        out += [f"Wall time {json.load(open(t))['wall_s']:.0f} s.", ""]
+    lg = os.path.join(D, "models", "run.log")
+    if os.path.exists(lg):
+        w = [float(l.split("wall ")[1].split(" s")[0]) for l in open(lg) if l.startswith("[memrun]")]
+        out += [f"Wall time {sum(w):.0f} s over {len(w)} `eval_run` processes (every pass of the driver).", ""]
 
 
 def consistency_section(n, sec, out):

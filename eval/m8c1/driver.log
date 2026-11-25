@@ -84,3 +84,4 @@ diag r1r2 N=5: 191 of 20, 27 s
 diag r1r2 N=5: m8b:rules:main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2: memout (exit -15)
 diag r1r2 N=5: 195 of 20, 50 s
 diag r1r2 N=5: 200 of 20, 61 s
+diag r1r2 N=5: 220 of 20, 323 s

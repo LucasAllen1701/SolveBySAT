@@ -78,3 +78,23 @@
 {"hwm_mb":742,"key":"m8b:norules:main:B/BitVec.getMsbD_rotateRight/33","ms":61,"status":"ok"}
 {"hwm_mb":742,"key":"m8b:rules:main:B/Nat.toArray_rco_eq_singleton_append_iff/10","ms":12793,"status":"ok"}
 {"hwm_mb":742,"key":"m8b:norules:main:B/Nat.toArray_rco_eq_singleton_append_iff/10","ms":1055,"status":"ok"}
+{"hwm_mb":2981,"key":"m8b:rules:main:B/List.find?_eq_some_iff_append/67","ms":72756,"status":"ok"}
+{"hwm_mb":2981,"key":"m8b:norules:main:B/List.find?_eq_some_iff_append/67","ms":34435,"status":"ok"}
+{"hwm_mb":2981,"key":"m8b:rules:main:B/Array.getElem_append_right'/24","ms":38377,"status":"ok"}
+{"hwm_mb":2981,"key":"m8b:norules:main:B/Array.getElem_append_right'/24","ms":11645,"status":"ok"}
+{"hwm_mb":2981,"key":"m8b:rules:main:B/UInt8.toUInt16_ofNat'/2","ms":681,"status":"ok"}
+{"hwm_mb":2981,"key":"m8b:norules:main:B/UInt8.toUInt16_ofNat'/2","ms":62,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.TreeMap.inter_equiv_empty_comm/14", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Std.TreeMap.inter_equiv_empty_comm/14","ms":1516,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:rules:main:B/Nat.toList_repr/0","ms":968,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Nat.toList_repr/0","ms":154,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:rules:main:B/Array.append_right_inj/0","ms":20067,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Array.append_right_inj/0","ms":14026,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:rules:main:B/Std.Do.WP.pure/6","ms":5989,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Std.Do.WP.pure/6","ms":1978,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:rules:main:B/UInt32.toUInt16_sub/0","ms":6355,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/UInt32.toUInt16_sub/0","ms":564,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:rules:main:B/Int32.xor_right_inj/1","ms":16821,"status":"ok"}
+{"hwm_mb":728,"key":"m8b:norules:main:B/Int32.xor_right_inj/1","ms":4552,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13", "status": "memout", "exit": -15, "last_section": "m7"}
+{"key": "m8b:norules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13", "status": "memout", "exit": -15, "last_section": "m7"}

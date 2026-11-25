@@ -199,3 +199,4 @@ shard 2: done; 150 results; 6298 s
 shard 3: done; 200 results; 6540 s
 sizes: 372 specs done
 === rerun done 2026-11-25 14:03:02
+sizes N=10: 60 of 60, 1403 s

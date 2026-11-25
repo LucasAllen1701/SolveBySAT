@@ -135,7 +135,102 @@ Encoding time (countOnly), pooled: off 667 s, R1 206 s, R1 R2 199 s.
 
 ## Sizes at N = 10
 
-No data.
+### Records
+
+| points | setting | records | ok | memout | crash | early exit |
+| --- | --- | --- | --- | --- | --- | --- |
+| with the 8a rules | both flags off | 1 | 1 | 0 | 0 | 0 |
+| with the 8a rules | R1 on | 1 | 1 | 0 | 0 | 0 |
+| with the 8a rules | R1 and R2 on | 1 | 1 | 0 | 0 | 0 |
+| milestone 7's H, no rules | both flags off | 1 | 1 | 0 | 0 | 0 |
+| milestone 7's H, no rules | R1 on | 1 | 1 | 0 | 0 | 1 |
+| milestone 7's H, no rules | R1 and R2 on | 1 | 1 | 0 | 0 | 1 |
+
+### Pooled, with the 8a rules (1 points complete in all three settings)
+
+| clauses | off | R1 | R1 R2 | off / R1 | off / R1 R2 | R1 / R1 R2 |
+| --- | --- | --- | --- | --- | --- | --- |
+| total | 17,170,288 | 2,430,134 | 2,420,191 | 7.07× | 7.09× | 1.00× |
+| 1 node assignment | 1,711 | 440 | 440 | 3.89× | 3.89× | 1.00× |
+| 2 tree shape | 4,227 | 2,192 | 2,192 | 1.93× | 1.93× | 1.00× |
+| 3 context (local hypotheses, ancestors) | 2,005 | 1,378 | 1,378 | 1.46× | 1.46× | 1.00× |
+| 4 matching | 261,370 | 84,040 | 84,040 | 3.11× | 3.11× | 1.00× |
+| 5 decomposition | 6,507,055 | 592,209 | 582,266 | 10.99× | 11.18× | 1.02× |
+| 6 links (environment copies) | 356,730 | 79,104 | 79,104 | 4.51× | 4.51× | 1.00× |
+| 7 eigenvariables, occurs check, scope | 64,810 | 14,561 | 14,561 | 4.45× | 4.45× | 1.00× |
+| 8 groundness | 9,970,820 | 1,654,334 | 1,654,334 | 6.03× | 6.03× | 1.00× |
+| 10 symmetry breaking | 1,560 | 1,560 | 1,560 | 1.00× | 1.00× | 1.00× |
+| 11 node bounds | 0 | 316 | 316 | – | – | 1.00× |
+| variables | 1,651,343 | 181,681 | 179,269 | 9.09× | 9.21× | 1.01× |
+
+Per-point ratios, median [q1, q3], over the 1 points without the early exit (0 left out); points with a family emptied by R1 and R2 are left out of that family's ratios and counted in the last column:
+
+| clauses | off / R1 | off / R1 R2 | R1 / R1 R2 | emptied (R1 R2) |
+| --- | --- | --- | --- | --- |
+| total | 7.07 | 7.09 | 1.00 | 0 |
+| 5 decomposition | 10.99 | 11.18 | 1.02 | 0 |
+| 8 groundness | 6.03 | 6.03 | 1.00 | 0 |
+| 4 matching | 3.11 | 3.11 | 1.00 | 0 |
+| 6 links (environment copies) | 4.51 | 4.51 | 1.00 | 0 |
+| 7 eigenvariables, occurs check, scope | 4.45 | 4.45 | 1.00 | 0 |
+
+Per point, median [q1, q3] (early exits left out of the first five rows):
+
+|  | off | R1 | R1 R2 |
+| --- | --- | --- | --- |
+| W | 34.00 | 33.00 | 33.00 |
+| IB | 10.00 | 9.00 | 9.00 |
+| rigid | 380.00 | 114.00 | 114.00 |
+| type_rigid | 610.00 | 145.00 | 145.00 |
+| full_pairs | 44215.00 | 5049.00 | 4968.00 |
+| R2: pairs skipped | – | – | 97.00 |
+| R1: gp excluded / gp pairs | – | 0.72 | – |
+| R1: cl excluded / cl pairs | – | 0.71 | – |
+
+Encoding time (countOnly), pooled: off 12 s, R1 2 s, R1 R2 2 s.
+
+### Pooled, milestone 7's H, no rules (1 points complete in all three settings)
+
+| clauses | off | R1 | R1 R2 | off / R1 | off / R1 R2 | R1 / R1 R2 |
+| --- | --- | --- | --- | --- | --- | --- |
+| total | 3,154,038 | 1 | 1 | 3154038.00× | 3154038.00× | 1.00× |
+| 1 node assignment | 491 | 0 | 0 | – | – | – |
+| 2 tree shape | 2,057 | 0 | 0 | – | – | – |
+| 3 context (local hypotheses, ancestors) | 1,400 | 0 | 0 | – | – | – |
+| 4 matching | 6,970 | 0 | 0 | – | – | – |
+| 5 decomposition | 1,680,110 | 0 | 0 | – | – | – |
+| 6 links (environment copies) | 125,070 | 0 | 0 | – | – | – |
+| 7 eigenvariables, occurs check, scope | 34,470 | 0 | 0 | – | – | – |
+| 8 groundness | 1,301,910 | 0 | 0 | – | – | – |
+| 10 symmetry breaking | 1,560 | 0 | 0 | – | – | – |
+| 11 node bounds | 0 | 1 | 1 | – | – | 1.00× |
+| variables | 410,261 | 0 | 0 | – | – | – |
+
+Per-point ratios, median [q1, q3], over the 0 points without the early exit (1 left out); points with a family emptied by R1 and R2 are left out of that family's ratios and counted in the last column:
+
+| clauses | off / R1 | off / R1 R2 | R1 / R1 R2 | emptied (R1 R2) |
+| --- | --- | --- | --- | --- |
+| total | – | – | – | 0 |
+| 5 decomposition | – | – | – | 0 |
+| 8 groundness | – | – | – | 0 |
+| 4 matching | – | – | – | 0 |
+| 6 links (environment copies) | – | – | – | 0 |
+| 7 eigenvariables, occurs check, scope | – | – | – | 0 |
+
+Per point, median [q1, q3] (early exits left out of the first five rows):
+
+|  | off | R1 | R1 R2 |
+| --- | --- | --- | --- |
+| W | – | – | – |
+| IB | – | – | – |
+| rigid | – | – | – |
+| type_rigid | – | – | – |
+| full_pairs | – | – | – |
+| R2: pairs skipped | – | – | – |
+| R1: gp excluded / gp pairs | – | – | – |
+| R1: cl excluded / cl pairs | – | – | – |
+
+Encoding time (countOnly), pooled: off 2 s, R1 0 s, R1 R2 0 s.
 
 ## M6 to M8 at N = 5, R1 and R2 on (3.9)
 
@@ -297,46 +392,381 @@ Per typing clause: 0.13 slot, 0.58 ground and 0.35 residual equations, 0.69 resi
 
 ## The rerun of 8a with R1 and R2 on (4.4)
 
-Runs: 1 of 200. Stops (4.4 exactness, 2.5): 0.
+Wall time: runs 1.82 h, sizes 0.45 h (8a: 2.19 h and 0.94 h).
+
+Runs: 200 of 200. Stops (4.4 exactness, 2.5): 0.
 
 ### Outcomes, all runs: 8a (rows) against the rerun (columns)
 
 | 8a \ rerun | proved | no_proof_le_Nmax | timeout | memout | crash | limitation | total |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| proved | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| no_proof_le_Nmax | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| timeout | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| proved | 64 | 0 | 0 | 0 | 0 | 0 | 64 |
+| no_proof_le_Nmax | 0 | 3 | 0 | 0 | 0 | 0 | 3 |
+| timeout | 1 | 0 | 41 | 0 | 0 | 0 | 42 |
 | memout | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| crash | 0 | 1 | 0 | 0 | 0 | 0 | 1 |
+| crash | 6 | 3 | 18 | 0 | 64 | 0 | 91 |
 | limitation | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| total | 0 | 1 | 0 | 0 | 0 | 0 | 1 |
+| total | 71 | 6 | 59 | 0 | 64 | 0 | 200 |
 
 ### Outcomes, rewriting, Tier B: 8a (rows) against the rerun (columns)
 
 | 8a \ rerun | proved | no_proof_le_Nmax | timeout | memout | crash | limitation | total |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| proved | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| no_proof_le_Nmax | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| timeout | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| proved | 16 | 0 | 0 | 0 | 0 | 0 | 16 |
+| no_proof_le_Nmax | 0 | 1 | 0 | 0 | 0 | 0 | 1 |
+| timeout | 0 | 0 | 31 | 0 | 0 | 0 | 31 |
 | memout | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| crash | 0 | 1 | 0 | 0 | 0 | 0 | 1 |
+| crash | 0 | 2 | 15 | 0 | 35 | 0 | 52 |
 | limitation | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| total | 0 | 1 | 0 | 0 | 0 | 0 | 1 |
+| total | 16 | 3 | 46 | 0 | 35 | 0 | 100 |
 
-### Runs whose outcome or last N changed (1 of 1)
+### Outcomes, rewriting, Tier A: 8a (rows) against the rerun (columns)
+
+| 8a \ rerun | proved | no_proof_le_Nmax | timeout | memout | crash | limitation | total |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| proved | 5 | 0 | 0 | 0 | 0 | 0 | 5 |
+| no_proof_le_Nmax | 0 | 2 | 0 | 0 | 0 | 0 | 2 |
+| timeout | 0 | 0 | 10 | 0 | 0 | 0 | 10 |
+| memout | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| crash | 0 | 1 | 3 | 0 | 29 | 0 | 33 |
+| limitation | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| total | 5 | 3 | 13 | 0 | 29 | 0 | 50 |
+
+### Outcomes, control: 8a (rows) against the rerun (columns)
+
+| 8a \ rerun | proved | no_proof_le_Nmax | timeout | memout | crash | limitation | total |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| proved | 43 | 0 | 0 | 0 | 0 | 0 | 43 |
+| no_proof_le_Nmax | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| timeout | 1 | 0 | 0 | 0 | 0 | 0 | 1 |
+| memout | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| crash | 6 | 0 | 0 | 0 | 0 | 0 | 6 |
+| limitation | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| total | 50 | 0 | 0 | 0 | 0 | 0 | 50 |
+
+### Runs whose outcome or last N changed (97 of 200)
 
 | goal | group | 8a: outcome, N | rerun: outcome, N | limit kind |
 | --- | --- | --- | --- | --- |
+| `A/BitVec.allOnes_or` | rewrite_A | crash 5 | crash 6 |  |
+| `A/BitVec.getMsbD_rotateRightAux_of_lt` | rewrite_A | crash 3 | crash 4 |  |
+| `A/BitVec.toInt_emod_two_pow` | rewrite_A | crash 6 | crash 7 |  |
+| `A/Int.ediv_eq_iff_eq_mul_left` | rewrite_A | crash 7 | crash 9 |  |
+| `A/Int.tmod_def` | rewrite_A | crash 6 | timeout 6 | solver |
+| `A/Int8.ofNat_div` | rewrite_A | crash 5 | crash 6 |  |
+| `A/Lean.Grind.CommRing.Poly.denote_mul` | rewrite_A | crash 5 | crash 6 |  |
+| `A/Lean.Grind.Field.NormNum.sub_eq` | rewrite_A | crash 6 | crash 7 |  |
+| `A/List.append_right_le_iff_of_length_eq` | rewrite_A | crash 3 | crash 5 |  |
+| `A/Nat.toArray_roc_eq_singleton_iff` | rewrite_A | crash 4 | crash 6 |  |
+| `A/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default` | rewrite_A | crash 3 | crash 5 |  |
+| `A/Std.DHashMap.Raw.Const.get?_emptyWithCapacity` | rewrite_A | crash 3 | crash 4 |  |
+| `A/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_contains` | rewrite_A | crash 2 | crash 3 |  |
+| `A/Std.DHashMap.Raw.getKeyD_eq_fallback` | rewrite_A | crash 4 | crash 6 |  |
+| `A/Std.DHashMap.isEmpty_iff_forall_not_mem` | rewrite_A | crash 4 | crash 7 |  |
+| `A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem` | rewrite_A | crash 3 | crash 5 |  |
+| `A/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self` | rewrite_A | crash 4 | crash 5 |  |
+| `A/Std.DTreeMap.Raw.Const.getD_inter_of_not_mem_right` | rewrite_A | crash 3 | crash 4 |  |
+| `A/Std.DTreeMap.Raw.contains_eq_false_iff_not_mem` | rewrite_A | crash 6 | crash 8 |  |
+| `A/Std.Internal.List.Const.getValue?_modifyKey_self` | rewrite_A | crash 3 | crash 5 |  |
+| `A/Std.Internal.List.getKey?_insertEntry_self` | rewrite_A | crash 7 | crash 9 |  |
+| `A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right` | rewrite_A | crash 4 | crash 5 |  |
+| `A/Std.TreeSet.max?_eq_back?_toArray` | rewrite_A | crash 6 | crash 7 |  |
+| `A/String.Pos.prev_le` | rewrite_A | crash 7 | no_proof_le_Nmax 10 |  |
+| `A/String.Pos.toSlice_le` | rewrite_A | crash 6 | crash 7 |  |
+| `A/String.revSkip?_toSlice` | rewrite_A | crash 4 | crash 5 |  |
+| `A/UInt32.sub_lt` | rewrite_A | crash 8 | timeout 9 | solver |
+| `A/UInt64.toUSize_sub` | rewrite_A | crash 7 | timeout 7 | solver |
+| `A/UInt8.toNat_shiftLeft` | rewrite_A | crash 6 | crash 7 |  |
+| `A/USize.toUInt8_mul` | rewrite_A | crash 5 | crash 6 |  |
+| `A/Vector.getElem?_setIfInBounds_ne` | rewrite_A | crash 3 | crash 4 |  |
+| `A/Vector.right_distrib` | rewrite_A | crash 3 | crash 4 |  |
+| `B/Array.append_right_inj/0` | rewrite_B | crash 4 | crash 5 |  |
+| `B/Array.getElem_append_right'/24` | rewrite_B | crash 4 | crash 5 |  |
+| `B/Array.size_insertIdx/11` | rewrite_B | crash 5 | crash 6 |  |
+| `B/Array.size_insertIdx/8` | rewrite_B | timeout 5 | timeout 6 | solver |
+| `B/BitVec.getMsbD_rotateRight/31` | rewrite_B | crash 10 | timeout 10 | solver |
+| `B/BitVec.getMsbD_rotateRight/33` | rewrite_B | timeout 5 | timeout 6 | solver |
+| `B/BitVec.udiv_eq_of_mul_add_toNat/9` | rewrite_B | crash 6 | crash 7 |  |
+| `B/Fin.add_one_pos/81` | rewrite_B | crash 4 | crash 6 |  |
+| `B/Int.Internal.Linear.cooper_left_split_dvd/42` | rewrite_B | timeout 8 | timeout 9 | solver |
+| `B/Int.ediv_eq_iff_eq_mul_left/2` | rewrite_B | timeout 6 | timeout 7 | solver |
+| `B/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos/18` | rewrite_B | crash 9 | timeout 10 | solver |
+| `B/Int.lcm_eq_natAbs_left_iff_dvd/1` | rewrite_B | timeout 7 | timeout 8 | solver |
+| `B/Int.sub_bmod_bmod/8` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/Int.zero_eq_toNat_sub_iff/6` | rewrite_B | timeout 7 | timeout 8 | solver |
+| `B/Int16.le_of_lt/2` | rewrite_B | timeout 7 | timeout 8 | solver |
+| `B/Int16.toInt_mul/7` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/Int32.xor_right_inj/1` | rewrite_B | crash 4 | crash 6 |  |
+| `B/Int64.toInt32_ofIntLE/1` | rewrite_B | timeout 6 | timeout 7 | solver |
+| `B/Int64.xor_not/5` | rewrite_B | timeout 7 | timeout 8 | solver |
+| `B/Int8.lt_of_le_of_ne/0` | control | crash 7 | proved 8 |  |
+| `B/Int8.lt_of_le_of_ne/2` | rewrite_B | crash 6 | timeout 8 | solver |
+| `B/Int8.not_inj/3` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/Lean.Grind.Linarith.zero_ne_one_of_field/11` | rewrite_B | crash 5 | crash 6 |  |
+| `B/Lean.Sym.String.lt_eq_true/1` | rewrite_B | timeout 8 | timeout 9 | solver |
+| `B/List.find?_eq_some_iff_append/67` | rewrite_B | crash 2 | crash 4 |  |
+| `B/List.isEmpty_eq_false_iff/2` | rewrite_B | crash 10 | no_proof_le_Nmax 10 |  |
+| `B/List.mergeSort_pair/30` | rewrite_B | crash 3 | crash 4 |  |
+| `B/List.nil_merge/1` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/List.zipIdx_eq_nil_iff/5` | rewrite_B | timeout 9 | timeout 10 | solver |
+| `B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/176` | rewrite_B | crash 4 | crash 5 |  |
+| `B/Nat.add_max_add_right/11` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/Nat.getElem!_toArray_ric/1` | rewrite_B | crash 4 | crash 5 |  |
+| `B/Nat.toArray_rco_eq_singleton_append_iff/10` | rewrite_B | crash 4 | crash 6 |  |
+| `B/Std.DHashMap.Const.getKey_alter_self/16` | rewrite_B | crash 6 | crash 7 |  |
+| `B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13` | rewrite_B | crash 3 | crash 4 |  |
+| `B/Std.DHashMap.Raw.Equiv.inter_congr/5` | rewrite_B | crash 2 | crash 4 |  |
+| `B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/50` | control | crash 3 | proved 3 |  |
+| `B/Std.DHashMap.Raw.getD_alter_self/2` | control | crash 4 | proved 6 |  |
+| `B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/10` | control | timeout 3 | proved 3 |  |
+| `B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8` | rewrite_B | crash 4 | crash 5 |  |
+| `B/Std.DTreeMap.Internal.Impl.Const.get!ₘ_eq_getValue!/0` | rewrite_B | crash 4 | crash 5 |  |
+| `B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3` | rewrite_B | crash 4 | crash 6 |  |
+| `B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_mem/3` | rewrite_B | timeout 7 | timeout 8 | solver |
+| `B/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left/10` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left/19` | control | crash 6 | proved 6 |  |
+| `B/Std.DTreeMap.Internal.Impl.get_diff!/1` | control | crash 4 | proved 5 |  |
+| `B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0` | rewrite_B | crash 3 | crash 6 |  |
+| `B/Std.Do.WP.pure/6` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2` | rewrite_B | crash 3 | crash 5 |  |
+| `B/Std.HashMap.Raw.getElem!_eq_getD_default/0` | control | crash 5 | proved 5 |  |
+| `B/Std.Internal.List.length_insertListIfNewUnit_le/7` | rewrite_B | crash 5 | crash 6 |  |
+| `B/Std.Sat.AIG.relabel_size_eq_size/0` | rewrite_B | timeout 5 | timeout 6 | solver |
+| `B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/3` | rewrite_B | crash 5 | crash 7 |  |
+| `B/String.Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar?/151` | rewrite_B | crash 6 | crash 8 |  |
 | `B/String.Pos.startPos_lt_iff/6` | rewrite_B | crash 9 | no_proof_le_Nmax 10 |  |
+| `B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/10` | rewrite_B | crash 6 | timeout 7 | solver |
+| `B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/9` | rewrite_B | crash 6 | timeout 8 | solver |
+| `B/String.Slice.sliceTo_sliceTo/12` | rewrite_B | crash 4 | crash 5 |  |
+| `B/UInt16.add_eq_left/1` | rewrite_B | crash 5 | crash 7 |  |
+| `B/UInt16.sub_mul/5` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/UInt32.toUInt16_sub/0` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/UInt64.toUInt8_le/7` | rewrite_B | crash 7 | timeout 7 | solver |
+| `B/UInt8.and_le_left/5` | rewrite_B | timeout 7 | timeout 8 | solver |
+| `B/UInt8.toUInt16_ofNat'/2` | rewrite_B | timeout 8 | timeout 9 | solver |
+| `B/USize.toUInt64_shiftLeft_of_lt/15` | rewrite_B | timeout 7 | timeout 8 | solver |
 
 Proved in 8a, rerun ended at a resource limit at or before 8a's N: 0
 
-### Goal by goal (1 runs)
+### Times where both runs gave the same answer at the same N
+
+|  | 8a | rerun | 8a / rerun |
+| --- | --- | --- | --- |
+| (N, answer) pairs | 435 |  |  |
+| clauses, pooled | 679,976,574 | 299,007,422 | 2.27× |
+| encoding ms, pooled | 492,204 | 217,333 | 2.26× |
+| solving s, pooled | 863.40 | 494.50 | 1.75× |
+| clauses, per-pair ratio 8a / rerun |  |  | 3.56 [1.98, 10.48] |
+| encoding, per-pair ratio 8a / rerun (8a ≥ 100 ms) |  |  | 2.66 [1.84, 5.84] |
+| solving, per-pair ratio 8a / rerun (8a ≥ 0.1 s) |  |  | 2.00 [1.54, 3.03] |
+
+### Goal by goal (200 runs)
 
 | goal | group | 8a outcome | 8a N | rerun outcome | rerun N |  |
 | --- | --- | --- | --- | --- | --- | --- |
+| `A/Int.gcd_eq_natAbs_right` | control | proved | 2 | proved | 2 | same |
+| `A/Int.neg_fmod_self` | control | proved | 3 | proved | 3 | same |
+| `A/Int.not_le_of_gt` | control | proved | 3 | proved | 3 | same |
+| `A/Int64.ofIntLE_sub` | control | proved | 5 | proved | 5 | same |
+| `A/Lean.Grind.Order.eq_trans_false'` | control | proved | 4 | proved | 4 | same |
+| `A/List.Perm.congr_left` | control | proved | 8 | proved | 8 | same |
+| `A/List.getLast_eq_head_reverse` | control | proved | 5 | proved | 5 | same |
+| `A/List.min_cons_cons_nil` | control | proved | 3 | proved | 3 | same |
+| `A/Nat.le_sub_iff_add_le'` | control | proved | 6 | proved | 6 | same |
+| `A/Std.Sat.CNF.Clause.sat_append_left` | control | proved | 3 | proved | 3 | same |
+| `A/Std.Sat.CNF.entails_trans` | control | proved | 6 | proved | 6 | same |
+| `A/UInt16.toBitVec_inj` | control | proved | 5 | proved | 5 | same |
+| `A/UInt64.toNat_ofNatTruncate_of_le` | control | proved | 2 | proved | 2 | same |
+| `A/UInt8.lt_of_le_of_ne` | control | proved | 7 | proved | 7 | same |
+| `B/Array.getElem?_toList/1` | control | proved | 1 | proved | 1 | same |
+| `B/Array.getElem?_toList/73` | control | proved | 1 | proved | 1 | same |
+| `B/Array.mkSlice_rio_eq_mkSlice_rio_min/13` | control | proved | 2 | proved | 2 | same |
+| `B/Array.ofFn_succ'/47` | control | proved | 1 | proved | 1 | same |
+| `B/Int.instNeZeroHShiftLeftNat/2` | control | proved | 2 | proved | 2 | same |
+| `B/Int32.toBitVec_neg/0` | control | proved | 1 | proved | 1 | same |
+| `B/Int32.toInt8_not/10` | control | proved | 1 | proved | 1 | same |
+| `B/Int8.lt_of_le_of_ne/0` | control | crash | 7 | proved | 8 | changed |
+| `B/List.modify_id/6` | control | proved | 1 | proved | 1 | same |
+| `B/Nat.exists_testBit_of_ne_zero/1` | control | proved | 3 | proved | 3 | same |
+| `B/Nat.lcm_div/28` | control | proved | 5 | proved | 5 | same |
+| `B/Option.all_attachWith/12` | control | proved | 1 | proved | 1 | same |
+| `B/Std.DHashMap.Const.get_insertMany_list_of_contains_eq_false/2` | control | proved | 1 | proved | 1 | same |
+| `B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/50` | control | crash | 3 | proved | 3 | changed |
+| `B/Std.DHashMap.Raw.getD_alter_self/2` | control | crash | 4 | proved | 6 | changed |
+| `B/Std.DHashMap.empty_equiv_iff_isEmpty/0` | control | proved | 3 | proved | 3 | same |
+| `B/Std.DHashMap.getKey?_eq_some_getKeyD/5` | control | proved | 4 | proved | 4 | same |
+| `B/Std.DHashMap.map_map_equiv/2` | control | proved | 2 | proved | 2 | same |
+| `B/Std.DTreeMap.Const.mem_ofList/11` | control | proved | 3 | proved | 3 | same |
+| `B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/10` | control | timeout | 3 | proved | 3 | changed |
+| `B/Std.DTreeMap.Internal.Impl.Equiv.getKeyLT?_eq/9` | control | proved | 1 | proved | 1 | same |
+| `B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_contains_eq_false/37` | control | proved | 3 | proved | 3 | same |
+| `B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left/19` | control | crash | 6 | proved | 6 | changed |
+| `B/Std.DTreeMap.Internal.Impl.get_diff!/1` | control | crash | 4 | proved | 5 | changed |
+| `B/Std.DTreeMap.Raw.Equiv.constGetEntryGED_eq/1` | control | proved | 2 | proved | 2 | same |
+| `B/Std.Do.SPred.imp_intro'/0` | control | proved | 4 | proved | 4 | same |
+| `B/Std.ExtDTreeMap.getKeyD_minKeyD/3` | control | proved | 2 | proved | 2 | same |
+| `B/Std.HashMap.Raw.WF.union/3` | control | proved | 2 | proved | 2 | same |
+| `B/Std.HashMap.Raw.contains_modify/1` | control | proved | 2 | proved | 2 | same |
+| `B/Std.HashMap.Raw.getElem!_eq_getD_default/0` | control | crash | 5 | proved | 5 | changed |
+| `B/Std.Internal.List.length_insertListIfNewUnit_le/13` | control | proved | 2 | proved | 2 | same |
+| `B/String.Pos.ofSliceTo_startPos/7` | control | proved | 1 | proved | 1 | same |
+| `B/UInt16.sizeOf/18` | control | proved | 2 | proved | 2 | same |
+| `B/UInt8.toInt8_ofNat'/0` | control | proved | 1 | proved | 1 | same |
+| `B/UInt8.toUInt16_ofNat'/11` | control | proved | 2 | proved | 2 | same |
+| `B/_private.Init.Grind.Ordered.Linarith.0.Lean.Grind.Linarith.Poly.denote'_go_eq_denote/5` | control | proved | 1 | proved | 1 | same |
+| `A/BitVec.allOnes_or` | rewrite_A | crash | 5 | crash | 6 | changed |
+| `A/BitVec.getMsbD_rotateRightAux_of_lt` | rewrite_A | crash | 3 | crash | 4 | changed |
+| `A/BitVec.toInt_emod_two_pow` | rewrite_A | crash | 6 | crash | 7 | changed |
+| `A/Int.bdiv_add_bmod'` | rewrite_A | timeout | 6 | timeout | 6 | same |
+| `A/Int.ediv_eq_iff_eq_mul_left` | rewrite_A | crash | 7 | crash | 9 | changed |
+| `A/Int.le_of_add_le_add_left` | rewrite_A | proved | 8 | proved | 8 | same |
+| `A/Int.tmod_def` | rewrite_A | crash | 6 | timeout | 6 | changed |
+| `A/Int32.toInt_inj` | rewrite_A | proved | 5 | proved | 5 | same |
+| `A/Int8.ofNat_div` | rewrite_A | crash | 5 | crash | 6 | changed |
+| `A/Lean.Grind.CommRing.Poly.denote_mul` | rewrite_A | crash | 5 | crash | 6 | changed |
+| `A/Lean.Grind.Field.NormNum.sub_eq` | rewrite_A | crash | 6 | crash | 7 | changed |
+| `A/Lean.Sym.String.lt_eq_true` | rewrite_A | timeout | 10 | timeout | 10 | same |
+| `A/List.any_toArray'` | rewrite_A | timeout | 6 | timeout | 6 | same |
+| `A/List.any_wfParam` | rewrite_A | timeout | 6 | timeout | 6 | same |
+| `A/List.append_right_le_iff_of_length_eq` | rewrite_A | crash | 3 | crash | 5 | changed |
+| `A/ListSlice.size_mkSlice_rco` | rewrite_A | crash | 3 | crash | 3 | same |
+| `A/Nat.gcd_eq_zero_iff` | rewrite_A | no_proof_le_Nmax | 10 | no_proof_le_Nmax | 10 | same |
+| `A/Nat.toArray_roc_eq_singleton_iff` | rewrite_A | crash | 4 | crash | 6 | changed |
+| `A/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default` | rewrite_A | crash | 3 | crash | 5 | changed |
+| `A/Std.DHashMap.Raw.Const.get?_emptyWithCapacity` | rewrite_A | crash | 3 | crash | 4 | changed |
+| `A/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_contains` | rewrite_A | crash | 2 | crash | 3 | changed |
+| `A/Std.DHashMap.Raw.getKeyD_eq_fallback` | rewrite_A | crash | 4 | crash | 6 | changed |
+| `A/Std.DHashMap.isEmpty_iff_forall_not_mem` | rewrite_A | crash | 4 | crash | 7 | changed |
+| `A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem` | rewrite_A | crash | 3 | crash | 5 | changed |
+| `A/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self` | rewrite_A | crash | 4 | crash | 5 | changed |
+| `A/Std.DTreeMap.Raw.Const.getD_inter_of_not_mem_right` | rewrite_A | crash | 3 | crash | 4 | changed |
+| `A/Std.DTreeMap.Raw.contains_eq_false_iff_not_mem` | rewrite_A | crash | 6 | crash | 8 | changed |
+| `A/Std.Internal.List.Const.getValue?_modifyKey_self` | rewrite_A | crash | 3 | crash | 5 | changed |
+| `A/Std.Internal.List.getKey?_insertEntry_self` | rewrite_A | crash | 7 | crash | 9 | changed |
+| `A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right` | rewrite_A | crash | 4 | crash | 5 | changed |
+| `A/Std.Tactic.BVDecide.Normalize.BitVec.signExtend_elim'` | rewrite_A | proved | 5 | proved | 5 | same |
+| `A/Std.TreeSet.max?_eq_back?_toArray` | rewrite_A | crash | 6 | crash | 7 | changed |
+| `A/String.Pos.prev_le` | rewrite_A | crash | 7 | no_proof_le_Nmax | 10 | changed |
+| `A/String.Pos.toSlice_le` | rewrite_A | crash | 6 | crash | 7 | changed |
+| `A/String.Slice.Pattern.Model.isLongestRevMatchAtChain_skipSuffixWhile` | rewrite_A | proved | 4 | proved | 4 | same |
+| `A/String.Slice.dropWhile_string_eq_dropWhile_toSlice` | rewrite_A | timeout | 7 | timeout | 7 | same |
+| `A/String.back?_eq` | rewrite_A | proved | 8 | proved | 8 | same |
+| `A/String.revSkip?_toSlice` | rewrite_A | crash | 4 | crash | 5 | changed |
+| `A/UInt16.sub_mul` | rewrite_A | timeout | 6 | timeout | 6 | same |
+| `A/UInt32.sub_lt` | rewrite_A | crash | 8 | timeout | 9 | changed |
+| `A/UInt64.ofFin_and` | rewrite_A | timeout | 6 | timeout | 6 | same |
+| `A/UInt64.ofNat_sub` | rewrite_A | timeout | 6 | timeout | 6 | same |
+| `A/UInt64.toUSize_sub` | rewrite_A | crash | 7 | timeout | 7 | changed |
+| `A/UInt8.toNat_shiftLeft` | rewrite_A | crash | 6 | crash | 7 | changed |
+| `A/USize.toUInt8_mul` | rewrite_A | crash | 5 | crash | 6 | changed |
+| `A/Vector.getElem?_setIfInBounds_ne` | rewrite_A | crash | 3 | crash | 4 | changed |
+| `A/Vector.right_distrib` | rewrite_A | crash | 3 | crash | 4 | changed |
+| `A/_private.Init.Data.Int.Linear.0.Int.Internal.Linear.eq_neg_addConst_add` | rewrite_A | timeout | 6 | timeout | 6 | same |
+| `A/_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.verify₁_eq_isSome_assemble₁` | rewrite_A | no_proof_le_Nmax | 10 | no_proof_le_Nmax | 10 | same |
+| `A/_private.Std.Http.Data.URI.Encoding.0.Std.Http.URI.isHexDigit_isEncodedChar` | rewrite_A | timeout | 8 | timeout | 8 | same |
+| `B/Array.append_right_inj/0` | rewrite_B | crash | 4 | crash | 5 | changed |
+| `B/Array.contains_filter/15` | rewrite_B | proved | 2 | proved | 2 | same |
+| `B/Array.eq_iff_flatten_eq/49` | rewrite_B | crash | 6 | crash | 6 | same |
+| `B/Array.find?_map/12` | rewrite_B | crash | 5 | crash | 5 | same |
+| `B/Array.getElem_append_right'/24` | rewrite_B | crash | 4 | crash | 5 | changed |
+| `B/Array.size_insertIdx/11` | rewrite_B | crash | 5 | crash | 6 | changed |
+| `B/Array.size_insertIdx/8` | rewrite_B | timeout | 5 | timeout | 6 | changed |
+| `B/Array.toList_fst_unzip/4` | rewrite_B | crash | 5 | crash | 5 | same |
+| `B/BitVec.getMsbD_rotateRight/31` | rewrite_B | crash | 10 | timeout | 10 | changed |
+| `B/BitVec.getMsbD_rotateRight/33` | rewrite_B | timeout | 5 | timeout | 6 | changed |
+| `B/BitVec.not_self_ne/2` | rewrite_B | proved | 1 | proved | 1 | same |
+| `B/BitVec.toNat_shiftConcat/3` | rewrite_B | crash | 5 | crash | 5 | same |
+| `B/BitVec.udiv_eq_of_mul_add_toNat/9` | rewrite_B | crash | 6 | crash | 7 | changed |
+| `B/BitVec.zero_udiv/4` | rewrite_B | crash | 6 | crash | 6 | same |
+| `B/ByteArray.isSome_utf8Decode?_iff/4` | rewrite_B | timeout | 8 | timeout | 8 | same |
+| `B/Fin.add_one_pos/81` | rewrite_B | crash | 4 | crash | 6 | changed |
+| `B/Int.Internal.Linear.Poly.denote_combine/2` | rewrite_B | timeout | 7 | timeout | 7 | same |
+| `B/Int.Internal.Linear.cooper_dvd_left_split_dvd2/37` | rewrite_B | crash | 6 | crash | 6 | same |
+| `B/Int.Internal.Linear.cooper_left_split_dvd/42` | rewrite_B | timeout | 8 | timeout | 9 | changed |
+| `B/Int.ediv_eq_iff_eq_mul_left/2` | rewrite_B | timeout | 6 | timeout | 7 | changed |
+| `B/Int.ediv_gcd_ne_zero_of_ne_zero_right/5` | rewrite_B | proved | 2 | proved | 2 | same |
+| `B/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos/18` | rewrite_B | crash | 9 | timeout | 10 | changed |
+| `B/Int.gcd_add_self_left/1` | rewrite_B | timeout | 7 | timeout | 7 | same |
+| `B/Int.lcm_dvd_lcm_mul_left_left/2` | rewrite_B | timeout | 7 | timeout | 7 | same |
+| `B/Int.lcm_eq_natAbs_left_iff_dvd/1` | rewrite_B | timeout | 7 | timeout | 8 | changed |
+| `B/Int.sub_bmod_bmod/8` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/Int.zero_eq_toNat_sub_iff/6` | rewrite_B | timeout | 7 | timeout | 8 | changed |
+| `B/Int.zero_lcm/1` | rewrite_B | timeout | 8 | timeout | 8 | same |
+| `B/Int16.le_of_lt/2` | rewrite_B | timeout | 7 | timeout | 8 | changed |
+| `B/Int16.toISize_mod/2` | rewrite_B | timeout | 7 | timeout | 7 | same |
+| `B/Int16.toISize_mod/3` | rewrite_B | timeout | 7 | timeout | 7 | same |
+| `B/Int16.toInt_mul/17` | rewrite_B | timeout | 6 | timeout | 6 | same |
+| `B/Int16.toInt_mul/7` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/Int32.toInt_div_of_ne_left/24` | rewrite_B | proved | 5 | proved | 5 | same |
+| `B/Int32.xor_right_inj/1` | rewrite_B | crash | 4 | crash | 6 | changed |
+| `B/Int64.toBitVec32_toISize/6` | rewrite_B | no_proof_le_Nmax | 10 | no_proof_le_Nmax | 10 | same |
+| `B/Int64.toInt32_ofIntLE/1` | rewrite_B | timeout | 6 | timeout | 7 | changed |
+| `B/Int64.toInt32_ofIntLE/5` | rewrite_B | timeout | 7 | timeout | 7 | same |
+| `B/Int64.xor_not/5` | rewrite_B | timeout | 7 | timeout | 8 | changed |
+| `B/Int8.lt_of_le_of_ne/2` | rewrite_B | crash | 6 | timeout | 8 | changed |
+| `B/Int8.not_inj/3` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/Lean.Grind.CommRing.Stepwise.d_step1C/17` | rewrite_B | crash | 5 | crash | 5 | same |
+| `B/Lean.Grind.Linarith.zero_ne_one_of_field/11` | rewrite_B | crash | 5 | crash | 6 | changed |
+| `B/Lean.Sym.String.lt_eq_true/1` | rewrite_B | timeout | 8 | timeout | 9 | changed |
+| `B/List.find?_eq_some_iff_append/67` | rewrite_B | crash | 2 | crash | 4 | changed |
+| `B/List.isEmpty_eq_false_iff/2` | rewrite_B | crash | 10 | no_proof_le_Nmax | 10 | changed |
+| `B/List.mergeSort_pair/30` | rewrite_B | crash | 3 | crash | 4 | changed |
+| `B/List.mkSlice_ric_eq_mkSlice_rio/0` | rewrite_B | proved | 1 | proved | 1 | same |
+| `B/List.nil_merge/1` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/List.take_reverse/120` | rewrite_B | timeout | 7 | timeout | 7 | same |
+| `B/List.zipIdx_eq_nil_iff/5` | rewrite_B | timeout | 9 | timeout | 10 | changed |
+| `B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/12` | rewrite_B | crash | 4 | crash | 4 | same |
+| `B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/176` | rewrite_B | crash | 4 | crash | 5 | changed |
+| `B/Nat.add_max_add_right/11` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/Nat.gcd_def/2` | rewrite_B | proved | 4 | proved | 4 | same |
+| `B/Nat.getElem!_toArray_ric/1` | rewrite_B | crash | 4 | crash | 5 | changed |
+| `B/Nat.le.intro/0` | rewrite_B | proved | 4 | proved | 4 | same |
+| `B/Nat.mul_div_cancel_left'/6` | rewrite_B | timeout | 7 | timeout | 7 | same |
+| `B/Nat.toArray_rco_eq_singleton_append_iff/10` | rewrite_B | crash | 4 | crash | 6 | changed |
+| `B/Nat.toList_repr/0` | rewrite_B | proved | 4 | proved | 4 | same |
+| `B/Option.choice_eq_some/9` | rewrite_B | proved | 3 | proved | 3 | same |
+| `B/Rat.intCast_inj/14` | rewrite_B | timeout | 8 | timeout | 8 | same |
+| `B/Rat.zpow_pos/1` | rewrite_B | timeout | 9 | timeout | 9 | same |
+| `B/Std.DHashMap.Const.getKey_alter_self/16` | rewrite_B | crash | 6 | crash | 7 | changed |
+| `B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13` | rewrite_B | crash | 3 | crash | 4 | changed |
+| `B/Std.DHashMap.Raw.Equiv.inter_congr/5` | rewrite_B | crash | 2 | crash | 4 | changed |
+| `B/Std.DHashMap.getKey?_eq_some_getKeyD/3` | rewrite_B | proved | 2 | proved | 2 | same |
+| `B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8` | rewrite_B | crash | 4 | crash | 5 | changed |
+| `B/Std.DTreeMap.Internal.Impl.Const.get!ₘ_eq_getValue!/0` | rewrite_B | crash | 4 | crash | 5 | changed |
+| `B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3` | rewrite_B | crash | 4 | crash | 6 | changed |
+| `B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_mem/3` | rewrite_B | timeout | 7 | timeout | 8 | changed |
+| `B/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left/10` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0` | rewrite_B | crash | 3 | crash | 6 | changed |
+| `B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/5` | rewrite_B | proved | 1 | proved | 1 | same |
+| `B/Std.Do.WP.pure/6` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2` | rewrite_B | crash | 3 | crash | 5 | changed |
+| `B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/6` | rewrite_B | crash | 7 | crash | 7 | same |
+| `B/Std.Internal.List.length_insertListIfNewUnit_le/7` | rewrite_B | crash | 5 | crash | 6 | changed |
+| `B/Std.Sat.AIG.relabel_size_eq_size/0` | rewrite_B | timeout | 5 | timeout | 6 | changed |
+| `B/Std.TreeMap.inter_equiv_empty_comm/13` | rewrite_B | proved | 2 | proved | 2 | same |
+| `B/Std.TreeMap.inter_equiv_empty_comm/14` | rewrite_B | proved | 2 | proved | 2 | same |
+| `B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/3` | rewrite_B | crash | 5 | crash | 7 | changed |
+| `B/String.Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar?/151` | rewrite_B | crash | 6 | crash | 8 | changed |
 | `B/String.Pos.startPos_lt_iff/6` | rewrite_B | crash | 9 | no_proof_le_Nmax | 10 | changed |
+| `B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/10` | rewrite_B | crash | 6 | timeout | 7 | changed |
+| `B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/9` | rewrite_B | crash | 6 | timeout | 8 | changed |
+| `B/String.Slice.Pos.next_eq_iff/21` | rewrite_B | proved | 3 | proved | 3 | same |
+| `B/String.Slice.sliceTo_sliceTo/12` | rewrite_B | crash | 4 | crash | 5 | changed |
+| `B/String.Slice.utf8ByteSize_sliceFrom/2` | rewrite_B | crash | 6 | crash | 6 | same |
+| `B/UInt16.add_eq_left/1` | rewrite_B | crash | 5 | crash | 7 | changed |
+| `B/UInt16.sub_mul/5` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/UInt32.toUInt16_sub/0` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/UInt64.lt_add_one/5` | rewrite_B | timeout | 8 | timeout | 8 | same |
+| `B/UInt64.lt_add_one/7` | rewrite_B | proved | 1 | proved | 1 | same |
+| `B/UInt64.toUInt8_le/11` | rewrite_B | proved | 1 | proved | 1 | same |
+| `B/UInt64.toUInt8_le/7` | rewrite_B | crash | 7 | timeout | 7 | changed |
+| `B/UInt8.and_le_left/5` | rewrite_B | timeout | 7 | timeout | 8 | changed |
+| `B/UInt8.toUInt16_ofNat'/2` | rewrite_B | timeout | 8 | timeout | 9 | changed |
+| `B/UInt8.toUInt64_sub/7` | rewrite_B | timeout | 7 | timeout | 7 | same |
+| `B/USize.toUInt64_shiftLeft_of_lt/15` | rewrite_B | timeout | 7 | timeout | 8 | changed |
 
-Early exits in the rerun's per-N records: 0.
+Early exits in the rerun's per-N records: 49.
 
-Rerun size records: 0 ().
+Sizes at N = 5 (`countOnly`), 200 runs with both records: 8a 2,999,589,410 clauses, rerun 1,198,832,528 (2.50×); per-run ratio 2.05 [1.62, 2.77].
+
+Rerun size records: 372 (ok 372).

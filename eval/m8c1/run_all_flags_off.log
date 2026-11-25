@@ -1,0 +1,8 @@
+Build completed successfully (85 jobs).
+== test_m0
+solver: /home/tom/.elan/toolchains/leanprover--lean4---v4.36.0/bin/cadical
+  pigeonhole 7→6: 42 vars, 133 clauses, UNSAT [91 ms]
+  random CNFs: 300 instances, 110 SAT / 190 UNSAT
+  gadgets: 300 eq/lt/amo/ladder-amo instances checked exhaustively
+M0: 902 passed, 0 failed
+== test_m1

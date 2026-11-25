@@ -138,3 +138,23 @@
 {"hwm_mb":772,"key":"m8b:norules:main:B/String.Slice.Pos.next_eq_iff/21","ms":114,"status":"ok"}
 {"key": "m8b:rules:main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8", "status": "memout", "exit": -15, "last_section": "m7"}
 {"key": "m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":733,"key":"m8b:rules:main:B/Int32.toInt_div_of_ne_left/24","ms":1030,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:norules:main:B/Int32.toInt_div_of_ne_left/24","ms":100,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:rules:main:B/List.mkSlice_ric_eq_mkSlice_rio/0","ms":3602,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:norules:main:B/List.mkSlice_ric_eq_mkSlice_rio/0","ms":103,"status":"ok"}
+{"key": "m8b:rules:main:B/Nat.getElem!_toArray_ric/1", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/Nat.getElem!_toArray_ric/1","ms":763,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:rules:main:B/Int64.toInt32_ofIntLE/5","ms":2661,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/Int64.toInt32_ofIntLE/5","ms":125,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left/10", "status": "memout", "exit": -15, "last_section": "m7"}
+{"key": "m8b:norules:main:B/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left/10", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":732,"key":"m8b:rules:main:B/Nat.mul_div_cancel_left'/6","ms":3432,"status":"ok"}
+{"hwm_mb":732,"key":"m8b:norules:main:B/Nat.mul_div_cancel_left'/6","ms":37,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.DTreeMap.Internal.Impl.Const.get!\u2098_eq_getValue!/0", "status": "memout", "exit": -15, "last_section": "m7"}
+{"key": "m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Const.get!\u2098_eq_getValue!/0", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":733,"key":"m8b:rules:main:B/UInt64.lt_add_one/7","ms":859,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:norules:main:B/UInt64.lt_add_one/7","ms":7,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:rules:main:B/UInt64.toUInt8_le/11","ms":1772,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:norules:main:B/UInt64.toUInt8_le/11","ms":8,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:rules:main:B/Int64.toInt32_ofIntLE/1","ms":3690,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:norules:main:B/Int64.toInt32_ofIntLE/1","ms":275,"status":"ok"}

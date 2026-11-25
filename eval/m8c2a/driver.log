@@ -5,3 +5,4 @@ sim N=5: 40 of 20, 42 s
 sim N=5: 60 of 20, 49 s
 sim N=5: 80 of 20, 41 s
 sim N=5: 100 of 20, 224 s
+sim N=5: 120 of 20, 100 s

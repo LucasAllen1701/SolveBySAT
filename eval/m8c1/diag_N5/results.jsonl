@@ -225,3 +225,6 @@
 {"hwm_mb":730,"key":"m8b:rules:main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_mem/3","ms":1908,"status":"ok"}
 {"hwm_mb":730,"key":"m8b:rules:main:B/Array.find?_map/12","ms":15490,"status":"ok"}
 {"hwm_mb":734,"key":"m8b:rules:main:B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/6","ms":7539,"status":"ok"}
+{"hwm_mb":733,"key":"m8b:rules:main:B/Std.TreeMap.inter_equiv_empty_comm/14","ms":5917,"status":"ok"}
+{"hwm_mb":744,"key":"m8b:rules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13","ms":60104,"status":"ok"}
+{"hwm_mb":744,"key":"m8b:norules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13","ms":11362,"status":"ok"}

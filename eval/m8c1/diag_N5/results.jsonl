@@ -218,3 +218,23 @@
 {"hwm_mb":2974,"key":"m8b:norules:main:A/Int.tmod_def","ms":259,"status":"ok"}
 {"hwm_mb":2974,"key":"m8b:rules:main:A/_private.Init.Data.Int.Linear.0.Int.Internal.Linear.eq_neg_addConst_add","ms":5948,"status":"ok"}
 {"hwm_mb":2974,"key":"m8b:norules:main:A/_private.Init.Data.Int.Linear.0.Int.Internal.Linear.eq_neg_addConst_add","ms":968,"status":"ok"}
+{"key": "m8b:rules:main:A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right", "status": "memout", "exit": -15, "last_section": "m7"}
+{"key": "m8b:norules:main:A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":734,"key":"m8b:rules:main:A/UInt32.sub_lt","ms":2070,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:A/UInt32.sub_lt","ms":83,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:A/Lean.Sym.String.lt_eq_true","ms":419,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:A/Lean.Sym.String.lt_eq_true","ms":164,"status":"ok"}
+{"hwm_mb":753,"key":"m8b:rules:main:A/Std.DHashMap.Raw.getKeyD_eq_fallback","ms":14168,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:norules:main:A/Std.DHashMap.Raw.getKeyD_eq_fallback","ms":2192,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:rules:main:A/BitVec.allOnes_or","ms":12364,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:norules:main:A/BitVec.allOnes_or","ms":7438,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:rules:main:A/String.revSkip?_toSlice","ms":29082,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:norules:main:A/String.revSkip?_toSlice","ms":6834,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:rules:main:A/List.any_wfParam","ms":3348,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:norules:main:A/List.any_wfParam","ms":1233,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:rules:main:A/UInt64.ofFin_and","ms":3132,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:norules:main:A/UInt64.ofFin_and","ms":452,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:rules:main:A/Nat.toArray_roc_eq_singleton_iff","ms":19378,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:norules:main:A/Nat.toArray_roc_eq_singleton_iff","ms":3647,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:rules:main:A/Int.ediv_eq_iff_eq_mul_left","ms":3320,"status":"ok"}
+{"hwm_mb":754,"key":"m8b:norules:main:A/Int.ediv_eq_iff_eq_mul_left","ms":246,"status":"ok"}

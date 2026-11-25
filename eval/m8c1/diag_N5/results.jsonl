@@ -158,3 +158,23 @@
 {"hwm_mb":733,"key":"m8b:norules:main:B/UInt64.toUInt8_le/11","ms":8,"status":"ok"}
 {"hwm_mb":733,"key":"m8b:rules:main:B/Int64.toInt32_ofIntLE/1","ms":3690,"status":"ok"}
 {"hwm_mb":733,"key":"m8b:norules:main:B/Int64.toInt32_ofIntLE/1","ms":275,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Nat.le.intro/0","ms":1075,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/Nat.le.intro/0","ms":19,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/3","ms":7420,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/3","ms":1207,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:rules:main:B/Int.gcd_add_self_left/1","ms":4206,"status":"ok"}
+{"hwm_mb":734,"key":"m8b:norules:main:B/Int.gcd_add_self_left/1","ms":81,"status":"ok"}
+{"key": "m8b:rules:main:B/Std.Sat.AIG.relabel_size_eq_size/0", "status": "memout", "exit": -15, "last_section": "m7"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/Std.Sat.AIG.relabel_size_eq_size/0","ms":749,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:rules:main:B/List.nil_merge/1","ms":5028,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/List.nil_merge/1","ms":432,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:rules:main:B/BitVec.zero_udiv/4","ms":12898,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/BitVec.zero_udiv/4","ms":1870,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:rules:main:B/Fin.add_one_pos/81","ms":22398,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/Fin.add_one_pos/81","ms":6783,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:rules:main:B/USize.toUInt64_shiftLeft_of_lt/15","ms":2031,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/USize.toUInt64_shiftLeft_of_lt/15","ms":102,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:rules:main:B/Lean.Grind.CommRing.Stepwise.d_step1C/17","ms":20121,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/Lean.Grind.CommRing.Stepwise.d_step1C/17","ms":1915,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:rules:main:B/Int.sub_bmod_bmod/8","ms":5033,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:B/Int.sub_bmod_bmod/8","ms":278,"status":"ok"}

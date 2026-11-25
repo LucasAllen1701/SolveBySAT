@@ -221,3 +221,6 @@
 {"hwm_mb":744,"key":"m8b:rules:main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0","ms":18387,"status":"ok"}
 {"hwm_mb":744,"key":"m8b:norules:main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0","ms":648,"status":"ok"}
 {"hwm_mb":744,"key":"m8b:rules:main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/5","ms":4683,"status":"ok"}
+{"hwm_mb":730,"key":"m8b:rules:main:B/Std.DHashMap.Const.getKey_alter_self/16","ms":7478,"status":"ok"}
+{"hwm_mb":730,"key":"m8b:rules:main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_mem/3","ms":1908,"status":"ok"}
+{"hwm_mb":730,"key":"m8b:rules:main:B/Array.find?_map/12","ms":15490,"status":"ok"}

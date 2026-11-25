@@ -244,3 +244,9 @@ differential with data: 15000 comparisons, 3854 provable instances, 0 mismatches
 PASS differential with data (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, ≥ 100 proofs using a data node, 0 mismatches)
 M5: 10 passed, 0 failed
 == off-switch
+PASS off-switch: 54 of 54 DIMACS files byte-identical to eval/m8b/dimacs_md5.txt
+== Lean suite, three settings
+PASS off Test/M2.lean
+PASS off Test/M3.lean
+PASS off Test/M4Lean.lean
+PASS off Test/M5Lean.lean

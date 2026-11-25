@@ -248,3 +248,13 @@
 {"hwm_mb":735,"key":"m8b:rules:main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2","ms":24056,"status":"ok"}
 {"hwm_mb":735,"key":"m8b:rules:main:A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right","ms":16576,"status":"ok"}
 {"hwm_mb":735,"key":"m8b:norules:main:A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right","ms":2315,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:rules:main:A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem","ms":48355,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:norules:main:A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem","ms":14529,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:rules:main:A/UInt64.ofNat_sub","ms":4401,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:norules:main:A/UInt64.ofNat_sub","ms":239,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:rules:main:A/USize.toUInt8_mul","ms":11966,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:norules:main:A/USize.toUInt8_mul","ms":1417,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:rules:main:A/ListSlice.size_mkSlice_rco","ms":79225,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:norules:main:A/ListSlice.size_mkSlice_rco","ms":22776,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:rules:main:A/UInt16.sub_mul","ms":3855,"status":"ok"}
+{"hwm_mb":739,"key":"m8b:norules:main:A/UInt16.sub_mul","ms":376,"status":"ok"}

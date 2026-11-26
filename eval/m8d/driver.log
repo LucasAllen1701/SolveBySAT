@@ -6,3 +6,34 @@ crash(shard, oom) on main:A/BitVec.getElem_rev
 shard 0: done; 20 results; 264 s
 sizes: 40 specs done
 === pilot done 2026-11-26 20:36:58
+=== finished 2026-11-26 20:37:01
+=== start full 2026-11-26 20:37:14
+300 specs, 20 done, 280 to run
+crash(shard, oom) on main:B/Lean.Grind.CommRing.le_norm_tight_expr/62
+crash(shard, oom) on main:B/Array.getElem_append_right'/0
+crash(shard, oom) on main:B/List.getElem?_mapFinIdx/93
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Equiv.inter_congr/5
+crash(shard, oom) on main:B/UInt32.mul_add/0
+crash(shard, oom) on main:B/List.toList_mkSlice_rii/1
+crash(shard, oom) on main:B/Nat.toList_rcc_eq_cons_iff/2
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw.Const.toArray_eq_toArray_map_toListModel/6
+crash(shard, oom) on main:B/BitVec.sshiftRight_add/216
+crash(shard, oom) on main:B/Int.le_mul_iff_le_left/6
+crash(shard, oom) on main:B/Fin.foldr_rev/21
+crash(shard, oom) on main:B/List.splitOnP_cons_eq_ite_splitOnPPrepend/4
+crash(shard, oom) on main:B/Vector.getElem?_extract_of_succ/2
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_union_of_contains_eq_false_right/21
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_contains/0
+crash(shard, oom) on main:B/Int.toList_roo_eq_cons_iff/0
+crash(shard, oom) on main:B/Std.IterM.stepAsHetT_filterMapWithPostcondition/33
+crash(shard, oom) on main:B/List.find?_eq_some_iff_append/67
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Equiv.inter_congr/21
+crash(shard, oom) on main:B/Vector.mapFinIdx_eq_mapFinIdx_iff/10
+crash(shard, oom) on main:B/List.find?_eq_some_iff_append/21
+crash(shard, oom) on main:B/Std.TreeMap.Raw.mem_insertMany_list/0
+crash(shard, oom) on main:B/Fin.add_one_pos/81
+crash(shard, oom) on main:B/List.find?_eq_some_iff_append/146
+crash(shard, oom) on main:B/String.Slice.sliceTo_sliceTo/104
+crash(shard, oom) on main:B/List.mergeSort_pair/30
+crash(shard, oom) on main:B/Int.Internal.Linear.cooper_dvd_left_split_dvd2/3
+shard 0: done; 70 results; 1130 s

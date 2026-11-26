@@ -48,6 +48,7 @@ lake build eval_run Test.M8Probe     # 8a: probe harness and hand examples
 lake build test_m8diag m8b_dimacs73  # 8b: diagnostics test and SPEC 7.3 DIMACS writer
 Test/m8c1_offswitch.sh              # 8c-1: flags off give 8b's DIMACS (in run_all.sh)
 Test/m8c1_lean.sh                   # 8c-1: the Lean suite with the flags off, R1, R1 and R2 (in run_all.sh)
+python3 Test/m8d_run.py status eval/m8d/runs full   # 8d: eval/m8d/STATUS.md
 ```
 
 ## Layout and where the data lives
@@ -116,7 +117,7 @@ machine's specs in NOTES.md before a full run.
     the 8a rerun in `rerun/`, the e(c) model check in `models/`).
   - Harness since 8c-1: `SOLVE_BY_SAT_EVAL_FLAGS=nodeBounds,exclusivePairs` sets the flags of `eval_run run|sizes`
     (unset: both off, so milestone 7 and 8a runs rebuild their CNFs); `SOLVE_BY_SAT_EVAL_COMPARE=<results.jsonl>`
-    applies 4.4's exactness stop rules (exit 6). `eval_run sizes8c` and `eval_run diag … SETTING`; `Test/m8c1_run.py`,
+    applies 4.4's exactness stop rules (exit 9 since 8d; 6 in 8c-1). `eval_run sizes8c` and `eval_run diag … SETTING`; `Test/m8c1_run.py`,
     `Test/m8c1_full.sh`. The 8b and milestone 7 tools (`dimacs`, `diag-models`, `m8b_dimacs73`, `eval_scaling`,
     `eval_numerals`, the 8b hand count, `test_m4`'s milestone 4 check) pin both flags off. Exact-output Lean guards
     that differ under R1 are pinned to the flags off, each with an R1 twin.
@@ -127,7 +128,15 @@ machine's specs in NOTES.md before a full run.
     `sim_N5/`, `sim_N10/`). Projected ratio at N = 5 with the rules 0.9925 (rule: at most 0.8). Tools:
     `M8Diag.simEncode`/`r3sim`/`r3ModelCheck`, `eval_run diag … r3`, `eval_run r3-models`, `Test/m8c2a_run.py`,
     `Test/m8c2a_full.sh`; the hand count on the forest R in `test_m8diag`.
-  - **Next: the owner decides on R3SIM.md (8c-2b or 8d), in the claude.ai project.**
+  - Amendment 4.6: R3 is not built (0.9925 > 0.8); the scale work ends with R1 and R2. 8d evaluates the tactic as users
+    run it (R1 and R2 on, milestone 7's H, no rules) on 300 sampled main-run goals: 100 Tier B and 100 Tier A memory
+    crashes, 50 proved and 50 no-proof controls.
+  - **8d, the evaluation, is done** (NOTES.md, "8d: evaluation"). Report `eval/m8d/EVAL8.md` from
+    `python3 eval/m8d/report.py`; data in `eval/m8d/` (`inputs/` from `m7-data`, `sample.tsv`, `specs.jsonl`, `runs/`).
+    Tools: `Test/m8d_run.py`, `Test/m8d_full.sh pilot|full` (detached: `setsid nohup Test/m8d_full.sh full &`).
+    Exactness stops (M8_PLAN 4.4, 4.6) now exit 9, in the shard and on crash records the driver writes;
+    `eval_run exactness-selftest` and `python3 Test/eval_driver.py exactness-selftest` are in `run_all.sh`.
+  - **Next: the owner checks 8d and revises the SPEC in the claude.ai project; then `m8` goes to `main` (not before).**
 - Milestone 8 rules: as milestone 7's. Only exact reductions (M8_PLAN 3.1, 4.4); SPEC.md is revised in the claude.ai
   project, not here. Do not change `SolveBySat/` in 8a. Filters, seeds, sample sizes and
   limits are pre-registered in `M8_PLAN.md` and NOTES.md; a decoder failure on a satisfiable CNF, or a

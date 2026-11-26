@@ -3264,3 +3264,91 @@ depth(α) ≥ d(g) and α + s(g) ≤ N, and a node with `cl(α, c)` has depth(α
   pass; the differentials with `m8off`, `r1`, `r1r2` have 0 mismatches; the off-switch gives 54/54 DIMACS identical to
   8b; the Lean suite passes in the three settings with the model check. `SolveBySat/` is unchanged in 8c-2a. (A first
   end-of-stage run was cut off in `test_m5` by a power failure; this is a full rerun from scratch.)
+
+### 8d: evaluation (M8_PLAN 4.6; 26 November 2026)
+
+- **Plan.** The status line and amendment 4.6 were put into M8_PLAN.md as written; md5
+  `3de303ee2a0a7ca24d0e00dbb5e367f5` as required (`4a64683`).
+- **Machine checks.** `git pull`: up to date. `vm.overcommit_memory` = 1; the memory controller is delegated, and a
+  400 MB allocation under `MemoryMax=200M` (`MemorySwapMax=0`) was killed (SIGKILL); about 6 GB available. The
+  milestone 7 checks that need `m7-data` were not rerun (as in 8a to 8c-2a). `Test/run_all.sh` before any change, with
+  nothing edited or rebuilt while it ran: **exit 0, a clean record** (`eval/m8d/run_all_start.log`, 88 min).
+- `SolveBySat/` is unchanged. All new code is in `Test/` (harness only).
+
+#### Inputs, sample and specs
+
+- `eval/m8d/inputs/results.jsonl` and `specs_full.jsonl`, extracted from `m7-data` (`git show`): md5 `944cc58e…` and
+  `f165d828…`, as 4.6 requires.
+- Group sizes recomputed from the main-run records (key `main:`; 6,000 of the 6,300, R1b's 300 left out): crash_B
+  490, crash_A 807, control_proved 976, control_no_proof 3,083, as in 4.6. All 1,297 crashes have `cause` `oom`.
+  Milestone 7's crash records have no `id` or `tier` field (the driver writes them); the tier is the key's letter
+  after `main:`.
+- `eval/m8d/sample.tsv` with the 8a rule (SHA-256 of `"80401:<key>"`, ties by key): md5 `1f097a46210bd923e98ed24d9d15b7c2`
+  and the two first keys of 4.6, at the first try.
+- `eval/m8d/specs.jsonl` (md5 `c4d81f67bb28c1af5c3d289b3e4cea58`): each sampled goal's line of `specs_full.jsonl`
+  with `baselines` false and one added field, `m8d_group` (ignored by `eval_run`), in sample order.
+  `specs_pilot.jsonl` (md5 `16f7a29925da…`): its first 5 per group.
+- Every sampled milestone 7 crash has a `last_N` (1 to 10) and phase `sat`; no milestone 7 timeout lacks per-N rows.
+
+#### Harness (8d)
+
+- **R1 and R2 on.** The harness's own default for the milestone 8 flags is off (8c-1), so `Test/m8d_run.py run` sets
+  `SOLVE_BY_SAT_EVAL_FLAGS=nodeBounds,exclusivePairs`, the tactic's defaults. Every result records `enc_flags`.
+- **Exactness (4.6)**, against `SOLVE_BY_SAT_EVAL_COMPARE=eval/m8d/inputs/results.jsonl`:
+  - in the shard, 8c-1's `exactnessStop`, unchanged. `loadReference` now reads each record through `referenceOf`,
+    which also treats a timeout without per-N rows as a crash (every N below `last_N` UNSAT), as 4.6 says; no
+    milestone 7 record has that form, so 8c-1's reference is unchanged.
+  - **Deviation: an exactness stop now exits 9** (in 8c-1 it shared 6 with the 4.2 and 2.5 stop rules); a record
+    with both kinds of stop keeps 6. `Test/eval_driver.py` passes 9 through.
+  - **Added: crash records written by the driver.** These never reach the shard's check. A crash at `last_N` = L
+    passed every N below L without a proof, so the driver flags it (exit 9, the record gets `stop`) when the
+    reference proved at N < L, or when the goal is not in the reference (`crash_exactness`).
+  - **Tests** (in `Test/run_all.sh`): `eval_run exactness-selftest`, 13 hand-made cases (each of the three stop
+    cases, also against a crash and a timeout reference, the early exit, and six agreements that must not stop),
+    and `eval_driver.py exactness-selftest`, 10 cases (the crash-record check and `reference_of` against the Lean
+    reading). Both pass.
+- `Test/m8d_run.py` (`pilot-specs`, `run`, `projection`, `status`, `publish`) reuses `Test/m8a_run.py`'s `run` (the
+  driver with the cap, the watchdog and crash records, then the `countOnly` sizes at N = 5 and the run's last N, each
+  spec in its own capped process). `Test/m8d_full.sh pilot|full`, detached, publishes `eval/m8d` after every shard.
+- `eval/m8d/report.py` writes `eval/m8d/EVAL8.md`; it recomputes the exactness rules from the records itself.
+
+#### Pilot and projection
+
+- The 20 pilot runs (20:31, 4.5 min of runs and 0.8 min of sizes): no stop. Projected per group as the larger of
+  (a) the pilot's mean time per run, overhead and sizes included, times the group size, and (b) the pilot's ratio to
+  milestone 7's N-loop time (`loop_ms`, or a crash's `elapsed_s` less its baselines' time) applied to the sampled
+  goals' milestone 7 times: **1.9 h** for the 300 runs. Under 24 h, so the full run followed at once, in the same
+  directory; nothing changed in between, so the pilot's runs count.
+
+#### Results (`eval/m8d/EVAL8.md`, md5 `55736ef45bf8…`)
+
+- **Stops: none.** The exactness rules, recomputed by the report, find 0 disagreements. Every new proof was decoded
+  and kernel-checked by the harness.
+- **crash_B:** 4 proved (4.0%, Wilson [1.6%, 9.8%]), 34 certified "no proof ≤ 10" (34.0%), 4 timed out, 58 still
+  crash (58.0%, [48.2%, 67.2%]). **crash_A:** 0 proved ([0%, 3.7%]), 36 "no proof ≤ 10", 5 timed out, 59 still crash.
+  Every timeout is the solver's 20 s limit; no run hit the 300 s watchdog.
+- **Controls:** 50/50 proved at milestone 7's N; 49/50 "no proof ≤ 10"; 608 N answered by both, all the same.
+  The N loop takes 0.39 (proved) and 0.53 (no proof) of milestone 7's time.
+- **The control at a resource limit:** `main:A/Bool.ite_eq_true_distrib` timed out at N = 10 (solver, 20 s), where
+  milestone 7 answered UNSAT in 6.9 s. N = 1 to 9 agree (UNSAT); at N = 9 both took about 15 s, so this goal is near
+  the per-call limit. 8d's CNF at N = 10 is smaller (2,223,377 clauses against 2,550,846); the solver's time on it is
+  not. A resource limit, not a stop (4.6).
+- **Time:** runs 1.56 h, sizes 0.40 h (projected 1.9 h).
+
+#### Surprising
+
+- **Most crashes still crash, but later.** Of the 117 that still crash, 96 reach a higher N than in milestone 7, and
+  none a lower one (median last N 7 against 6).
+- **The `countOnly` sizes never hit the cap**, even at the N where a run crashed (585 records, all counted). The
+  crashes are in building or solving the CNF, not in counting it.
+- **Early exits certify quickly.** 14 crash goals (9 in B, 5 in A) and 7 no-proof controls exit early at every N:
+  "no proof at any N", in well under a second, where milestone 7 crashed or solved ten CNFs.
+- **The new proofs are all Tier B** (N = 4, 5, 5, 9); crash_A has none.
+- **Decomposition** is 92% (B) and 84% (A) of the crash groups' clauses at N = 5, and groundness grows with N (to
+  20% and 29% at the last N).
+- **Regression (end of 8d):** `Test/run_all.sh` exit 0 at `d5776b3` plus this section, with R1 and R2 on by default
+  (`eval/m8d/run_all_end.log`, 83 min): M0 902/902, M1 26/26, M4 7/7, M5 13/13, `countOnly` 44/44, M8 diagnostics
+  10/10, 41/41 and 91/91; the exactness self-tests 13/13 (Lean) and 10/10 (driver); M2, M3, M4Lean, M5Lean, M7Lean,
+  M8Probe, M8C1Lean pass; the differentials with `m8off`, `r1`, `r1r2` have 0 mismatches; the off-switch gives 54/54
+  DIMACS identical to 8b; the Lean suite passes in the three settings with the model check. `SolveBySat/` is unchanged
+  in 8d.

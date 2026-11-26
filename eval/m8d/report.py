@@ -334,7 +334,7 @@ def main():
         rows.append([g, n, fmt(a), fmt(b), f"{a / b:.3f}" if b else "–",
                      f"{statistics.median(rr):.3f} [{min(rr):.3f}, {max(rr):.3f}]" if rr else "–"])
     L += ["### Clauses at N = 5 against milestone 7's", "",
-          "Where milestone 7 has a per-N record at N = 5 (none for its crashes):", ""]
+          "Where milestone 7 has a per-N record at N = 5 (none for its crashes). An 8d early exit at N = 5 counts with its one clause.", ""]
     L += table(["group", "goals", "8d", "milestone 7", "pooled ratio", "per goal, median [min, max]"], rows)
     L.append("")
 

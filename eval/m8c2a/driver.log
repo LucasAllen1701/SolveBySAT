@@ -25,3 +25,4 @@ sim N=10: 20 of 20, 657 s
 sim N=10: 40 of 20, 254 s
 sim N=10: 60 of 20, 299 s
 sim N=10: 80 of 20, 246 s
+sim N=10: 100 of 20, 2397 s

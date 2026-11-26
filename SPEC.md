@@ -1,8 +1,13 @@
 # Solve By SAT: revised specification
 
-Lucas Allen · 18 November 2026; revised 24 November 2026
+Lucas Allen · 18 November 2026; revised 24 November 2026 and 27 November 2026
 
-**Status: implemented and evaluated.** Milestones 0 to 6 are complete on Lean 4.36.0, and milestone 7 evaluated the tactic on 6,300 real Lean goals. This revision describes the system as built. It folds in every amendment and deviation from the implementation's NOTES.md, including milestone 7's three fixes (sections 4.5 and 8) and its encoder addition `countOnly` (section 3), and it summarises the evaluation (sections 7.4 and 9.5). Section 11 lists the changes. The full evaluation is in `EVAL.md` and `EVAL_PLAN.md` in the repository.
+**Status: implemented and evaluated.** Milestones 0 to 6 are complete on Lean 4.36.0, and milestone 7 evaluated the tactic on 6,300 real Lean goals. Milestone 8 added two exact reductions of the CNF, node–clause bounds with an early exit and exclusive pairs, now on by default (6.10.1 and 6.10.2). This revision describes the system as built. It folds in every amendment and deviation from the implementation's NOTES.md:
+
+- milestone 7's three fixes (sections 4.5 and 8) and its encoder addition `countOnly` (section 3);
+- milestone 8's reductions, options and measurements (sections 3, 5.3, 6.10, 7.5).
+
+It summarises both evaluations (sections 7.4, 7.5, 9.5 and 9.6). Section 11 lists the changes. The evaluations are in the repository: `EVAL.md` and `EVAL_PLAN.md` for milestone 7, and `M8_PLAN.md` with the reports under `eval/m8a/` to `eval/m8d/` for milestone 8.
 
 ## 1. Overview and contract
 
@@ -103,7 +108,7 @@ The size of a proof is its number of nodes.
 | Type class resolution | an instance argument that is not syntactically the expected one | instances are found only by unification |
 | Proof-dependent types | a binder whose type mentions an earlier proof variable | rejected at compile time |
 | Lemma reuse | a sub-proof needed twice | proofs are trees, so it is counted twice; there is no `have` |
-| Large problems | 9 lemmas at 12 nodes is already 5.1 million clauses; on real goals, 21.6% exceed 2.5 GB at N ≤ 10 | groundness and decomposition grow quadratically in `H` (sections 7.3 and 7.4) |
+| Large problems | 9 lemmas at 12 nodes is 4.2 million clauses; on real goals, 21.6% exceeded 2.5 GB at N ≤ 10 before milestone 8, and an estimated 13% still do | groundness and decomposition grow quadratically in `H` (sections 7.3 to 7.5) |
 
 ## 3. Architecture
 
@@ -127,6 +132,7 @@ The implementation is a four-stage pipeline in which only the first and last sta
 | `SolveBySat/Reference.lean` | brute-force prover over forests with binders, data and groundness; the test oracle | no |
 | `Test/` | fixed tests, differential tests, Lean examples, scripts | mixed |
 | `Test/Eval*.lean`, `Test/eval_*.py`, `eval/` | the milestone 7 evaluation: corpus extraction, coverage harness and driver, scaling runs, and `eval/report.py`, which writes `EVAL.md` | mixed |
+| `Test/M8Diag.lean`, `Test/m8*_run.py`, `eval/m8a/` to `eval/m8d/` | milestone 8: the rewriting probe, the CNF diagnostics (an exact recount of every family in a counting CNF), and the stage reports | mixed |
 
 **Solver.** Lean 4.36.0 ships CaDiCaL 2.1.2 in the toolchain's `bin/`. `Solver.findSolver` tries, in order: the environment variable `SOLVE_BY_SAT_SOLVER`, `IO.appPath.parent/cadical`, `Lean.findSysroot/bin/cadical`, and `cadical` on `PATH`. Every model returned is checked against the CNF, so a faulty solver cannot produce a false proof.
 
@@ -136,11 +142,14 @@ The implementation is a four-stage pipeline in which only the first and last sta
 | --- | --- | --- |
 | `(nodes := N)` | 8 | node bound; `nodes := 0` fails at once with the no-proof message |
 | `solve_by_sat.verbose` | false | reports CNF size, the skeleton found, and context hypotheses that were ignored |
-| `solve_by_sat.refinements` | true | `false` switches off all five refinements of 6.10 |
+| `solve_by_sat.refinements` | true | `false` switches off all seven refinements of 6.10 |
+| `solve_by_sat.nodeBounds` | true | node–clause bounds and the early exit (6.10.1) |
+| `solve_by_sat.exclusivePairs` | true | no decomposition between objects that are never active together (6.10.2) |
 | `solve_by_sat.staticTyping`, `typingClause`, `forgetTypes` | true, true, false | testing only: switch off the static typing filter or the typing clause, or treat every type as unknown |
 | `solve_by_sat.checkTemplates` | false | testing only: fail with an internal error if a type template is changed by preprocessing (section 4.5) |
+| `solve_by_sat.checkBounds` | false | testing only: check every node of a decoded proof against the bounds of 6.10.1 |
 
-`EncodeOptions` has one flag per refinement (`symmetry`, `pairPruning`, `candidatePruning`, `framePruning`, `ladderAmo`), plus `protoRank` (the prototype's rank width) and `openBit`, `dataFilter` for mutation tests.
+`EncodeOptions` has one flag per refinement (`symmetry`, `pairPruning`, `candidatePruning`, `framePruning`, `ladderAmo`, `nodeBounds`, `exclusivePairs`), plus `protoRank` (the prototype's rank width). For mutation tests only, it also has `openBit`, `dataFilter`, `boundsScope` (on), `boundsTight` and `exclusiveMutant` (off).
 
 `EncodeOptions.countOnly` (default false) counts variables and clauses, per family, without storing any clause. The clause builder does all its constant folding and counting as before and only skips storing the clause, so the counts equal a full encode's; a test checks this on every instance of section 7.3. It is used to measure CNFs too large to build in memory (section 7.4).
 
@@ -286,7 +295,7 @@ Every object carries a **label**, a fixed-width bit vector. Two objects have the
 | `esc` | N | the nodes whose eigenvariables occur in the value | free | constant: empty | constant: only bit α |
 | `open` | 1, present only if some template is open | the value has a loose bound variable | constant | constant | constant 0 |
 
-Here "objects built" counts rigid, type-template, value and ground objects plus N·E eigenvariable codes. `rt` and `rh` are the most rigid positions in any target and any head, counting the type templates attached to them, and `gh` is the greatest ground height. This bound is sound: a strictly increasing chain of non-ground classes above the ground terms has at most N·(rt + rh) members.
+Here "objects built" counts rigid, type-template, value and ground objects plus N·E eigenvariable codes. With node bounds (6.10.1), only the objects that are built count, so `idx` can be narrower. This keeps every answer, because only objects that can be active need distinct codes, but it is not a literal restriction of the old models. `rt` and `rh` are the most rigid positions in any target and any head, counting the type templates attached to them, and `gh` is the greatest ground height. This bound is sound: a strictly increasing chain of non-ground classes above the ground terms has at most N·(rt + rh) members.
 
 All fields of an ordinary slot are free, except `open`, which is 0, so a clause variable can never take an open value. The total width is written `W`.
 
@@ -294,7 +303,7 @@ The remaining variables are auxiliaries introduced by the clause families: `sm` 
 
 ## 6. Clause families
 
-The CNF is the conjunction of the families below. All are implemented; the refinements of 6.10 are on by default and each can be switched off.
+The CNF is the conjunction of the families below. All are implemented; the refinements of 6.10 are on by default and each can be switched off. With node bounds on, the encoder also emits a family of unit clauses ("11 node bounds" in the counts).
 
 **Conventions.** `L(o)` is the label of object `o`. `X ⇒ L(o) = L(o')` means bitwise equality under condition `X`: two clauses per pair of free bits, one per free bit against a constant, and the single clause `¬X` if two constant bits differ. The clause builder folds constant bits and drops tautologies. At-most-one uses the ladder encoding for 6 or more literals (3n − 4 clauses, n − 1 auxiliaries, with `xᵢ ⇒ sᵢ`, `sᵢ₋₁ ⇒ sᵢ` and `xᵢ ⇒ ¬sᵢ₋₁`) and pairwise below that.
 
@@ -392,8 +401,47 @@ A data position (section 4.3) is an optional child index of its clause. A data n
 | Candidate pruning | `candidatePruning` | in 6.8, skip a candidate whose type template does not unify apart with the variable's | a real grounding has equal types, which are instances of both type templates |
 | Frame pruning | `framePruning` | link a variable into a child only if it occurs anywhere below it: targets, local clauses, values and type templates, recursively (`Forest.varsBelow`) | a variable absent from the whole subforest constrains nothing there |
 | Ladder at-most-one | `ladderAmo` | sequential encoding for 6 or more literals | equivalent to pairwise |
+| Node–clause bounds (milestone 8) | `nodeBounds` | the units `¬gp(α, g)` and `¬cl(α, c)` for pairs no proof tree can use; nothing that depends only on them is built; an early exit when no proof fits (6.10.1) | the bounds hold in every model of the structural clauses |
+| Exclusive pairs (milestone 8) | `exclusivePairs` | no decomposition clauses between two objects of one node whose owners are in one at-most-one group (6.10.2) | the pair's clauses are implied or satisfiable by their own auxiliaries |
 
 Pair pruning must keep the `idx`-differs clause. Dropping the pair outright would let two objects that can never be equal share a label. The `idx` field has a code for every object, so distinct classes can always get distinct codes.
+
+Milestone 8 accepted only **exact** reductions: each keeps every answer and every minimal N. With its flag off, each gives the CNF of the code before it byte for byte; with both milestone 8 flags off, the encoder gives milestone 7's CNF.
+
+#### 6.10.1 Node–clause bounds
+
+**Dead literals.** One mechanism serves this refinement. A literal shown false in every model is emitted as a unit clause and treated as the constant `false` by the clause builder. Clauses it satisfies disappear, and no object, slot, label or auxiliary used only by them is allocated. This is exact: if F ⊨ ¬x, then F ≡ F[x := false] ∧ ¬x. Ground objects are still built, because they are always active and are candidates.
+
+**Definitions.** Write c ▷ g when clause c passes the static tests of 6.4 for position g: the kind filter, and the same predicate symbol and arity. A built-in clause matches only its own target.
+
+- **Least depth.** d(root) = 0. For a premise or data position p of c, d(p) = 1 + min over c ▷ g of max(d(g), e(c)). Here e(c) is d(g₀) for a clause local to g₀, and 0 for a global clause: a local clause is used only at or below the node that introduced it (6.3), and that node solves g₀.
+- **Least size.** s(g) = min over c ▷ g of cs(c), where cs(c) = 1 + the sum of s(p) over the premises p of c. Data positions count 0, because they are optional (6.9).
+- Both are fixpoints computed from ∞, ignoring unification.
+
+**The bounds.**
+
+- `gp(α, g)` is possible only if d(g) ≤ α and α + s(g) ≤ N.
+- `cl(α, c)` is possible only if some g with c ▷ g has max(d(g), e(c)) ≤ α, and α + cs(c) ≤ N.
+
+**Why they hold in every model.**
+
+- Only node 0 solves the root, and every other node has one parent edge whose clause matches the parent's position (6.1, 6.2, 6.4). So a node's depth is at least the least depth of its position, and parents have smaller indices, so depth(β) ≤ β.
+- A local clause's introducer is the node itself or an ancestor (6.3).
+- Every premise index has a child with a larger index (6.2), so the subtree of α has at least cs(c) nodes, all with indices in [α, N).
+- These are structural clauses, and unification only adds conditions, so the bounds hold in every model.
+- Checked on models: 0 of 492 pairs used in 90 real models violate them.
+
+**What disappears with the dead pairs:** their objects and slots; matching, links and scope clauses under them; their groundness; candidates on dead objects; and decomposition pairs with a dead object.
+
+**Early exit.** If `gp(0, root)` is dead, because s(root) > N or s(root) = ∞, the encoder returns one empty clause and builds nothing else. The tactic then fails with the no-proof message before solving. With `verbose` it explains: "every proof has at least k nodes", or "no proof tree exists at any N".
+
+#### 6.10.2 Exclusive pairs
+
+Two objects at one node α whose activation literals are different members of one at-most-one group of 6.1 are never active together. Such groups are `cl(α, c)` and `cl(α, c′)` with c ≠ c′, covering head, value and clause-side type-template objects; and `gp(α, g)` and `gp(α, g′)`, covering goal-side objects. For such a pair, no decomposition clauses are emitted, and no pair-pruning `idx`-differs clause either.
+
+This is exact. The pair's defining clause `¬act(o) ∨ ¬act(o′) ∨ d₁ ∨ … ∨ sm` is implied by the at-most-one. `sm` and the `dⱼ` occur positively only there, so setting them false satisfies the pair's other clauses. Labels of inactive objects are constrained only under their activation literals, so sharing a label does no harm.
+
+A goal object and a head object at the same node can be active together, so they are never such a pair. A mutation that treats them as one is caught by the differential tests.
 
 ### 6.11 Why the encoding is exact
 
@@ -404,7 +452,7 @@ Pair pruning must keep the `idx`-differs clause. Dropping the pair outright woul
 
 ## 7. Clause counts
 
-The number of clauses grows as N³ in the node bound and quadratically in the total size of the hypothesis list. Two families dominate: groundness (6.8) and decomposition (6.5), which together are over 90% of the clauses on larger problems. The refinements of 6.10 do not reduce either, except typing when the lemmas have distinct types (7.4).
+The number of clauses grows as N³ in the node bound and quadratically in the total size of the hypothesis list. Two families dominate: groundness (6.8) and decomposition (6.5), which together are over 90% of the clauses on larger problems. The refinements of milestone 6 do not reduce either, except typing when the lemmas have distinct types (7.4). Milestone 8's node bounds and exclusive pairs reduce both, by about 2 to 3.4 times at N = 5 on real goals, less at larger N (7.5). The growth rates are unchanged.
 
 ### 7.1 Parameters
 
@@ -443,21 +491,21 @@ Adding these up gives the total below. Since `W` is about `N` once `N` exceeds t
 
 ### 7.3 Measured sizes and times
 
-The benchmark (`Test/bench.py`) proves `x ≤ w` from `x ≤ y`, `y ≤ z`, `z ≤ w` with transitivity, plus 0, 4 or 8 monotonicity lemmas `m ≤ n → s m ≤ s n`. All the extra lemmas share the symbol `s`; with distinct symbols the counts are smaller. L1 and D3 are the Lean tests of section 9. Every instance is satisfiable. "Before" is all refinements off; "after" is all on, the default.
+The benchmark (`Test/bench.py`) proves `x ≤ w` from `x ≤ y`, `y ≤ z`, `z ≤ w` with transitivity, plus 0, 4 or 8 monotonicity lemmas `m ≤ n → s m ≤ s n`. All the extra lemmas share the symbol `s`; with distinct symbols the counts are smaller. L1 and D3 are the Lean tests of section 9. Every instance is satisfiable. "Before" is all refinements off; "after" is the five refinements of milestone 6. The column "with milestone 8" adds node bounds and exclusive pairs, the default since milestone 8. It comes from the `countOnly` parity test, which checks it against a full encode.
 
-| Instance | N | Variables after | Clauses before → after | Encode ms after | Solve s before → after | Solver MB after |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 lemma | 5 | 1,237 | 16,910 → 14,283 | 5 | 0.01 → 0.01 | 16 |
-| 1 lemma | 8 | 2,829 | 52,800 → 44,119 | 14 | 0.04 → 0.01 | 16 |
-| 1 lemma | 12 | 5,723 | 141,128 → 116,999 | 36 | 0.40 → 0.03 | 17 |
-| 5 lemmas | 5 | 19,292 | 193,350 → 189,563 | 60 | 0.07 → 0.06 | 25 |
-| 5 lemmas | 8 | 58,101 | 620,176 → 608,135 | 187 | 0.23 → 0.28 | 77 |
-| 5 lemmas | 12 | 151,055 | 1,681,688 → 1,649,015 | 508 | 1.00 → 0.86 | 196 |
-| 9 lemmas | 5 | 69,242 | 618,190 → 613,943 | 195 | 0.24 → 0.24 | 74 |
-| 9 lemmas | 8 | 215,493 | 1,978,320 → 1,965,351 | 604 | 0.93 → 1.04 | 230 |
-| 9 lemmas | 12 | 553,199 | 5,159,936 → 5,126,687 | 1,565 | 3.48 → 3.27 | 619 |
-| L1 | 5 | 1,377 | 19,590 → 16,523 | 5 | 0.01 → 0.01 | 26 |
-| D3 | 3 | 1,155 | 4,793 → 4,602 | 1 | 0.00 → 0.00 | 26 |
+| Instance | N | Variables after | Clauses before → after | Clauses with milestone 8 | Encode ms after | Solve s before → after | Solver MB after |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 lemma | 5 | 1,237 | 16,910 → 14,283 | 10,461 | 5 | 0.01 → 0.01 | 16 |
+| 1 lemma | 8 | 2,829 | 52,800 → 44,119 | 36,681 | 14 | 0.04 → 0.01 | 16 |
+| 1 lemma | 12 | 5,723 | 141,128 → 116,999 | 103,801 | 36 | 0.40 → 0.03 | 17 |
+| 5 lemmas | 5 | 19,292 | 193,350 → 189,563 | 119,421 | 60 | 0.07 → 0.06 | 25 |
+| 5 lemmas | 8 | 58,101 | 620,176 → 608,135 | 460,965 | 187 | 0.23 → 0.28 | 77 |
+| 5 lemmas | 12 | 151,055 | 1,681,688 → 1,649,015 | 1,375,973 | 508 | 1.00 → 0.86 | 196 |
+| 9 lemmas | 5 | 69,242 | 618,190 → 613,943 | 368,781 | 195 | 0.24 → 0.24 | 74 |
+| 9 lemmas | 8 | 215,493 | 1,978,320 → 1,965,351 | 1,450,613 | 604 | 0.93 → 1.04 | 230 |
+| 9 lemmas | 12 | 553,199 | 5,159,936 → 5,126,687 | 4,207,117 | 1,565 | 3.48 → 3.27 | 619 |
+| L1 | 5 | 1,377 | 19,590 → 16,523 | 12,093 | 5 | 0.01 → 0.01 | 26 |
+| D3 | 3 | 1,155 | 4,793 → 4,602 | 2,373 | 1 | 0.00 → 0.00 | 26 |
 
 Encoder memory, including the Lean runtime, ranges from about 100 MB on the forests to 600 MB at 9 lemmas and N = 12; L1 and D3 use about 430 MB because they import `Init`.
 
@@ -465,7 +513,7 @@ What the refinements change:
 
 - **With 1 lemma**, frame pruning nearly halves the link clauses (53,280 to 29,280 at N = 12), and symmetry breaking cuts solve time from 0.40 s to 0.03 s.
 - **With 9 lemmas at N = 8**, groundness (1,104,280 clauses) and decomposition (723,392) are 92% of the CNF and do not change. Candidate pruning needs type templates, which this untyped benchmark lacks, and pair pruning finds nothing, because every template unifies apart with every other.
-- **Scaling in the number of lemmas** is therefore unchanged. Reducing groundness and decomposition is the main open problem (section 9.4).
+- **Scaling in the number of lemmas** is therefore unchanged by milestone 6's refinements. Node bounds and exclusive pairs cut 11–40% here, and more on real goals (7.5). Reducing groundness and decomposition remains the main open problem (section 9.4).
 
 With all refinements off and the prototype's rank width, the encoder reproduces the original prototype's counts exactly, for example 571,956 variables and 5,354,456 clauses at 9 lemmas and N = 12.
 
@@ -497,6 +545,32 @@ Milestone 7 measured scaling through the Lean compile path, so type templates ar
 
 So the quadratic growth of 7.2 holds on real, typed problems. Reducing groundness and decomposition remains the main open problem (9.4).
 
+### 7.5 Where the clauses are, and what milestone 8 removed
+
+Milestone 8 measured the CNF with diagnostics that replay the encoder's own builders in a counting CNF. They recount every family exactly, and attribute each clause to its cause (`eval/m8b/DIAG.md`, `eval/m8c1/SCALE.md`, `eval/m8c2a/R3SIM.md`). The points are the 200 goals of the rewriting probe (9.6) at N = 5, each with the probe's equality rules and without them: 400 points.
+
+**Before milestone 8, at N = 5:**
+
+- decomposition is 64% of the clauses with the rules (87% without), and groundness 34% (12%);
+- 82–84% of decomposition is between objects at different nodes. Universe levels and type templates dominate it: with the rules, `succ` on levels is 32% of it and `List` 20%;
+- groundness is 91% rigid-position candidates. In real models, candidates at descendant and unrelated nodes are used, so restricting candidates to ancestors would lose proofs;
+- the label width W is 18–35 bits.
+
+**Node bounds and exclusive pairs**, pooled clauses before and after:
+
+| points | N = 5 | N = 10 |
+| --- | --- | --- |
+| with the rules | 2.50 times fewer | 1.70 times fewer |
+| without rules | 3.38 times fewer | 2.11 times fewer |
+
+The per-point median is 2.03 times with the rules at N = 5. The gain falls with N because fewer pairs are excluded. After both, groundness and decomposition are still 97% of the clauses with the rules. 14 of the 400 points exit early.
+
+**Reductions measured and not built:**
+
+- **Typing by static unification.** This would replace whole type-template objects by the triangular solved form of their unifier, with shared residual objects. Simulated exactly, it removes 0.75% of the clauses with the rules (11% without). 94% of the type-template objects are still needed, because polymorphic lemmas bind bare type variables to whole templates.
+- **Universe levels as a finite domain.** The closure of the level terms exceeds 100,000 values on a third of the points.
+- **Dropping groundness for rigidly matched head variables.** It would reach 0.1% of groundness with the rules. The unrestricted version is unsound: a cycle through target variables leaves a class with no rigid member (M8_PLAN 3.7.2).
+
 ## 8. Decoding: from a model to a checked proof
 
 The decoder replays the proof tree in `MetaM`, finishes any argument that unification leaves open with the value the model chose, and has the kernel check the result.
@@ -516,6 +590,8 @@ The decoder replays the proof tree in `MetaM`, finishes any argument that unific
    A ground term containing a proof that mentions a hypothesis has no representative valid in the decoder. It takes its expression from an occurrence of the same term in the replay instead, which proof irrelevance makes correct. Each value is type-checked in the variable's own local context, so Lean checks scope, before it is assigned.
 4. **Finish.** Instantiate metavariables, fail if any remains, run `Meta.check`, and close the user's goal so the kernel checks the term.
 
+**Dead literals.** With node bounds, `cl` and `gp` literals that the encoder folded to `false` read as false. Groundness witnesses exist only for live pairs, so the decoder needs no change.
+
 **Unifier settings.** The whole decode runs with `foApprox` and `ctxApprox` on, the settings the elaborator gives tactics, whoever calls it. A caller with every approximation off, such as a bare `MetaM`, could otherwise fail on a valid model, because a value's metavariable sometimes has to be restricted to a smaller local context. The restriction is sound, because the scope clauses (6.7) guarantee that every grounding is in scope.
 
 Messages:
@@ -528,7 +604,7 @@ Lean's `isDefEq` is stronger than the encoder's matching; for example, it solves
 
 ## 9. Status and tests
 
-Milestones 0 to 7 are complete, and the full suite (`Test/run_all.sh`) passes with all refinements on.
+Milestones 0 to 8 are complete, and the full suite (`Test/run_all.sh`) passes with all refinements on.
 
 | # | Milestone | Key acceptance result |
 | --- | --- | --- |
@@ -540,6 +616,7 @@ Milestones 0 to 7 are complete, and the full suite (`Test/run_all.sh`) passes wi
 | 5 | Built arguments | D1 to D7, local data functions, level normalisation (N1) |
 | 6 | Refinements | identical answers with each refinement on or off; benchmark of 7.3 |
 | 7 | Evaluation on real goals | 6,300 goals from Lean core and `Std` (9.5); three bugs found and fixed with regression tests M7-R1 to M7-R3; `countOnly` equal to a full encode on every check; `EVAL.md` regenerates byte-identically from the data files |
+| 8 | Scale | node bounds and exclusive pairs (6.10.1, 6.10.2), exact and on by default: 0 mismatches in every differential with each on, the mutation checks fire, the off-switch gives milestone 7's DIMACS on 54 encodings, and no disagreement with earlier per-N answers on 500 real-goal runs (9.6) |
 
 ### 9.1 Named tests
 
@@ -578,8 +655,9 @@ Every success is also run with one node fewer and must fail with the exact no-pr
 | M7-R1a to R1e | a clause whose head mentions its own premise, with and without binders, and the real goal `List.getLast_eq_head_reverse` | succeed (synthetic opaque premises, section 8) |
 | M7-R2a, R2b | `∀ x : Nat, x ≠ x.succ` from `Ne.symm` and `Nat.succ_ne_self`, and the real goal from `Nat.pred_eq_self_iff`, decoded with every approximation off in the caller | 4 nodes; succeed (unifier settings, section 8) |
 | M7-R3a, R3b | `decide (¬ b = true) = decide (b = false)` with `[Decidable.decide.congr_simp, Bool.not_eq_true]`; `x = x` for `x : List (α × β)` with `[Eq.refl]` | 2; 1 (type templates preprocessed, 4.5) |
+| M8C1 | the early exit with and without `verbose`, with node bounds off, and the bounds model check (`checkBounds`) | no-proof message before solving; the explanation line |
 
-The tests of milestone 7 are in `Test/M7Lean.lean`, named R1 to R3 there; here they are prefixed M7 to keep them apart from the rejection tests R1 to R4 of milestone 2. A mutation check shows that M7-R3 fails with the template fix reverted, and the template invariant (4.5) fails on 1,036 corpus goals with it reverted.
+The tests of milestone 7 are in `Test/M7Lean.lean`, named R1 to R3 there; here they are prefixed M7 to keep them apart from the rejection tests R1 to R4 of milestone 2. M8C1 is `Test/M8C1Lean.lean`. A mutation check shows that M7-R3 fails with the template fix reverted, and the template invariant (4.5) fails on 1,036 corpus goals with it reverted.
 
 ### 9.2 Validation
 
@@ -588,7 +666,15 @@ The tests of milestone 7 are in `Test/M7Lean.lean`, named R1 to R3 there; here t
 - **Mutation checks** fire: switching off scope, the occurs check, the open bit, or the data kind filter each produces mismatches.
 - **Option invariance.** The Lean suite gives identical answers with the static typing filter off and with all refinements off.
 - **Unit tests** check that every object kind's label is allocated exactly once.
-- **`countOnly`** equals a full encode, in variables and in every family's count, on all 22 checks (each instance of 7.3, with all refinements on and all off).
+- **`countOnly`** equals a full encode, in variables and in every family's count, on all 44 checks: each instance of 7.3, with all refinements on, all off, node bounds alone, and both milestone 8 refinements.
+- **Milestone 8.**
+  - The three differentials give 0 mismatches with both milestone 8 refinements off, with node bounds, and with both.
+  - Mutation checks fire. Tightening the size bound by one loses every proof at its minimal N (556 of 556, 503 of 503, 825 of 825). Treating a goal object and a head object as exclusive gives false proofs.
+  - Dropping the scope term e(c) changes no answer and only makes CNFs larger.
+  - With both flags off, 54 encodings are byte-identical to milestone 7's.
+  - The Lean suite passes in all three settings with the bounds model check.
+  - The diagnostics' recount equals the encoder's counts, with hand-count tests (`test_m8diag`).
+  - Per-N exactness checks against earlier runs, on real goals, found no disagreement: the rewriting probe's 200 runs, and the 300 runs of 9.6.
 
 ### 9.3 Running the tests
 
@@ -597,13 +683,15 @@ The tests of milestone 7 are in `Test/M7Lean.lean`, named R1 to R3 there; here t
 - `Test/bench.py`: the benchmark of section 7.3.
 - `SOLVE_BY_SAT_SOLVER=<path>` runs everything against another DIMACS solver.
 - `python3 eval/report.py` regenerates `EVAL.md` from the evaluation's data files, which are kept on the archived `eval-m7` branch (tag `m7-data`).
+- `python3 eval/m8a/report.py`, and likewise for `m8b`, `m8c1`, `m8c2a` and `m8d`, regenerate milestone 8's reports from their data files, which are kept on tag `m8-data`.
 
 ### 9.4 Open directions
 
-1. **Shrink groundness and decomposition.** They are 85–99% of the CNF on larger problems, real and synthetic, and limit the size of `H` (7.4). This is milestone 8, which starts with a probe of rewriting by equality rules.
-2. **Rewriting, case analysis and induction.** These are proposed for milestone 9, where the motive is forced or chosen from finitely many candidates. Rewriting comes first, because it would reach the most goals (9.5).
+1. **Shrink groundness and decomposition further.** After milestone 8's reductions they are still 97% of the CNF with many lemmas (7.5). The exact reductions that remain look small (7.5). A tighter universe-level domain, built from the level instances that matching can produce, is untried.
+2. **Rewriting, case analysis and induction.** These are milestone 9, where the motive is forced or chosen from finitely many candidates. Rewriting comes first, because it would reach the most goals (9.5, 9.6). Generating equality rules only for symbols on a possible rewriting path is the main lever, because rules for every symbol multiply the CNF 13 to 18 times (9.6).
 3. **Search over N.** The tactic needs `N`. A wrapper that tries increasing values would return a minimal proof without the user choosing a bound. The evaluation harness's N loop is a prototype.
 4. **A written correctness proof.** Section 6.11 is an argument, not a proof; a careful write-up, or a Lean formalisation of the encoding, would back the soundness and completeness claims.
+5. **A lazy, incremental option**, revisited when the project is complete. It would solve with most decomposition and groundness clauses left out, add the clauses the model violates, and repeat. It would be offered alongside the one-shot mode, not in its place.
 
 ### 9.5 Evaluation on real goals (milestone 7)
 
@@ -621,6 +709,37 @@ Milestone 7 ran the tactic on 3,000 theorem statements of Lean core and `Std` (T
 - **What rewriting could reach.** At most 946 more Tier B goals have only rewriting constants as obstacles. Only 12 have only case-analysis or induction obstacles on data, and none has only case-split obstacles. This is an upper bound: definitional unfolding, instances and proof size can still block a goal.
 - **Against the baseline.** Like-for-like `solve_by_elim` also closes 96.3% of the Tier B goals `solve_by_sat` proves, about 80 times faster. Most of the 89 goals only `solve_by_sat` proves use a built-in `↔` or `∧` projection. The tactic's distinctive contributions are minimal proofs and certified "no proof with at most N nodes" answers.
 - **Hand reviews.** Where `solve_by_elim` wins, the obstacle is definitional unfolding, instances or a rejected constant, never proof size. Among goals the tactic should be able to prove and does not, the commonest cause is an instance argument: instances are dropped from H.
+
+### 9.6 Milestone 8: the rewriting probe and the scale evaluation
+
+`M8_PLAN.md` pre-registers every stage; the reports are under `eval/m8a/` to `eval/m8d/`.
+
+**The rewriting probe (8a).** It gave the unchanged tactic generated, kernel-checked equality rules: congruence and substitution for every symbol of a goal and its H, and `L = R` for every `↔` head in H, proved by `propext`. It ran on 100 Tier B and 50 Tier A goals whose only obstacles are rewriting constants, and on 50 proved controls, at N ≤ 10.
+
+- **Rewriting works where the CNF fits.** 21 goals that milestone 7 did not prove are proved, at N = 1 to 8. The `propext` equations prove 8 of the 28 Tier B goals with a `propext` obstacle.
+- **The rules are expensive.** They multiply the CNF at N = 5 by a median of 13 to 18 (5 for the controls). No goal with more than 10 accepted rules is proved, and most of milestone 7's certified "no proof ≤ 10" answers become resource limits.
+- **With node bounds and exclusive pairs** (a rerun of the same 200 runs):
+  - every control is proved;
+  - 3 crashes become certified answers, and 18 become solver timeouts;
+  - solving is 1.75 times faster;
+  - but no further rewriting goal is proved.
+
+**The scale evaluation (8d).** The tactic as users run it: node bounds and exclusive pairs on, milestone 7's oracle H, and no rules. It ran on samples of milestone 7's memory crashes, with proved and no-proof goals as exactness controls.
+
+| group (population) | runs | proved | certified "no proof ≤ 10" | solver timeout | memory crash |
+| --- | --- | --- | --- | --- | --- |
+| Tier B memory crashes (490) | 100 | 4 | 34 | 4 | 58 |
+| Tier A memory crashes (807) | 100 | 0 | 36 | 5 | 59 |
+| proved controls (976) | 50 | 50 | | | |
+| no-proof controls (3,083) | 50 | | 49 | 1 | |
+
+- **Scaled to the populations.** About 20 more Tier B proofs (Wilson 95% interval: 8 to 48) and about 460 more certified answers. The memory crashes fall from 1,297 to about 760, which is 13% of the main run's 6,000 goals.
+- **Exactness.** No disagreement with milestone 7 at any of the 1,737 N that both answered.
+- **Speed.** The controls' N loop takes 0.39 to 0.53 of milestone 7's time.
+- **Early exits.** 21 sampled goals get "no proof at any N" in under a second.
+- **The remaining crashes reach higher N** than in milestone 7.
+
+So milestone 8 makes the tactic faster and more decisive. More proofs need milestone 9's scope.
 
 
 ## 10. Changes from the original PDF draft
@@ -666,3 +785,8 @@ The first version of this specification was written before any code. Implementat
 | 8 | The decode runs with `foApprox` and `ctxApprox` on, whoever calls it | milestone 7: a caller with every approximation off failed on a valid model |
 | 3 | `EncodeOptions.countOnly` | milestone 7: counting CNFs too large to build in memory |
 | 3 | `vm.overcommit_memory = 1` on the development machine | the intermittent "not enough memory" was the kernel refusing `lake`'s fork |
+| 3, 6.10.1 | Node–clause bounds (`nodeBounds`), with the early exit and the dead-literal mechanism, on by default | milestone 8: about half the clauses of large CNFs can never be used, in any model |
+| 6.10.2 | Exclusive pairs (`exclusivePairs`), on by default | milestone 8: decomposition between objects that are never active together |
+| 5.3 | `idx` counts only the objects built | milestone 8: a by-product of node bounds; exact for every answer |
+| 3 | `checkBounds`, and mutation flags `boundsScope`, `boundsTight`, `exclusiveMutant` | milestone 8: tests of the new refinements |
+| 7.5, 9.4 | Typing by static unification, finite-domain levels and narrow groundness were measured and not built | milestone 8: each would remove too little, or does not fit |

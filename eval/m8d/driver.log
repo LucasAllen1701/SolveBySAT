@@ -127,3 +127,4 @@ crash(shard, oom) on main:A/Array.attach_congr
 crash(shard, oom) on main:A/Std.HashMap.getElem!_insertMany_list_of_mem
 crash(shard, oom) on main:A/Std.WP.Spec.IterM.forIn_mapM
 shard 3: done; 220 results; 5067 s
+shard 4: done; 270 results; 5197 s

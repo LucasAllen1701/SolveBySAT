@@ -46,6 +46,62 @@ PARALLEL_SHARDS = 1          # P of §10.5 decision 4 (owner's choice for the te
 MIN_FREE_MB = 1024           # stop condition: memory outside the evaluation slice
 
 
+def reference_of(r):
+    """8c-1/8d (M8_PLAN 4.4, 4.6): one reference record's answers, as `referenceOf` in
+    Test/EvalRun.lean: the N where it was UNSAT (per-N rows; for a crash, and for a timeout without
+    per-N rows, every N below last_N) and the N of its proof, if any."""
+    rows = r.get("per_N") or []
+    unsat = set()
+    if r.get("outcome") == "crash" or (r.get("outcome") == "timeout" and not rows):
+        unsat |= set(range(1, r.get("last_N") or 1))
+    unsat |= {x["N"] for x in rows if x.get("result") == "unsat"}
+    return unsat, (r.get("N") if r.get("outcome") == "proved" else None)
+
+
+def load_reference(path):
+    return {r["key"]: reference_of(r) for r in load(path)}
+
+
+def crash_exactness(ref, last_n):
+    """8d (M8_PLAN 4.6): the stop rules for a crash record written by the driver. The run passed
+    every N below last_N without a proof, so it was UNSAT (or exited early) there."""
+    if ref is None:
+        return "the goal is not in the reference run"
+    _, proved = ref
+    if proved is not None and last_n is not None and proved < last_n:
+        return f"passed N = {proved} without a proof (crash at N = {last_n}), where the reference run found a proof"
+    return None
+
+
+def exactness_selftest():
+    """8d (M8_PLAN 4.6): the driver's crash-record check flags a crash past the reference's proof
+    and nothing else; reference_of agrees with the Lean referenceOf on the hand-made records."""
+    proved = reference_of({"outcome": "proved", "N": 3, "per_N": [{"N": 1, "result": "unsat"}, {"N": 3, "result": "proved"}]})
+    crash = reference_of({"outcome": "crash", "cause": "oom", "last_N": 4})
+    tmo = reference_of({"outcome": "timeout", "last_N": 3})
+    cases = [("2 a crash at N = 5 past the reference's proof at N = 3", proved, 5, True),
+             ("2 a crash at N = 4 past the reference's proof at N = 3", proved, 4, True),
+             ("agree: a crash at the reference's proof N", proved, 3, False),
+             ("agree: a crash below the reference's proof N", proved, 2, False),
+             ("agree: a crash against a reference crash", crash, 9, False),
+             ("agree: a crash with no N reached", proved, None, False),
+             ("a goal missing from the reference", None, 2, True)]
+    fails = 0
+    for name, ref, n, want in cases:
+        got = crash_exactness(ref, n)
+        ok = bool(got) == want
+        fails += not ok
+        print(f"{'PASS' if ok else 'FAIL'} {name}: {got or 'no stop'}")
+    for name, got, want in [("reference of a crash", crash, ({1, 2, 3}, None)),
+                            ("reference of a timeout without rows", tmo, ({1, 2}, None)),
+                            ("reference of a proof", proved, ({1}, 3))]:
+        ok = got == want
+        fails += not ok
+        print(f"{'PASS' if ok else 'FAIL'} {name}: {got}")
+    print(f"driver exactness (M8_PLAN 4.6): {len(cases) + 3 - fails} passed, {fails} failed")
+    return 1 if fails else 0
+
+
 def die_with_parent():
     """preexec_fn: the child gets SIGKILL when the driver dies, so no shard is orphaned
     (an orphaned shard plus a new run caused a global OOM on 18 November)."""
@@ -233,6 +289,8 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MI
             done.add(r["key"])
             print(f"resume: {r['key']} started earlier with no result: crash(shard, unknown)", flush=True)
     pending = [s for s in specs if s["key"] not in done]
+    ref_path = os.environ.get("SOLVE_BY_SAT_EVAL_COMPARE") or None
+    reference = load_reference(ref_path) if ref_path else None
     print(f"{len(specs)} specs, {len(specs) - len(pending)} done, {len(pending)} to run", flush=True)
     # one driver at a time, machine-wide
     lock = open(os.path.join(ROOT, "eval", ".driver.lock"), "w")
@@ -305,9 +363,10 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MI
                     return 7
                 if rc == 0:
                     continue
-                if rc in (3, 4, 6):
+                if rc in (3, 4, 6, 9):
                     what = {3: "decoder bug or solver error", 4: "harness error",
-                            6: "a 4.2 stop rule, EVAL_PLAN 10.9 decision 9"}[rc]
+                            6: "a 4.2 stop rule, EVAL_PLAN 10.9 decision 9",
+                            9: "an exactness stop rule, M8_PLAN 4.4 and 4.6"}[rc]
                     print(f"STOP: shard exited with {rc} ({what}; see results.jsonl)", flush=True)
                     return rc
                 fix_trailing(results)
@@ -335,12 +394,23 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MI
                 for r in load(started)[n_started0:]:
                     if "phase" in r:
                         phases[r["key"]] = r["phase"]
+                exact_stop = None
                 for k in lost:
                     el = round(time.monotonic() - since, 1) if (k == cur and since) else None
-                    append(results, with_baselines(outdir, {"key": k, "outcome": "crash", "cause": cause,
-                                                            "last_N": last_n.get(k), "phase": phases.get(k),
-                                                            "elapsed_s": el}))
+                    rec = {"key": k, "outcome": "crash", "cause": cause, "last_N": last_n.get(k),
+                           "phase": phases.get(k), "elapsed_s": el}
+                    # 8d (M8_PLAN 4.6): a crash after N passed every N below it; against the reference
+                    # run (SOLVE_BY_SAT_EVAL_COMPARE), that is UNSAT at a reference proof's N if below
+                    if reference is not None:
+                        m = crash_exactness(reference.get(k), rec["last_N"])
+                        if m:
+                            rec["stop"] = "exactness (M8_PLAN 4.4): " + m
+                            exact_stop = exact_stop or (k, rec["stop"])
+                    append(results, with_baselines(outdir, rec))
                     print(f"crash(shard, {cause}) on {k}", flush=True)
+                if exact_stop:
+                    print(f"STOP: {exact_stop[1]} on {exact_stop[0]} (an exactness stop rule, M8_PLAN 4.6)", flush=True)
+                    return 9
                 if cause not in ("oom", "watchdog"):
                     n_same = sum(1 for r in load(results) if r.get("outcome") == "crash" and r.get("cause") == cause)
                     if n_same >= 2:
@@ -365,6 +435,8 @@ def main():
                 f.write(json.dumps(s, sort_keys=True) + "\n")
         print(f"wrote {sum(1 for _ in open(a[2]))} specs to {a[2]}")
         return 0
+    if a == ["exactness-selftest"]:
+        return exactness_selftest()
     if a[:1] == ["run"]:
         opts = dict(zip(a[3::2], a[4::2]))
         return run(a[1], a[2], int(opts.get("--shard-size", SHARD_SIZE)),

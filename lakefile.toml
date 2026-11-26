@@ -11,11 +11,11 @@ roots = ["Test.Util"]
 
 [[lean_lib]]
 name = "EvalLib"
-roots = ["Test.EvalCommon", "Test.EvalNamed"]
+roots = ["Test.EvalCommon", "Test.EvalNamed", "Test.M8Rules", "Test.M8Diag"]
 
 [[lean_lib]]
 name = "LeanTests"
-roots = ["Test.M2", "Test.M3", "Test.M4Lean", "Test.M5Lean", "Test.M7Lean"]
+roots = ["Test.M2", "Test.M3", "Test.M4Lean", "Test.M5Lean", "Test.M7Lean", "Test.M8Probe"]
 
 [[lean_exe]]
 name = "test_m0"
@@ -71,3 +71,12 @@ supportInterpreter = true
 name = "eval_pool"
 root = "Test.EvalPool"
 supportInterpreter = true
+
+[[lean_exe]]
+name = "test_m8diag"
+root = "Test.M8DiagTest"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "m8b_dimacs73"
+root = "Test.M8Dimacs73"

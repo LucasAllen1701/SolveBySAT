@@ -100,6 +100,22 @@ solve_by_sat: the clause variable f#0 is applied to arguments in f x: not first 
 error: solve_by_sat: no proof with at most 3 nodes exists in the class
 -/
 #guard_msgs (whitespace := lax) in
+set_option solve_by_sat.nodeBounds false in
+set_option solve_by_sat.exclusivePairs false in
+example (h : ∀ f : Nat → Nat, ∀ x, f x = x) : (1 : Nat) = 1 := by
+  solve_by_sat [] (nodes := 3)
+
+-- 8c-1: the same call with R1 on (M8_PLAN 3.4.3): the early exit, which says why with verbose
+/--
+info: solve_by_sat: hypothesis h is introduced but gives no clause:
+solve_by_sat: the clause variable f#0 is applied to arguments in f x: not first order
+---
+info: solve_by_sat: early exit (node bounds): no proof tree exists at any N
+---
+error: solve_by_sat: no proof with at most 3 nodes exists in the class
+-/
+#guard_msgs (whitespace := lax) in
+set_option solve_by_sat.nodeBounds true in
 example (h : ∀ f : Nat → Nat, ∀ x, f x = x) : (1 : Nat) = 1 := by
   solve_by_sat [] (nodes := 3)
 

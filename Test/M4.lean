@@ -46,7 +46,8 @@ def main : IO UInt32 := do
   let P := unitForest
   let mut fails := 0
   for N in [1, 2, 3] do
-    let E := encode P N
+    -- the milestone 4 check, of the encoding without the milestone 8 flags (on by default since 8c-1)
+    let E := encode P N { nodeBounds := false, exclusivePairs := false }
     let bad := E.allocs.toList.filter (·.2 != 1)
     let missing := E.allocs.toList.filter fun (o, _) => !E.labels.contains o
     let wrongWidth := E.labels.toList.filter fun (_, l) => l.size != E.info.W
@@ -65,5 +66,15 @@ def main : IO UInt32 := do
   let r ← runSolver (encode P 1).cnf
   IO.println s!"{if r.isSat then "PASS" else "FAIL"} the unit forest is satisfiable at N = 1"
   unless r.isSat do fails := fails + 1
-  IO.println s!"M4 unit: {4 - fails} passed, {fails} failed"
+  -- 8c-1: with R1 and R2 (the defaults) every label is still allocated once, cached, of width W;
+  -- R1 builds no object for a dead owner, so not every kind need occur
+  let mut fails8 := 0
+  for N in [1, 2, 3] do
+    let E := encode P N
+    let ok := E.allocs.toList.all (·.2 == 1) && E.allocs.toList.all (fun (o, _) => E.labels.contains o) &&
+      E.labels.toList.all (fun (_, l) => l.size == E.info.W)
+    IO.println s!"{if ok then "PASS" else "FAIL"} N = {N}, R1 and R2 on: {E.allocs.size} objects, each label allocated once and cached with width W = {E.info.W}"
+    unless ok do fails8 := fails8 + 1
+  IO.println s!"M4 unit: {7 - fails - fails8} passed, {fails + fails8} failed"
+  fails := fails + fails8
   return if fails == 0 then 0 else 1

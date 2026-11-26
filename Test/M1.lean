@@ -267,6 +267,42 @@ def histogram (xs : Array (Nat × Nat)) : List (Nat × Nat) :=
     let k := (xs.filter (·.2 == n)).size
     if k == 0 then none else some (n, k)
 
+/-- Milestone 8 (M8_PLAN 3.4.5, 3.5): the mutation checks of R1 and R2 on one differential.
+`minSizes` are the forests with a proof and their minimal N, from the reference (independent of
+the encoder). -/
+def m8Mutations (base : EncodeOptions) (seeds workers : Nat) (binders : Bool) (minSizes : Array (Nat × Nat))
+    (t : Tally) : IO Tally := do
+  let mut t := t
+  let tag := if binders then " (forests with binders)" else ""
+  let r1 : EncodeOptions := { base with groundness := false, nodeBounds := true }
+  -- R1's size bound tightened by one: every forest with a proof fails at its minimal N
+  let m ← diffRun seeds 5 { r1 with boundsTight := true } (workers := workers) (binders := binders)
+  let failing := minSizes.filter fun (s, n) => m.mismatches.any fun (s', n', r, x) => s' == s && n' == n && r && !x
+  let ok := failing.size == minSizes.size && !minSizes.isEmpty
+  IO.println s!"{if ok then "PASS" else "FAIL"} mutation 'R1 size bound tightened by one'{tag}: {failing.size} of {minSizes.size} forests with a proof have none at their minimal N ({m.mismatches.size} mismatches in all)"
+  t := t.check ok
+  -- e(c) dropped: no answer changes, and no CNF is smaller than with e(c)
+  let m ← diffRun seeds 5 { r1 with boundsScope := false } (workers := workers) (binders := binders)
+  let mut smaller := 0
+  let mut larger := 0
+  for s in [0:seeds] do
+    let P := problemOf s binders
+    for N in [1:6] do
+      let a := (encode P N { r1 with countOnly := true }).cnf.numClauses
+      let b := (encode P N { r1 with countOnly := true, boundsScope := false }).cnf.numClauses
+      if b < a then smaller := smaller + 1
+      if b > a then larger := larger + 1
+  let ok := m.mismatches.isEmpty && smaller == 0
+  IO.println s!"{if ok then "PASS" else "FAIL"} mutation 'R1 without e(c)'{tag}: {m.mismatches.size} mismatches in {m.total} comparisons; CNFs smaller than with e(c): {smaller}, larger: {larger}"
+  t := t.check ok
+  -- R2 applied to a goal object and a head object at the same node: mismatches
+  let m ← diffRun seeds 5 { base with groundness := false, exclusivePairs := true, exclusiveMutant := true }
+    (stopAtFirst := true) (workers := workers) (binders := binders)
+  let ok := !m.mismatches.isEmpty
+  let first := m.mismatches.toList.take 3 |>.map fun (s, N, r, x) => s!"seed {s} N {N} (ref {r}, sat {x})"
+  IO.println s!"{if ok then "PASS" else "FAIL"} mutation 'R2 on a goal object and a head object at one node'{tag}: mismatches found, e.g. {first}"
+  return t.check ok
+
 def main (args : List String) : IO UInt32 := do
   let seeds := (args[0]? >>= String.toNat?).getD 1500
   let workers := (args[1]? >>= String.toNat?).getD 4
@@ -275,6 +311,16 @@ def main (args : List String) : IO UInt32 := do
   IO.println s!"solver: {← findSolver}; refinements: {cfg}"
   let mut t : Tally := {}
   t ← runForestTests base t
+  -- milestone 8: R1's size bound tightened by one loses every forest test at its minimal N
+  let mut lost := 0
+  let mut withProof := 0
+  for (_, P, expect) in forestTests do
+    if let some n := expect then
+      withProof := withProof + 1
+      let (r, _) ← solveForest P n { base with nodeBounds := true, boundsTight := true }
+      if r.isNone then lost := lost + 1
+  IO.println s!"{if lost == withProof then "PASS" else "FAIL"} mutation 'R1 size bound tightened by one' (forest tests): {lost} of {withProof} have no proof at their minimal N"
+  t := t.check (lost == withProof)
   t ← runSizeTests t
   -- differential test
   let t0 ← IO.monoMsNow
@@ -285,6 +331,7 @@ def main (args : List String) : IO UInt32 := do
   let ok := d.total ≥ 5000 && deep ≥ 100 && d.mismatches.isEmpty
   IO.println s!"{if ok then "PASS" else "FAIL"} differential (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)"
   t := t.check ok
+  let minPlain := d.minSizes
   -- mutation checks
   for (name, opts) in [("scope clauses of 6.7 off", { base with groundness := false, scope := false }),
                        ("occurs check off", { base with groundness := false, occurs := false })] do
@@ -305,10 +352,16 @@ def main (args : List String) : IO UInt32 := do
   let ok := d.total ≥ 5000 && deep ≥ 100 && d.mismatches.isEmpty
   IO.println s!"{if ok then "PASS" else "FAIL"} differential with binders (need ≥ 5000 comparisons, ≥ 100 forests of min size ≥ 2, 0 mismatches)"
   t := t.check ok
+  let minBinders := d.minSizes
   let m ← diffRun seeds 5 { base with groundness := false, openBit := false } (stopAtFirst := true) (workers := workers) (binders := true)
   let ok := !m.mismatches.isEmpty
   let first := m.mismatches.toList.take 3 |>.map fun (s, N, r, x) => s!"seed {s} N {N} (ref {r}, sat {x})"
   IO.println s!"{if ok then "PASS" else "FAIL"} mutation 'open bit off' (forests with binders): mismatches found, e.g. {first}"
   t := t.check ok
+  -- milestone 8 (M8_PLAN 3.4.5, 3.5), in the default configuration only (the other settings of
+  -- Test/run_all.sh repeat the differentials, not these)
+  if cfg == "all" then
+    t ← m8Mutations base seeds workers false minPlain t
+    t ← m8Mutations base seeds workers true minBinders t
   IO.println s!"M1: {t.pass} passed, {t.fail} failed"
   return if t.fail == 0 then 0 else 1

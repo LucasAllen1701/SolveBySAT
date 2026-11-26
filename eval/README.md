@@ -1,26 +1,58 @@
 # eval/
 
-Milestone 7's evaluation (EVAL_PLAN.md) produced about 71 MB of data: run folders, the corpus and
-annotation files, the specs, the scaling data and the forest dumps. On `main` this folder keeps only:
+The evaluations of milestones 7 and 8 produced about 71 MB and 33 MB of data: run folders, corpus and
+annotation files, specs, sizes, models, scaling data and forest dumps. On `main` this folder keeps only the
+reports, the scripts that write them, and the fixtures that the acceptance tests read.
 
-- `report.py`, which generates `EVAL.md`;
-- `merge.py`, the merge rule of the 10.7 rerun (NOTES.md, "10.7: merge rule");
-- `reviews/`, the hand reviews (7d-1 and 7d-2).
+| on `main` | what it is |
+| --- | --- |
+| `report.py` | writes `EVAL.md` (milestone 7) |
+| `merge.py` | the merge rule of the 10.7 rerun (NOTES.md, "10.7: merge rule") |
+| `reviews/` | the hand reviews of milestone 7 (7d-1 and 7d-2) |
+| `m8a/PROBE.md`, `m8a/report.py` | 8a, the rewriting probe |
+| `m8b/DIAG.md`, `m8b/report.py` | 8b, the measurements |
+| `m8c1/SCALE.md`, `m8c1/report.py` | 8c-1, node bounds (R1) and exclusive pairs (R2) |
+| `m8c2a/R3SIM.md`, `m8c2a/report.py` | 8c-2a, the R3 simulation |
+| `m8d/EVAL8.md`, `m8d/report.py` | 8d, the evaluation of the tactic as users run it |
+| `m8b/specs_named_dimacs.jsonl`, `m8b/dimacs_md5.txt` | **test fixtures** (below) |
+| `run_all_m8_merge.log` | the log of `Test/run_all.sh` on the merged tree (NOTES.md, "End of milestone 8") |
 
-**The data is on the annotated tag `m7-data`** (the head of branch `eval-m7`, kept as an archive).
-NOTES.md, "End of milestone 7: spec, archive tag and merge", lists every path removed here, with its size.
+**Fixtures.** `Test/m8c1_offswitch.sh`, which `Test/run_all.sh` runs, writes the 54 DIMACS encodings of
+`m8b/specs_named_dimacs.jsonl` (the 36 named cases at their milestone 7 N) and of the SPEC 7.3 examples with
+both milestone 8 flags off, and checks them against the md5 sums in `m8b/dimacs_md5.txt` (8b's encodings,
+which equal those of `SolveBySat` at `5820197`). Without these two files the off-switch test cannot run, so
+they stay on `main`. No other test reads a file under `eval/`.
 
-`EVAL.md` regenerates on `m7-data`, not on `main`, because `report.py` reads the data files. To regenerate
-it, or to look at the data:
+## Where the data is
+
+- **Milestone 7:** annotated tag `m7-data` (the head of branch `eval-m7`, an archive). NOTES.md, "End of
+  milestone 7: spec, archive tag and merge", lists every path removed from `main`, with its size.
+- **Milestone 8:** annotated tag `m8-data` (the head of branch `m8`, an archive). NOTES.md, "End of
+  milestone 8: spec, archive tag and merge", lists the paths removed from `main`, with their sizes.
+
+The reports regenerate on their tag, not on `main`, because each `report.py` reads the data files.
 
 ```sh
 git fetch origin --tags
-git worktree add ../m7-data m7-data       # a separate checkout of the archive
-cd ../m7-data
-python3 eval/report.py                    # writes EVAL.md; it must equal the committed one
-git diff --exit-code EVAL.md
+git worktree add ../m7-data m7-data       # milestone 7
+(cd ../m7-data && python3 eval/report.py && git diff --exit-code EVAL.md)
+
+git worktree add ../m8-data m8-data       # milestone 8
+cd ../m8-data
+python3 eval/m8a/report.py                # PROBE.md
+python3 eval/m8b/report.py                # DIAG.md
+python3 eval/m8c1/report.py               # SCALE.md
+python3 eval/m8c2a/report.py              # R3SIM.md
+python3 eval/m8d/report.py                # EVAL8.md
+git diff --exit-code eval/                # each must equal the committed one
 ```
 
-The run folders' commands (`Test/eval_driver.py`, `Test/capped.sh`, and the executables in `lakefile.toml`)
-are on `main` too, but their inputs (`eval/specs_*.jsonl`, the corpus) are only on `m7-data`. Remove the
-worktree with `git worktree remove ../m7-data` when you are done.
+Remove a worktree with `git worktree remove ../m8-data` (or `../m7-data`) when you are done.
+
+**Do not run the milestone 8 reports on `main`.** With the data absent, `m8a`, `m8b` and `m8d`'s scripts stop
+with a Python error and write nothing, but `m8c1/report.py` and `m8c2a/report.py` exit 0 and overwrite
+`SCALE.md` and `R3SIM.md` with a stub that says "No data". If that happens, run `git checkout -- eval/`.
+
+The commands that made the data (`Test/eval_driver.py`, `Test/m8*_run.py`, `Test/m8*_full.sh`, and the
+executables in `lakefile.toml`) are on `main` too, but their inputs (the specs, the corpus, `inputs/`) are
+only on the tags.

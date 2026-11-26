@@ -49,6 +49,25 @@ register_option solve_by_sat.refinements : Bool := {
   descr := "solve_by_sat: the refinements of SPEC §6.10 and the ladder at-most-one encoding"
 }
 
+register_option solve_by_sat.nodeBounds : Bool := {
+  defValue := ({} : EncodeOptions).nodeBounds
+  descr := "solve_by_sat: refinement R1 (milestone 8), node–clause bounds from least depth and least \
+    proof size, with the early exit when no proof has at most N nodes; off if \
+    solve_by_sat.refinements is off"
+}
+
+register_option solve_by_sat.exclusivePairs : Bool := {
+  defValue := ({} : EncodeOptions).exclusivePairs
+  descr := "solve_by_sat: refinement R2 (milestone 8), no decomposition clauses between two objects \
+    at the same node that are never active together; off if solve_by_sat.refinements is off"
+}
+
+register_option solve_by_sat.checkBounds : Bool := {
+  defValue := false
+  descr := "solve_by_sat (testing only): check that every node of a decoded proof satisfies R1's \
+    node–clause bounds (M8_PLAN 3.4.5, the model check), whether or not R1 is on"
+}
+
 /-- Default node bound when `(nodes := N)` is omitted. -/
 def defaultNodes : Nat := 8
 
@@ -62,12 +81,31 @@ def solveCore (goal : Expr) (H : Array Name) (N : Nat) : MetaM Expr := do
     throwError "solve_by_sat: no proof with at most {N} nodes exists in the class"
   let opts ← getOptions
   let base : EncodeOptions := { staticTyping := solve_by_sat.staticTyping.get opts,
-                                typingClause := solve_by_sat.typingClause.get opts }
+                                typingClause := solve_by_sat.typingClause.get opts,
+                                nodeBounds := solve_by_sat.nodeBounds.get opts,
+                                exclusivePairs := solve_by_sat.exclusivePairs.get opts }
   let E := encode C.forest N (if solve_by_sat.refinements.get opts then base else base.allOff)
+  -- R1's early exit: no proof has at most N nodes, so nothing was encoded or solved
+  if E.info.earlyExit then
+    if solve_by_sat.verbose.get opts then
+      logInfo m!"solve_by_sat: early exit (node bounds): {match E.info.rootSize with
+        | some k => s!"every proof has at least {k} nodes, more than N = {N}"
+        | none => "no proof tree exists at any N"}"
+    throwError "solve_by_sat: no proof with at most {N} nodes exists in the class"
   match ← runSolver E.cnf with
   | .unsat => throwError "solve_by_sat: no proof with at most {N} nodes exists in the class"
   | .sat model =>
     let t ← decode C E model
+    -- the model check of R1 (testing only): the pairs used satisfy the bounds
+    if solve_by_sat.checkBounds.get opts then
+      let B := NodeBounds.compute C.forest
+      match readSkeleton C.forest E.vars model with
+      | .error e => throwError "solve_by_sat: internal: {e}"
+      | .ok sk =>
+        for n in sk do
+          unless B.gpLive N n.node n.goal && B.clLive N n.node n.clause do
+            throwError "solve_by_sat: internal: node {n.node} of the decoded proof (goal position \
+              {n.goal}, clause {n.clause}) violates the node bounds (M8_PLAN 3.4)"
     if solve_by_sat.verbose.get (← getOptions) then
       if let .ok sk := readSkeleton C.forest E.vars model then
         logInfo m!"solve_by_sat: N = {N}, {E.cnf.nVars} variables, {E.cnf.clauses.size} clauses; \

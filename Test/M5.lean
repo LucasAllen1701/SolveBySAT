@@ -254,5 +254,28 @@ def main (args : List String) : IO UInt32 := do
   let m ← diffRun seeds { base with dataFilter := false } (stopAtFirst := true) (workers := workers)
   let first := m.mismatches.toList.take 3 |>.map fun (s, N, r, x) => s!"seed {s} N {N} (ref {r}, sat {x})"
   t ← t.check (!m.mismatches.isEmpty) s!"mutation 'static filter of 6.9 off': mismatches found, e.g. {first}"
+  -- milestone 8 (M8_PLAN 3.4.5, 3.5): the mutation checks of R1 and R2 on the data differential,
+  -- in the default configuration only
+  if cfg == "all" then
+    let r1 : EncodeOptions := { base with nodeBounds := true }
+    let mt ← diffRun seeds { r1 with boundsTight := true } (workers := workers)
+    let failing := d.minSizes.filter fun (s, n) => mt.mismatches.any fun (s', n', r, x) => s' == s && n' == n && r && !x
+    t ← t.check (failing.size == d.minSizes.size && !d.minSizes.isEmpty)
+      s!"mutation 'R1 size bound tightened by one' (data): {failing.size} of {d.minSizes.size} forests with a proof have none at their minimal N ({mt.mismatches.size} mismatches in all)"
+    let ms ← diffRun seeds { r1 with boundsScope := false } (workers := workers)
+    let mut smaller := 0
+    let mut larger := 0
+    for s in [0:seeds] do
+      let P := dataProblemOf s
+      for N in [1:6] do
+        let a := (encode P N { r1 with countOnly := true }).cnf.numClauses
+        let b := (encode P N { r1 with countOnly := true, boundsScope := false }).cnf.numClauses
+        if b < a then smaller := smaller + 1
+        if b > a then larger := larger + 1
+    t ← t.check (ms.mismatches.isEmpty && smaller == 0)
+      s!"mutation 'R1 without e(c)' (data): {ms.mismatches.size} mismatches in {ms.total} comparisons; CNFs smaller than with e(c): {smaller}, larger: {larger}"
+    let m2 ← diffRun seeds { base with exclusivePairs := true, exclusiveMutant := true } (stopAtFirst := true) (workers := workers)
+    let first := m2.mismatches.toList.take 3 |>.map fun (s, N, r, x) => s!"seed {s} N {N} (ref {r}, sat {x})"
+    t ← t.check (!m2.mismatches.isEmpty) s!"mutation 'R2 on a goal object and a head object at one node' (data): mismatches found, e.g. {first}"
   IO.println s!"M5: {t.pass} passed, {t.fail} failed"
   return if t.fail == 0 then 0 else 1

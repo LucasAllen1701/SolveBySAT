@@ -4,3 +4,5 @@ crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw.Const.toArray_eq_toArray_m
 crash(shard, oom) on main:B/List.getElem_insertIdx_of_lt/6
 crash(shard, oom) on main:A/BitVec.getElem_rev
 shard 0: done; 20 results; 264 s
+sizes: 40 specs done
+=== pilot done 2026-11-26 20:36:58

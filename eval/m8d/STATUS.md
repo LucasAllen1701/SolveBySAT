@@ -1,10 +1,10 @@
 # eval/m8d: status
 
-Updated 2026-11-26 20:36:07. Phase: pilot.
+Updated 2026-11-26 20:36:59. Phase: pilot finished.
 
 - Goals done: 20 of 300
 - Stops: 0
-- Sizes done: 0
+- Sizes done: 40
 
 | group | done | proved | no proof ≤ N | memory crash | timeout | other |
 | --- | --- | --- | --- | --- | --- | --- |

@@ -246,15 +246,17 @@ def projection_section(n, sec, out):
 
 def decision_section(sec5, out):
     out += ["## The decision rule of 4.5", ""]
-    pts = sorted(k for k in sec5 if variant(k) == "rules" and "r3_on" in sec5[k])
+    # an early exit is one empty clause in both settings (no R3 record is written after it)
+    pts = sorted(k for k in sec5 if variant(k) == "rules" and ("r3_on" in sec5[k] or
+                                                                 sec5[k].get("r3_off", {}).get("early_exit")))
     a = sum(sec5[k]["r3_off"]["clauses"] for k in pts)
-    b = sum(sec5[k]["r3_on"]["clauses"] for k in pts)
+    b = sum(sec5[k].get("r3_on", sec5[k]["r3_off"])["clauses"] for k in pts)
     if not a:
         out += ["No data.", ""]
         return
     r = b / a
-    out += [f"With the rules at N = 5, over the {len(pts)} points that finished both settings (early exits included, one "
-            f"clause each): R1 and R2 {a:,} clauses, R1, R2 and R3 projected {b:,}. Ratio {r:.4f} "
+    out += [f"With the rules at N = 5, over the {len(pts)} points that finished both settings (early exits included: one "
+            f"clause in both): R1 and R2 {a:,} clauses, R1, R2 and R3 projected {b:,}. Ratio {r:.4f} "
             f"({a / b:.3f} times smaller). The rule's threshold is {THRESHOLD} (1.25 times smaller): the ratio is "
             f"{'at most' if r <= THRESHOLD else 'above'} {THRESHOLD}.", ""]
 

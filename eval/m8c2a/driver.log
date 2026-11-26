@@ -20,3 +20,5 @@ sim N=5: 340 of 20, 74 s
 sim N=5: 360 of 20, 32 s
 sim N=5: 380 of 20, 45 s
 sim N=5: 400 of 20, 37 s
+=== sim N=5 done 2026-11-26 11:26:21
+sim N=10: 20 of 20, 657 s

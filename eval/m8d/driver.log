@@ -68,3 +68,32 @@ crash(shard, oom) on main:B/Std.DTreeMap.Internal.Const.toList_roo/3
 crash(shard, oom) on main:B/List.prefix_concat_iff/13
 crash(shard, oom) on main:A/BitVec.DivModState.lawful_init
 shard 1: done; 120 results; 2614 s
+crash(shard, oom) on main:A/List.splitOnP_cons_eq_ite_splitOnPPrepend
+crash(shard, oom) on main:A/List.findIdx?_flatten
+crash(shard, oom) on main:A/Array.getElem?_extract
+crash(shard, oom) on main:A/Nat.add_eq_one_iff
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKey?_diff_of_mem_right
+crash(shard, oom) on main:A/Std.Do.Spec.forIn'_cnfClause
+crash(shard, oom) on main:A/Lean.Grind.Linarith.Poly.denote_mul
+crash(shard, oom) on main:A/Std.TreeSet.Equiv.eraseMany_list
+crash(shard, oom) on main:A/Fin.one_mul
+crash(shard, oom) on main:A/Std.Rco.toArray_eq_ite_rco
+crash(shard, oom) on main:A/String.eq_singleton_append
+crash(shard, oom) on main:A/Std.Internal.ForIn.toList_rcc
+crash(shard, oom) on main:A/List.mergeSort_pair
+crash(shard, oom) on main:A/BitVec.neg_mul_neg
+crash(shard, oom) on main:A/List.prefix_cons_iff
+crash(shard, oom) on main:A/List.findSomeRev?_eq_findSomeRev?TR
+crash(shard, oom) on main:A/List.set_getElem_succ_eraseIdx_succ
+crash(shard, oom) on main:A/_private.Init.Data.Array.Lemmas.0.Array.getElem_shrink_loop
+crash(shard, oom) on main:A/Array.attach_eq_empty_iff
+crash(shard, oom) on main:A/Std.ExtDHashMap.Const.get?_insertIfNew
+crash(shard, oom) on main:A/Array.eraseP_filter
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get!_emptyWithCapacity
+crash(shard, oom) on main:A/Std.Internal.List.minEntry?_eq_some_iff
+crash(shard, oom) on main:A/Std.Tactic.BVDecide.BVExpr.bitblast.blastUmod.denote_go
+crash(shard, oom) on main:A/Rat.le_iff_sub_nonneg
+crash(shard, oom) on main:A/Array.le_snd_of_mem_zipIdx
+crash(shard, oom) on main:A/Int32.shiftRight_xor
+crash(shard, oom) on main:A/BitVec.srem_zero
+shard 2: done; 170 results; 3913 s

@@ -2,7 +2,7 @@
 
 Lucas Allen · 24 November 2026
 
-**Status: 8a, 8b and 8c-1 are complete (sections 2 and 3, amendments 4.1 to 4.5), and R1 and R2 are on by default. 8c-2a has started: Claude Code simulates R3 with shared residual objects, without changing the tactic (4.5). R4 is set aside and R5 is dropped. The encoding stays one-shot (4.2), and only exact reductions are accepted (4.4).** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
+**Status: 8a to 8c-2a are complete (sections 2 and 3, amendments 4.1 to 4.6). The scale work ends with R1 and R2, which are on by default; R3 is not built, R4 is set aside and R5 is dropped. 8d, the evaluation, has started (4.6). The encoding stays one-shot (4.2), and only exact reductions are accepted (4.4).** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
 
 ## 1. Aims
 
@@ -527,3 +527,57 @@ R1 and R2 are accepted and on by default.
 - **Model check, a stop rule.** In the 90 models of 8c-1 (`eval/m8c1/models/`), every triangular binding of every chosen candidate with a typing clause must hold under the decoded substitution. A failure means the simulation's solved form is wrong, and it stops the work.
 - **Decision rule.** R3 is recommended for building if its projected pooled clause count with the rules at N = 5 is at most 0.8 of the R1-and-R2 count (1.25 times smaller or better). Otherwise R3 is not built, and milestone 8 goes to 8d. The owner decides on the report.
 - **Rules.** `SolveBySat/` does not change. The 54 encodings of `eval/m8b/dimacs_md5.txt` stay byte-identical with the flags off. `eval/m8c2a/report.py` writes `eval/m8c2a/R3SIM.md` from the data files alone, and it must regenerate byte-identically. It states facts.
+
+### 4.6 After 8c-2a: R3 is not built, and 8d is pre-registered (26 November 2026)
+
+**8c-2a record.** NOTES.md ("8c-2a: R3 simulation") and `eval/m8c2a/R3SIM.md` have the details. The stage was checked independently: `SolveBySat/` is unchanged, the decision ratios recompute from the data, and R3SIM.md regenerates byte-identically.
+
+- **The model check passed:** 399 bindings in 90 models, with 0 failures.
+- **Consistency:** with R3 off, the replay equals 8c-1's counts at all 400 points, and the typing clauses equal M6's.
+- **The decision rule.** With the rules at N = 5, R3 projects 0.9925 of R1 and R2's clauses, against the threshold of 0.8. At N = 10 it is 0.982, and without rules 0.888 (N = 5) and 0.867 (N = 10).
+- **Why R3 saves so little.** 94.0% of type-template objects are retained with the rules, because polymorphic rules bind bare type variables to whole templates. Decomposition falls 3.3%, and groundness grows 2.9%, because there are more bindings than typing clauses.
+
+**Decisions.**
+
+1. **R3 is not built**, by the rule of 4.5. With R4 set aside and R5 dropped (4.5), the scale work of milestone 8 ends with R1 and R2, which are on by default.
+2. **8d evaluates the tactic as users will run it:** R1 and R2 on, milestone 7's H, and no rewriting rules. The 8c-1 rerun (4.4) has already measured R1 and R2 on 8a's rewriting goals, so 8d does not repeat it. This replaces the 8d row of 3.11.
+3. **Then milestone 8 ends.** The SPEC is revised in the claude.ai project, and the code and reports go to `main` (2.8). Milestone 9 follows, with far fewer generated rules as its main lever (3.10).
+
+**8d, pre-registered.**
+
+- **Inputs.** Extract these from tag `m7-data` into `eval/m8d/inputs/` before any run:
+  - `eval/final/results.jsonl` (md5 `944cc58e53ee2b4ce17ee1e83d29bab1`);
+  - `eval/specs_full.jsonl` (md5 `f165d8289db71aa9231b2c9e9f9b4949`).
+- **Groups.** The population is the main-run goals (the key starts with `main:`; R1b is excluded), by their milestone 7 outcome:
+
+  | group | population | sample |
+  | --- | --- | --- |
+  | `crash_B`: Tier B, outcome `crash` | 490 | 100 |
+  | `crash_A`: Tier A, outcome `crash` | 807 | 100 |
+  | `control_proved`: outcome `proved`, tiers pooled | 976 | 50 |
+  | `control_no_proof`: outcome `no_proof_le_Nmax`, tiers pooled | 3,083 | 50 |
+
+  Every milestone 7 crash was a memory crash (`cause` `oom`).
+- **Ranking.** Rank each group's keys by the hash rule of 8a (the SHA-256 hex digest of `"80401:<key>"`, ascending, ties broken by the key), and take the first ones.
+- **The sample file.** `eval/m8d/sample.tsv` has one line per run, `<group>\t<key>`, in the group order of the table and in rank order within each group. It ends with a newline. Its md5 must be `1f097a46210bd923e98ed24d9d15b7c2`. The first keys are `main:B/Std.Rii.forIn'_eq_forIn'_toList/0` (`crash_B`) and `main:A/Std.DTreeMap.get_insertMany_list_of_mem` (`crash_A`).
+- **Runs.**
+  - **Specs.** Each run uses its milestone 7 spec (H, tier), with the baselines off.
+  - **Settings.** One run per goal: the N loop from 1 to 10, with milestone 7's limits (2.4). R1 and R2 are on (the defaults), and every other option is at its default.
+  - **Records.** Record the outcome, the N found, the per-N record, the time, and any early exit. As in 2.4, record the `countOnly` counts per family at N = 5 and at the run's last N, each in its own capped process.
+- **Stop rules: the exactness checks of 4.4**, against milestone 7's per-N records. For a crashed or timed-out milestone 7 run without per-N records, every N below its `last_N` counts as UNSAT. A run stops if it:
+  - reports a proof at an N where milestone 7's answer was UNSAT;
+  - reports UNSAT, or the early exit, at an N where milestone 7 found a proof;
+  - finds a proof at an N other than milestone 7's, for a goal that both runs prove.
+
+  Milestone 7's results come from four code versions, so a disagreement may be a milestone 7 fix rather than a new bug. Either way it stops the run until it is explained.
+
+  A control ending at a resource limit is not a stop. It is recorded and explained.
+- **Pilot and projection.** Run the 5 highest-ranked goals of each group first, then project the time of the 300 runs. If the projection exceeds about 24 hours, propose smaller groups and wait. Otherwise continue without waiting.
+- **Report.** `eval/m8d/report.py` writes `eval/m8d/EVAL8.md` from the data files alone, and it must regenerate byte-identically. It covers:
+  - outcomes per group, and the transitions from milestone 7's outcomes;
+  - for each crash group, the shares proved, certified "no proof ≤ 10", timed out and still crashed, with Wilson 95% intervals, and those shares applied to the group's population;
+  - proved at N, and the early exits;
+  - for the controls, agreement with milestone 7, and solving and encoding times against milestone 7's where both answered the same N;
+  - the sizes at N = 5 and the last N, per family.
+
+  It states facts. Reading them is for the claude.ai project.

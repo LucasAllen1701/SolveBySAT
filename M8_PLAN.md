@@ -2,7 +2,7 @@
 
 Lucas Allen · 24 November 2026
 
-**Status: 8a to 8c-2a are complete (sections 2 and 3, amendments 4.1 to 4.6). The scale work ends with R1 and R2, which are on by default; R3 is not built, R4 is set aside and R5 is dropped. 8d, the evaluation, has started (4.6). The encoding stays one-shot (4.2), and only exact reductions are accepted (4.4).** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
+**Status: milestone 8 is complete (sections 2 and 3, amendments 4.1 to 4.7). The scale work ended with R1 and R2, which are exact and on by default; R3 is not built, R4 is set aside and R5 is dropped. The data is archived on tag `m8-data`, and the code and reports are merged into `main` (4.7). The encoding stays one-shot (4.2).** EVAL_PLAN section 10.11 records why milestone 8 is scale and why the probe comes first.
 
 ## 1. Aims
 
@@ -581,3 +581,40 @@ R1 and R2 are accepted and on by default.
   - the sizes at N = 5 and the last N, per family.
 
   It states facts. Reading them is for the claude.ai project.
+
+### 4.7 After 8d: milestone 8 ends (27 November 2026)
+
+**8d record.** NOTES.md ("8d: evaluation") and `eval/m8d/EVAL8.md` have the details. The stage was checked independently:
+
+- the sample file's md5 is as pre-registered;
+- `SolveBySat/` is unchanged;
+- the exactness comparison recomputes from the per-N records, with no disagreement at any of the 1,737 N that both milestone 7 and 8d answered;
+- EVAL8.md regenerates byte-identically.
+
+| group (population) | runs | proved | certified "no proof ≤ 10" | solver timeout | memory crash |
+| --- | --- | --- | --- | --- | --- |
+| Tier B memory crashes (490) | 100 | 4 | 34 | 4 | 58 |
+| Tier A memory crashes (807) | 100 | 0 | 36 | 5 | 59 |
+| proved controls (976) | 50 | 50 | | | |
+| no-proof controls (3,083) | 50 | | 49 | 1 | |
+
+- **For users, R1 and R2 mostly turn memory crashes into certified answers.** Scaled to the populations, that is about 20 more Tier B proofs (Wilson 95% interval: 8 to 48) and about 460 more certified answers. The memory crashes fall from 1,297 to about 760.
+- **Speed.** The controls' N loop takes 0.39 to 0.53 of milestone 7's time.
+- **Early exits.** 21 sampled goals get "no proof at any N" in under a second.
+- **The one control timeout** (`A/Bool.ite_eq_true_distrib`, at N = 10) was already close to the 20 s limit in milestone 7. It shows that solving time is not monotone in CNF size.
+
+**Milestone 8's result.**
+
+- **Built and on by default:** R1 and R2, both exact. They shrink the CNF 2.5 to 3.4 times at N = 5 and 1.7 to 2.1 times at N = 10.
+- **Measured and not built:** R3, R4 and R5 (4.5, 4.6).
+- **What remains.** Groundness and decomposition are still 97% of the CNF with rewriting rules, and no rewriting goal beyond 8a's 21 became provable. More proofs need milestone 9's scope, with far fewer generated rules (3.10).
+
+**The end of milestone 8.**
+
+- **SPEC.md** takes in R1, R2, the early exit, the `idx` width note, the new options and tests, and summaries of the measurements and the evaluations (SPEC 6.10.1, 6.10.2, 7.5 and 9.6).
+- **Archive.** The head of `m8`, with this amendment and the revised SPEC, is tagged `m8-data`. `m8` is then kept as an archive and takes no more commits.
+- **Merge.** The code and the reports of `m8` are merged into `main` by a true merge, so every commit that NOTES.md and the reports cite stays reachable.
+  - The reports are M8_PLAN.md, NOTES.md, SPEC.md, CLAUDE.md, and in each of `eval/m8a/` to `eval/m8d/` the report and the `report.py` that writes it.
+  - The test fixtures that `Test/run_all.sh` reads are kept too.
+  - Every other file under `eval/m8a/` to `eval/m8d/` stays only on `m8-data`. Each report regenerates there, not on `main`.
+- **Milestone 9** starts from the updated `main`, after its design note is written and accepted in the claude.ai project.

@@ -37,3 +37,34 @@ crash(shard, oom) on main:B/String.Slice.sliceTo_sliceTo/104
 crash(shard, oom) on main:B/List.mergeSort_pair/30
 crash(shard, oom) on main:B/Int.Internal.Linear.cooper_dvd_left_split_dvd2/3
 shard 0: done; 70 results; 1130 s
+crash(shard, oom) on main:B/Array.mkSlice_rio_eq_mkSlice_rio_min/0
+crash(shard, oom) on main:B/List.getElem?_mapFinIdx/332
+crash(shard, oom) on main:B/Nat.toArray_roc_eq_singleton_iff/0
+crash(shard, oom) on main:B/Std.TreeMap.Raw.getD_filter'/26
+crash(shard, oom) on main:B/Array.eraseP_filter/5
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.aux_size_modify/25
+crash(shard, oom) on main:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/0
+crash(shard, oom) on main:B/Std.DHashMap.Raw.getKeyD_of_isEmpty/1
+crash(shard, oom) on main:B/Std.TreeMap.maxKeyD_eq_iff_getKey?_eq_self_and_forall/0
+crash(shard, oom) on main:B/Std.HashMap.mem_insert/0
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Const.toList_roo/44
+crash(shard, oom) on main:B/BitVec.neg_mul_neg/3
+crash(shard, oom) on main:B/ByteArray.extract_add_four/108
+crash(shard, oom) on main:B/String.skipSuffix?_bool_eq_some_iff/1169
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.size_toArray/0
+crash(shard, oom) on main:B/Std.Internal.List.mem_replaceEntry_of_true/11
+crash(shard, oom) on main:B/Std.Do.WP.pure/0
+crash(shard, oom) on main:B/Std.DHashMap.Raw.contains_inter/0
+crash(shard, oom) on main:B/BitVec.sshiftRight_add/8
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13
+crash(shard, oom) on main:B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/0
+crash(shard, oom) on main:B/ByteArray.extract_append_eq_left/3
+crash(shard, oom) on main:B/Vector.extract_push/124
+crash(shard, oom) on main:B/List.drop_eq_getElem?_toList_append/42
+crash(shard, oom) on main:B/BitVec.neg_mul_neg/2
+crash(shard, oom) on main:B/Nat.toList_roc_eq_append/0
+crash(shard, oom) on main:B/List.toList_mkSlice_rii/2
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Const.toList_roo/3
+crash(shard, oom) on main:B/List.prefix_concat_iff/13
+crash(shard, oom) on main:A/BitVec.DivModState.lawful_init
+shard 1: done; 120 results; 2614 s

@@ -93,6 +93,15 @@ def addClause (ls : Array BLit) : CnfM Unit := do
              counts := s.counts.insert s.fam (c + 1)
              famOrder := if c == 0 && !s.famOrder.contains s.fam then s.famOrder.push s.fam else s.famOrder }
 
+/-- The dead-literal mechanism of milestone 8 (M8_PLAN 3.3): `l` is false in every model of
+the CNF, so assert `¬l` as a unit clause and return the constant `false`. The caller uses the
+constant in place of `l` from then on, so every later clause folds it (a clause with `¬l` is
+dropped, `l` is removed from a disjunction), and allocation, candidate lists and the pair loop
+skip what only a `false` literal would use. Exact: if `F ⊨ ¬l` then `F ≡ F[l := false] ∧ ¬l`. -/
+def kill (l : BLit) : CnfM BLit := do
+  addClause #[l.neg]
+  return .const false
+
 /-- `cond ⇒ X = Y` bitwise (enc.py `eq`). Two clauses per pair of free bits, one per free
 bit against a constant; if two constant bits differ, the single clause `¬cond`. -/
 def eqUnder (cond : Array BLit) (X Y : Array BLit) : CnfM Unit := do

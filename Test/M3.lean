@@ -47,16 +47,55 @@ example (A : Prop) : (A → A) ∧ A := by
 
 /-- error: solve_by_sat: no proof with at most 2 nodes exists in the class -/
 #guard_msgs in
+set_option solve_by_sat.nodeBounds false in
+set_option solve_by_sat.exclusivePairs false in
+example (A B : Prop) (ha : A) (hb : B) : A ∧ B := by
+  solve_by_sat [] (nodes := 2)
+
+-- 8c-1: the same call with R1 on (M8_PLAN 3.4.3): the early exit, which says why with verbose
+/--
+info: solve_by_sat: early exit (node bounds): every proof has at least 3 nodes, more than N = 2
+---
+error: solve_by_sat: no proof with at most 2 nodes exists in the class
+-/
+#guard_msgs in
+set_option solve_by_sat.nodeBounds true in
 example (A B : Prop) (ha : A) (hb : B) : A ∧ B := by
   solve_by_sat [] (nodes := 2)
 
 /-- error: solve_by_sat: no proof with at most 1 nodes exists in the class -/
 #guard_msgs in
+set_option solve_by_sat.nodeBounds false in
+set_option solve_by_sat.exclusivePairs false in
+example (A B : Prop) (hb : B) : A ∨ B := by
+  solve_by_sat [] (nodes := 1)
+
+-- 8c-1: the same call with R1 on (M8_PLAN 3.4.3): the early exit, which says why with verbose
+/--
+info: solve_by_sat: early exit (node bounds): every proof has at least 2 nodes, more than N = 1
+---
+error: solve_by_sat: no proof with at most 1 nodes exists in the class
+-/
+#guard_msgs in
+set_option solve_by_sat.nodeBounds true in
 example (A B : Prop) (hb : B) : A ∨ B := by
   solve_by_sat [] (nodes := 1)
 
 /-- error: solve_by_sat: no proof with at most 1 nodes exists in the class -/
 #guard_msgs in
+set_option solve_by_sat.nodeBounds false in
+set_option solve_by_sat.exclusivePairs false in
+example (a b : Nat) (h : a ≤ b) : ∃ x, x ≤ b := by
+  solve_by_sat [] (nodes := 1)
+
+-- 8c-1: the same call with R1 on (M8_PLAN 3.4.3): the early exit, which says why with verbose
+/--
+info: solve_by_sat: early exit (node bounds): every proof has at least 2 nodes, more than N = 1
+---
+error: solve_by_sat: no proof with at most 1 nodes exists in the class
+-/
+#guard_msgs in
+set_option solve_by_sat.nodeBounds true in
 example (a b : Nat) (h : a ≤ b) : ∃ x, x ≤ b := by
   solve_by_sat [] (nodes := 1)
 
@@ -104,6 +143,19 @@ example (R : Nat → Nat → Prop) (r : ∀ n, R n n) : ∀ y, ∃ x, R x y := b
 
 /-- error: solve_by_sat: no proof with at most 1 nodes exists in the class -/
 #guard_msgs in
+set_option solve_by_sat.nodeBounds false in
+set_option solve_by_sat.exclusivePairs false in
+example (R : Nat → Nat → Prop) (r : ∀ n, R n n) : ∀ y, ∃ x, R x y := by
+  solve_by_sat [] (nodes := 1)
+
+-- 8c-1: the same call with R1 on (M8_PLAN 3.4.3): the early exit, which says why with verbose
+/--
+info: solve_by_sat: early exit (node bounds): every proof has at least 2 nodes, more than N = 1
+---
+error: solve_by_sat: no proof with at most 1 nodes exists in the class
+-/
+#guard_msgs in
+set_option solve_by_sat.nodeBounds true in
 example (R : Nat → Nat → Prop) (r : ∀ n, R n n) : ∀ y, ∃ x, R x y := by
   solve_by_sat [] (nodes := 1)
 
@@ -120,6 +172,20 @@ theorem A4a (g : Nat → Int) (k : Nat) (Q R : Int → Prop) (P0 : Prop)
 
 /-- error: solve_by_sat: no proof with at most 2 nodes exists in the class -/
 #guard_msgs in
+set_option solve_by_sat.nodeBounds false in
+set_option solve_by_sat.exclusivePairs false in
+example (g : Nat → Int) (k : Nat) (Q R : Int → Prop) (P0 : Prop)
+    (h : ∀ (y : Int) (u : Nat), Q y → R (g u) → P0) (q : ∀ y', Q y') (r : ∀ t, R t) : P0 := by
+  solve_by_sat [] (nodes := 2)
+
+-- 8c-1: the same call with R1 on (M8_PLAN 3.4.3): the early exit, which says why with verbose
+/--
+info: solve_by_sat: early exit (node bounds): every proof has at least 3 nodes, more than N = 2
+---
+error: solve_by_sat: no proof with at most 2 nodes exists in the class
+-/
+#guard_msgs in
+set_option solve_by_sat.nodeBounds true in
 example (g : Nat → Int) (k : Nat) (Q R : Int → Prop) (P0 : Prop)
     (h : ∀ (y : Int) (u : Nat), Q y → R (g u) → P0) (q : ∀ y', Q y') (r : ∀ t, R t) : P0 := by
   solve_by_sat [] (nodes := 2)
@@ -134,6 +200,20 @@ theorem A4b (R0 : Prop) (Q T : {x : Nat // x = 3} → Prop) (hp : 3 = 3)
 
 /-- error: solve_by_sat: no proof with at most 3 nodes exists in the class -/
 #guard_msgs in
+set_option solve_by_sat.nodeBounds false in
+set_option solve_by_sat.exclusivePairs false in
+example (R0 : Prop) (Q T : {x : Nat // x = 3} → Prop) (hp : 3 = 3)
+    (h : ∀ s, Q s → R0) (q : ∀ s, Q s) (t : ∀ s, T s) : R0 ∧ T ⟨3, hp⟩ := by
+  solve_by_sat [] (nodes := 3)
+
+-- 8c-1: the same call with R1 on (M8_PLAN 3.4.3): the early exit, which says why with verbose
+/--
+info: solve_by_sat: early exit (node bounds): every proof has at least 4 nodes, more than N = 3
+---
+error: solve_by_sat: no proof with at most 3 nodes exists in the class
+-/
+#guard_msgs in
+set_option solve_by_sat.nodeBounds true in
 example (R0 : Prop) (Q T : {x : Nat // x = 3} → Prop) (hp : 3 = 3)
     (h : ∀ s, Q s → R0) (q : ∀ s, Q s) (t : ∀ s, T s) : R0 ∧ T ⟨3, hp⟩ := by
   solve_by_sat [] (nodes := 3)

@@ -22,15 +22,16 @@ unsafe def importEnv (mods : Array Name) : IO Environment := do
   importModules (mods.map fun m => { module := m }) {} (loadExts := true)
 
 /-- The five configurations of EVAL_PLAN §4.1, and E6's `no_typing` (§10.10 decision 7). -/
+-- Milestone 7's encodings: the milestone 8 flags (on by default since 8c-1) pinned off.
 def configOf : String → Option EncodeOptions
-  | "all" => some {}
+  | "all" => some { nodeBounds := false, exclusivePairs := false }
   | "none" => some EncodeOptions.allOff
-  | "no_candidate" => some { candidatePruning := false }
-  | "no_pair" => some { pairPruning := false }
-  | "no_static" => some { staticTyping := false }
+  | "no_candidate" => some { candidatePruning := false, nodeBounds := false, exclusivePairs := false }
+  | "no_pair" => some { pairPruning := false, nodeBounds := false, exclusivePairs := false }
+  | "no_static" => some { staticTyping := false, nodeBounds := false, exclusivePairs := false }
   -- E6 (EVAL_PLAN §10.10 decision 7, exploratory, not part of the pre-registered grid):
   -- both typing filters off, every other refinement on
-  | "no_typing" => some { staticTyping := false, candidatePruning := false }
+  | "no_typing" => some { staticTyping := false, candidatePruning := false, nodeBounds := false, exclusivePairs := false }
   | _ => none
 
 def distractors (fam : String) (k : Nat) : Array Name :=

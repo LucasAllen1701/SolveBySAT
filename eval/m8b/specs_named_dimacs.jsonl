@@ -1,0 +1,36 @@
+{"H": ["Nat.le_trans"], "baselines": false, "expect": "min 5", "id": "L1", "key": "named:L1", "nmax": 5, "opts": [], "run": "named", "thm": "EvalNamed.L1", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 3", "id": "L2", "key": "named:L2", "nmax": 3, "opts": [], "run": "named", "thm": "EvalNamed.L2", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 2", "id": "L3", "key": "named:L3", "nmax": 2, "opts": [], "run": "named", "thm": "EvalNamed.L3", "tier": "named"}
+{"H": ["Nat.le_refl"], "baselines": false, "expect": "min 1", "id": "L4", "key": "named:L4", "nmax": 1, "opts": [], "run": "named", "thm": "EvalNamed.L4", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 3", "id": "L5", "key": "named:L5", "nmax": 3, "opts": [], "run": "named", "thm": "EvalNamed.L5", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 2", "id": "L6", "key": "named:L6", "nmax": 2, "opts": [], "run": "named", "thm": "EvalNamed.L6", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 2", "id": "L7", "key": "named:L7", "nmax": 2, "opts": [], "run": "named", "thm": "EvalNamed.L7", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 1", "id": "L8", "key": "named:L8", "nmax": 1, "opts": [], "run": "named", "thm": "EvalNamed.L8", "tier": "named"}
+{"H": [], "baselines": false, "expect": "none 6", "id": "F1", "key": "named:F1", "nmax": 10, "opts": [], "run": "named", "thm": "EvalNamed.F1", "tier": "named"}
+{"H": ["Eq.refl"], "baselines": false, "expect": "none 6", "id": "F2", "key": "named:F2", "nmax": 10, "opts": [], "run": "named", "thm": "EvalNamed.F2", "tier": "named"}
+{"H": ["Eq.refl"], "baselines": false, "expect": "none 6", "id": "F3", "key": "named:F3", "nmax": 10, "opts": [], "run": "named", "thm": "EvalNamed.F3", "tier": "named"}
+{"H": ["Nat.le_trans"], "baselines": false, "expect": "above 4", "id": "F4", "key": "named:F4", "nmax": 5, "opts": [], "run": "named", "thm": "EvalNamed.L1", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 2", "id": "G1", "key": "named:G1", "nmax": 2, "opts": [], "run": "named", "thm": "EvalNamed.G1", "tier": "named"}
+{"H": [], "baselines": false, "expect": "none 2", "id": "G2", "key": "named:G2", "nmax": 10, "opts": [], "run": "named", "thm": "EvalNamed.G2", "tier": "named"}
+{"H": [], "baselines": false, "expect": "none 2", "id": "G2-nostatic", "key": "named:G2-nostatic", "nmax": 10, "opts": ["nostatic"], "run": "named", "thm": "EvalNamed.G2", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 1", "id": "A1a", "key": "named:A1a", "nmax": 1, "opts": [], "run": "named", "thm": "EvalNamed.A1a", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 1", "id": "A1b", "key": "named:A1b", "nmax": 1, "opts": [], "run": "named", "thm": "EvalNamed.A1b", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 1", "id": "A1c", "key": "named:A1c", "nmax": 1, "opts": [], "run": "named", "thm": "EvalNamed.A1c", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 2", "id": "A1d", "key": "named:A1d", "nmax": 2, "opts": [], "run": "named", "thm": "EvalNamed.A1d", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 1", "id": "A2", "key": "named:A2", "nmax": 1, "opts": [], "run": "named", "thm": "EvalNamed.A2", "tier": "named"}
+{"H": [], "baselines": false, "expect": "none 6", "id": "A3a", "key": "named:A3a", "nmax": 10, "opts": [], "run": "named", "thm": "EvalNamed.A3a", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 2", "id": "A3b", "key": "named:A3b", "nmax": 2, "opts": [], "run": "named", "thm": "EvalNamed.A3b", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 3", "id": "A4a", "key": "named:A4a", "nmax": 3, "opts": [], "run": "named", "thm": "EvalNamed.A4a", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 4", "id": "A4b", "key": "named:A4b", "nmax": 4, "opts": [], "run": "named", "thm": "EvalNamed.A4b", "tier": "named"}
+{"H": ["Eq.refl"], "baselines": false, "expect": "min 1", "id": "E1", "key": "named:E1", "nmax": 1, "opts": [], "run": "named", "thm": "EvalNamed.E1", "tier": "named"}
+{"H": [], "baselines": false, "expect": "min 1", "id": "E3", "key": "named:E3", "nmax": 1, "opts": [], "run": "named", "thm": "EvalNamed.E3", "tier": "named"}
+{"H": [], "baselines": false, "expect": "limitation", "id": "U1", "key": "named:U1", "nmax": 2, "opts": ["forgettypes"], "run": "named", "thm": "EvalNamed.G2", "tier": "named"}
+{"H": ["EvalNamed.maxL"], "baselines": false, "expect": "min 1", "id": "N1", "key": "named:N1", "nmax": 1, "opts": [], "run": "named", "thm": "EvalNamed.N1", "tier": "named"}
+{"H": ["Nat.le_refl", "Nat.zero"], "baselines": false, "expect": "min 3", "id": "D1", "key": "named:D1", "nmax": 3, "opts": [], "run": "named", "thm": "EvalNamed.D1", "tier": "named"}
+{"H": ["Nat.zero"], "baselines": false, "expect": "min 3", "id": "D2a", "key": "named:D2a", "nmax": 3, "opts": [], "run": "named", "thm": "EvalNamed.D2", "tier": "named"}
+{"H": [], "baselines": false, "expect": "none 6", "id": "D2b", "key": "named:D2b", "nmax": 10, "opts": [], "run": "named", "thm": "EvalNamed.D2", "tier": "named"}
+{"H": ["Nat.zero"], "baselines": false, "expect": "min 3", "id": "D3", "key": "named:D3", "nmax": 3, "opts": [], "run": "named", "thm": "EvalNamed.D3", "tier": "named"}
+{"H": ["Int.ofNat", "Nat.zero"], "baselines": false, "expect": "min 4", "id": "D4", "key": "named:D4", "nmax": 4, "opts": [], "run": "named", "thm": "EvalNamed.D4", "tier": "named"}
+{"H": ["Nat.zero", "Nat.succ"], "baselines": false, "expect": "none 6", "id": "D5", "key": "named:D5", "nmax": 10, "opts": [], "run": "named", "thm": "EvalNamed.A3a", "tier": "named"}
+{"H": ["Nat.succ", "Nat.zero", "Eq.refl"], "baselines": false, "expect": "none 6", "id": "D6", "key": "named:D6", "nmax": 10, "opts": [], "run": "named", "thm": "EvalNamed.D6", "tier": "named"}
+{"H": ["Eq.refl"], "baselines": false, "expect": "min 2", "id": "D7", "key": "named:D7", "nmax": 2, "opts": [], "run": "named", "thm": "EvalNamed.D7", "tier": "named"}

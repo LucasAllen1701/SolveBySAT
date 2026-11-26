@@ -4,7 +4,8 @@ A Lean 4 tactic, `solve_by_sat`, that searches for small backward-chaining proof
 reduction to SAT. The spec is `SPEC.md`; the Python prototype in `reference/` is the
 authority for SPEC §5 and §6.1–6.8 where they disagree. `NOTES.md` records every
 deviation from the spec and every decision, milestone by milestone. Read its Milestone 7
-section before touching the evaluation, and `M8_PLAN.md` for milestone 8.
+and Milestone 8 sections before touching the evaluation; `EVAL_PLAN.md` and `M8_PLAN.md` are
+those milestones' plans (both closed).
 
 ## Standing rules (from the project owner)
 
@@ -38,26 +39,40 @@ section before touching the evaluation, and `M8_PLAN.md` for milestone 8.
 
 ```sh
 lake build                         # library
-Test/run_all.sh                    # milestones 0-6 acceptance (several minutes)
+Test/run_all.sh                    # milestones 0-8 acceptance (about 80 minutes)
 Test/refinements.sh                # each SPEC 6.10 refinement alone (long)
 lake build eval_corpus eval_run    # milestone 7 executables
 lake build Test.EvalNamed          # loaded at run time by the named harness
 lake build eval_numerals           # 7d-1 annotations, forest dumps, invariant check
 lake build eval_scaling eval_pool test_countonly SynthLib   # 7c
+lake build eval_run Test.M8Probe     # 8a: probe harness and hand examples
+lake build test_m8diag m8b_dimacs73  # 8b: diagnostics test and SPEC 7.3 DIMACS writer
+Test/m8c1_offswitch.sh              # 8c-1: flags off give 8b's DIMACS (in run_all.sh)
+Test/m8c1_lean.sh                   # 8c-1: the Lean suite with the flags off, R1, R1 and R2 (in run_all.sh)
+python3 Test/m8d_run.py status eval/m8d/runs full   # 8d: eval/m8d/STATUS.md (needs m8-data's data)
 ```
 
 ## Layout and where the data lives
 
-- `SolveBySat/` the tactic (SPEC §3). `Test/` the acceptance tests (M0–M7), the milestone 7 harness
-  (`EvalCorpus`, `EvalRun`, `EvalNumerals`, `EvalPool`, `EvalScaling`, `M8Facts`, the Python drivers) and
-  `Test/capped.sh`. `reference/` the Python prototype.
-- `SPEC.md` (milestone 7 folded in), `NOTES.md`, `EVAL_PLAN.md` (milestone 7, closed by §10.11),
-  `EVAL.md` (milestone 7's report).
-- `eval/` on `main` holds only `report.py`, `merge.py`, `reviews/` and `README.md`. **All milestone 7 data
-  (run folders, corpus, annotations, specs, scaling data, forest dumps) is on the annotated tag `m7-data`**
-  (the head of branch `eval-m7`, an archive: never commit to it). NOTES.md, "End of milestone 7", lists the
-  removed paths. EVAL.md regenerates on `m7-data` only:
-  `git worktree add ../m7-data m7-data && cd ../m7-data && python3 eval/report.py`.
+- `SolveBySat/` the tactic (SPEC §3). `Test/` the acceptance tests (M0–M8), the evaluation harness
+  (`EvalCorpus`, `EvalRun`, `EvalNumerals`, `EvalPool`, `EvalScaling`, `M8Facts`, `M8Rules`, `M8Diag`, the
+  Python drivers and the `m8*_run.py` / `m8*_full.sh` scripts) and `Test/capped.sh`. `reference/` the Python
+  prototype.
+- `SPEC.md` (milestones 7 and 8 folded in), `NOTES.md`, `EVAL_PLAN.md` (milestone 7, closed by §10.11),
+  `M8_PLAN.md` (milestone 8, closed by 4.7), `EVAL.md` (milestone 7's report).
+- `eval/` on `main` holds only (`eval/README.md` has the list and why):
+  - milestone 7's `report.py`, `merge.py`, `reviews/` and `README.md`;
+  - in each of `eval/m8a/`, `m8b/`, `m8c1/`, `m8c2a/`, `m8d/`, its report (`PROBE.md`, `DIAG.md`, `SCALE.md`,
+    `R3SIM.md`, `EVAL8.md`) and the `report.py` that writes it;
+  - the test fixtures `eval/m8b/specs_named_dimacs.jsonl` and `eval/m8b/dimacs_md5.txt`, read by
+    `Test/m8c1_offswitch.sh` (in `run_all.sh`);
+  - `run_all_m8_merge.log`, the regression log of the milestone 8 merge.
+- **All milestone 7 data is on the annotated tag `m7-data`** (the head of branch `eval-m7`) and **all
+  milestone 8 data on `m8-data`** (the head of branch `m8`). Both branches are archives: never commit to them.
+  NOTES.md, "End of milestone 7" and "End of milestone 8", list the removed paths. The reports regenerate
+  on their tag only, e.g. `git worktree add ../m8-data m8-data && cd ../m8-data && python3 eval/m8d/report.py`.
+  Do not run the milestone 8 `report.py` scripts on `main`: `m8c1`'s and `m8c2a`'s overwrite their report
+  with a "No data" stub.
 
 ## Setting up a test machine for a capped evaluation run
 
@@ -78,20 +93,52 @@ Requirements:
 Machine differences (CPU speed, RAM) change times and possibly which goals hit the cap. Record the
 machine's specs in NOTES.md before a full run.
 
-## Status (24 November 2026)
+## Status (27 November 2026)
 
 - **Milestone 7 (evaluation) is done** and merged into `main` (NOTES.md, "Milestone 7: summary" and "End
-  of milestone 7: spec, archive tag and merge"; EVAL_PLAN §10.11). The owner decided: scale first, with a
-  cheap rewriting probe first.
-- Bugs found by milestone 7 and fixed: two decoder bugs (R1, R2 in `Test/M7Lean.lean`) and the
-  type-template fix (EVAL_PLAN §10.7). `countOnly` (`EncodeOptions.countOnly`, tested by `test_countonly`)
-  is the only encoder addition of milestone 7.
-- **Next: milestone 8 (`M8_PLAN.md`), on branch `m8`.** 8a is the rewriting probe; 8b the scale design.
+  of milestone 7: spec, archive tag and merge"; EVAL_PLAN §10.11). Bugs it found and fixed: two decoder bugs
+  (R1, R2 in `Test/M7Lean.lean`) and the type-template fix (EVAL_PLAN §10.7). `countOnly`
+  (`EncodeOptions.countOnly`, tested by `test_countonly`) was its only encoder addition.
+- **Milestone 8 (scale, `M8_PLAN.md`) is done** and merged into `main` (NOTES.md, "Milestone 8" and "End of
+  milestone 8: spec, archive tag and merge"; M8_PLAN 4.7). Stages: 8a the rewriting probe (`PROBE.md`), 8b the
+  measurements (`DIAG.md`), 8c-1 R1 and R2 (`SCALE.md`), 8c-2a the R3 simulation (`R3SIM.md`), 8d the evaluation
+  (`EVAL8.md`). The encoding stays one-shot (4.2); only exact reductions were accepted (4.4).
+  - **R1 and R2 are on by default** in the tactic: R1 node bounds (`EncodeOptions.nodeBounds`, option
+    `solve_by_sat.nodeBounds`: node–clause bounds with the scope term e(c), and the early exit when s(root) > N),
+    R2 exclusive pairs (`exclusivePairs`, `solve_by_sat.exclusivePairs`). `solve_by_sat.refinements := false`
+    switches them off too. Dead `cl`/`gp` literals become constant false through `CNF.kill` (unit clause in family
+    "11 node bounds"). Mutation-only options `boundsScope`, `boundsTight`, `exclusiveMutant`; testing-only tactic
+    option `solve_by_sat.checkBounds` (the model check).
+  - Not built: R3 (simulated, projected ratio 0.9925 > 0.8, 4.6), R4 (set aside), R5 (dropped) (4.5).
+- **Next: milestone 9** starts from `main`, after its design note is written and accepted in the claude.ai
+  project. Do not create its branch before then.
+
+### Harness notes (milestones 7 and 8)
+
+- **The harness's own default for the flags is off**, unlike the tactic's:
+  `SOLVE_BY_SAT_EVAL_FLAGS=nodeBounds,exclusivePairs` sets them for `eval_run run|sizes` (unset: both off, so
+  milestone 7 and 8a runs rebuild their CNFs). The variable is process-wide: every goal of a run, crash records
+  included, gets it. `SOLVE_BY_SAT_EVAL_COMPARE=<results.jsonl>` applies 4.4's exactness stop rules (exit 9, in
+  the shard and on crash records the driver writes; 6 in 8c-1). `eval_run exactness-selftest` and
+  `python3 Test/eval_driver.py exactness-selftest` are in `run_all.sh`.
+- The 8b and milestone 7 tools (`dimacs`, `diag-models`, `m8b_dimacs73`, `eval_scaling`, `eval_numerals`, the 8b
+  hand count, `test_m4`'s milestone 4 check) pin both flags off. Exact-output Lean guards that differ under R1 are
+  pinned to the flags off, each with an R1 twin.
+- Tools by stage: 8a `Test/M8Rules.lean`, `Test/M8Probe.lean`, `eval_run`'s `probe` fields and `probe-rules`,
+  `Test/m8a_setup.py`, `Test/m8a_run.py`, `Test/m8a_full.sh`, `Test/m8a_publish.sh`; 8b `Test/M8Diag.lean`,
+  `eval_run diag | diag-models | dimacs`, `m8b_dimacs73`, `test_m8diag`, `Test/m8b_setup.py`, `Test/m8b_run.py`;
+  8c-1 `eval_run sizes8c`, `eval_run diag … SETTING`, `Test/m8c1_run.py`, `Test/m8c1_full.sh`; 8c-2a
+  `M8Diag.simEncode`/`r3sim`/`r3ModelCheck`, `eval_run diag … r3`, `eval_run r3-models`, `Test/m8c2a_run.py`,
+  `Test/m8c2a_full.sh`; 8d `Test/m8d_run.py`, `Test/m8d_full.sh pilot|full`. Their inputs are on `m8-data`.
+  Detached runs: `setsid nohup Test/m8X_full.sh … &`.
+- Milestone 8 rules (for reference): as milestone 7's. Only exact reductions (M8_PLAN 3.1, 4.4); SPEC.md is
+  revised in the claude.ai project, not here. Filters, seeds, sample sizes and limits were pre-registered in
+  `M8_PLAN.md` and NOTES.md; a decoder failure on a satisfiable CNF, or a §2.5 stop rule, stops the run.
 
 ## Running the evaluation
 
 - `python3 Test/eval_driver.py specs named|pilot|full OUT.jsonl` writes a spec file. Milestone 7's
-  pre-registered `eval/specs_*.jsonl` files are on `m7-data`.
+  pre-registered `eval/specs_*.jsonl` files are on `m7-data`, milestone 8's (`eval/m8*/specs*.jsonl`) on `m8-data`.
 - `python3 Test/eval_driver.py run SPECS OUTDIR` runs it. Only one driver may run at a
   time, enforced by `eval/.driver.lock`. Run it in the background: a full run takes
   hours. Resume by running the same command again.
@@ -108,6 +155,8 @@ machine's specs in NOTES.md before a full run.
 - An orphaned shard plus a new run once exhausted RAM and forced a reboot. The driver now
   takes a lock and its children die with it (`PR_SET_PDEATHSIG`); keep it that way.
 - `/tmp` may be a tmpfs (RAM). Solver inputs go to `OUTDIR/tmp` on disk.
+- Bash reads a script while it runs: never edit `Test/run_all.sh` (or rebuild what it runs) while it is running. Do not
+  rebuild `eval_run` while a detached run uses it.
 - In Lean 4.36 `try … catch` in `MetaM` does not catch heartbeat or recursion-depth
   exceptions; use `tryCatchRuntimeEx`.
 - CaDiCaL 2.1.2 at its `-t` limit prints `c UNKNOWN` (a comment line) and exits 0.

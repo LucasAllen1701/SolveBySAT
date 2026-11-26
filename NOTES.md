@@ -2543,3 +2543,900 @@ sentence in bold was replaced; the rest of that paragraph is unchanged.
     are on `m7-data` only. They were last run at 7d-2, 36/36 (`eval/d2_check/named` on `m7-data`), and no
     Lean code has changed since.
 - **Regression (end of milestone 7, the merge):** on the merged tree (before the merge commit), `lake build` and `Test/run_all.sh` exit 0 (M0 902/902, M1 19/19, M4 4/4, M5 10/10, `countOnly` 22/22; M2, M3, M4Lean, M5Lean and M7Lean pass). The Lean code is `m7-data`'s, unchanged. The named cases are not rerun here (above); EVAL.md regenerates byte-identically on `m7-data`.
+
+## Milestone 8: scale, with a rewriting probe first (M8_PLAN.md)
+
+### 8a: probe set-up and pilot (M8_PLAN §2; 24 November 2026)
+
+Branch `m8`, made from `main` after the milestone 7 merge (`2f211b1`). Same machine as milestone 7
+(Intel i7-10510U, 7,735 MiB, kernel 7.3.5-arch1-1, `vm.overcommit_memory = 1`). `M8_PLAN.md` was
+added as written (`8221ac6`).
+
+#### Inputs (§2.8), extracted before any run
+
+`python3 Test/m8a_setup.py inputs ../m7-data` reads a worktree of tag `m7-data` (`fc61dd9`). It computes
+the E5 population with `m7-data`'s own `eval/report.py`: accepted, not proved in `eval/final/`, every
+obstacle in family 3A. The result is **522 Tier A and 946 Tier B**, as in EVAL.md E5. Then it copies the
+records of those 1,468 goals and of the 50 control goals into `eval/m8a/inputs/` (`MD5SUMS` there):
+
+| file | md5 | what |
+| --- | --- | --- |
+| `corpus.jsonl` | `4c2c2e270f3d` | corpus records (`corpus_A/B.jsonl`) of the 1,518 goals |
+| `hcompile.jsonl` | `c6d4fbd1ca76` | compiler verdicts (`corpus_hcompile.jsonl`) |
+| `final.jsonl` | `eb2d223580c8` | final results (`eval/final/results.jsonl`) |
+| `specs_full.jsonl` | `13d80428543a` | milestone 7's specs of the same goals (*addition*: H in run order, `thm`, `pos`, `nctx`) |
+| `population.jsonl` | `69230cf475e1` | the E5 population: key, tier, obstacles and their families (*addition*) |
+| `m8_families.json` | `24b74f9310c1` | the E5 table, as committed in 7d-2 |
+| `m8_obstacles.jsonl` | `d9cea64c7c95` | the E5 facts, as committed in 7d-2 |
+| `scaling_goals.jsonl` | `99041d07b319` | the 50 scaling goals, as committed in 7c |
+
+The two additions are derived from the same `m7-data` files. They let the sample and the specs be rebuilt
+from `eval/m8a/inputs/` alone.
+
+#### Sample (§2.2), drawn before any run
+
+`python3 Test/m8a_setup.py sample` writes `eval/m8a/goals.jsonl`, using the hash rule of NOTES.md 7c with
+seed 80101: SHA-256 of `"80101:<key>"`, ascending, first 100 Tier B and 50 Tier A keys of the population.
+- *Decision (the plan does not rank the controls):* the 50 control goals are ranked by the same rule and
+  seed. §2.6's "5 highest-ranked control goals" are their first five.
+- Each record has the rank, the H_main of milestone 7's spec in run order, and the accepted H_main
+  (`hcompile`'s `accepted`, in that order). For the controls, the accepted H_main equals
+  `scaling_goals.jsonl`'s (checked).
+
+| group | goals | \|H_main\| median / p90 / max | accepted \|H_main\| median | milestone 7 outcome |
+| --- | --- | --- | --- | --- |
+| rewriting, Tier B | 100 | 4 / 9 / 11 | 2 | no proof ≤ 10: 82, memory crash: 18 |
+| rewriting, Tier A | 50 | 8 / 12 / 17 | 5 | no proof ≤ 10: 28, memory crash: 22 |
+| control | 50 | 1 / 8 / 11 | 1 | proved: 50 (original N 1: 12, 2: 12, 3: 10, 4: 3, 5: 6, 6: 4, 7: 1, 8: 2) |
+
+#### The rules (§2.3): `Test/M8Rules.lean` (harness only; `SolveBySat/` unchanged)
+
+- *Symbols.* The constants of the goal's statement and of its accepted H_main constants' statements, both
+  preprocessed with `SolveBySat.preprocess` (SPEC 4.1). *Decision:* the H constants' statements are
+  preprocessed too, for consistency with the goal.
+- *Predicate and function symbols.* A predicate symbol's type ends in `Prop`, and a function symbol's
+  type ends in a type that is not a sort. Type formers and proofs get no rules. Positions are the
+  binders of the symbol's type, without reduction, numbered from 0.
+- *Eligible positions* as §2.3 says. A `Prop` position uses `↔`. Proofs:
+  `congrArg (fun y => f … y …) h`, `Eq.mpr (congrArg (fun y => P … y …) h) hp`, and `propext h` for `↔`.
+  They are built with `mkAppM ``congrArg`, not `Meta.mkCongrArg`, which rewrites special cases.
+- *Names.* `_probe.<symbol>.<kind>.«<i>»`, where kind is `congr`, `subst`, `congr_iff` or `subst_iff`.
+  **Deviation:** `<i>` is a *string* component. A numeric component is read back as a hygiene macro
+  scope when the name goes through syntax, and the test tactic could not name the rule ("Unknown
+  constant `_probe.Eq.subst✝`").
+- *H* is the accepted H_main constants, then `Eq.refl`, `Eq.symm`, `Eq.trans` if absent, then the rules
+  sorted by `Name.toString`. In the shard, each goal's rules are added to a fresh copy of the base
+  environment.
+- *Harness (`Test/EvalRun.lean`).* New optional spec fields `probe` and `probe_group`; specs without them
+  run as before. A probe run watches every H constant outside H_main (`probe_extra_used`, `uses_rule`)
+  and records the rule counts and failures. It also applies the stop rules of §2.5:
+  - a control uses the 4.2 monotonicity rule. 4.2's k = 0 rule (same N as `eval/final/`) is *not*
+    applied to probe specs, because rules may legitimately shorten a proof;
+  - a rewriting goal proved with H_main constants only stops the run (exit 6).
+
+  `eval_run sizes` builds the same H. The new `eval_run probe-rules` subcommand writes the rule
+  bookkeeping without solving anything.
+- **Hand examples (`Test/M8Probe.lean`, now in `Test/run_all.sh`).** A test-only tactic,
+  `solve_by_sat_probe`, generates the rules for the goal and calls the unchanged `solve_by_sat`. It drops
+  compiler-rejected constants first, as the harness does. Inside a proof, Lean 4.36 accepts new
+  declarations only under the current theorem's prefix, so the file sets `Elab.async false`.
+  - P1, `a = b → f a = f b`: proved at N = 2 (`_probe.f.congr.«0» a b h`); none at 1.
+  - P2, `h : x = y ⊢ P (f x) → P (f y)`: proved at N = 5,
+    `_probe.P.subst.«0» (f y) (f x) (_probe.f.congr.«0» y x (Eq.symm h)) hp`; none at 4.
+  - **P3, P4: a `Prop` position with `↔` cannot be proved as M8_PLAN §2.3 is written.** The rules build
+    and the kernel accepts them (`_probe.Q.subst_iff.«0» : ∀ (a b : Prop), (a ↔ b) → Q b → Q a`). But
+    the unchanged compiler rejects every `↔` rule: the premise `a ↔ b` over Prop variables compiles to
+    clauses whose head is a clause variable (SPEC §2). The test records this outcome with `#guard_msgs`.
+    As §2.3 says for rejected rules, the `↔` rules are kept in the generator and recorded, and the probe
+    runs as written. Alternatives are proposed to the owner, not adopted.
+- **No rules, no change.** The 36 named cases through the probe harness (`eval/m8a/named_check`, specs
+  read from `m7-data`) equal `m7-data`'s `eval/fix_check3/named` in outcome, N and skeleton: 36/36.
+- **Rules over the 200 goals** (`eval/m8a/rules.jsonl`, `eval_run probe-rules`, 15 s, peak 742 MB):
+
+  | group | rules: median / p90 / max | accepted by the compiler: median / p90 / max |
+  | --- | --- | --- |
+  | rewriting, Tier B | 9 / 16 / 29 | 8 / 15 / 29 |
+  | rewriting, Tier A | 11 / 18 / 25 | 9.5 / 17 / 23 |
+  | control | 8 / 11 / 14 | 6 / 10 / 14 |
+
+  - Built: 1,092 `congr`, 699 `subst`, 162 `subst_iff`, 0 `congr_iff`.
+  - **Failed to build: 116.** In every one, the symbol's *result type* depends on the rewritten argument
+    (`OfNat Nat y` 63, `Decidable (y < m)` and its variants 22, `BitVec y` 4, `y.Pos`, …), so the
+    `congrArg` motive is ill-typed. §2.3 excludes positions that *another argument's* type depends on, but
+    not ones the result type depends on, so these are built, fail and are recorded, as §2.3 says.
+  - **Rejected by the compiler: 184.** All 162 `subst_iff` rules (`And`, `Or`, `Iff`: the `↔` premise, as
+    in P3), plus 22 whose clause variable is applied to arguments (higher order).
+  - No H_main constant is rejected.
+
+#### Pilot (§2.6): `eval/m8a/pilot/`
+
+`python3 Test/m8a_run.py run eval/m8a/specs_pilot.jsonl eval/m8a/pilot`, from a clean tree at `9329aca`.
+It runs the driver with milestone 7's limits, then the `countOnly` sizes. Runs took 791 s; sizes, 38 counts
+(N = 5 and the last N), took 400 s. Driver exit 0. **No stop rule fired.**
+- *Sizes for the controls (addition):* a control's original N is also counted, for §2.7's comparison with
+  milestone 7. The crashed control stopped at N = 4, below its original N of 6.
+- *Pilot bookkeeping:* the sizes pass was run a second time, from scratch, after `m8a_run.py` was fixed
+  (rule counts for crash records from `rules.jsonl`, crash times from the driver's `elapsed_s`, timing
+  accumulated over passes). The runs were not repeated. Their time (791 s) is the driver's own record.
+- `eval/m8a/pilot_summary.md` has every pilot run (`python3 Test/m8a_run.py summary eval/m8a/pilot`).
+
+| group | runs | proved | memory crash | proved with a rule |
+| --- | --- | --- | --- | --- |
+| rewriting, Tier B | 10 | 1 (N = 2) | 9 | 1 |
+| rewriting, Tier A | 5 | 0 | 5 | – |
+| control | 5 | 4 (each at its original N) | 1 | 0 |
+
+- The rewriting proof: `B/Int.ediv_gcd_ne_zero_of_ne_zero_right/5` at N = 2,
+  `_probe.Nat.cast.congr.«2»(Int.gcd_comm)`. Milestone 7 found no proof ≤ 10.
+- **Every crash is the 2.5 GB cap,** at last N 3–10, with 9.7–26 M clauses at the last N. Groundness plus
+  decomposition is 95–99% of them. Where milestone 7 has a CNF at the same N, the rules multiply it
+  2.3–17× (0.87 M → 15.0 M at N = 6; 5.16 M → 11.8 M at N = 10).
+- **Controls, clauses at the original N:** 1,079 → 42,094 (39×), 3,234 → 39,282 (12×),
+  246,708 → 2,981,513 (12×), 1,284,012 → 2,489,298 (1.9×). One control, proved at N = 6 in milestone 7
+  with 8.05 M clauses, has 28.9 M with the rules and crashed at N = 4: the rules made it infeasible.
+  That is a resource limit, which §2.5 allows.
+- **Projection for the 200 runs: 3.3 h** (runs and sizes; rewriting Tier B 1.8 h, Tier A 1.2 h, control
+  0.4 h). That is well under about 24 h, so no reduction is proposed. The full run waits for the owner's
+  approval.
+#### Open decisions for the owner (before the full 8a run)
+
+1. **Approve the full run (§2.6).** 200 runs (100 Tier B and 50 Tier A rewriting goals, 50 controls) with
+   the pre-registered limits; the pilot's projection is 3.3 h, so no reduction is proposed. The full run
+   repeats the 20 pilot specs, as 4.2 did, unless the owner prefers to keep the pilot's results and run
+   only the other 180.
+2. **The `↔` rules (§2.3).** The unchanged compiler rejects every `↔` rule (P3, P4 above; all 162
+   `subst_iff` rules over the 200 goals), so Prop positions get no usable rule. Options:
+   - **(a) keep §2.3 as written** (recommended): the `↔` rules stay in the generator, are recorded as
+     rejected, and the report states that rewriting at a Prop position is outside the class of the
+     unchanged tactic;
+   - **(b) `=` between Props** in place of `↔`: likely accepted, but of little use, because the only
+     source of such equalities is `propext`, which the compiler also rejects;
+   - **(c) instantiate the `↔` rules** at the Prop subterms of the goal and H, so that no Prop variable is a
+     head: closest to the plan's intent, but the rules are then no longer universally quantified (§2.3),
+     and it is an amendment to record in M8_PLAN §4.
+3. **Decisions taken here that the owner may overrule** (each recorded above):
+   - the controls are ranked by the same hash rule and seed as the rewriting goals (the plan gives no
+     ranking for them);
+   - rule indices are string name components (`«0»`), not numeric ones;
+   - 4.2's k = 0 stop rule (same N as `eval/final/`) does not apply to probe controls, because rules may
+     shorten a proof; the monotonicity rule does apply;
+   - each control is also sized at its original N, in addition to N = 5 and its last N;
+   - rules whose result type depends on the rewritten argument are attempted, fail to build (116) and are
+     recorded, since §2.3 excludes only positions on which another *argument's* type depends;
+   - on `main`, the owner's deletions of `SPEC(out of date).md` and `SPEC.pdf` were kept in the merge (both
+     files remain on `m7-data`).
+4. **What the pilot already suggests** (facts for 8b, not a decision): with the rules, 14 of 15 rewriting
+   goals and 1 of 5 controls exceed the 2.5 GB cap before N = 10, with groundness plus decomposition at
+   95–99% of the clauses. The full run will likely measure mostly where memory runs out, as §10.11
+   anticipated.
+
+- **Regression (end of the 8a set-up and pilot):** `Test/run_all.sh` exit 0 on `m8` at `52e4f79`, with
+  `Test/M8Probe.lean` added (M0 902/902, M1 19/19, M4 4/4, M5 10/10, `countOnly` 22/22; M2, M3, M4Lean,
+  M5Lean, M7Lean and M8Probe pass; `eval/m8a/run_all.log`). The named cases are 36/36 with the probe
+  harness and no rules. `SolveBySat/` is unchanged since milestone 7. After `52e4f79` only Python files
+  (`Test/m8a_run.py`) and data changed.
+
+### 8a: the full run (M8_PLAN §2.4–2.6, amendment 4.1; 24 November 2026)
+
+#### Before the run
+
+- **Plan.** Amendment 4.1 and the new status line were added to M8_PLAN.md as written (`cbce65e`).
+- **Machine checks.** `vm.overcommit_memory` = 1. The user session delegates the memory controller,
+  and `systemd-run --user --scope -p MemoryMax=200M` killed a 400 MB allocation (exit 137). 6.6 GB was
+  available outside the slice. `Test/run_all.sh` exit 0 before the change (`eval/m8a/run_all_before_4.1.log`).
+- **Rules (decisions 1–3), `Test/M8Rules.lean`.** `SolveBySat/` is unchanged.
+  - A `Prop` position takes `a = b`, like every other position. The `_iff` rules are gone.
+  - A position the symbol's result type depends on is skipped and counted (`probe_skipped_dep`).
+  - `propext` equations: for each accepted H_main constant, the split paths of SPEC 4.2 are walked
+    without reduction. `∧` gives `l` and `r`; `↔` gives `mp` (extra premise: the left side) and `mpr`
+    (extra premise: the right side); a `∀` component adds binders, at most 6 steps deep. Every path whose
+    head is `L ↔ R` gives `_probe.<c>.propext.«<path>»` (`root`, or the steps joined by `_`). It has the
+    same binders and premises, head `L = R`, and is proved by `propext` of the projected proof. Each one
+    is kernel-checked by `addDecl`.
+  - The shard records `uses_propext`. The pilot's bookkeeping is kept as `eval/m8a/rules_pilot.jsonl`.
+- **Rules over the 200 goals** (`eval/m8a/rules.jsonl`, `eval_run probe-rules`, 15 s):
+  - built: 1,092 `congr`, 861 `subst` (699 before, plus the 162 Prop positions now on `=`), 79 `propext`
+    (77 at the root, 2 on an `mp` path);
+  - failed to build: 0 (pilot 116); positions skipped because the result type depends on them: **116**,
+    the pilot's 116 failures;
+  - rejected by the compiler: 184, as in the pilot, but different rules. 162 are `subst` rules at a Prop
+    position of a *connective* (`Iff` 134, `And` 22, `Or` 6): the connective's head splits (SPEC 4.2) into
+    the variable heads `a`, `b`. The other 22 have a clause variable applied to arguments. No `propext`
+    equation is rejected.
+
+  | group | rules: median / p90 / max (pilot) | accepted (pilot) | goals with a `propext` equation |
+  | --- | --- | --- | --- |
+  | rewriting, Tier B | 10 / 17 / 29 (9 / 16 / 29) | 9 / 15 / 29 (8 / 15 / 29) | 28 |
+  | rewriting, Tier A | 11 / 19 / 26 (11 / 18 / 25) | 10 / 17 / 24 (9.5 / 17 / 23) | 15 |
+  | control | 8 / 12 / 15 (8 / 11 / 14) | 7 / 11 / 14 (6 / 10 / 14) | 13 |
+
+  **All 38 sampled rewriting goals with a `propext` obstacle get at least one `propext` equation,** and
+  so do all 9 whose only obstacle is `propext`. 56 of the 200 goals get one.
+- **Hand examples (decision 5), `Test/M8Probe.lean`.** P3 and P4 are replaced, and P5 is added, each with
+  its minimality check:
+  - P3, `(¬ a ≤ b) = (b < a)` from `Nat.not_le`: 1 node, `_probe.Nat.not_le.propext.root`. With N = 1
+    there is no smaller N to check; the test pins the equation's statement instead.
+  - P4, `Q (¬ a ≤ b) → Q (b < a)`: **proved** at 4 nodes,
+    `_probe.Q.subst.«0» (b < a) (a ≤ b → False) (Eq.symm _probe.Nat.not_le.propext.root) h`, through a
+    substitution rule at a Prop position. There is no proof at 3. The probe tactic also logs that
+    `Iff`'s own substitution rules are rejected, as above; the minimality check matches errors only
+    (`#guard_msgs (error, drop info)`).
+  - P5, `A ∧ B` from `hA`, `h : B ↔ C`, `hC`, with no rules: 4 nodes, `⟨hA, h.mpr hC⟩`; none at 3.
+- **No rules, no change.** The 36 named cases through the amended harness (`eval/m8a/named_check_4.1`)
+  equal `m7-data`'s `eval/fix_check3/named` in outcome, N and skeleton: 36/36.
+- **Acceptance with the amended rules.** `Test/run_all.sh` exit 0 (M0 902/902, M1 19/19, M4 4/4, M5 10/10,
+  `countOnly` 22/22; M2, M3, M4Lean, M5Lean, M7Lean and M8Probe pass; `eval/m8a/run_all_4.1.log`).
+- **Specs (decision 4).** `eval/m8a/specs.jsonl` was regenerated. The specs do not hold rules, because the
+  shard generates them, so each spec now records `"probe_rules": "amendment 4.1"`; the shard does not read
+  that field. md5 `86c57c212a83`. `specs_pilot.jsonl` (`529796ddec3a`) is the pilot's record and is no
+  longer rewritten. The full run repeats the 20 pilot specs.
+- **Detached run.** `Test/m8a_full.sh`, started with `setsid nohup`, runs `Test/m8a_run.py run` (the driver,
+  then the sizes). The after-shard hook is `Test/m8a_publish.sh`: it writes `eval/m8a/full/STATUS.md`,
+  commits `eval/m8a/full/` only, and pushes `m8`. The 7b scripts push `eval-m7`, which is now an archive,
+  so they are not used.
+
+#### The run (`eval/m8a/full/`)
+
+- Started detached from a clean tree at `55d25b4` (12:32). Runs finished at 14:44 (7,895 s); sizes, 378
+  `countOnly` counts, at 15:40 (3,371 s, all `ok`). Total 3.1 h, against the pilot's 3.3 h projection.
+  Wrapper exit 0. The hook pushed `STATUS.md` after each of the 4 shards and at the end (`2dc5ab8`).
+- **Stop rules (§2.5): none fired.** No decoder failure. Every control that is not proved hit a resource
+  limit. Every rewriting proof uses a constant outside H_main.
+- **Report.** `eval/m8a/report.py` writes `eval/m8a/PROBE.md` from the data files alone. Regenerated twice
+  and under `PYTHONHASHSEED` 1 and 777: byte-identical (md5 `44a850dbd2b1`).
+
+| group | runs | proved | no proof ≤ N | memory crash | solver timeout |
+| --- | --- | --- | --- | --- | --- |
+| rewriting, Tier B | 100 | 16 | 1 | 52 | 31 |
+| rewriting, Tier A | 50 | 5 | 2 | 33 | 10 |
+| control | 50 | 43 | 0 | 6 | 1 |
+
+- **Rewriting proofs:** 21 of 150 goals that milestone 7 did not prove, at N 1–8 (Tier B: N = 1 for 5 goals,
+  2 for 5, 3 for 2, 4 for 3, 5 for 1). Every proof and its rules are in PROBE.md.
+  - 8 Tier B proofs use a `propext` equation, all on goals with a `propext` obstacle: 8 of those 28, and
+    none of the 10 such goals in Tier A (all 10 crashed).
+  - 11 use a generated congruence or substitution rule (6 in Tier B, all 5 in Tier A). The other 10 are the 8
+    `propext` proofs and 2 proofs that need only `Eq.refl` (surprise 2).
+- **Milestone 7's answer against 8a's, rewriting goals:**
+  - no proof ≤ 10 → proved 20, memory crash 46, timeout 41, no proof ≤ 10 3;
+  - memory crash → memory crash 39, proved 1.
+- **Size.** At N = 5 the rules multiply the clauses 17.7× (Tier B), 13.2× (Tier A) and 5.0× (controls), as a
+  median over goals with a milestone 7 count. Groundness plus decomposition is 95–96%. Over crashed runs
+  with a milestone 7 count at the same N, the median is 16.5× (range 2.3–258). The smallest crashed CNF has
+  9.47 M clauses.
+- **Controls:** 43 of 50 stay feasible. All 24 with original N ≤ 2 stay feasible, 11 of 13 at N 3–4 and 8 of
+  13 at N ≥ 5. Clauses at the original N grow by a median of 13.6× (range 2.4–183). The seven that are lost
+  (6 memory, 1 timeout) all had an original N of 3 or more. One control proof uses a rule
+  (`A/Lean.Grind.Order.eq_trans_false'`, at its original N 4).
+- **Proved share by rules:** no rewriting goal with more than 10 accepted rules is proved (0 of 56). With
+  10 or fewer, 21 of 94 are.
+
+#### Surprises
+
+1. **The rules mostly turn definite answers into resource limits.** 87 of the 110 rewriting goals with a
+   certified "no proof ≤ 10" in milestone 7 now end at a limit (46 memory, 41 solver timeout). Only 3 keep a
+   certified answer. The pilot had no timeouts; the full run has 42, all at the 20 s per-call solver limit,
+   at N 3–10 (mostly 6–8).
+2. **Two "rewriting" goals need no rewriting.** `B/List.mkSlice_ric_eq_mkSlice_rio/0` is proved by `Eq.refl`
+   alone (N = 1), and `B/Array.contains_filter/15` by an H_main lemma applied to `Eq.refl` (N = 2). E5 counted
+   them as all-3A because their oracle proofs use `congrArg`/`propext`. They failed in milestone 7 only
+   because `Eq.refl` was not in their H_main, which the oracle H filter (§2.3) leaves out.
+3. **`propext` equations are the most effective rule.** They prove 8 of the 28 Tier B goals with a `propext`
+   obstacle (29%), against 8 of the 72 without one (11%). Seven of those 8 proofs have 1 or 2 nodes.
+4. **The pilot's one changed goal.** `B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/5` crashed in the
+   pilot and is now proved at N = 1 by a `propext` equation, which amendment 4.1 added.
+5. **Substitution at Prop positions works only for opaque predicates.** For the connectives (`Iff`, `And`,
+   `Or`) the `=` substitution rules are rejected, because their heads split into variable heads (162 of the
+   184 rejections). P4's `Q` works.
+
+- **Regression (end of the full 8a run):** `Test/run_all.sh` exit 0 at `55d25b4` with the amended rules and
+  P3–P5 (`eval/m8a/run_all_4.1.log`). The named cases are 36/36 with the amended harness and no rules.
+  `SolveBySat/` is unchanged since `m7-data` (empty `git diff`). After `55d25b4`, only data (`eval/m8a/full/`),
+  `PROBE.md`, NOTES.md and CLAUDE.md changed. PROBE.md regenerates byte-identically.
+
+### 8b: measurements (M8_PLAN §4.2, §4.3; 24 November 2026)
+
+- **Plan.** Sections 4.2 and 4.3 and the new status line were added to M8_PLAN.md as written (`a108c9e`).
+- **Machine checks.** `vm.overcommit_memory` = 1. The memory controller is delegated, and a 400 MB allocation
+  under `MemoryMax=200M` was killed (exit 137). 5.4 GB was available. `Test/run_all.sh` exit 0 before any change.
+
+#### Diagnostics without changing the CNF (§4.3 "Rules")
+
+- **No hooks.** `SolveBySat/` is unchanged (empty `git diff 5820197 -- SolveBySat`).
+  - The diagnostics are a new module, `Test/M8Diag.lean`. It rebuilds the per-node object graph with the
+    encoder's own public builders (`Encode.build`, `buildValue`, `buildGround`, `buildType`) and copies the
+    encoder's candidate lists, typing decisions and pair loop.
+  - It replays each grounding candidate's and each decomposition pair's clauses with the encoder's own gadgets
+    (`addClause`, `eqUnder`), in a scratch counting CNF, with the encoding's real labels and `sv` literals.
+    So constant folding is identical, and every clause is attributed exactly.
+  - Every point checks itself: the replayed totals must equal the encoder's "8 groundness" and
+    "5 decomposition" counts, and the kept candidates must equal `Encoding.sv`.
+  - `eval_run` gains three subcommands: `diag` (M1–M4, with `countOnly`), `diag-models` (M5) and `dimacs`.
+    `m8b_dimacs73` writes the SPEC 7.3 encodings.
+- **DIMACS byte-identical** (`eval/m8b/dimacs_md5.txt`). The 36 named cases at their milestone 7 N, and the 9
+  SPEC 7.3 instances with all refinements on and all off (18 encodings), were compared three ways:
+  diagnostics run on the encoding first (`on`), not run (`off`), and the same tools built against
+  `SolveBySat/` at `5820197` (a worktree). All 54 files are equal in all three. The 7.3 counts match SPEC 7.3
+  (for example 9 lemmas, N = 12, all off: 5,159,936 clauses).
+- **Hand count (`test_m8diag`, in `Test/run_all.sh`).** L1 at N = 2: 48 `sv`, all eigenvariable slots (24 at the
+  same node, 12 at a smaller and 12 at a larger index), and no decomposition pair; recounts equal the
+  encoder's. The test caught a bug in the first version: the copy had left out the eigenvariable candidates
+  (0 `sv`, 6 kept-candidate mismatches). Fixed before any measurement.
+
+#### M4: the bounds argument, checked against the encoding
+
+- **Depth.**
+  - `gp(0, root)` is forced, and there is at most one `gp` per node (6.1), so node 0 solves exactly the root.
+  - A node β ≥ 1 has exactly one parent edge `y(α, β, k)` (6.2), and `cl(α, c) ∧ y(α, β, k) ⇒ gp(β, g_k)`
+    forces it to solve the premise or data position at index k of its parent's clause. The root is no clause's
+    premise, so only node 0 solves it.
+  - The parent solves some g′, and applies c only if c statically matches g′ (6.4 forbids every other pairing).
+    So depth(β) ≥ d(g′) + 1 ≥ d(g_k), by the fixpoint.
+  - Parents have smaller indices (5.1, 6.2), so depth(β) ≤ β.
+- **Size.**
+  - Every premise index of the applied clause needs a child (6.2). Data indices need none (6.9), so they count 0.
+    Children are distinct nodes with larger indices.
+  - By induction on the subtree, the subtree at α has at least s(g) nodes (cs(c) for the clause applied), all
+    with indices in [α, N). So α + s(g) ≤ N.
+- **What is ignored.** The fixpoint ignores unification and the scope of local clauses (6.3). Both only add
+  options, so d and s stay lower bounds.
+- **Strength of the claim.** The argument uses only structural clauses, so the bounds hold in *every model of
+  the CNF*, not only in decoded proofs. So a clause conditioned on an excluded `cl` or `gp` literal is
+  satisfied in every model: the "dead" shares are exact.
+- **No flaw was found.**
+- **On models (`eval/m8b/models/`, `diag-models`).**
+  - The 64 proved 8a runs (with the rules) and the 26 named cases with a proof (milestone 7's H) were
+    re-solved at their proved N (solver limit 20 s), decoded and kernel-checked: 64/64 and 26/26 SAT, every
+    proof valid, and every proof has exactly N nodes, so each re-solve gives a proof of the same N.
+  - All 374 + 118 `gp` and `cl` pairs used pass the bounds: **0 violations**.
+
+#### M1–M4 on the 400 points (`eval/m8b/points/`)
+
+- `python3 Test/m8b_run.py points eval/m8b/specs_points.jsonl eval/m8b/points 5 --publish`, detached, from
+  `5428a9c` (17:03 to 18:50, 6,452 s), one capped `eval_run diag` process at a time.
+- **No memout and no crash:** 400/400 `ok`. **Recount checks: 800/800 sections equal the encoder; 0
+  kept-candidate mismatches.**
+- *Publishing.* The driver published only between diag processes, and with no memout there was only one
+  process. So a separate loop (`m8b_run.py publish-loop`, every 20 minutes) pushed `STATUS.md` from 144
+  points on. It was stopped by PID at the end.
+- **Report.** `eval/m8b/report.py` writes `eval/m8b/DIAG.md`. Regenerated twice and under `PYTHONHASHSEED`
+  1 and 777: byte-identical (md5 `97b344cade3d`).
+
+#### Surprises
+
+1. **M4 removes a lot.**
+   - Least depth and least size exclude a third of all `gp` and `cl` pairs (33–36% with rules, 39–42%
+     without).
+   - The clauses that depend only on excluded pairs are **50% of all clauses with the rules and 65% without**
+     (pooled; groundness 38% / 47%, decomposition 58% / 68%).
+   - These clauses are satisfied in every model.
+2. **Decomposition is dominated by types and universe levels, not by the goals' terms.** With the rules, the
+   largest symbols are `lvl:succ/1` (32% of decomposition), `c:List/2` (20%) and `sort/1` (10%), then
+   `lvl:max/2`. These are mostly type-template objects (the typing clause), and in a point the largest
+   symbol alone is a median 46% of decomposition. Without rules, `c:List/2` is 45% pooled.
+3. **Decomposition is 82–84% between different nodes**, and with the rules 85% is between templates in the same
+   static may-equal component. So the component rule recorded in DIAG.md separates little once the rules
+   connect the symbols. Without rules it is 58% pooled, but a median 99%: a few large points have big
+   cross-component shares.
+4. **Groundness candidates.**
+   - 91% of the groundness clauses with the rules (84% without) come from rigid-position candidates.
+   - The split by node index is symmetric by construction (each slot considers every node's copies):
+     39 / 20 / 39% for smaller, same, larger.
+   - In the models, the chosen candidates are mostly at the same node or an ancestor. An eigenvariable slot is
+     never a descendant's or an unrelated node's.
+   - But rigid positions are chosen at a descendant (26 of 113) and at an unrelated node (9) too, and value
+     objects at a descendant (5 of 6) in the named cases.
+5. **Label width W is 18–35 bits** (median 27 with rules, 25 without). `idx` and `rank` are the variable parts
+   (6–13 and 3–11 bits); `esc` is N = 5.
+
+- **Slip, recorded.** In `1115737` a `sed` replacement containing `&` mangled `Test/run_all.sh`'s build line.
+  It was repaired in `5428a9c` before the suite was run with the new test. The 1.3 GB of DIMACS files written
+  for the identity check were on `/tmp`, a tmpfs here, and were deleted right after the check (CLAUDE.md's
+  lesson).
+- **Regression (end of 8b measurements):** `Test/run_all.sh` exit 0 at `5428a9c` with `test_m8diag` (M0
+  902/902, M1 19/19, M4 4/4, M5 10/10, `countOnly` 22/22, M8 diagnostics 10/10; M2, M3, M4Lean, M5Lean,
+  M7Lean, M8Probe pass; `eval/m8b/run_all.log`). The CNF is byte-identical to `5820197`'s on the 36 named cases
+  and the 18 SPEC 7.3 encodings. `SolveBySat/` is unchanged. DIAG.md regenerates byte-identically.
+
+### 8c-1: node bounds and exclusive pairs (M8_PLAN 3.4, 3.5, 4.4; 25 November 2026)
+
+- **Plan.** Section 3 (the scale design), amendment 4.4, the status line and the 8c row were put into
+  M8_PLAN.md as written; md5 `340bcac47ae6a647805c057a70e069a4` as required (`ebbda27`).
+- **Machine checks.** `git pull`: up to date. `vm.overcommit_memory` = 1; the memory controller is delegated, and a
+  400 MB allocation under `MemoryMax=200M` was killed (exit 137); 6.3 GB available. `Test/run_all.sh` before
+  any change: **not a clean record** (`eval/m8c1/run_all_start.log`). *Slip:* bash reads a script as it runs, and
+  I edited `Test/run_all.sh` and rebuilt the test executables while it ran. Only M0 (902/902), M1 (19/19) and M4
+  (4/4) ran on the code before the change; the rest ran on the new code (flags off by default) and the new
+  8c-1 sections, and passed (exit 0). The clean records are the two runs below.
+
+#### The scope term e(c), checked first (4.4)
+
+- `NodeBounds` (in `SolveBySat/Encode.lean`) computes d, s, cs and cd = min over c ▷ g of max(d(g), e(c)).
+  `M8Diag.models` checks each decoded node against it as well as against 8b's bounds.
+- The 64 proved 8a runs and the 26 named cases with a proof (the 36 named cases have 26 proofs; 8b's
+  `specs_named.jsonl`) were re-solved at their N with both flags off (`eval/m8c1/models/`): 90/90 SAT, every
+  proof kernel-checked, skeletons equal to 8b's. **All 492 `gp` and `cl` pairs pass the bounds with e(c): 0
+  violations** (and 0 against 8b's). 108 of those nodes apply a local clause, so e(c) is exercised.
+
+#### R1: the argument of 3.4.2, checked against the encoding
+
+Write c ▷ g when c passes 6.4's static tests for g (kind filter, predicate symbol and arity) and, for a
+built-in clause local to g₀, g = g₀. The claim: in every model of the CNF, a node α with `gp(α, g)` has
+depth(α) ≥ d(g) and α + s(g) ≤ N, and a node with `cl(α, c)` has depth(α) ≥ cd(c) and α + cs(c) ≤ N.
+
+- **The tree.** `act(0)` and `gp(0, root)` are units; `act` is downward closed (`act(β) ⇒ act(β − 1)`); each
+  active β ≥ 1 has exactly one `y(α, β, k)` (6.2: at least one, at most one over all (α, k)), with α < β and
+  α active. So the active nodes form a tree rooted at 0 with parents at smaller indices. Each active node has
+  exactly one `gp` and one `cl` (6.1: at least one each, at most one each, and `gp`, `cl` imply `act`).
+- **Which g a node solves.** `cl(α, c) ∧ y(α, β, k) ⇒ gp(β, g_k)` for k a premise or data index (6.2, 6.9),
+  and `¬cl(α, c) ∨ ¬y(α, β, k)` for any other k. The root is no clause's premise, so only node 0 solves it.
+- **Which c a node applies.** 6.4 emits `¬gp(α, g) ∨ ¬cl(α, c)` when c fails the kind filter or the symbol test
+  for g. A built-in clause c of g₀: `cl(β, c) ⇒ u(β, β)` and `u(β, β) ∧ cl(β, c) ⇒ gp(β, g₀)`, so β solves g₀.
+  So the clause c at α satisfies c ▷ g for the g that α solves.
+- **Scope (e(c)).** For c local to g₀: `cl(α, c) ⇒` some `u(α, γ)` with γ ≤ α, and `u(α, γ) ∧ cl(α, c) ⇒
+  gp(γ, g₀)`; `u(α, γ) ⇒ anc(γ, α)` for γ < α; `anc(γ, β) ∧ y(α', β, k)` forces α' = γ or `anc(γ, α')` with
+  γ < α' (the clause for α' < γ forbids the rest). By induction down the parent chain, γ is α or an ancestor of α.
+  So depth(γ) ≤ depth(α), and γ solves g₀.
+- **Depth, by induction on depth.** Node 0: d(root) = 0. A node β with parent α applying c and solving g′: α's
+  depth is at least d(g′) (induction), and at least d(g₀) = e(c) for a local c (γ above has smaller depth,
+  induction). So depth(β) = depth(α) + 1 ≥ 1 + max(d(g′), e(c)) ≥ d(g_k), because the fixpoint d satisfies
+  d(g_k) ≤ 1 + max(d(g), e(c)) for every g with c ▷ g. Parents have smaller indices, so depth(α) ≤ α.
+- **Size, by induction on the subtree.** Every premise index of the clause at α has a child (6.2); children of
+  one node are distinct, and subtrees are disjoint; data children (6.9) only add nodes. So the subtree of α has
+  at least cs(c) ≥ s(g) nodes, all with indices in [α, N), and α + s(g) ≤ N (α + cs(c) ≤ N for `cl`).
+- Only structural clauses (6.1–6.3, 6.4's static clauses, 6.9) are used, so the bounds hold in every model,
+  not only in decoded proofs. Unification only adds conditions; ignoring it keeps d, s, cs lower bounds.
+- **No flaw found.** Two refinements of 8b's M4 argument, both from the clauses above: the scope term, and
+  the built-in restriction (8b's M4 let a built-in clause match every g with its symbol).
+
+**What the flag does (3.3, 3.4.3).**
+- After the structural variables are allocated (numbering unchanged), each dead `cl(α, c)` and `gp(α, g)` gets
+  a unit clause `¬x` (family "11 node bounds") and is replaced by the constant false (`CNF.kill`). The clause
+  builder folds it everywhere; every place that would allocate for a false literal skips it: the object graph
+  (no rigid, value or type-template object of a dead owner), matching (6.4, 6.9) under a dead pair,
+  parent links under a dead `cl`, introducer links under a dead `cl`, eigenvariable codes of a dead `gp`, the
+  occurs and escape clauses of objects never built, the scope clauses of a dead `cl`, groundness (6.8) of a dead
+  `cl` and every candidate whose activation literal is dead, and the pair loop (dead objects are not in it).
+  At-most-one over `cl(α, ·)` and `gp(α, ·)` leaves out the false members (equivalent).
+- **Exact.** If F ⊨ ¬x then F ≡ F[x := false] ∧ ¬x. Every skipped clause contains ¬x for a dead x (so it is
+  satisfied), or is a clause whose only other literals are auxiliaries that appear nowhere else (`sv`, `sm`,
+  `dⱼ`, the less-than chain of an object never active), which can be set false.
+- **Ground objects stay.** A dead owner's ground subterms are still built (`buildGroundParts`, in the same
+  order), so the ground objects, their ids and the decomposition pairs between ground and live objects are
+  exactly those without R1. Ground objects are always active and are candidates, so dropping them would not
+  be an exact reduction.
+- **Width (3.4.3).** `idx` counts the objects built, now only live ones. This is not literally model-preserving
+  (fewer bits), but it is exact for the answer: soundness does not depend on the width, and SPEC 5.3's
+  completeness argument (each class of active objects needs its own code within its symbol) only counts
+  objects that can be active, which are live. `rank` is unchanged (static).
+- **Early exit.** If gp(0, root) is dead (s(root) > N, or s(root) = ∞), `encode` returns one empty clause (family
+  "11 node bounds") and `info.earlyExit`; nothing else is built. The tactic then fails with the no-proof message
+  before solving; with `verbose` it logs "early exit (node bounds): every proof has at least k nodes, more than
+  N = …" (or "no proof tree exists at any N"). The tactic takes one N, so there is no N loop to start at
+  s(root); the harness's N loop still runs from 1 (the rerun compares per N with 8a) and records an
+  `early_exit` row per N below s(root).
+- **The decoder** is unchanged: it reads `cl`, `gp` through `BLit.eval` (a constant false evaluates to false)
+  and looks up no label; groundness witnesses exist only for live (α, c).
+- Flags (`EncodeOptions`): `nodeBounds`, `exclusivePairs` (off by default until step 11), and for the mutation
+  checks only `boundsScope` (default on), `boundsTight`, `exclusiveMutant` (default off), like `scope`,
+  `occurs`, `openBit`. `allOff` and the configuration `none` switch R1 and R2 off; new configurations `bounds`,
+  `exclusive` (each alone, for `Test/refinements.sh`) and `m8off`, `r1`, `r1r2` (the 4.4 settings).
+  Tactic options `solve_by_sat.nodeBounds`, `solve_by_sat.exclusivePairs` (defaults from `EncodeOptions`; off
+  when `solve_by_sat.refinements` is off), and `solve_by_sat.checkBounds` (testing only: the model check).
+
+#### R2: the argument of 3.5
+
+- Two objects at one node α whose activation literals are two different members of one at-most-one group
+  (`cl(α, c)`, `cl(α, c′)`, c ≠ c′, covering head, value and clause-side type-template objects; or `gp(α, g)`,
+  `gp(α, g′)`, covering goal-side objects) are never active together: 6.1 has at-most-one over each group.
+- Their pair's clauses are `¬act(o) ∨ ¬act(o′) ∨ d₁ ∨ … ∨ sm` (or, pruned, `¬act(o) ∨ ¬act(o′) ∨ ds`), the
+  `dⱼ` definitions and `sm ⇒ children equal`. The first is implied by the at-most-one; `sm` and the `dⱼ` occur
+  positively only there, so setting them false satisfies the rest. Labels of inactive objects are only
+  constrained under their activation literal, so sharing a label does no harm. So the clauses can be left out.
+- A goal object and a head object at the same node (`gp(α, g)` with `cl(α, c)`) are active together whenever
+  α applies c to g; the mutation applies R2 to them and must be caught.
+
+#### Tests (3.1, 3.4.5, 3.5), in `Test/run_all.sh`
+
+- **Off-switch** (`Test/m8c1_offswitch.sh`): with both flags off and every other option at its default, the 54
+  encodings of `eval/m8b/dimacs_md5.txt` are byte-identical: 54/54. The 8b DIMACS writers (`eval_run dimacs`,
+  `m8b_dimacs73`) now pin the two flags off explicitly.
+- **Identical answers.** `test_m1` (plain and binder differentials, 7,500 comparisons each) and `test_m5` (data,
+  15,000) with the configurations `m8off`, `r1`, `r1r2`: 0 mismatches in all nine runs; the forest tests T1–T9
+  give their exact minimal N in each. The Lean suite in the three settings (`Test/m8c1_lean.sh`, the flags set
+  with `-D`): every file passes, and the number of decoded proofs per file is the same.
+- **Mutation checks** (in the default configuration of `test_m1` and `test_m5`):
+  - R1's size bound tightened by one: every test with a proof fails at its minimal N: forest tests 8/8, plain
+    556/556, binders 503/503, data 825/825.
+  - e(c) dropped: 0 mismatches (7,500 + 7,500 + 15,000 comparisons), and no CNF is smaller than with e(c)
+    (4,351 + 4,551 + 7,852 of the encodings are larger, the rest equal).
+  - R2 on a goal object and a head object at one node: mismatches in all three differentials (e.g. plain seed
+    1209 N 3, binders seed 576 N 1, data seed 770 N 3: the reference says no proof, the mutant finds one).
+- **Model check.** `solve_by_sat.checkBounds` (testing only) checks every node of every decoded proof against
+  R1's bounds; the Lean suite runs with it in all three settings (meaningful with R1 off) and passes, as do the
+  90 models above.
+- **`countOnly` parity** on the 11 SPEC 7.3 instances with R1, and with R1 and R2, on: 44/44 (with all on and all
+  off). At 9 lemmas, N = 12: 5,126,687 clauses all on, 4,336,477 with R1, 4,207,117 with R1 and R2.
+- **Recount.** 8b's diagnostics mirror R1 (dead owners get only ground parts, dead candidates and (α, c) are
+  skipped) and R2 (the same groups); new checks: R1's unit clauses equal the dead pairs, R2's skipped pairs equal
+  the encoder's. `test_m8diag` adds a hand count on the forest K (in its header): at N = 3, 4 dead `gp` and 4 dead
+  `cl`, 8 units, rigid objects 6 → 3, full pairs 21 → 6 (R1) → 5 (R1 and R2), R2 alone 3 pairs skipped, `sv`
+  48 → 15; at N = 1 the early exit. 41/41.
+- `Test/M8C1Lean.lean` (new, in the Lean suite): the early exit with and without verbose, with R1 off, with
+  `refinements := false`, s(root) = ∞ (`False`), and L1 with the model check.
+- **Test changes, none weakened.** Under R1 two kinds of exact-output guard differ, with the same answers:
+  - 7 `#guard_msgs` on failing calls under `verbose` (M2:102; M3:49, 54, 59, 106, 122, 136; M5Lean:115) see the
+    early exit's extra info line. Each original is pinned to both flags off (its context when it was written)
+    and gets a twin with R1 on whose expected output adds that line. The error message is the same in both.
+  - M8Probe's `#print P2` pins the exact term; R1's CNF finds another 5-node proof
+    (`Eq.symm (f.congr x y h)` instead of `f.congr y x (Eq.symm h)`). P2 is pinned to both flags off, and an
+    unpinned example proves it at N = 5 in whatever setting runs.
+  - `Test/refinements.sh` gains `bounds` and `exclusive` (each alone); not run in 8c-1.
+- **Clean regression run, flags off by default** (`eval/m8c1/run_all_flags_off.log`, during the N = 10 sizes):
+  exit 0. M0 902/902, M1 26/26, M4 4/4, M5 13/13, `countOnly` 44/44, M8 diagnostics 10/10 and 41/41; the three
+  settings, the off-switch and the Lean suite as above.
+
+#### Harness (milestone 8c-1)
+
+- `eval_run sizes8c SPECS RESULTS STARTED N off,r1,r1r2`: `countOnly` counts per family per (point, setting), with
+  R1's excluded pairs computed from the bounds (also at the early exit). `eval_run diag … N SETTING`: 8b's
+  sections plus `r1`, `m6_r3`, `m6_r4`, `m7`, with the setting's flags.
+- `SOLVE_BY_SAT_EVAL_FLAGS` (comma list `nodeBounds,exclusivePairs`; unset: both off, whatever the defaults) sets the
+  flags of `runSat` and `runSizes`; each result records `enc_flags`. `SOLVE_BY_SAT_EVAL_COMPARE` names a reference
+  results file; the shard then applies 4.4's exactness stop rules to each result (exit 6). Checked on a two-goal
+  test against a falsified reference: the stop fires.
+- The N loop records an `early_exit` row per N below s(root); no solver is called.
+- `Test/m8c1_run.py` (sizes, diag, the 4.4 checks after every chunk of 20 points, status, publish) and
+  `Test/m8c1_full.sh` (detached: sizes N = 5, diag N = 5 with R1 and R2, the rerun, sizes N = 10).
+
+#### Measurement definitions (3.9)
+
+- **M6, kinds.** Each decomposition pair is counted under the two object kinds (rigid position, value object,
+  type-template object, ground object) and the class of its symbol (level if it starts with `lvl:`, else term).
+- **M6 for R3.** For each kept candidate that gets a typing clause, the two type templates are renamed apart
+  (`L|` and `R|` prefixes; the same prefix when the candidate is a clause-side object at the same node, the same
+  frame) and unified (first order, occurs check; `mgu` in `Test/M8Diag.lean`). The idempotent most general unifier
+  gives one equation x = σ(x) per bound variable, counted as slot (σ(x) a variable), ground, or residual (σ(x)
+  has structure and variables); residual objects count σ(x)'s non-ground application nodes. Memoised on
+  (variable, candidate type template, same frame). Computed only, never built.
+- **M6 for R4.** Λ₀: the ground level terms occurring in the forest (targets, heads, values, every type template,
+  ground terms and their types). Level templates: its non-ground level subterms. Each of N rounds adds every
+  instance of every template with its variables taken from the current Λ; it stops early when a round adds
+  nothing. Cap 100,000: if Λ, or the assignments of one template, would exceed it, the point is "over the cap".
+- **M7.** A clause variable b of c is *rigidly matched* when some occurrence of b in head(c), at path π, has, for
+  every goal position g with c ▷ g, a subterm of tgt(g) at π that is neither a variable nor open. Other classes:
+  in the head but not rigidly matched; not in the head; no goal position matches c. Counted on the groundness
+  clauses of each slot (candidates and the at-least-one clause).
+- *Bug, found and fixed during the run:* the first Λ code built a template's assignment product before checking
+  the cap, and 32 diag points ran out of memory there (`last_section` m7). The run was stopped by PID, the check
+  moved before the product, the 32 records and their partial sections removed, and the run resumed. A point that
+  finished before is unaffected (over the cap either way). Recorded in `eval/m8c1/driver.log`.
+
+#### The run (`eval/m8c1/`, from `37f6646`; report `SCALE.md`)
+
+- Time projected before step 6: about 21 h (N = 5 sizes 1.5 h, diag 1.2 h, rerun 6 h, N = 10 sizes 12.7 h, from 8b's
+  times and an 8-point N = 10 sample). Under 24 h, so run detached as planned.
+- **Sizes at N = 5:** 1,200/1,200 records, no memout; 1.55 h. **Every check of 4.4 passes at every point**: the
+  flags-off count equals 8b's `total_clauses` (400/400); with R1, and with R1 and R2, the clauses less R1's units are
+  within 8b's total less the dead shares (pooled 1,282,642,144 / 1,198,819,484 of 1,498,749,386 with the rules,
+  242,921,744 / 233,138,799 of 276,055,055 without); R1's excluded pairs are at least 8b's (83 and 79 more pairs:
+  e(c) and the built-in restriction). 14 points take the early exit at N = 5 (1 with the rules, 13 without).
+- **Pooled at N = 5:** R1 shrinks the CNF 2.34× with the rules (3.24× without); R1 and R2 2.50× (3.38×);
+  per point median 2.05 (1.78). Groundness 2.15× (2.54×) with R1; decomposition 2.78× (3.58×) with both.
+- **M6–M8 at N = 5 with R1 and R2:** 400/400 points, recount checks all equal. Decomposition is 58% of the clauses
+  with the rules (82% without), groundness 39% (15%). Type-template objects take part in 80% of decomposition with
+  the rules (77% without); level symbols are 38% (12%). R3's solved forms average 0.77 residual objects per typing
+  clause; 61% (65%) of the typing clauses need none. |Λ| median 12 (2), max 476, but 62 (32) points are over the cap.
+  Rigidly matched variables carry 0.1% (5.8%) of groundness.
+- **Rerun of 8a with R1 and R2** (`eval/m8c1/rerun/`; 1.82 h runs, 0.45 h sizes; 8a 2.19 h and 0.94 h): 200/200, **no
+  stop** (4.4's exactness rules and 2.5). 64/64 of 8a's proofs again at the same N; 7 new proofs, all controls
+  (6 from 8a crashes, 1 from a timeout); 3 crashes became "no proof up to N = 10"; 97 runs changed outcome or last
+  N, mostly reaching a larger N before their limit. No goal proved in 8a ended at a limit at or before 8a's N.
+  Where both answered the same N (435 pairs): clauses 2.27×, encoding 2.26×, solving 1.75× pooled (per pair
+  median 3.56, 2.66, 2.00). 49 per-N records are early exits. The first two minutes of the rerun overlapped with
+  a `run_all` that I then stopped, so as not to disturb the solving times.
+- **Sizes at N = 10:** 1,200/1,200 records, no memout and no crash in any setting (8.4 h, overlapping a
+  `run_all`). Pooled, R1 shrinks the CNF 1.64× with the rules (2.06× without), R1 and R2 1.70× (2.11×); per point
+  median 1.50 (with the rules). The share removed is smaller than at N = 5: fewer (α, c) pairs are excluded when
+  N is larger (median 20% of `cl` pairs against 33%).
+- **The early exits** (14 points at N = 5 and the same 14 at N = 10, 1 with the rules and 13 without) all have
+  s(root) = ∞: no proof tree exists at any N (by the static tests of 6.4, ignoring unification).
+- *Surprise:* M7 shows R5 would reach little (0.1% of groundness with the rules, 5.8% without), and R4's Λ blows
+  past the cap at 62 (32) points: max-templates over a dozen ground levels grow fast within N rounds.
+
+#### Defaults (step 11, amendment 4.4)
+
+- Every check of steps 2 to 8 passed, so `EncodeOptions.nodeBounds` and `exclusivePairs` are now `true` by default
+  (and with them the tactic options). Pinned to both flags off, so they keep building what they built: the 8b tools
+  (`eval_run dimacs`, `diag-models`, `diag` without a setting, `m8b_dimacs73`), milestone 7's `eval_scaling`
+  configurations and `eval_numerals`, 8b's L1 hand count and K's "flags off" case in `test_m8diag`, and `test_m4`'s
+  milestone 4 check, which gains an R1-and-R2 loop (each label allocated once, cached, width W; 7/7). `eval_run
+  run|sizes` take the flags from `SOLVE_BY_SAT_EVAL_FLAGS` (unset: off). `bench` keeps its named configurations:
+  `all` now includes R1 and R2 (`m8off` gives SPEC 7.3's encodings). SPEC.md is not edited (4.4: it is revised in
+  the claude.ai project).
+- `eval/m8c1/SCALE.md` regenerates byte-identically, plain and under `PYTHONHASHSEED` 1 and 777 (md5 `776ef317873b`).
+- `eval/m8c1/lean_three.log` is the first three-setting run, before the guard changes (it records the failures
+  listed above).
+- **Regression (end of 8c-1):** `Test/run_all.sh` exit 0 with R1 and R2 on by default (`eval/m8c1/run_all_defaults.log`):
+  M0 902/902, M1 26/26 (the R1 and R2 mutation checks fire), M4 7/7, M5 13/13, `countOnly` 44/44, M8 diagnostics
+  10/10 and 41/41; M2, M3, M4Lean, M5Lean, M7Lean, M8Probe, M8C1Lean pass; the differentials with `m8off`, `r1`,
+  `r1r2` have 0 mismatches; the off-switch gives 54/54 DIMACS identical to 8b (and so to `5820197`); the Lean suite
+  passes in the three settings with the model check. Before the flip, the same suite with the flags off by default:
+  exit 0 (`eval/m8c1/run_all_flags_off.log`).
+
+### 8c-2a: R3 simulation (M8_PLAN 4.5; 26 November 2026)
+
+- **Plan.** The status line and amendment 4.5 were put into M8_PLAN.md as written; md5
+  `5d61ad6e4a04bf869caf26c7196ff25a` as required (`70b3db3`).
+- **Machine checks.** `git pull`: up to date. `vm.overcommit_memory` = 1; the memory controller is delegated, and a
+  400 MB allocation under `MemoryMax=200M` (`MemorySwapMax=0`) was killed (exit 137); about 6 GB available. The
+  milestone 7 checks that need `m7-data` were not rerun (as in 8a to 8c-1). `Test/run_all.sh` before any change, with
+  nothing edited or rebuilt while it ran: **exit 0, a clean record** (`eval/m8c2a/run_all_start.log`, 137 min): M0
+  902/902, M1 26/26, M4 7/7, M5 13/13, `countOnly` 44/44, M8 diagnostics 10/10 and 41/41, the three settings with 0
+  mismatches, the off-switch 54/54, the Lean suite in three settings.
+- `SolveBySat/` is unchanged; R3 is not built in the tactic. All new code is in `Test/` (diagnostics only).
+
+#### Definitions used by the simulation (`Test/M8Diag.lean`, "8c-2a")
+
+- **Triangular solved form.** `M8Diag.triangular` runs the unifier's `go` loop (the same order as `mgu`) and keeps
+  its bindings as they are made, before `resolve` applies them to each other. The two templates are renamed apart
+  as in 3.6.1, with the prefixes `L|` (the slot variable's type) and `R|` (the candidate's type); when the
+  candidate shares the slot's frame (`sameFrame`: a rigid or slot of the clause side, or a value, at the same node)
+  both get the same prefix, as the encoder's typing clause does. Since `walk` only follows variable bindings, every
+  right side is a subterm of one of the two renamed templates.
+- **Kinds of right side.** *slot*, a variable (⟦t⟧ is that variable's slot); *ground*, a ground term (⟦t⟧ is its
+  ground object); *shared residual*, anything else (⟦t⟧ is the type-template object of that subterm).
+- **Path rule.** A shared residual is located by `firstPath`: first in the L template (the slot's type, owner the
+  slot's clause or goal), then in the R template (the candidate's type, its owner); within a template in pre-order,
+  a node before its arguments, arguments left to right. The first occurrence gives (template, owner, node, path).
+  A right side found in neither is an *anomaly*; there were none at any point, in either setting.
+- **Retained.** The ⟦t⟧ objects of the shared-residual bindings of every kept candidate at that point and N, and
+  every type-template object below one (`closeBelow`). The other type-template objects are not built: they leave
+  the pair loop (decomposition) and their occurs, escape and rank clauses go. Slots and ground right sides need no
+  type-template object.
+- **Typing clauses.** Each is replaced by one `sv ⇒ L(x) = L(⟦t⟧)` per binding, with the encoder's equality gadget
+  (`eqUnder`). A candidate whose templates do not unify is left out, with its groundness clauses.
+- **Kept as today.** Ground objects stay (as in R1: they are always active, and are candidates). The label widths
+  (`SB`, `IB`, `RB`) are today's: the projection credits R3 neither with a narrower `rank` nor with a narrower
+  `idx` (fewer objects), as 4.5 asks.
+- **Counting.** `simEncode` is a copy of `encode` in the counting CNF with an R3 switch. With R3 off it must equal
+  `encode`. Variables per family are attributed by sampling `nVars` at each family switch, with the structural
+  variables under "0 structural". Decomposition clauses are counted per pair by the kinds of the two objects and
+  the symbol class (term or level), as M6 does.
+- **The model check** (`M8Diag.r3ModelCheck`, `eval_run r3-models`). The decoded substitution is read back from the
+  model's labels: each label value maps to a representative active object (rigid, type-template, value or ground)
+  or to an eigenvariable code, and the term is built from it, with ground children read as their own term. For each
+  chosen candidate (its `sv` true) with a typing clause, every triangular binding x ↦ t is checked structurally,
+  σ(x) = σ(t), and by label, L(x) = L(⟦t⟧). Two representatives of one label value that read back as different
+  terms are counted as read-back conflicts.
+
+#### Results
+
+- **Hand count** (`test_m8diag`, the forest R in `Test/M8DiagTest.lean`'s header: a polymorphic lemma `∀ A (X :
+  L(A)) (Y : A), P(X, k(Y))` against a goal `P(e, k(u))`, N = 1): 10 typing clauses, 9 of which unify and 1 does
+  not (Y against k(Y), same frame: occurs check); bindings 3 slot, 2 ground, 3 shared residual (1 in L, 2 in R);
+  4 type-template objects built, 3 retained; `sv` 11 → 10; full pairs 7 → 4. In the model, 2 chosen typed
+  candidates, 2 slot bindings, which hold. With R3 off, `simEncode` equals `encode` on R, K, SPEC 7.3 (1, 5 and 9
+  lemmas), L1 and D3 at several N with four option sets. 91/91.
+- **The model check (stop rule): passed.** 90/90 models solved, kernel-checked, skeletons equal to 8c-1's. 276 chosen
+  candidates with a typing clause; 399 bindings checked (slot 149, ground 237, shared residual 13): 0 failures, 0
+  label mismatches, 0 unreadable, 0 read-back conflicts. 307 s.
+- **Consistency: all pass.** With R3 off the replay equals 8c-1's R1-and-R2 counts (clauses, variables, every
+  family) at 400/400 points at both N, and the pooled table of 4.5 exactly. At N = 5 the typing clauses equal M6's
+  per point (4,422,137 and 334,786; templates that do not unify 6,304 and 1,378), and the decomposition by kinds
+  equals M6's. The off-switch: 54/54 DIMACS files byte-identical to `eval/m8b/dimacs_md5.txt` after the runs.
+- **The runs.** 400 points at N = 5 (0.58 h) and N = 10 (4.15 h), R3 off and on, under the 2.5 GB cap, one process
+  at a time: no memout. The projection before the start was about 5 h (an 8-point sample ran 1.8 to 1.9 times 8c-1's
+  encode time).
+- **The decision rule.** At N = 5 with the rules, R1, R2 and R3 project 1,189,864,226 clauses against 1,198,832,528:
+  ratio 0.9925, above 0.8. Without the rules 0.8880; at N = 10, 0.9820 with the rules and 0.8667 without.
+  `eval/m8c2a/R3SIM.md` (from `python3 eval/m8c2a/report.py`) regenerates byte-identically, twice and under
+  `PYTHONHASHSEED` 1 and 777 (md5 `f7b5871a9dc8`).
+
+#### Surprising, and deviations
+
+- **Little is dropped with the rules.** Of 59,757 type-template objects at N = 5, 56,159 (94.0%) are retained: most
+  lie below a ⟦t⟧ of some binding (36,337 are ⟦t⟧ themselves). Decomposition falls 3.3% (full pairs 5,148,456 →
+  4,960,815). Without the rules 75.7% are retained and decomposition falls 14.1%.
+- **Groundness grows** (2.9% with the rules, 3.4% without): there are more bindings than typing clauses (4,640,190
+  against 4,422,137 with the rules), and each binding gets its own equality under `sv`.
+- **The triangular split differs from M6's.** M6 counted equations of the idempotent solved form. Over both sets at
+  N = 5, the triangular form gives the same number of equations (4,995,462) and the same unifiable count, but a
+  different split: slot 755,698 against M6's 755,134; ground 2,395,489 against 2,395,577; residual 1,844,275 against
+  1,844,751. A binding x ↦ y that `resolve` would turn into x ↦ f(…) stays a slot binding here.
+- **Read-back artefact, fixed before the run.** The first model-check pass reported read-back conflicts in 9 named
+  cases: ground leaf children have no label (labels are allocated lazily) and read as "?". Ground children are now
+  read as their own term; after a rerun from scratch, 0 conflicts.
+- **Timing file.** `eval/m8c2a/models/timing.json` was overwritten by the detached driver's no-op pass (2 s); the
+  report takes the model-check wall time from `models/run.log` instead (the sum over every pass, 307 s).
+- **Time.** The two N took 4.73 h together, against the projected 5 h.
+
+#### Harness (8c-2a)
+
+- `eval_run diag SPECS RESULTS SECTIONS N r3` (R1 and R2 on; sections `forest`, `r3_off`, `r3_on`), `eval_run
+  r3-models SPECS RESULTS` (the model check, flags off, as `diag-models`), `Test/m8c2a_run.py` (`models`, `sim`,
+  `check`, `status`, `publish`; stop codes 8 for the model check and 7 for consistency), `Test/m8c2a_full.sh`
+  (detached: `setsid nohup Test/m8c2a_full.sh &`, log `eval/m8c2a/driver.log`), `eval/m8c2a/report.py`.
+
+- **Regression (end of 8c-2a):** `Test/run_all.sh` exit 0 at `98884d7` plus this section, with R1 and R2 on by default
+  (`eval/m8c2a/run_all_end.log`): M0 902/902, M1 26/26, M4 7/7, M5 13/13, `countOnly` 44/44, M8 diagnostics 10/10,
+  41/41 and 91/91 (the R3 hand count and R3 off against `encode`); M2, M3, M4Lean, M5Lean, M7Lean, M8Probe, M8C1Lean
+  pass; the differentials with `m8off`, `r1`, `r1r2` have 0 mismatches; the off-switch gives 54/54 DIMACS identical to
+  8b; the Lean suite passes in the three settings with the model check. `SolveBySat/` is unchanged in 8c-2a. (A first
+  end-of-stage run was cut off in `test_m5` by a power failure; this is a full rerun from scratch.)
+
+### 8d: evaluation (M8_PLAN 4.6; 26 November 2026)
+
+- **Plan.** The status line and amendment 4.6 were put into M8_PLAN.md as written; md5
+  `3de303ee2a0a7ca24d0e00dbb5e367f5` as required (`4a64683`).
+- **Machine checks.** `git pull`: up to date. `vm.overcommit_memory` = 1; the memory controller is delegated, and a
+  400 MB allocation under `MemoryMax=200M` (`MemorySwapMax=0`) was killed (SIGKILL); about 6 GB available. The
+  milestone 7 checks that need `m7-data` were not rerun (as in 8a to 8c-2a). `Test/run_all.sh` before any change, with
+  nothing edited or rebuilt while it ran: **exit 0, a clean record** (`eval/m8d/run_all_start.log`, 88 min).
+- `SolveBySat/` is unchanged. All new code is in `Test/` (harness only).
+
+#### Inputs, sample and specs
+
+- `eval/m8d/inputs/results.jsonl` and `specs_full.jsonl`, extracted from `m7-data` (`git show`): md5 `944cc58e…` and
+  `f165d828…`, as 4.6 requires.
+- Group sizes recomputed from the main-run records (key `main:`; 6,000 of the 6,300, R1b's 300 left out): crash_B
+  490, crash_A 807, control_proved 976, control_no_proof 3,083, as in 4.6. All 1,297 crashes have `cause` `oom`.
+  Milestone 7's crash records have no `id` or `tier` field (the driver writes them); the tier is the key's letter
+  after `main:`.
+- `eval/m8d/sample.tsv` with the 8a rule (SHA-256 of `"80401:<key>"`, ties by key): md5 `1f097a46210bd923e98ed24d9d15b7c2`
+  and the two first keys of 4.6, at the first try.
+- `eval/m8d/specs.jsonl` (md5 `c4d81f67bb28c1af5c3d289b3e4cea58`): each sampled goal's line of `specs_full.jsonl`
+  with `baselines` false and one added field, `m8d_group` (ignored by `eval_run`), in sample order.
+  `specs_pilot.jsonl` (md5 `16f7a29925da…`): its first 5 per group.
+- Every sampled milestone 7 crash has a `last_N` (1 to 10) and phase `sat`; no milestone 7 timeout lacks per-N rows.
+
+#### Harness (8d)
+
+- **R1 and R2 on.** The harness's own default for the milestone 8 flags is off (8c-1), so `Test/m8d_run.py run` sets
+  `SOLVE_BY_SAT_EVAL_FLAGS=nodeBounds,exclusivePairs`, the tactic's defaults. Every result records `enc_flags`.
+- **Exactness (4.6)**, against `SOLVE_BY_SAT_EVAL_COMPARE=eval/m8d/inputs/results.jsonl`:
+  - in the shard, 8c-1's `exactnessStop`, unchanged. `loadReference` now reads each record through `referenceOf`,
+    which also treats a timeout without per-N rows as a crash (every N below `last_N` UNSAT), as 4.6 says; no
+    milestone 7 record has that form, so 8c-1's reference is unchanged.
+  - **Deviation: an exactness stop now exits 9** (in 8c-1 it shared 6 with the 4.2 and 2.5 stop rules); a record
+    with both kinds of stop keeps 6. `Test/eval_driver.py` passes 9 through.
+  - **Added: crash records written by the driver.** These never reach the shard's check. A crash at `last_N` = L
+    passed every N below L without a proof, so the driver flags it (exit 9, the record gets `stop`) when the
+    reference proved at N < L, or when the goal is not in the reference (`crash_exactness`).
+  - **Tests** (in `Test/run_all.sh`): `eval_run exactness-selftest`, 13 hand-made cases (each of the three stop
+    cases, also against a crash and a timeout reference, the early exit, and six agreements that must not stop),
+    and `eval_driver.py exactness-selftest`, 10 cases (the crash-record check and `reference_of` against the Lean
+    reading). Both pass.
+- `Test/m8d_run.py` (`pilot-specs`, `run`, `projection`, `status`, `publish`) reuses `Test/m8a_run.py`'s `run` (the
+  driver with the cap, the watchdog and crash records, then the `countOnly` sizes at N = 5 and the run's last N, each
+  spec in its own capped process). `Test/m8d_full.sh pilot|full`, detached, publishes `eval/m8d` after every shard.
+- `eval/m8d/report.py` writes `eval/m8d/EVAL8.md`; it recomputes the exactness rules from the records itself.
+
+#### Pilot and projection
+
+- The 20 pilot runs (20:31, 4.5 min of runs and 0.8 min of sizes): no stop. Projected per group as the larger of
+  (a) the pilot's mean time per run, overhead and sizes included, times the group size, and (b) the pilot's ratio to
+  milestone 7's N-loop time (`loop_ms`, or a crash's `elapsed_s` less its baselines' time) applied to the sampled
+  goals' milestone 7 times: **1.9 h** for the 300 runs. Under 24 h, so the full run followed at once, in the same
+  directory; nothing changed in between, so the pilot's runs count.
+
+#### Results (`eval/m8d/EVAL8.md`, md5 `55736ef45bf8…`)
+
+- **Stops: none.** The exactness rules, recomputed by the report, find 0 disagreements. Every new proof was decoded
+  and kernel-checked by the harness.
+- **crash_B:** 4 proved (4.0%, Wilson [1.6%, 9.8%]), 34 certified "no proof ≤ 10" (34.0%), 4 timed out, 58 still
+  crash (58.0%, [48.2%, 67.2%]). **crash_A:** 0 proved ([0%, 3.7%]), 36 "no proof ≤ 10", 5 timed out, 59 still crash.
+  Every timeout is the solver's 20 s limit; no run hit the 300 s watchdog.
+- **Controls:** 50/50 proved at milestone 7's N; 49/50 "no proof ≤ 10"; 608 N answered by both, all the same.
+  The N loop takes 0.39 (proved) and 0.53 (no proof) of milestone 7's time.
+- **The control at a resource limit:** `main:A/Bool.ite_eq_true_distrib` timed out at N = 10 (solver, 20 s), where
+  milestone 7 answered UNSAT in 6.9 s. N = 1 to 9 agree (UNSAT); at N = 9 both took about 15 s, so this goal is near
+  the per-call limit. 8d's CNF at N = 10 is smaller (2,223,377 clauses against 2,550,846); the solver's time on it is
+  not. A resource limit, not a stop (4.6).
+- **Time:** runs 1.56 h, sizes 0.40 h (projected 1.9 h).
+
+#### Surprising
+
+- **Most crashes still crash, but later.** Of the 117 that still crash, 96 reach a higher N than in milestone 7, and
+  none a lower one (median last N 7 against 6).
+- **The `countOnly` sizes never hit the cap**, even at the N where a run crashed (585 records, all counted). The
+  crashes are in building or solving the CNF, not in counting it.
+- **Early exits certify quickly.** 14 crash goals (9 in B, 5 in A) and 7 no-proof controls exit early at every N:
+  "no proof at any N", in well under a second, where milestone 7 crashed or solved ten CNFs.
+- **The new proofs are all Tier B** (N = 4, 5, 5, 9); crash_A has none.
+- **Decomposition** is 92% (B) and 84% (A) of the crash groups' clauses at N = 5, and groundness grows with N (to
+  20% and 29% at the last N).
+- **Regression (end of 8d):** `Test/run_all.sh` exit 0 at `d5776b3` plus this section, with R1 and R2 on by default
+  (`eval/m8d/run_all_end.log`, 83 min): M0 902/902, M1 26/26, M4 7/7, M5 13/13, `countOnly` 44/44, M8 diagnostics
+  10/10, 41/41 and 91/91; the exactness self-tests 13/13 (Lean) and 10/10 (driver); M2, M3, M4Lean, M5Lean, M7Lean,
+  M8Probe, M8C1Lean pass; the differentials with `m8off`, `r1`, `r1r2` have 0 mismatches; the off-switch gives 54/54
+  DIMACS identical to 8b; the Lean suite passes in the three settings with the model check. `SolveBySat/` is unchanged
+  in 8d.
+
+### End of milestone 8: spec, archive tag and merge (M8_PLAN 4.7; 27 November 2026)
+
+- **Checks before any edit.** `git pull` on `m8`: up to date at `a31d7ea`. `lake build` succeeds. Machine: the
+  cgroup memory controller is delegated, `vm.overcommit_memory = 1`, `systemd-run --user` and `systemctl --user`
+  work, the bundled CaDiCaL is 2.1.2; 7 GB RAM. `M8_PLAN.md` had md5 `3de303ee2a0a…`, as required.
+- **Plan.** The status line and amendment 4.7 were added to `M8_PLAN.md` exactly as given; md5 `37e4d7e140e0…`,
+  as required, ending in a single newline. Committed on `m8` (`2dfa75c`).
+- **Spec.** The owner's revised `SPEC.md` was on `origin/main` (`3ac2e8f`, after `6a6789d` deleted the old one),
+  not in this working tree, so it was copied from there, as at the end of milestone 7. md5 `550956e3c0c2…`, as
+  required. Committed on `m8` ("SPEC.md: fold in milestone 8", `2512553`); `m8` pushed.
+- **Archive tag.** `m8-data` (annotated: "Milestone 8 data, archived; the reports under eval/m8a to eval/m8d
+  regenerate here"; tag object `c38983d`) on `2512553`, the head of `m8`, pushed. Nothing more is committed to `m8`.
+- **8d's crash records and the flags.** The flags were set process-wide (`SOLVE_BY_SAT_EVAL_FLAGS`, set in `Test/m8d_run.py`'s
+  environment and inherited by the driver and every shard), so the 117 crash records without `enc_flags` still ran with R1 and R2.
+- **Merge.** Branch `m8-merge` from `origin/main` (`3ac2e8f`), `git merge --no-ff --no-commit m8-data`. No
+  conflict: `SPEC.md` is the same on both sides.
+  - *Kept outside `eval/`:* everything from `m8-data`.
+  - *Kept in `eval/`:* milestone 7's `report.py`, `merge.py`, `reviews/` and `README.md` (rewritten for both
+    tags); in each of `eval/m8a/` to `eval/m8d/` the report and its `report.py` (`m8a/PROBE.md`, `m8b/DIAG.md`,
+    `m8c1/SCALE.md`, `m8c2a/R3SIM.md`, `m8d/EVAL8.md`); the fixtures `eval/m8b/specs_named_dimacs.jsonl` and
+    `eval/m8b/dimacs_md5.txt`; and the new `eval/run_all_m8_merge.log`.
+  - *Fixtures, found by reading the scripts:* of what `Test/run_all.sh` runs, only `Test/m8c1_offswitch.sh` reads
+    files under `eval/` (the two above). `Test/m8c1_lean.sh` and the off-switch only make scratch directories in
+    `eval/`; the test executables, the Lean files and the exactness self-tests read nothing there. The other
+    `eval/m8*` paths named in `Test/` are in the stage drivers (`m8*_run.py`, `m8*_setup.py`, `m8*_full.sh`),
+    which are not tests. The run below confirms it: no test needed a removed file.
+  - *Removed from the merged tree* (they stay on `m8-data`): 239 files, 33.2 MB.
+
+| path | files | size |
+| --- | --- | --- |
+| `eval/m8a/` (top level) | 12 | 523.3 kB |
+| `eval/m8a/full` | 14 | 776.6 kB |
+| `eval/m8a/inputs` | 10 | 6.7 MB |
+| `eval/m8a/named_check` | 5 | 48.5 kB |
+| `eval/m8a/named_check_4.1` | 5 | 48.5 kB |
+| `eval/m8a/pilot` | 9 | 63.5 kB |
+| `eval/m8b/` (top level) | 4 | 211.5 kB |
+| `eval/m8b/inputs` | 3 | 41.7 kB |
+| `eval/m8b/models` | 3 | 49.2 kB |
+| `eval/m8b/points` | 4 | 1.4 MB |
+| `eval/m8c1/` (top level) | 6 | 85.0 kB |
+| `eval/m8c1/diag_N5` | 23 | 2.3 MB |
+| `eval/m8c1/models` | 3 | 52.9 kB |
+| `eval/m8c1/rerun` | 13 | 881.5 kB |
+| `eval/m8c1/sizes_N10` | 23 | 1.2 MB |
+| `eval/m8c1/sizes_N5` | 23 | 1.1 MB |
+| `eval/m8c2a/` (top level) | 5 | 49.2 kB |
+| `eval/m8c2a/models` | 4 | 33.0 kB |
+| `eval/m8c2a/sim_N10` | 23 | 1.4 MB |
+| `eval/m8c2a/sim_N5` | 23 | 1.3 MB |
+| `eval/m8d/` (top level) | 8 | 232.5 kB |
+| `eval/m8d/inputs` | 2 | 13.4 MB |
+| `eval/m8d/runs` | 14 | 1.3 MB |
+| **total** | 239 | 33.2 MB |
+
+  - Files over 1 MB among them:
+    - `eval/m8a/inputs/corpus.jsonl` (2.0 MB)
+    - `eval/m8a/inputs/final.jsonl` (3.0 MB)
+    - `eval/m8b/points/sections.jsonl` (1.3 MB)
+    - `eval/m8c1/diag_N5/sections.jsonl` (2.1 MB)
+    - `eval/m8c2a/sim_N10/sections.jsonl` (1.2 MB)
+    - `eval/m8c2a/sim_N5/sections.jsonl` (1.1 MB)
+    - `eval/m8d/inputs/results.jsonl` (11.0 MB)
+    - `eval/m8d/inputs/specs_full.jsonl` (2.3 MB)
+  - **`report.py` on `main`** (run on a scratch copy of the merged index, so that no committed file could change):
+    - `eval/m8a/report.py`: exit 1, `IndexError` (no runs in `eval/m8a/full/`); writes nothing.
+    - `eval/m8b/report.py`: exit 1, `IndexError`; writes nothing.
+    - `eval/m8c1/report.py`: exit 0, and **overwrites `SCALE.md`** with a 960-byte stub ("No data" in each
+      section, zero rows in the model table).
+    - `eval/m8c2a/report.py`: exit 0, and **overwrites `R3SIM.md`** with a 2,792-byte stub.
+    - `eval/m8d/report.py`: exit 1, `FileNotFoundError: eval/m8d/sample.tsv`; writes nothing.
+    - The reports are unchanged, as asked. The two silent overwrites are a hazard on `main`: `eval/README.md` and
+      CLAUDE.md say not to run the milestone 8 reports there, and how to undo it (`git checkout -- eval/`). A
+      guard ("data is on tag m8-data") would be a one-line change to each script if the owner wants one.
+  - CLAUDE.md now describes `main`: the layout, the data on `m7-data` and `m8-data`, that milestone 8 is done and
+    R1 and R2 are on by default, and the harness notes that still apply (the harness's own default for the flags
+    is off; `SOLVE_BY_SAT_EVAL_FLAGS`, `SOLVE_BY_SAT_EVAL_COMPARE`, exit 9).
+  - `SolveBySat/` is `m8-data`'s, unchanged.
+- **Regression (end of milestone 8, the merge):** on the merged tree (before the merge commit), `lake build` and
+  `Test/run_all.sh` exit 0 (`eval/run_all_m8_merge.log`, 137 min on this machine): M0 902/902, M1 26/26, M4 7/7,
+  M5 13/13, `countOnly` 44/44, M8 diagnostics 10/10, 41/41 and 91/91; M2, M3, M4Lean, M5Lean, M7Lean, M8Probe and
+  M8C1Lean pass; the differentials with `m8off`, `r1`, `r1r2` (M1 20/20, M5 10/10 each) have 0 mismatches; the
+  exactness self-tests 13/13 (Lean) and 10/10 (driver); the off-switch gives 54/54 DIMACS identical to
+  `eval/m8b/dimacs_md5.txt` (from the kept fixtures); the Lean suite passes in the three settings with the model
+  check, with the same proof node counts in each. No test needed a removed file. The code is `m8-data`'s, unchanged;
+  the reports regenerate on `m8-data` (they were checked byte-identical at the end of each stage, and 8d's again by
+  the owner).

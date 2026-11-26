@@ -23,6 +23,11 @@ for cfg in m8off r1 r1r2; do
   .lake/build/bin/test_m1 1500 4 "$cfg" | grep -E "^(FAIL|MISMATCH)|differential|^M1:" || status=1
   .lake/build/bin/test_m5 3000 4 "$cfg" | grep -E "^(FAIL|MISMATCH)|differential|^M5:" || status=1
 done
+# 8d (M8_PLAN 4.6): the exactness comparison flags a hand-made disagreement in each stop case
+echo "== exactness comparison"
+# (pipefail: a failing self-test fails the pipeline)
+.lake/build/bin/eval_run exactness-selftest | grep -E "^FAIL|^exactness" || status=1
+python3 Test/eval_driver.py exactness-selftest | grep -E "^FAIL|^driver exactness" || status=1
 echo "== off-switch"
 Test/m8c1_offswitch.sh || status=1
 echo "== Lean suite, three settings"

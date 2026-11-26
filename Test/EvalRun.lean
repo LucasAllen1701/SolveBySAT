@@ -380,22 +380,28 @@ def readKeys (path : System.FilePath) : IO (Std.HashSet String) := do
       if let .ok k := j.getObjValAs? String "key" then ks := ks.insert k
   return ks
 
-/-- 8c-1 (M8_PLAN 4.4): a reference run's answers per goal: the N where it was UNSAT (per-N rows
-`unsat`; for a crash record, every N below `last_N`) and the N of its proof, if any. -/
+/-- 8c-1 (M8_PLAN 4.4): one reference record's answers: the N where it was UNSAT (per-N rows
+`unsat`; for a crash record, and (8d, M8_PLAN 4.6) for a timeout record without per-N rows, every N
+below `last_N`) and the N of its proof, if any. -/
+def referenceOf (j : Json) : Array Nat × Option Nat := Id.run do
+  let outcome := (j.getObjValAs? String "outcome").toOption.getD ""
+  let rows := (j.getObjValAs? (Array Json) "per_N").toOption.getD #[]
+  let mut unsat : Array Nat := #[]
+  if outcome == "crash" || (outcome == "timeout" && rows.isEmpty) then
+    unsat := (List.range ((j.getObjValAs? Nat "last_N").toOption.getD 1)).toArray.filter (· ≥ 1)
+  for r in rows do
+    if (r.getObjValAs? String "result").toOption == some "unsat" then
+      if let .ok n := r.getObjValAs? Nat "N" then unsat := unsat.push n
+  let proved := if outcome == "proved" then (j.getObjValAs? Nat "N").toOption else none
+  return (unsat, proved)
+
+/-- 8c-1 (M8_PLAN 4.4): a reference run's answers per goal (`referenceOf`). -/
 def loadReference (path : System.FilePath) : IO (Std.HashMap String (Array Nat × Option Nat)) := do
   let mut m := {}
   for l in (← IO.FS.readFile path).splitOn "\n" do
     let .ok j := Json.parse l | continue
     let .ok k := j.getObjValAs? String "key" | continue
-    let outcome := (j.getObjValAs? String "outcome").toOption.getD ""
-    let mut unsat : Array Nat := #[]
-    if outcome == "crash" then
-      unsat := (List.range ((j.getObjValAs? Nat "last_N").toOption.getD 1)).toArray.filter (· ≥ 1)
-    for r in (j.getObjValAs? (Array Json) "per_N").toOption.getD #[] do
-      if (r.getObjValAs? String "result").toOption == some "unsat" then
-        if let .ok n := r.getObjValAs? Nat "N" then unsat := unsat.push n
-    let proved := if outcome == "proved" then (j.getObjValAs? Nat "N").toOption else none
-    m := m.insert k (unsat, proved)
+    m := m.insert k (referenceOf j)
   return m
 
 /-- The exactness stop rules of M8_PLAN 4.4 for one result against the reference: a proof at an N
@@ -415,6 +421,43 @@ def exactnessStop (ref : Array Nat × Option Nat) (sat : Json) : Option String :
     if (res == "unsat" || res == "early_exit") && proved == some n then
       return some s!"{res} at N = {n}, where the reference run found a proof"
   return none
+
+/-- 8d (M8_PLAN 4.6): the exactness comparison must flag a hand-made disagreement in each of the
+three stop cases, and must not flag agreements. Exit 1 on any failure. -/
+def exactnessSelftest : IO UInt32 := do
+  let pj := fun (s : String) => match Json.parse s with | .ok j => j | .error _ => Json.null
+  let row := fun (n : Nat) (r : String) => s!"\{\"N\": {n}, \"result\": \"{r}\"}"
+  let rec_ := fun (out : String) (n : Option Nat) (rows : List String) (lastN : Option Nat) =>
+    pj ("{\"outcome\": \"" ++ out ++ "\"" ++ (match n with | some k => s!", \"N\": {k}" | none => "") ++
+      (match lastN with | some k => s!", \"last_N\": {k}" | none => "") ++
+      ", \"per_N\": [" ++ ", ".intercalate rows ++ "]}")
+  -- references: proved at 3; no proof up to 4; a crash at last_N 4 (UNSAT at 1..3); a timeout without rows
+  let refProved := referenceOf (rec_ "proved" (some 3) [row 1 "unsat", row 2 "unsat", row 3 "proved"] none)
+  let refNoProof := referenceOf (rec_ "no_proof_le_Nmax" none [row 1 "unsat", row 2 "unsat", row 3 "unsat", row 4 "unsat"] none)
+  let refCrash := referenceOf (pj "{\"outcome\": \"crash\", \"cause\": \"oom\", \"last_N\": 4}")
+  let refTimeout := referenceOf (pj "{\"outcome\": \"timeout\", \"last_N\": 3}")
+  let cases : List (String × (Array Nat × Option Nat) × Json × Bool) := [
+    ("1 a proof where the reference was UNSAT", refNoProof, rec_ "proved" (some 2) [row 1 "unsat", row 2 "proved"] none, true),
+    ("1 a proof below a reference crash's last_N", refCrash, rec_ "proved" (some 3) [row 1 "unsat", row 2 "unsat", row 3 "proved"] none, true),
+    ("1 a proof below a reference timeout's last_N", refTimeout, rec_ "proved" (some 2) [row 1 "unsat", row 2 "proved"] none, true),
+    ("2 UNSAT at the reference's proof N", refProved, rec_ "no_proof_le_Nmax" none [row 1 "unsat", row 2 "unsat", row 3 "unsat", row 4 "unsat"] none, true),
+    ("2 the early exit at the reference's proof N", refProved, rec_ "no_proof_le_Nmax" none [row 1 "unsat", row 2 "unsat", row 3 "early_exit"] none, true),
+    ("2 UNSAT at the reference's proof N, then a timeout", refProved, rec_ "timeout" none [row 1 "unsat", row 2 "unsat", row 3 "unsat", row 4 "timeout"] none, true),
+    ("3 both prove, at different N", refProved, rec_ "proved" (some 4) [row 1 "unsat", row 2 "unsat", row 3 "unknown", row 4 "proved"] none, true),
+    ("agree: proved at the reference's N", refProved, rec_ "proved" (some 3) [row 1 "unsat", row 2 "unsat", row 3 "proved"] none, false),
+    ("agree: no proof against no proof", refNoProof, rec_ "no_proof_le_Nmax" none [row 1 "unsat", row 2 "unsat", row 3 "unsat", row 4 "unsat"] none, false),
+    ("agree: a proof at a reference crash's last_N", refCrash, rec_ "proved" (some 4) [row 1 "unsat", row 2 "unsat", row 3 "unsat", row 4 "proved"] none, false),
+    ("agree: a proof above a reference crash's last_N", refCrash, rec_ "proved" (some 6) [row 1 "unsat", row 5 "unsat", row 6 "proved"] none, false),
+    ("agree: the early exit against a crash", refCrash, rec_ "no_proof_le_Nmax" none [row 1 "early_exit"] none, false),
+    ("agree: a timeout below the reference's proof N", refProved, rec_ "timeout" none [row 1 "unsat", row 2 "timeout"] none, false)]
+  let mut fails := 0
+  for (name, ref, res, want) in cases do
+    let got := exactnessStop ref res
+    let ok := got.isSome == want
+    unless ok do fails := fails + 1
+    IO.println s!"{if ok then "PASS" else "FAIL"} {name}: {got.getD "no stop"}"
+  IO.println s!"exactness (M8_PLAN 4.6): {cases.length - fails} passed, {fails} failed"
+  return (if fails == 0 then 0 else 1)
 
 unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UInt32 := do
   -- 8c-1: the reference run for the exactness stop rules of M8_PLAN 4.4, if any
@@ -514,7 +557,9 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
         match m.get? s.key with
         | some ref => (exactnessStop ref sat).map ("exactness (M8_PLAN 4.4): " ++ ·)
         | none => some "exactness (M8_PLAN 4.4): the goal is not in the reference run"
+      -- 8d (M8_PLAN 4.6): an exactness stop has its own exit code, 9 (8c-1 used 6)
       let stop := stop <|> exact
+      let exactOnly := exact.isSome && stop == exact
       let j := (Json.mkObj head).mergeObj sat |>.mergeObj bl |>.mergeObj scal |>.mergeObj
         (Json.mkObj ([("total_ms", Json.num (← msSince t0)),
                      ("rss_mb", Json.num rss), ("hwm_mb", Json.num hwm)] ++
@@ -524,8 +569,8 @@ unsafe def runShard (specsPath results started warmup : System.FilePath) : IO UI
         IO.eprintln s!"STOP: {(sat.getObjValD "outcome").compress} on {s.key}: {(sat.getObjValD "reason").compress}"
         return 3
       if let some m := stop then
-        IO.eprintln s!"STOP (EVAL_PLAN 10.9 decision 9, M8_PLAN 2.5): {m} on {s.key}"
-        return 6
+        IO.eprintln s!"STOP (EVAL_PLAN 10.9 decision 9, M8_PLAN 2.5, 4.4, 4.6): {m} on {s.key}"
+        return (if exactOnly then 9 else 6)
     | .error e =>
       appendLine results (Json.mkObj (head ++ [("outcome", jStr "harness_error"),
         ("reason", jStr (toString e))])).compress
@@ -802,6 +847,7 @@ unsafe def main (args : List String) : IO UInt32 := do
   | ["probe-rules", specs, results] => runProbeRules specs results
   | ["run", specs, results, started, warmup] => runShard specs results started warmup
   | ["sizes", specs, results, started] => runSizes specs results started
+  | ["exactness-selftest"] => exactnessSelftest
   | "verify-removed" :: cs =>
     let env ← importEnv #[`Init, `Std]
     let names := nameTable env

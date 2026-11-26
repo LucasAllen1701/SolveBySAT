@@ -97,3 +97,33 @@ crash(shard, oom) on main:A/Array.le_snd_of_mem_zipIdx
 crash(shard, oom) on main:A/Int32.shiftRight_xor
 crash(shard, oom) on main:A/BitVec.srem_zero
 shard 2: done; 170 results; 3913 s
+crash(shard, oom) on main:A/Std.IterM.step_dropWhileM
+crash(shard, oom) on main:A/Std.TreeMap.Raw.getElem!_filterMap'
+crash(shard, oom) on main:A/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff
+crash(shard, oom) on main:A/Std.Internal.List.maxKey?_eraseKey_eq_iff_beq_maxKey?_eq_false
+crash(shard, oom) on main:A/Array.findSomeRev?_push_of_isNone
+crash(shard, oom) on main:A/_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.isUTF8ContinuationByte_of_assemble₃_eq_some_right
+crash(shard, oom) on main:A/_private.Std.Data.DTreeMap.Internal.Zipper.0.Std.DTreeMap.Internal.toList_roiIter
+crash(shard, oom) on main:A/Std.TreeMap.Raw.mem_alter_of_compare_eq
+crash(shard, oom) on main:A/List.beq_eq_isEqv
+crash(shard, oom) on main:A/String.Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar?
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Equiv.constGet!_eq
+crash(shard, oom) on main:A/List.mapIdx_eq_cons_iff
+crash(shard, oom) on main:A/Std.HashMap.isEmpty_diff_iff
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.get_map'
+crash(shard, oom) on main:A/Option.mem_toArray
+crash(shard, oom) on main:A/Std.DHashMap.Const.isEmpty_toList
+crash(shard, oom) on main:A/Array.of_push_eq_push
+crash(shard, oom) on main:A/Std.Rio.toList_succ_eq_map
+crash(shard, oom) on main:A/Std.Internal.List.insertEntry_append_of_not_contains_right
+crash(shard, oom) on main:A/Std.TreeMap.find?_toList_eq_some_iff_getKey?_eq_some_and_getElem?_eq_some
+crash(shard, oom) on main:A/Std.DHashMap.equiv_emptyWithCapacity_iff_isEmpty
+crash(shard, oom) on main:A/Nat.size_rco
+crash(shard, oom) on main:A/Lean.Grind.Ring.intCast_mul_comm
+crash(shard, oom) on main:A/Std.ExtTreeSet.insertMany_list_eq_foldl
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.minKey?_eq_some_iff_getKey?_eq_self_and_forall
+crash(shard, oom) on main:A/Vector.foldlM_attachWith
+crash(shard, oom) on main:A/Array.attach_congr
+crash(shard, oom) on main:A/Std.HashMap.getElem!_insertMany_list_of_mem
+crash(shard, oom) on main:A/Std.WP.Spec.IterM.forIn_mapM
+shard 3: done; 220 results; 5067 s

@@ -82,7 +82,7 @@ Requirements:
 Machine differences (CPU speed, RAM) change times and possibly which goals hit the cap. Record the
 machine's specs in NOTES.md before a full run.
 
-## Status (25 November 2026)
+## Status (26 November 2026)
 
 - **Milestone 7 (evaluation) is done** and merged into `main` (NOTES.md, "Milestone 7: summary" and "End
   of milestone 7: spec, archive tag and merge"; EVAL_PLAN §10.11). The owner decided: scale first, with a
@@ -120,7 +120,14 @@ machine's specs in NOTES.md before a full run.
     `Test/m8c1_full.sh`. The 8b and milestone 7 tools (`dimacs`, `diag-models`, `m8b_dimacs73`, `eval_scaling`,
     `eval_numerals`, the 8b hand count, `test_m4`'s milestone 4 check) pin both flags off. Exact-output Lean guards
     that differ under R1 are pinned to the flags off, each with an R1 twin.
-  - **Next: choosing what 8c-2 builds (R3, R4, R5), in the claude.ai project**, with SCALE.md in hand.
+  - Amendment 4.5: R5 is dropped, R4 set aside; R3 is simulated first (8c-2a) and built (8c-2b) only if its projected
+    pooled clauses with the rules at N = 5 are at most 0.8 of R1 and R2's; then 8d.
+  - **8c-2a, the R3 simulation, is done** (NOTES.md, "8c-2a: R3 simulation"); diagnostic code only, `SolveBySat/`
+    unchanged. Report `eval/m8c2a/R3SIM.md` from `python3 eval/m8c2a/report.py`; data in `eval/m8c2a/` (`models/`,
+    `sim_N5/`, `sim_N10/`). Projected ratio at N = 5 with the rules 0.9925 (rule: at most 0.8). Tools:
+    `M8Diag.simEncode`/`r3sim`/`r3ModelCheck`, `eval_run diag … r3`, `eval_run r3-models`, `Test/m8c2a_run.py`,
+    `Test/m8c2a_full.sh`; the hand count on the forest R in `test_m8diag`.
+  - **Next: the owner decides on R3SIM.md (8c-2b or 8d), in the claude.ai project.**
 - Milestone 8 rules: as milestone 7's. Only exact reductions (M8_PLAN 3.1, 4.4); SPEC.md is revised in the claude.ai
   project, not here. Do not change `SolveBySat/` in 8a. Filters, seeds, sample sizes and
   limits are pre-registered in `M8_PLAN.md` and NOTES.md; a decoder failure on a satisfiable CNF, or a

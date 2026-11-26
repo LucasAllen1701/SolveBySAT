@@ -3163,3 +3163,104 @@ depth(α) ≥ d(g) and α + s(g) ≤ N, and a node with `cl(α, c)` has depth(α
   `r1r2` have 0 mismatches; the off-switch gives 54/54 DIMACS identical to 8b (and so to `5820197`); the Lean suite
   passes in the three settings with the model check. Before the flip, the same suite with the flags off by default:
   exit 0 (`eval/m8c1/run_all_flags_off.log`).
+
+### 8c-2a: R3 simulation (M8_PLAN 4.5; 26 November 2026)
+
+- **Plan.** The status line and amendment 4.5 were put into M8_PLAN.md as written; md5
+  `5d61ad6e4a04bf869caf26c7196ff25a` as required (`70b3db3`).
+- **Machine checks.** `git pull`: up to date. `vm.overcommit_memory` = 1; the memory controller is delegated, and a
+  400 MB allocation under `MemoryMax=200M` (`MemorySwapMax=0`) was killed (exit 137); about 6 GB available. The
+  milestone 7 checks that need `m7-data` were not rerun (as in 8a to 8c-1). `Test/run_all.sh` before any change, with
+  nothing edited or rebuilt while it ran: **exit 0, a clean record** (`eval/m8c2a/run_all_start.log`, 137 min): M0
+  902/902, M1 26/26, M4 7/7, M5 13/13, `countOnly` 44/44, M8 diagnostics 10/10 and 41/41, the three settings with 0
+  mismatches, the off-switch 54/54, the Lean suite in three settings.
+- `SolveBySat/` is unchanged; R3 is not built in the tactic. All new code is in `Test/` (diagnostics only).
+
+#### Definitions used by the simulation (`Test/M8Diag.lean`, "8c-2a")
+
+- **Triangular solved form.** `M8Diag.triangular` runs the unifier's `go` loop (the same order as `mgu`) and keeps
+  its bindings as they are made, before `resolve` applies them to each other. The two templates are renamed apart
+  as in 3.6.1, with the prefixes `L|` (the slot variable's type) and `R|` (the candidate's type); when the
+  candidate shares the slot's frame (`sameFrame`: a rigid or slot of the clause side, or a value, at the same node)
+  both get the same prefix, as the encoder's typing clause does. Since `walk` only follows variable bindings, every
+  right side is a subterm of one of the two renamed templates.
+- **Kinds of right side.** *slot*, a variable (⟦t⟧ is that variable's slot); *ground*, a ground term (⟦t⟧ is its
+  ground object); *shared residual*, anything else (⟦t⟧ is the type-template object of that subterm).
+- **Path rule.** A shared residual is located by `firstPath`: first in the L template (the slot's type, owner the
+  slot's clause or goal), then in the R template (the candidate's type, its owner); within a template in pre-order,
+  a node before its arguments, arguments left to right. The first occurrence gives (template, owner, node, path).
+  A right side found in neither is an *anomaly*; there were none at any point, in either setting.
+- **Retained.** The ⟦t⟧ objects of the shared-residual bindings of every kept candidate at that point and N, and
+  every type-template object below one (`closeBelow`). The other type-template objects are not built: they leave
+  the pair loop (decomposition) and their occurs, escape and rank clauses go. Slots and ground right sides need no
+  type-template object.
+- **Typing clauses.** Each is replaced by one `sv ⇒ L(x) = L(⟦t⟧)` per binding, with the encoder's equality gadget
+  (`eqUnder`). A candidate whose templates do not unify is left out, with its groundness clauses.
+- **Kept as today.** Ground objects stay (as in R1: they are always active, and are candidates). The label widths
+  (`SB`, `IB`, `RB`) are today's: the projection credits R3 neither with a narrower `rank` nor with a narrower
+  `idx` (fewer objects), as 4.5 asks.
+- **Counting.** `simEncode` is a copy of `encode` in the counting CNF with an R3 switch. With R3 off it must equal
+  `encode`. Variables per family are attributed by sampling `nVars` at each family switch, with the structural
+  variables under "0 structural". Decomposition clauses are counted per pair by the kinds of the two objects and
+  the symbol class (term or level), as M6 does.
+- **The model check** (`M8Diag.r3ModelCheck`, `eval_run r3-models`). The decoded substitution is read back from the
+  model's labels: each label value maps to a representative active object (rigid, type-template, value or ground)
+  or to an eigenvariable code, and the term is built from it, with ground children read as their own term. For each
+  chosen candidate (its `sv` true) with a typing clause, every triangular binding x ↦ t is checked structurally,
+  σ(x) = σ(t), and by label, L(x) = L(⟦t⟧). Two representatives of one label value that read back as different
+  terms are counted as read-back conflicts.
+
+#### Results
+
+- **Hand count** (`test_m8diag`, the forest R in `Test/M8DiagTest.lean`'s header: a polymorphic lemma `∀ A (X :
+  L(A)) (Y : A), P(X, k(Y))` against a goal `P(e, k(u))`, N = 1): 10 typing clauses, 9 of which unify and 1 does
+  not (Y against k(Y), same frame: occurs check); bindings 3 slot, 2 ground, 3 shared residual (1 in L, 2 in R);
+  4 type-template objects built, 3 retained; `sv` 11 → 10; full pairs 7 → 4. In the model, 2 chosen typed
+  candidates, 2 slot bindings, which hold. With R3 off, `simEncode` equals `encode` on R, K, SPEC 7.3 (1, 5 and 9
+  lemmas), L1 and D3 at several N with four option sets. 91/91.
+- **The model check (stop rule): passed.** 90/90 models solved, kernel-checked, skeletons equal to 8c-1's. 276 chosen
+  candidates with a typing clause; 399 bindings checked (slot 149, ground 237, shared residual 13): 0 failures, 0
+  label mismatches, 0 unreadable, 0 read-back conflicts. 307 s.
+- **Consistency: all pass.** With R3 off the replay equals 8c-1's R1-and-R2 counts (clauses, variables, every
+  family) at 400/400 points at both N, and the pooled table of 4.5 exactly. At N = 5 the typing clauses equal M6's
+  per point (4,422,137 and 334,786; templates that do not unify 6,304 and 1,378), and the decomposition by kinds
+  equals M6's. The off-switch: 54/54 DIMACS files byte-identical to `eval/m8b/dimacs_md5.txt` after the runs.
+- **The runs.** 400 points at N = 5 (0.58 h) and N = 10 (4.15 h), R3 off and on, under the 2.5 GB cap, one process
+  at a time: no memout. The projection before the start was about 5 h (an 8-point sample ran 1.8 to 1.9 times 8c-1's
+  encode time).
+- **The decision rule.** At N = 5 with the rules, R1, R2 and R3 project 1,189,864,226 clauses against 1,198,832,528:
+  ratio 0.9925, above 0.8. Without the rules 0.8880; at N = 10, 0.9820 with the rules and 0.8667 without.
+  `eval/m8c2a/R3SIM.md` (from `python3 eval/m8c2a/report.py`) regenerates byte-identically, twice and under
+  `PYTHONHASHSEED` 1 and 777 (md5 `f7b5871a9dc8`).
+
+#### Surprising, and deviations
+
+- **Little is dropped with the rules.** Of 59,757 type-template objects at N = 5, 56,159 (94.0%) are retained: most
+  lie below a ⟦t⟧ of some binding (36,337 are ⟦t⟧ themselves). Decomposition falls 3.3% (full pairs 5,148,456 →
+  4,960,815). Without the rules 75.7% are retained and decomposition falls 14.1%.
+- **Groundness grows** (2.9% with the rules, 3.4% without): there are more bindings than typing clauses (4,640,190
+  against 4,422,137 with the rules), and each binding gets its own equality under `sv`.
+- **The triangular split differs from M6's.** M6 counted equations of the idempotent solved form. Over both sets at
+  N = 5, the triangular form gives the same number of equations (4,995,462) and the same unifiable count, but a
+  different split: slot 755,698 against M6's 755,134; ground 2,395,489 against 2,395,577; residual 1,844,275 against
+  1,844,751. A binding x ↦ y that `resolve` would turn into x ↦ f(…) stays a slot binding here.
+- **Read-back artefact, fixed before the run.** The first model-check pass reported read-back conflicts in 9 named
+  cases: ground leaf children have no label (labels are allocated lazily) and read as "?". Ground children are now
+  read as their own term; after a rerun from scratch, 0 conflicts.
+- **Timing file.** `eval/m8c2a/models/timing.json` was overwritten by the detached driver's no-op pass (2 s); the
+  report takes the model-check wall time from `models/run.log` instead (the sum over every pass, 307 s).
+- **Time.** The two N took 4.73 h together, against the projected 5 h.
+
+#### Harness (8c-2a)
+
+- `eval_run diag SPECS RESULTS SECTIONS N r3` (R1 and R2 on; sections `forest`, `r3_off`, `r3_on`), `eval_run
+  r3-models SPECS RESULTS` (the model check, flags off, as `diag-models`), `Test/m8c2a_run.py` (`models`, `sim`,
+  `check`, `status`, `publish`; stop codes 8 for the model check and 7 for consistency), `Test/m8c2a_full.sh`
+  (detached: `setsid nohup Test/m8c2a_full.sh &`, log `eval/m8c2a/driver.log`), `eval/m8c2a/report.py`.
+
+- **Regression (end of 8c-2a):** `Test/run_all.sh` exit 0 at `98884d7` plus this section, with R1 and R2 on by default
+  (`eval/m8c2a/run_all_end.log`): M0 902/902, M1 26/26, M4 7/7, M5 13/13, `countOnly` 44/44, M8 diagnostics 10/10,
+  41/41 and 91/91 (the R3 hand count and R3 off against `encode`); M2, M3, M4Lean, M5Lean, M7Lean, M8Probe, M8C1Lean
+  pass; the differentials with `m8off`, `r1`, `r1r2` have 0 mismatches; the off-switch gives 54/54 DIMACS identical to
+  8b; the Lean suite passes in the three settings with the model check. `SolveBySat/` is unchanged in 8c-2a. (A first
+  end-of-stage run was cut off in `test_m5` by a power failure; this is a full rerun from scratch.)

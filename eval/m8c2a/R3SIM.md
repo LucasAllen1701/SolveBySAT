@@ -220,95 +220,195 @@ Typing clauses at N = 5 (whose templates unify, as M6 counts them; and whose tem
 
 ## The projection at N = 10
 
+Wall time 4.15 h.
+
 ### Consistency at N = 10
 
-Points: 2 (ok 2).
+Points: 400 (ok 400).
 
 With R3 off, the replay against the encoder's counts (8c-1's R1-and-R2 sizes; clauses, variables and every family equal per point) and against the table of 4.5, pooled:
 
 | points | equal per point | clauses | 4.5 | equal | decomposition | 4.5 | equal |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| with the rules | 2 of 2 | 18,762,081 | 8,783,597,441 | no | 6,964,150 | 5,427,950,094 | no |
-| without rules | 1 of 1 | 1 | 1,886,439,639 | no | 0 | 1,621,030,607 | no |
+| with the rules | 200 of 200 | 8,783,597,441 | 8,783,597,441 | yes | 5,427,950,094 | 5,427,950,094 | yes |
+| without rules | 200 of 200 | 1,886,439,639 | 1,886,439,639 | yes | 1,621,030,607 | 1,621,030,607 | yes |
 
-### with the rules: 1 points (0 early exits left out)
+### with the rules: 199 points (1 early exits left out)
 
 **Clauses**, R1 and R2 (R3 off) against R1, R2 and R3 (R3 on): pooled, and the per-point ratio R3 on / off:
 
 | family | R1 R2 | R1 R2 R3 | difference | pooled ratio | per-point ratio |
 | --- | --- | --- | --- | --- | --- |
-| total | 2,420,191 | 2,254,218 | -165,973 | 0.9314 | 0.931 |
-| 1 node assignment | 440 | 440 | 0 | 1.0000 | 1.000 |
-| 2 tree shape | 2,192 | 2,192 | 0 | 1.0000 | 1.000 |
-| 3 context (local hypotheses, ancestors) | 1,378 | 1,378 | 0 | 1.0000 | 1.000 |
-| 4 matching | 84,040 | 84,040 | 0 | 1.0000 | 1.000 |
-| 5 decomposition | 582,266 | 403,178 | -179,088 | 0.6924 | 0.692 |
-| 6 links (environment copies) | 79,104 | 79,104 | 0 | 1.0000 | 1.000 |
-| 7 eigenvariables, occurs check, scope | 14,561 | 13,056 | -1,505 | 0.8966 | 0.897 |
-| 8 groundness | 1,654,334 | 1,668,954 | 14,620 | 1.0088 | 1.009 |
-| 10 symmetry breaking | 1,560 | 1,560 | 0 | 1.0000 | 1.000 |
-| 11 node bounds | 316 | 316 | 0 | 1.0000 | 1.000 |
+| total | 8,783,597,440 | 8,625,495,806 | -158,101,634 | 0.9820 | 1.001 [0.974, 1.008] |
+| 1 node assignment | 223,618 | 223,618 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 2 tree shape | 466,132 | 466,132 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 3 context (local hypotheses, ancestors) | 289,410 | 289,410 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 4 matching | 76,051,138 | 76,051,138 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 5 decomposition | 5,427,950,094 | 5,177,300,836 | -250,649,258 | 0.9538 | 1.000 [0.923, 1.000] |
+| 6 links (environment copies) | 40,623,962 | 40,623,962 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 7 eigenvariables, occurs check, scope | 21,570,112 | 21,059,019 | -511,093 | 0.9763 | 1.000 [0.958, 1.000] |
+| 8 groundness | 3,216,303,666 | 3,309,362,383 | 93,058,717 | 1.0289 | 1.009 [1.001, 1.037] |
+| 10 symmetry breaking | 102,216 | 102,216 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 11 node bounds | 17,092 | 17,092 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
 
 **Variables**, by the family in which each was allocated (structural variables first):
 
 | family | R1 R2 | R1 R2 R3 | difference | pooled ratio | per-point ratio |
 | --- | --- | --- | --- | --- | --- |
-| total | 179,269 | 135,398 | -43,871 | 0.7553 | 0.755 |
-| 0 structural | 730 | 730 | 0 | 1.0000 | 1.000 |
-| 1 node assignment | 71 | 71 | 0 | 1.0000 | 1.000 |
-| 2 tree shape | 272 | 272 | 0 | 1.0000 | 1.000 |
-| 3 context (local hypotheses, ancestors) | 35 | 35 | 0 | 1.0000 | 1.000 |
-| 4 matching | 12,140 | 12,140 | 0 | 1.0000 | 1.000 |
-| 5 decomposition | 145,827 | 102,300 | -43,527 | 0.7015 | 0.702 |
-| 6 links (environment copies) | 768 | 768 | 0 | 1.0000 | 1.000 |
-| 7 eigenvariables, occurs check, scope | 3,272 | 2,928 | -344 | 0.8949 | 0.895 |
-| 8 groundness | 16,154 | 16,154 | 0 | 1.0000 | 1.000 |
+| total | 1,114,939,382 | 1,062,204,693 | -52,734,689 | 0.9527 | 1.000 [0.923, 1.000] |
+| 0 structural | 117,475 | 117,475 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 1 node assignment | 53,812 | 53,812 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 2 tree shape | 29,200 | 29,200 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 3 context (local hypotheses, ancestors) | 6,965 | 6,965 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 4 matching | 5,818,676 | 5,818,676 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 5 decomposition | 1,073,955,921 | 1,021,364,788 | -52,591,133 | 0.9510 | 1.000 [0.910, 1.000] |
+| 6 links (environment copies) | 245,587 | 245,587 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 7 eigenvariables, occurs check, scope | 5,605,978 | 5,477,328 | -128,650 | 0.9771 | 1.000 [0.945, 1.000] |
+| 8 groundness | 29,105,768 | 29,090,862 | -14,906 | 0.9995 | 1.000 [0.999, 1.000] |
 
 **Type-template objects, bindings and candidates**, pooled (per point: median [quartiles]):
 
 |  | count | share | per point |
 | --- | --- | --- | --- |
-| type-template objects built | 145 |  | 145.000 |
-| retained | 102 | 70.3% | 0.703 |
-| of them ⟦t⟧ of some binding | 82 | 56.6% |  |
-| typing clauses (R1 R2) | 15,724 |  |  |
-| of them with templates that unify | 15,724 | 100.0% |  |
-| candidates dropped (templates do not unify) | 0 | 0.0% |  |
-| bindings | 15,724 |  | 1.00 per typing clause |
-| bindings: slot | 0 | 0.0% |  |
-| bindings: ground | 8,436 | 53.7% |  |
-| bindings: shared residual | 7,288 | 46.3% |  |
-| shared residual, in the variable's template | 0 | 0.0% |  |
-| shared residual, in the candidate's template | 7,288 | 100.0% |  |
-| sv (R1 R2 → R1 R2 R3) | 16,154 → 16,154 | 100.0% |  |
-| full decomposition pairs (R1 R2 → R1 R2 R3) | 4,968 → 3,372 | 67.9% |  |
+| type-template objects built | 141,753 |  | 445.000 [223.000, 918.000] |
+| retained | 132,416 | 93.4% | 1.000 [0.857, 1.000] |
+| of them ⟦t⟧ of some binding | 85,306 | 60.2% |  |
+| typing clauses (R1 R2) | 23,671,692 |  |  |
+| of them with templates that unify | 23,656,786 | 99.9% |  |
+| candidates dropped (templates do not unify) | 14,906 | 0.1% |  |
+| bindings | 24,877,733 |  | 1.05 per typing clause |
+| bindings: slot | 3,914,596 | 15.7% |  |
+| bindings: ground | 11,482,776 | 46.2% |  |
+| bindings: shared residual | 9,480,361 | 38.1% |  |
+| shared residual, in the variable's template | 2,881,787 | 30.4% |  |
+| shared residual, in the candidate's template | 6,598,574 | 69.6% |  |
+| sv (R1 R2 → R1 R2 R3) | 29,105,768 → 29,090,862 | 99.9% |  |
+| full decomposition pairs (R1 R2 → R1 R2 R3) | 31,907,921 → 30,284,746 | 94.9% |  |
 
-**Decomposition by object kinds, R1 R2**, pooled over 582,266 clauses:
-
-| kinds of the pair | symbol class | clauses | share |
-| --- | --- | --- | --- |
-| type-template object+type-template object | term | 338,515 | 58.1% |
-| rigid position+type-template object | term | 112,600 | 19.3% |
-| rigid position+rigid position | term | 96,973 | 16.7% |
-| rigid position+type-template object | level | 14,208 | 2.4% |
-| type-template object+type-template object | level | 13,768 | 2.4% |
-| rigid position+rigid position | level | 3,332 | 0.6% |
-| ground object+type-template object | term | 2,870 | 0.5% |
-| all | level | 31,308 | 5.4% |
-| all | term | 550,958 | 94.6% |
-
-**Decomposition by object kinds, R1 R2 R3**, pooled over 403,178 clauses:
+**Decomposition by object kinds, R1 R2**, pooled over 5,427,950,094 clauses:
 
 | kinds of the pair | symbol class | clauses | share |
 | --- | --- | --- | --- |
-| type-template object+type-template object | term | 162,265 | 40.2% |
-| rigid position+type-template object | term | 112,600 | 27.9% |
-| rigid position+rigid position | term | 96,973 | 24.1% |
-| rigid position+type-template object | level | 14,208 | 3.5% |
-| type-template object+type-template object | level | 13,768 | 3.4% |
-| rigid position+rigid position | level | 3,332 | 0.8% |
-| ground object+type-template object | term | 32 | 0.0% |
-| all | level | 31,308 | 7.8% |
-| all | term | 371,870 | 92.2% |
+| type-template object+type-template object | term | 1,532,445,938 | 28.2% |
+| rigid position+type-template object | term | 1,005,296,181 | 18.5% |
+| type-template object+type-template object | level | 980,974,924 | 18.1% |
+| rigid position+type-template object | level | 858,793,747 | 15.8% |
+| rigid position+rigid position | term | 844,895,303 | 15.6% |
+| rigid position+rigid position | level | 197,003,450 | 3.6% |
+| ground object+type-template object | term | 3,259,664 | 0.1% |
+| ground object+type-template object | level | 3,111,488 | 0.1% |
+| ground object+rigid position | level | 1,480,707 | 0.0% |
+| rigid position+value object | term | 334,429 | 0.0% |
+| ground object+rigid position | term | 266,503 | 0.0% |
+| value object+value object | term | 87,760 | 0.0% |
+| all | level | 2,041,364,316 | 37.6% |
+| all | term | 3,386,585,778 | 62.4% |
 
-### without rules: 0 points (1 early exits left out)
+**Decomposition by object kinds, R1 R2 R3**, pooled over 5,177,300,836 clauses:
+
+| kinds of the pair | symbol class | clauses | share |
+| --- | --- | --- | --- |
+| type-template object+type-template object | term | 1,401,597,992 | 27.1% |
+| type-template object+type-template object | level | 955,364,543 | 18.5% |
+| rigid position+type-template object | term | 927,733,163 | 17.9% |
+| rigid position+rigid position | term | 844,895,303 | 16.3% |
+| rigid position+type-template object | level | 842,546,109 | 16.3% |
+| rigid position+rigid position | level | 197,003,450 | 3.8% |
+| ground object+type-template object | term | 2,996,910 | 0.1% |
+| ground object+type-template object | level | 2,993,967 | 0.1% |
+| ground object+rigid position | level | 1,480,707 | 0.0% |
+| rigid position+value object | term | 334,429 | 0.0% |
+| ground object+rigid position | term | 266,503 | 0.0% |
+| value object+value object | term | 87,760 | 0.0% |
+| all | level | 1,999,388,776 | 38.6% |
+| all | term | 3,177,912,060 | 61.4% |
+
+### without rules: 187 points (13 early exits left out)
+
+**Clauses**, R1 and R2 (R3 off) against R1, R2 and R3 (R3 on): pooled, and the per-point ratio R3 on / off:
+
+| family | R1 R2 | R1 R2 R3 | difference | pooled ratio | per-point ratio |
+| --- | --- | --- | --- | --- | --- |
+| total | 1,886,439,626 | 1,634,927,434 | -251,512,192 | 0.8667 | 0.992 [0.877, 1.000] |
+| 1 node assignment | 50,008 | 50,008 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 2 tree shape | 169,052 | 169,052 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 3 context (local hypotheses, ancestors) | 155,512 | 155,512 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 4 matching | 3,831,041 | 3,831,041 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 5 decomposition | 1,621,030,607 | 1,361,041,380 | -259,989,227 | 0.8396 | 0.967 [0.781, 1.000] |
+| 6 links (environment copies) | 8,826,102 | 8,826,102 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 7 eigenvariables, occurs check, scope | 8,604,206 | 7,875,748 | -728,458 | 0.9153 | 0.970 [0.902, 1.000] |
+| 8 groundness | 243,703,335 | 252,908,828 | 9,205,493 | 1.0378 | 1.009 [1.000, 1.044] |
+| 10 symmetry breaking | 64,032 | 64,032 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 11 node bounds | 5,731 | 5,731 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+
+**Variables**, by the family in which each was allocated (structural variables first):
+
+| family | R1 R2 | R1 R2 R3 | difference | pooled ratio | per-point ratio |
+| --- | --- | --- | --- | --- | --- |
+| total | 326,664,709 | 273,813,021 | -52,851,688 | 0.8382 | 0.971 [0.796, 1.000] |
+| 0 structural | 54,830 | 54,830 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 1 node assignment | 7,238 | 7,238 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 2 tree shape | 18,823 | 18,823 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 3 context (local hypotheses, ancestors) | 6,545 | 6,545 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 4 matching | 1,106,299 | 1,106,299 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 5 decomposition | 320,413,383 | 267,782,011 | -52,631,372 | 0.8357 | 0.966 [0.773, 1.000] |
+| 6 links (environment copies) | 59,838 | 59,838 | 0 | 1.0000 | 1.000 [1.000, 1.000] |
+| 7 eigenvariables, occurs check, scope | 2,620,342 | 2,403,621 | -216,721 | 0.9173 | 0.980 [0.908, 1.000] |
+| 8 groundness | 2,377,411 | 2,373,816 | -3,595 | 0.9985 | 1.000 [1.000, 1.000] |
+
+**Type-template objects, bindings and candidates**, pooled (per point: median [quartiles]):
+
+|  | count | share | per point |
+| --- | --- | --- | --- |
+| type-template objects built | 47,533 |  | 100.000 [10.000, 310.000] |
+| retained | 36,444 | 76.7% | 0.641 [0.000, 1.000] |
+| of them ⟦t⟧ of some binding | 21,079 | 44.3% |  |
+| typing clauses (R1 R2) | 1,807,952 |  |  |
+| of them with templates that unify | 1,804,357 | 99.8% |  |
+| candidates dropped (templates do not unify) | 3,595 | 0.2% |  |
+| bindings | 1,935,335 |  | 1.07 per typing clause |
+| bindings: slot | 237,446 | 12.3% |  |
+| bindings: ground | 1,050,510 | 54.3% |  |
+| bindings: shared residual | 647,379 | 33.5% |  |
+| shared residual, in the variable's template | 117,998 | 18.2% |  |
+| shared residual, in the candidate's template | 529,381 | 81.8% |  |
+| sv (R1 R2 → R1 R2 R3) | 2,377,411 → 2,373,816 | 99.8% |  |
+| full decomposition pairs (R1 R2 → R1 R2 R3) | 9,432,436 → 7,847,289 | 83.2% |  |
+
+**Decomposition by object kinds, R1 R2**, pooled over 1,621,030,607 clauses:
+
+| kinds of the pair | symbol class | clauses | share |
+| --- | --- | --- | --- |
+| rigid position+type-template object | term | 567,181,550 | 35.0% |
+| type-template object+type-template object | term | 494,518,743 | 30.5% |
+| rigid position+rigid position | term | 382,210,075 | 23.6% |
+| type-template object+type-template object | level | 113,966,318 | 7.0% |
+| rigid position+type-template object | level | 52,148,771 | 3.2% |
+| rigid position+rigid position | level | 9,084,239 | 0.6% |
+| ground object+type-template object | level | 727,506 | 0.0% |
+| ground object+type-template object | term | 559,724 | 0.0% |
+| rigid position+value object | term | 322,522 | 0.0% |
+| ground object+rigid position | level | 190,409 | 0.0% |
+| value object+value object | term | 63,880 | 0.0% |
+| ground object+rigid position | term | 56,870 | 0.0% |
+| all | level | 176,117,243 | 10.9% |
+| all | term | 1,444,913,364 | 89.1% |
+
+**Decomposition by object kinds, R1 R2 R3**, pooled over 1,361,041,380 clauses:
+
+| kinds of the pair | symbol class | clauses | share |
+| --- | --- | --- | --- |
+| rigid position+type-template object | term | 458,101,954 | 33.7% |
+| rigid position+rigid position | term | 382,210,075 | 28.1% |
+| type-template object+type-template object | term | 367,520,922 | 27.0% |
+| type-template object+type-template object | level | 97,371,937 | 7.2% |
+| rigid position+type-template object | level | 45,100,301 | 3.3% |
+| rigid position+rigid position | level | 9,084,239 | 0.7% |
+| ground object+type-template object | level | 602,005 | 0.0% |
+| ground object+type-template object | term | 416,266 | 0.0% |
+| rigid position+value object | term | 322,522 | 0.0% |
+| ground object+rigid position | level | 190,409 | 0.0% |
+| value object+value object | term | 63,880 | 0.0% |
+| ground object+rigid position | term | 56,870 | 0.0% |
+| all | level | 152,348,891 | 11.2% |
+| all | term | 1,208,692,489 | 88.8% |

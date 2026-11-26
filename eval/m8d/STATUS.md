@@ -1,10 +1,10 @@
 # eval/m8d: status
 
-Updated 2026-11-26 22:06:13. Phase: full.
+Updated 2026-11-26 22:29:37. Phase: full finished.
 
 - Goals done: 300 of 300
 - Stops: 0
-- Sizes done: 40
+- Sizes done: 585
 
 | group | done | proved | no proof ≤ N | memory crash | timeout | other |
 | --- | --- | --- | --- | --- | --- | --- |

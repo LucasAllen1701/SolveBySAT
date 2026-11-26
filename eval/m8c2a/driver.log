@@ -8,3 +8,4 @@ sim N=5: 100 of 20, 224 s
 sim N=5: 120 of 20, 100 s
 sim N=5: 140 of 20, 173 s
 sim N=5: 160 of 20, 60 s
+sim N=5: 180 of 20, 78 s

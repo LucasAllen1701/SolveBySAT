@@ -1,0 +1,79 @@
+on M2.lean:102 gained: error: solve_by_sat: no proof with at most 3 nodes exists in the class
+on M2.lean:117 gained: info: solve_by_sat: early exit (node bounds): no proof tree exists at any N
+on M3.lean:202 message: info: solve_by_sat: rewrite: 3 rules (refl: ground 1; symm: ground 1; trans: ground 1)
+on M3.lean:215 message: info: solve_by_sat: rewrite: 3 rules (refl: ground 1; symm: ground 1; trans: ground 1)
+on M4Lean.lean:43 message: info: solve_by_sat: rewrite: 4 rules (symm: ground 1, H 1; trans: ground 1, H 1)
+on M4Lean.lean:59 message: info: solve_by_sat: rewrite: 4 rules (symm: ground 1, H 1; trans: ground 1, H 1)
+on M4Lean.lean:64 message: info: solve_by_sat: rewrite: 4 rules (symm: ground 1, H 1; trans: ground 1, H 1)
+on M5Lean.lean:98 message: info: solve_by_sat: rewrite: 4 rules (symm: ground 1, H 1; trans: ground 1, H 1)
+on M5Lean.lean:115 message: info: solve_by_sat: rewrite: 4 rules (symm: ground 1, H 1; trans: ground 1, H 1)
+on M5Lean.lean:127 message: info: solve_by_sat: rewrite: 4 rules (symm: ground 1, H 1; trans: ground 1, H 1)
+on M5Lean.lean:167 message: info: solve_by_sat: rewrite: 6 rules (refl: ground 1, H 1; symm: ground 1, H 1; trans: ground 1, H 1)
+on M7Lean.lean:122 message: info: fun x a => Ne.symm (fun a => Nat.succ_ne_self x a) a
+on M7Lean.lean:126 gained: error: solve_by_sat: no proof with at most 3 nodes exists in the class
+on M7Lean.lean:130 message: info: fun {n} n_1 a x_0 x_0_1 a_1 => Ne.symm (fun a => Nat.succ_ne_self x_0_1 a) a_1
+on M7Lean.lean:134 gained: error: solve_by_sat: no proof with at most 3 nodes exists in the class
+on M8C1Lean.lean:23 message: info: solve_by_sat: rewrite: 4 rules (symm: ground 1, H 1; trans: ground 1, H 1)
+on M8C1Lean.lean:31 message: info: solve_by_sat: rewrite: 4 rules (symm: ground 1, H 1; trans: ground 1, H 1)
+on M8C1Lean.lean:39 message: info: solve_by_sat: rewrite: 4 rules (symm: ground 1, H 1; trans: ground 1, H 1)
+on M9Lean.lean:254 message: info: solve_by_sat: rewrite: 8 rules (subst: ground 2; refl: ground 2; symm: ground 2; trans: ground 2)
+on M9Lean.lean:280 message: info: solve_by_sat: rewrite: 3 rules (refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M2.lean:44 message: info: solve_by_sat: rewrite: 5 rules (subst: ground 2; refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M2.lean:54 message: info: solve_by_sat: rewrite: 5 rules (subst: root 2; refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M2.lean:59 message: info: solve_by_sat: rewrite: 5 rules (subst: ground 2; refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M2.lean:72 message: info: solve_by_sat: rewrite: 4 rules (subst: root 1; refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M2.lean:81 message: info: solve_by_sat: rewrite: 4 rules (subst: root 1; refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M2.lean:102 gained: error: solve_by_sat: no proof with at most 3 nodes exists in the class
+liberal M2.lean:117 gained: info: solve_by_sat: early exit (node bounds): no proof tree exists at any N
+liberal M3.lean:42 message: info: solve_by_sat: rewrite: the rule rw.And.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#2 as its head symbol
+liberal M3.lean:49 message: info: solve_by_sat: rewrite: the rule rw.And.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#3 as its head symbol
+liberal M3.lean:61 message: info: solve_by_sat: rewrite: the rule rw.And.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#3 as its head symbol
+liberal M3.lean:67 message: info: solve_by_sat: rewrite: the rule rw.Or.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#3 as its head symbol
+liberal M3.lean:79 message: info: solve_by_sat: rewrite: the rule rw.Or.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#3 as its head symbol
+liberal M3.lean:85 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#4 as its head symb
+liberal M3.lean:97 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#4 as its head symb
+liberal M3.lean:103 message: info: solve_by_sat: rewrite: the rule rw.And.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#3 as its head symbol
+liberal M3.lean:123 message: info: solve_by_sat: rewrite: the rule rw.Or.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#3 as its head symbol
+liberal M3.lean:137 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#5 as its head symb
+liberal M3.lean:145 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#5 as its head symb
+liberal M3.lean:157 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#5 as its head symb
+liberal M3.lean:174 message: info: solve_by_sat: rewrite: 9 rules (subst: root 2; congr: root 1; refl: ground 2; symm: ground 2; trans: ground 2)
+liberal M3.lean:187 message: info: solve_by_sat: rewrite: 9 rules (subst: root 2; congr: root 1; refl: ground 2; symm: ground 2; trans: ground 2)
+liberal M3.lean:202 message: info: solve_by_sat: rewrite: the rule rw.And.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#7 as its head symbol
+liberal M3.lean:215 message: info: solve_by_sat: rewrite: the rule rw.And.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#7 as its head symbol
+liberal M4Lean.lean:43 message: info: solve_by_sat: rewrite: 8 rules (subst: ground 2, H 2; symm: ground 1, H 1; trans: ground 1, H 1)
+liberal M4Lean.lean:59 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#6 as its head symb
+liberal M4Lean.lean:64 message: info: solve_by_sat: rewrite: 10 rules (subst: ground 2, H 2; congr: ground 2; symm: ground 1, H 1; trans: ground 1, H 1)
+liberal M4Lean.lean:92 message: info: solve_by_sat: rewrite: 4 rules (subst: root 1; refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M5Lean.lean:35 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#3 as its head symb
+liberal M5Lean.lean:45 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#2 as its head symb
+liberal M5Lean.lean:50 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#2 as its head symb
+liberal M5Lean.lean:65 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#4 as its head symb
+liberal M5Lean.lean:80 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#3 as its head symb
+liberal M5Lean.lean:87 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#6 as its head symb
+liberal M5Lean.lean:98 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#6 as its head symb
+liberal M5Lean.lean:115 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#5 as its head symb
+liberal M5Lean.lean:127 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#5 as its head symb
+liberal M5Lean.lean:144 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#4 as its head symb
+liberal M5Lean.lean:150 message: info: solve_by_sat: rewrite: the rule rw.And.subst.0@ground#0 is dropped: solve_by_sat: the target b has the clause variable b#4 as its head symbol
+liberal M5Lean.lean:167 message: info: solve_by_sat: rewrite: 10 rules (subst: ground 2, H 2; refl: ground 1, H 1; symm: ground 1, H 1; trans: ground 1, H 1)
+liberal M7Lean.lean:122 message: info: fun x a => Ne.symm (fun a => Nat.succ_ne_self x a) a
+liberal M7Lean.lean:126 gained: error: solve_by_sat: no proof with at most 3 nodes exists in the class
+liberal M7Lean.lean:130 message: info: fun {n} n_1 a x_0 x_0_1 a_1 => Ne.symm (fun a => Nat.succ_ne_self x_0_1 a) a_1
+liberal M7Lean.lean:134 gained: error: solve_by_sat: no proof with at most 3 nodes exists in the class
+liberal M8Probe.lean:48 message: fun x y h a => _probe.P.subst.«0» (f y) (f x) (_probe.f.congr.«0» y x (Eq.symm h)) a
+liberal M8C1Lean.lean:23 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#5 as its head symb
+liberal M8C1Lean.lean:31 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#5 as its head symb
+liberal M8C1Lean.lean:39 message: info: solve_by_sat: rewrite: the rule rw.Exists.subst.1@ground#0 is dropped: solve_by_sat: the target b w has the clause variable b#5 as its head symb
+liberal M9Lean.lean:254 message: info: solve_by_sat: rewrite: the rule rw.And.subst.0@ground#8 is dropped: solve_by_sat: the target b has the clause variable b#44 as its head symbol
+liberal M9Lean.lean:280 message: info: solve_by_sat: rewrite: 5 rules (subst: ground 2; refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M9Lean.lean:345 gained: error: solve_by_sat: no proof with at most 4 nodes exists in the class
+liberal M9Lean.lean:383 gained: error: solve_by_sat: no proof with at most 4 nodes exists in the class
+liberal M9Lean.lean:467 message: rw.HAdd.hAdd.congr.4@root#1: c:Eq(lvl:succ(lvl:param:u_1), ?α#0, c:HAdd.hAdd(lvl:param:u_1, lvl:param:u_1, lvl:param:u_1, ?α#0, ?α#0, ?α#0, c:instHAdd
+liberal M9Lean.lean:475 message: info: solve_by_sat: rewrite: 4 rules (subst: root 1; refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M9Lean.lean:495 message: info: solve_by_sat: rewrite: 6 rules (subst: ground 2; refl: ground 1, H 1; trans: ground 1, H 1)
+liberal M9Lean.lean:523 message: info: solve_by_sat: rewrite: the rule rw.And.subst.1@ground#1 is dropped: solve_by_sat: the target x0 has the clause variable x0#3 as its head symbol
+liberal M9Lean.lean:604 message: info: solve_by_sat: rewrite: the rule rw.HAdd.hAdd.congr.0@ground#2 is dropped by the static motive check: Application type mismatch: The argument
+liberal M9Lean.lean:620 message: info: solve_by_sat: rewrite: 3 rules (refl: ground 1; symm: ground 1; trans: ground 1)
+liberal M9Lean.lean:636 message: skeleton: fun α#0 inst#1 x#2 y#3 n#4 m#5 h k => rw.HAdd.hAdd.congr.4@root#1(h)
+summary: liberal gained 6, liberal message 52, on gained 4, on message 16

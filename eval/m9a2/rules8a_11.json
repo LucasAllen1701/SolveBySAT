@@ -1,0 +1,142 @@
+{
+ "A/Int.le_of_add_le_add_left": {
+  "N": 8,
+  "rules": [
+   [
+    "subst",
+    "LE.le",
+    2
+   ],
+   [
+    "subst",
+    "LE.le",
+    3
+   ]
+  ]
+ },
+ "A/Int32.toInt_inj": {
+  "N": 5,
+  "rules": [
+   [
+    "congr",
+    "Int32.toInt",
+    0
+   ]
+  ]
+ },
+ "A/Std.Tactic.BVDecide.Normalize.BitVec.signExtend_elim'": {
+  "N": 5,
+  "rules": [
+   [
+    "subst",
+    "Eq",
+    1
+   ]
+  ]
+ },
+ "A/String.Slice.Pattern.Model.isLongestRevMatchAtChain_skipSuffixWhile": {
+  "N": 4,
+  "rules": [
+   [
+    "subst",
+    "String.Slice.Pattern.Model.IsLongestRevMatchAtChain",
+    4
+   ]
+  ]
+ },
+ "A/String.back?_eq": {
+  "N": 8,
+  "rules": [
+   [
+    "subst",
+    "Eq",
+    1
+   ],
+   [
+    "congr",
+    "List.getLast?",
+    1
+   ],
+   [
+    "congr",
+    "String.toList",
+    0
+   ]
+  ]
+ },
+ "B/Int.ediv_gcd_ne_zero_of_ne_zero_right/5": {
+  "N": 2,
+  "rules": [
+   [
+    "congr",
+    "Nat.cast",
+    2
+   ]
+  ]
+ },
+ "B/Int32.toInt_div_of_ne_left/24": {
+  "N": 5,
+  "rules": [
+   [
+    "subst",
+    "Eq",
+    1
+   ],
+   [
+    "congr",
+    "Int.tdiv",
+    0
+   ],
+   [
+    "congr",
+    "Int.tdiv",
+    1
+   ]
+  ]
+ },
+ "B/Nat.gcd_def/2": {
+  "N": 4,
+  "rules": [
+   [
+    "subst",
+    "Eq",
+    2
+   ]
+  ]
+ },
+ "B/Nat.le.intro/0": {
+  "N": 4,
+  "rules": [
+   [
+    "subst",
+    "LE.le",
+    3
+   ]
+  ]
+ },
+ "B/Nat.toList_repr/0": {
+  "N": 4,
+  "rules": [
+   [
+    "subst",
+    "Eq",
+    1
+   ],
+   [
+    "congr",
+    "String.toList",
+    0
+   ]
+  ]
+ },
+ "B/Option.choice_eq_some/9": {
+  "N": 3,
+  "rules": [
+   [
+    "congr",
+    "Option.some",
+    1
+   ]
+  ]
+ }
+}

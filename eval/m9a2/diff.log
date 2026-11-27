@@ -1,0 +1,5 @@
+solver: /home/tom/.elan/toolchains/leanprover--lean4---v4.36.0/bin/cadical
+differential with rules: 600 forests (593 with rules, 4902 rules), 3000 comparisons, 773 provable, 430 proofs use a generated rule, 0 mismatches [103s]
+PASS differential with rules (need ≥ 2500 comparisons, ≥ 100 proofs using a rule, 0 mismatches)
+selection dropped (liberal rules): 1000 comparisons, 0 proofs lost, 12 proofs gained, 0 mismatches [81s]
+PASS selection dropped: no proof lost, 0 mismatches

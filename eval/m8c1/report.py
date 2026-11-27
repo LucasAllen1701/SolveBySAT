@@ -386,5 +386,36 @@ def main():
     open(os.path.join(D, "SCALE.md"), "w").write("\n".join(out).rstrip("\n") + "\n")
 
 
+# The data files this report reads. On `main` they are absent (they are on tag m8-data): stop before
+# writing anything rather than overwrite the committed report.
+DATA_FILES = [
+    "eval/m8c1/models/m8a.jsonl",
+    "eval/m8c1/models/named.jsonl",
+    "eval/m8c1/sizes_N5/results.jsonl",
+    "eval/m8c1/sizes_N5/timing.json",
+    "eval/m8c1/sizes_N10/results.jsonl",
+    "eval/m8c1/sizes_N10/timing.json",
+    "eval/m8b/points/sections.jsonl",
+    "eval/m8c1/diag_N5/sections.jsonl",
+    "eval/m8c1/diag_N5/results.jsonl",
+    "eval/m8c1/rerun/results.jsonl",
+    "eval/m8c1/rerun/sizes.jsonl",
+    "eval/m8c1/rerun/timing.json",
+    "eval/m8a/full/results.jsonl",
+    "eval/m8a/full/sizes.jsonl",
+    "eval/m8a/full/timing.json",
+    "eval/m8a/specs.jsonl",
+]
+
+
+def require_data(extra=()):
+    import sys
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    if not all(os.path.exists(os.path.join(root, p)) for p in DATA_FILES) or not all(os.path.exists(p) for p in extra):
+        print("the data for this report is on tag m8-data; see eval/README.md")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
+    require_data()
     main()

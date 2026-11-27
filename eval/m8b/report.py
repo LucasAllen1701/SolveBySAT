@@ -241,5 +241,27 @@ def main():
     print("wrote eval/m8b/DIAG.md")
 
 
+# The data files this report reads. On `main` they are absent (they are on tag m8-data): stop before
+# writing anything rather than overwrite the committed report.
+DATA_FILES = [
+    "eval/m8b/specs_points.jsonl",
+    "eval/m8b/points/results.jsonl",
+    "eval/m8b/points/sections.jsonl",
+    "eval/m8b/points/timing.json",
+    "eval/m8b/specs_models.jsonl",
+    "eval/m8b/models/m8a.jsonl",
+    "eval/m8b/models/named.jsonl",
+]
+
+
+def require_data(extra=()):
+    import sys
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    if not all(os.path.exists(os.path.join(root, p)) for p in DATA_FILES) or not all(os.path.exists(p) for p in extra):
+        print("the data for this report is on tag m8-data; see eval/README.md")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
+    require_data()
     main()

@@ -257,5 +257,27 @@ def main(rundir):
     print(f"wrote eval/m8a/{name}")
 
 
+# The data files this report reads. On `main` they are absent (they are on tag m8-data): stop before
+# writing anything rather than overwrite the committed report.
+DATA_FILES = [
+    "eval/m8a/goals.jsonl",
+    "eval/m8a/specs.jsonl",
+    "eval/m8a/rules.jsonl",
+    "eval/m8a/inputs/final.jsonl",
+    "eval/m8a/inputs/population.jsonl",
+    "eval/m8a/inputs/scaling_k0.jsonl",
+]
+
+
+def require_data(extra=()):
+    import sys
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    if not all(os.path.exists(os.path.join(root, p)) for p in DATA_FILES) or not all(os.path.exists(p) for p in extra):
+        print("the data for this report is on tag m8-data; see eval/README.md")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else os.path.join(D, "full"))
+    _rundir = sys.argv[1] if len(sys.argv) > 1 else os.path.join(D, "full")
+    require_data([os.path.join(_rundir, f) for f in ("results.jsonl", "sizes.jsonl", "header.json")])
+    main(_rundir)

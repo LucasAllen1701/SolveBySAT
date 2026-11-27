@@ -49,9 +49,10 @@ git diff --exit-code eval/                # each must equal the committed one
 
 Remove a worktree with `git worktree remove ../m8-data` (or `../m7-data`) when you are done.
 
-**Do not run the milestone 8 reports on `main`.** With the data absent, `m8a`, `m8b` and `m8d`'s scripts stop
-with a Python error and write nothing, but `m8c1/report.py` and `m8c2a/report.py` exit 0 and overwrite
-`SCALE.md` and `R3SIM.md` with a stub that says "No data". If that happens, run `git checkout -- eval/`.
+On `main`, where the data is absent, each milestone 8 `report.py` checks first that the data files it reads
+are present, and otherwise prints "the data for this report is on tag m8-data; see eval/README.md" and exits
+with code 1, writing nothing. (Before milestone 9, `m8c1/report.py` and `m8c2a/report.py` overwrote their
+reports with a "No data" stub; NOTES.md, "End of milestone 8".)
 
 The commands that made the data (`Test/eval_driver.py`, `Test/m8*_run.py`, `Test/m8*_full.sh`, and the
 executables in `lakefile.toml`) are on `main` too, but their inputs (the specs, the corpus, `inputs/`) are

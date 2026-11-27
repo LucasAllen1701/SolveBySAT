@@ -71,8 +71,8 @@ python3 Test/m8d_run.py status eval/m8d/runs full   # 8d: eval/m8d/STATUS.md (ne
   milestone 8 data on `m8-data`** (the head of branch `m8`). Both branches are archives: never commit to them.
   NOTES.md, "End of milestone 7" and "End of milestone 8", list the removed paths. The reports regenerate
   on their tag only, e.g. `git worktree add ../m8-data m8-data && cd ../m8-data && python3 eval/m8d/report.py`.
-  Do not run the milestone 8 `report.py` scripts on `main`: `m8c1`'s and `m8c2a`'s overwrite their report
-  with a "No data" stub.
+  Without the data, each milestone 8 `report.py` prints that the data is on tag m8-data and exits 1, writing
+  nothing.
 
 ## Setting up a test machine for a capped evaluation run
 

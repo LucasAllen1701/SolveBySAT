@@ -7,7 +7,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 lake build SolveBySat Test.EvalNamed >/dev/null || exit 1
-files="Test/M2.lean Test/M3.lean Test/M4Lean.lean Test/M5Lean.lean Test/M7Lean.lean Test/M8Probe.lean Test/M8C1Lean.lean"
+files="Test/M2.lean Test/M3.lean Test/M4Lean.lean Test/M5Lean.lean Test/M7Lean.lean Test/M8Probe.lean Test/M8C1Lean.lean Test/M9Lean.lean"
 tmp=$(mktemp -d "$PWD/eval/.m8c1lean.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT
 status=0

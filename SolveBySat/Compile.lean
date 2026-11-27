@@ -6,6 +6,8 @@ Milestones 2 and 3: `∀`, `→`, atoms, connectives in targets (built-in clause
 (splitting), and binders inside terms (`lam`/`pi`, needed for the opaque atom of `∃`).
 Milestone 4: universe parameters of constants in `H` are level variables. Data constants
 are milestone 5; until then they are rejected with a message naming the milestone.
+Milestone 9a-1 (M9_PLAN 2.1): with `CompileOptions.iffEq`, every `↔` head on any split path
+also gives the paths `L = R` (`propext`) and `R = L` (`Eq.symm` of it).
 -/
 import Lean
 import SolveBySat.Forest
@@ -97,13 +99,26 @@ inductive BinderUse where
   | prem (k : Nat)
   deriving Inhabited, Repr, BEq
 
-/-- Head splitting (SPEC §4.2): which component of an `∧` / `↔` head a clause uses. -/
+/-- Head splitting (SPEC §4.2): which component of an `∧` / `↔` head a clause uses. With
+`iffEq` (M9_PLAN 2.1), an `↔` head `L ↔ R` also gives the head `L = R` (`propEq`) and the
+head `R = L` (`propEqSymm`), each an `Eq` atom at type `Prop` that ends its path. -/
 inductive Split where
-  | left | right | mp | mpr
+  | left | right | mp | mpr | propEq | propEqSymm
   deriving Inhabited, Repr, BEq
 
 def Split.suffix : Split → String
   | .left => "left" | .right => "right" | .mp => "mp" | .mpr => "mpr"
+  | .propEq => "propext" | .propEqSymm => "propext_symm"
+
+/-- Options of the compiler. Every one is off by default, and with all of them off the
+forest is exactly milestone 8's. -/
+structure CompileOptions where
+  /-- M9_PLAN 2.1: `↔` heads also give the equations `L = R` and `R = L` between propositions. -/
+  iffEq : Bool := false
+  /-- Mutation check of M9_PLAN 2.2 (testing only): the recipes of the two `iffEq` paths are
+  swapped, so the decoder builds `L = R` for the path whose head is `R = L` and conversely. -/
+  iffEqMutant : Bool := false
+  deriving Inhabited, Repr
 
 /-- How the decoder builds the proof of a clause's head from the proof of its statement. -/
 inductive Step where
@@ -114,7 +129,11 @@ inductive Step where
   /-- `Iff.mp`; the extra premise has index `k`. -/
   | iffMp (k : Nat)
   | iffMpr (k : Nat)
-  deriving Inhabited, Repr
+  /-- M9_PLAN 2.1: `propext : (L ↔ R) → L = R`. -/
+  | propEq
+  /-- M9_PLAN 2.1: `Eq.symm (propext _) : R = L`. -/
+  | propEqSymm
+  deriving Inhabited, Repr, BEq
 
 inductive Builtin where
   | andIntro | orInl | orInr | existsIntro | iffIntro | trueIntro
@@ -151,6 +170,22 @@ structure Compiled where
   goalType : Expr
   /-- Root hypotheses (or split components of them) that gave no clause, with the reason. -/
   notes : Array MessageData := #[]
+  /-- The options it was compiled with. -/
+  opts : CompileOptions := {}
+
+/-- M9_PLAN 2.1: is a clause one of the `iffEq` paths (its last split is `propEq` or
+`propEqSymm`)? -/
+def ClauseInfo.isIffEq (ci : ClauseInfo) : Bool :=
+  ci.steps.any fun s => s == .propEq || s == .propEqSymm
+
+/-- The number of `iffEq` (`propext`) paths compiled: from constants of `H`, and from local
+hypotheses. -/
+def Compiled.iffEqCounts (C : Compiled) : Nat × Nat :=
+  C.clauseInfo.foldl (init := (0, 0)) fun (g, l) ci =>
+    if !ci.isIffEq then (g, l) else match ci.origin with
+      | .global _ => (g + 1, l)
+      | .localHyp .. => (g, l + 1)
+      | .builtin _ => (g, l)
 
 /-! ## Compilation -/
 
@@ -185,6 +220,7 @@ structure CState where
   dataKeys : Option (Std.HashSet (String × Nat)) := none
   /-- Head symbols of the data clauses compiled so far. -/
   dataHeads : Array (String × Nat) := #[]
+  opts : CompileOptions := {}
 
 abbrev CompileM := StateRefT CState MetaM
 
@@ -349,14 +385,36 @@ def binApp? (c : Name) (e : Expr) : Option (Expr × Expr) :=
 
 /-- The split paths of a clause formula (SPEC §4.2 and amendment 1): the opaque head `[]`,
 and recursively the components of an `∧` head (`left`, `right`) and of an `↔` head (`mp`:
-head `B` with premise `A`; `mpr`: head `A` with premise `B`). -/
+head `B` with premise `A`; `mpr`: head `A` with premise `B`). With `iffEq` (M9_PLAN 2.1), an
+`↔` head `A ↔ B` also gives `[propEq]` (head `A = B`) and `[propEqSymm]` (head `B = A`),
+after its other paths, so that with the option off the paths are exactly as before. -/
 partial def splitPaths (e : Expr) : CompileM (List (List Split)) :=
   telescope e fun _ body => do
     if let some (a, b) := binApp? ``And body then
       return [[]] ++ (← splitPaths a).map (.left :: ·) ++ (← splitPaths b).map (.right :: ·)
     if let some (a, b) := binApp? ``Iff body then
-      return [[]] ++ (← splitPaths b).map (.mp :: ·) ++ (← splitPaths a).map (.mpr :: ·)
+      let eqs := if (← get).opts.iffEq then [[Split.propEq], [Split.propEqSymm]] else []
+      return [[]] ++ (← splitPaths b).map (.mp :: ·) ++ (← splitPaths a).map (.mpr :: ·) ++ eqs
     return [[]]
+
+/-- Does a split path end in an `iffEq` head? -/
+def isIffEqPath (path : List Split) : Bool :=
+  path.getLast? matches some .propEq | some .propEqSymm
+
+/-- The equation `@Eq Prop a b` between two propositions. -/
+def mkPropEq (a b : Expr) : Expr :=
+  mkApp3 (mkConst ``Eq [Level.one]) (mkSort Level.zero) a b
+
+/-- Run `k` for an `iffEq` path (M9_PLAN 2.1): if it cannot be compiled (for instance a side
+whose template cannot be built), the path is dropped and reported in a note, as root split
+paths are; the clause's other paths are unaffected. -/
+def dropIffEqPath (shown : String) (k : CompileM Nat) : CompileM (Option Nat) := do
+  let saved ← get
+  try some <$> k
+  catch ex =>
+    let note := m!"solve_by_sat: the ↔-as-equation path {shown} is dropped:\n{ex.toMessageData}"
+    set { saved with notes := saved.notes.push note }
+    return none
 
 /-- Classify binders: non-Prop binders become static variables of the given kind, Prop
 binders are returned as hypotheses/premises. -/
@@ -509,6 +567,10 @@ partial def compileHyp (d : Expr) (scope : Array String) (gid i : Nat) (hname : 
         let shown := if path.isEmpty then hname else hname ++ "." ++ ".".intercalate (path.map Split.suffix)
         let note := m!"solve_by_sat: hypothesis {shown} is introduced but gives no clause:\n{ex.toMessageData}"
         set { saved with notes := saved.notes.push note }
+    else if isIffEqPath path then
+      let shown := hname ++ "." ++ ".".intercalate (path.map Split.suffix)
+      if let some id ← dropIffEqPath shown (compileClauseAlong d scope (some gid) (.localHyp gid i) hname path) then
+        ids := ids.push id
     else
       ids := ids.push (← compileClauseAlong d scope (some gid) (.localHyp gid i) hname path)
   return ids
@@ -558,11 +620,15 @@ partial def compileClauseAlong (e : Expr) (env : Array String) (localOf : Option
       | sp :: rest =>
         let some (a, b) := binApp? (if sp matches .left | .right then ``And else ``Iff) body
           | compileError m!"internal: split path {repr path} does not match the head {body}"
+        -- the mutation check of M9_PLAN 2.2 swaps the two `iffEq` recipes (not the heads)
+        let swap := (← get).opts.iffEqMutant
         match sp with
         | .left => go a rest vars prems (steps.push .andLeft) varTys
         | .right => go b rest vars prems (steps.push .andRight) varTys
         | .mp => go b rest vars (prems.push a) (steps.push (.iffMp prems.size)) varTys
         | .mpr => go a rest vars (prems.push b) (steps.push (.iffMpr prems.size)) varTys
+        | .propEq => go (mkPropEq a b) rest vars prems (steps.push (if swap then .propEqSymm else .propEq)) varTys
+        | .propEqSymm => go (mkPropEq b a) rest vars prems (steps.push (if swap then .propEq else .propEqSymm)) varTys
   try go e path lvars #[] #[] #[]
   finally modify fun s => { s with levelMap := savedLevels }
   return cid
@@ -611,7 +677,7 @@ partial def compileBuiltins (gid : Nat) (R : Expr) (tgt : Term) (tys : Array (Ar
 end
 
 /-- Compile a closed goal and the constants `H` into a clause forest (SPEC §4). -/
-def compile (goal : Expr) (H : Array Name) : MetaM Compiled := do
+def compile (goal : Expr) (H : Array Name) (opts : CompileOptions := {}) : MetaM Compiled := do
   if goal.hasFVar then throwError "solve_by_sat: internal: the goal is not closed after revert"
   let goalType ← preprocess goal
   let go : CompileM Unit := do
@@ -621,7 +687,11 @@ def compile (goal : Expr) (H : Array Name) : MetaM Compiled := do
       let ty ← preprocess info.type
       if ← isProp ty then
         for path in ← splitPaths ty do
-          discard <| compileClauseAlong ty #[] none (.global c) s!"{c}" path info.levelParams
+          if isIffEqPath path then
+            let shown := s!"{c}." ++ ".".intercalate (path.map Split.suffix)
+            discard <| dropIffEqPath shown (compileClauseAlong ty #[] none (.global c) s!"{c}" path info.levelParams)
+          else
+            discard <| compileClauseAlong ty #[] none (.global c) s!"{c}" path info.levelParams
       else
         -- a data constant (SPEC §6.9): its result type must not be a Sort
         let isSortResult ← resultType ty fun r => pure r.consumeMData.isSort
@@ -631,10 +701,10 @@ def compile (goal : Expr) (H : Array Name) : MetaM Compiled := do
           (mkConst c (info.levelParams.map Level.param))
   -- pass 1 finds the data clauses; only if there are some, pass 2 adds data positions
   -- (milestone 5, requirement 1: with no data clause every CNF is unchanged)
-  let ((), s1) ← go.run {}
+  let ((), s1) ← go.run { opts }
   let s ← if s1.dataHeads.isEmpty then pure s1 else
     let keys := s1.dataHeads.foldl (fun h k => h.insert k) ({} : Std.HashSet (String × Nat))
-    pure (← go.run { dataKeys := some keys }).2
+    pure (← go.run { dataKeys := some keys, opts }).2
   let forest : Forest := { goals := s.goals, clauses := s.clauses, varTypes := s.varTypes,
                            groundTypes := s.groundOrder.map (fun t => (t, s.groundTypes[t]!)),
                            levelVars := s.levelVars }
@@ -642,6 +712,6 @@ def compile (goal : Expr) (H : Array Name) : MetaM Compiled := do
   | .error e => throwError "solve_by_sat: internal: ill-formed forest: {e}"
   | .ok () => pure ()
   return { forest, goalInfo := s.goalInfo, clauseInfo := s.clauseInfo, groundExprs := s.groundExprs,
-           goalType, notes := s.notes }
+           goalType, notes := s.notes, opts }
 
 end SolveBySat

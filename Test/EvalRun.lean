@@ -126,6 +126,12 @@ def evalFlags : IO (List String) := do
 def withEvalFlags (fl : List String) (o : EncodeOptions) : EncodeOptions :=
   { o with nodeBounds := fl.contains "nodeBounds", exclusivePairs := fl.contains "exclusivePairs" }
 
+/-- 9a-1 (M9_PLAN 2.1): the compiler options of `eval_run run|sizes`, from the same variable:
+`iffEq` in `SOLVE_BY_SAT_EVAL_FLAGS` turns `CompileOptions.iffEq` on. Unset or absent: every
+compiler option off, the harness's own default, so earlier runs rebuild their forests. -/
+def evalCompileOptions (fl : List String) : CompileOptions :=
+  { iffEq := fl.contains "iffEq" }
+
 /-- The closed goal type and its binder count (the Tier B context). -/
 def goalOf (s : Spec) : MetaM (Expr × Nat) := do
   let some ci := (← getEnv).find? s.thm | throwError "unknown {s.thm}"
@@ -199,19 +205,21 @@ def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat 
     (nmax : Nat := nMax) (watch : Array Name := #[]) :
     MetaM (Json × Bool) := do
   let t0 ← IO.monoMsNow
+  let copts := evalCompileOptions (← evalFlags)
   -- 1. the goal
-  try discard <| compile goal #[]
+  try discard <| compile goal #[] copts
   catch e => return (Json.mkObj [("outcome", jStr "goal_rejected"), ("reason", jStr (← msgOf e))], false)
   -- 2. each H constant on its own
   let mut acc := #[]
   let mut rej := #[]
   for c in H do
-    try discard <| compile goal #[c]; acc := acc.push c
+    try discard <| compile goal #[c] copts; acc := acc.push c
     catch e => rej := rej.push (Json.arr #[c.toString, ← msgOf e])
   let base := [("H_accepted", Json.arr (acc.map (Json.str ·.toString))), ("H_rejected", Json.arr rej)]
-  let C ← try compile goal acc
+  let C ← try compile goal acc copts
     catch e => return (Json.mkObj (base ++ [("outcome", jStr "compile_error"), ("reason", jStr (← msgOf e))]), false)
   let C := if opts.contains "forgettypes" then { C with forest := C.forest.forgetTypes } else C
+  let base := if copts.iffEq then base ++ [("iffeq_paths", toJson [C.iffEqCounts.1, C.iffEqCounts.2])] else base
   let flags ← evalFlags
   let eopts : EncodeOptions := withEvalFlags flags { staticTyping := !opts.contains "nostatic" }
   let base := if flags.isEmpty then base else base ++ [("enc_flags", toJson flags)]
@@ -597,11 +605,12 @@ unsafe def runSizes (specsPath results started : System.FilePath) : IO UInt32 :=
           let R ← M8.generate goal s.H
           pure (M8.probeH s.H R.rules, [("probe_rules", toJson R.rules.size)])
         else pure (s.H, [])
+      let flags ← evalFlags
+      let copts := evalCompileOptions flags
       let mut acc := #[]
       for c in H do
-        try discard <| compile goal #[c]; acc := acc.push c catch _ => pure ()
-      let C ← compile goal acc
-      let flags ← evalFlags
+        try discard <| compile goal #[c] copts; acc := acc.push c catch _ => pure ()
+      let C ← compile goal acc copts
       let E := encode C.forest s.nmax (withEvalFlags flags { countOnly := true })
       let extra := if flags.isEmpty then extra else extra ++ [("enc_flags", toJson flags),
         ("early_exit", toJson E.info.earlyExit), ("gp_dead", toJson E.info.gpDead), ("cl_dead", toJson E.info.clDead)]
@@ -662,6 +671,40 @@ unsafe def specsEnv (specsPath : System.FilePath) : IO (Environment × Array Spe
   let names := nameTable env
   let specs ← js.mapM fun j => IO.ofExcept (parseSpec names j)
   return (env, specs.toArray)
+
+/-- 9a-1 (M9_PLAN 2.2, "The 8a count"): for each spec, the `iffEq` paths the compiler makes with H
+the spec's (each constant accepted on its own, as `runSat` does) and `iffEq` on: from constants of H
+(in all, and per constant) and from local hypotheses, and the notes of dropped paths. Also whether
+`iffEq` changes which constants are accepted. Nothing is encoded or solved. -/
+unsafe def runIffEqCount (specsPath results : System.FilePath) : IO UInt32 := do
+  let (env, specs) ← specsEnv specsPath
+  let done ← readKeys results
+  for s in specs.filter (!done.contains ·.key) do
+    let t0 ← IO.monoMsNow
+    let r ← runMeta env do
+      let (goal, _) ← goalOf s
+      let on : CompileOptions := { iffEq := true }
+      let mut acc := #[]
+      let mut accOff := #[]
+      for c in s.H do
+        try discard <| compile goal #[c] on; acc := acc.push c catch _ => pure ()
+        try discard <| compile goal #[c]; accOff := accOff.push c catch _ => pure ()
+      let C ← compile goal acc on
+      let (g, l) := C.iffEqCounts
+      let perConst := acc.filterMap fun c =>
+        let k := (C.clauseInfo.filter fun ci => ci.isIffEq && (match ci.origin with | .global c' => c' == c | _ => false)).size
+        if k == 0 then none else some (c.toString, k)
+      let mut dropped := #[]
+      for n in C.notes do
+        let m ← n.toString
+        if (m.splitOn "propext").length > 1 then dropped := dropped.push m
+      return Json.mkObj [("iffeq_global", toJson g), ("iffeq_local", toJson l),
+        ("iffeq_per_constant", Json.mkObj (perConst.toList.map fun (c, k) => (c, toJson k))),
+        ("dropped", toJson dropped), ("H_accepted", toJson (acc.map (·.toString))),
+        ("acceptance_unchanged", toJson (acc == accOff))]
+    appendLine results ((Json.mkObj [("key", jStr s.key)]).mergeObj r |>.mergeObj
+      (Json.mkObj [("ms", toJson (← msSince t0))])).compress
+  return 0
 
 /-- 8c-1 (M8_PLAN 4.4): the three settings of the size measurements, with `countOnly`: both
 milestone 8 flags off, R1 on, R1 and R2 on; every other option at its default. -/
@@ -844,6 +887,7 @@ unsafe def main (args : List String) : IO UInt32 := do
   | ["diag-models", specs, results] => runDiagModels specs results
   | ["r3-models", specs, results] => runR3Models specs results
   | ["dimacs", specs, outdir, mode] => runDimacs specs outdir mode
+  | ["iffeq-count", specs, results] => runIffEqCount specs results
   | ["probe-rules", specs, results] => runProbeRules specs results
   | ["run", specs, results, started, warmup] => runShard specs results started warmup
   | ["sizes", specs, results, started] => runSizes specs results started

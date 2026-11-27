@@ -183,6 +183,17 @@ def instantiateClause (C : Compiled) (n : SkelNode) : DecodeM (Expr × Expr × A
       e := mkApp4 (mkConst (if mp then ``Iff.mp else ``Iff.mpr)) A B e p
       T := if mp then B else A
       prems := prems.set! j (some p)
+    | .propEq | .propEqSymm =>
+      -- M9_PLAN 2.1: `propext : (A ↔ B) → A = B` (`{a b : Prop}`), and `Eq.symm` of it
+      -- (`Eq.symm.{u} {α : Sort u} {a b : α}`, here at `α := Prop`, `u := 1`)
+      let some (A, B) := binApp? ``Iff T | throwError "clause {cl.name}: {T} is not an iff"
+      let pe := mkApp3 (mkConst ``propext) A B e
+      if st == .propEq then
+        e := pe
+        T := mkPropEq A B
+      else
+        e := mkApp4 (mkConst ``Eq.symm [Level.one]) (mkSort Level.zero) A B pe
+        T := mkPropEq B A
   let premMVs ← prems.mapIdxM fun j p? => match p? with
     | some p => pure p
     | none => throwError "clause {cl.name}: premise {j} was never opened"

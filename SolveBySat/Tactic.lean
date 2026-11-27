@@ -62,6 +62,19 @@ register_option solve_by_sat.exclusivePairs : Bool := {
     at the same node that are never active together; off if solve_by_sat.refinements is off"
 }
 
+register_option solve_by_sat.iffEq : Bool := {
+  defValue := ({} : CompileOptions).iffEq
+  descr := "solve_by_sat: milestone 9a-1 (M9_PLAN 2.1), every clause with an `↔` head `L ↔ R`, on any \
+    split path, also gives the clauses with heads `L = R` (by `propext`) and `R = L` (by `Eq.symm`); \
+    also `(iffEq := true)` in the tactic call"
+}
+
+register_option solve_by_sat.iffEqMutant : Bool := {
+  defValue := false
+  descr := "solve_by_sat (testing only): the mutation check of M9_PLAN 2.2, the decoder's recipes of \
+    the two `iffEq` paths swapped"
+}
+
 register_option solve_by_sat.checkBounds : Bool := {
   defValue := false
   descr := "solve_by_sat (testing only): check that every node of a decoded proof satisfies R1's \
@@ -71,12 +84,20 @@ register_option solve_by_sat.checkBounds : Bool := {
 /-- Default node bound when `(nodes := N)` is omitted. -/
 def defaultNodes : Nat := 8
 
+/-- The compiler options from the `solve_by_sat.*` options. -/
+def compileOptionsOf (opts : Options) : CompileOptions :=
+  { iffEq := solve_by_sat.iffEq.get opts, iffEqMutant := solve_by_sat.iffEqMutant.get opts }
+
 /-- Prove the closed type `goal` from the constants `H` with at most `N` nodes. -/
 def solveCore (goal : Expr) (H : Array Name) (N : Nat) : MetaM Expr := do
-  let C ← compile goal H
+  let C ← compile goal H (compileOptionsOf (← getOptions))
   let C := if solve_by_sat.forgetTypes.get (← getOptions) then { C with forest := C.forest.forgetTypes } else C
   if solve_by_sat.verbose.get (← getOptions) then
     for note in C.notes do logInfo note
+    -- only when some were added, so that `verbose` says nothing new for a goal without `↔` heads
+    let (g, l) := C.iffEqCounts
+    if C.opts.iffEq && g + l > 0 then
+      logInfo m!"solve_by_sat: iffEq: {g + l} propext paths added ({g} from constants of H, {l} from local hypotheses)"
   if N == 0 then
     throwError "solve_by_sat: no proof with at most {N} nodes exists in the class"
   let opts ← getOptions
@@ -113,19 +134,28 @@ def solveCore (goal : Expr) (H : Array Name) (N : Nat) : MetaM Expr := do
     return t
 
 syntax solveBySatNodes := "(" &"nodes" " := " num ")"
+syntax solveBySatIffEq := "(" &"iffEq" " := " (&"true" <|> &"false") ")"
 
-/-- `solve_by_sat [h₁, …] (nodes := N)` searches for a backward-chaining proof of at most
-`N` nodes (SPEC §2) using the constants `hᵢ` and the local context, by reduction to SAT. -/
-syntax (name := solveBySat) "solve_by_sat" " [" ident,* "]" (ppSpace solveBySatNodes)? : tactic
+/-- `solve_by_sat [h₁, …] (nodes := N) (iffEq := true)` searches for a backward-chaining proof
+of at most `N` nodes (SPEC §2) using the constants `hᵢ` and the local context, by reduction to
+SAT. Both arguments are optional, in this order. `(iffEq := b)` sets the option
+`solve_by_sat.iffEq` (M9_PLAN 2.1) for this call. -/
+syntax (name := solveBySat) "solve_by_sat" " [" ident,* "]" (ppSpace atomic(solveBySatNodes))?
+  (ppSpace solveBySatIffEq)? : tactic
 
 elab_rules : tactic
-  | `(tactic| solve_by_sat [$hs,*] $[$cfg]?) => do
+  | `(tactic| solve_by_sat [$hs,*] $[$cfg]? $[$ie]?) => do
     let N ← match cfg with
       | some c => match c with
         | `(solveBySatNodes| (nodes := $k)) => pure k.getNat
         | _ => throwUnsupportedSyntax
       | none => pure defaultNodes
+    let iffEq? : Option Bool ← match ie with
+      -- the value is `(&"true" <|> &"false")`: a node of kind `token.true` / `token.false`
+      | some s => pure (some (s.raw[3].getKind == `token.true || s.raw[3][0].getAtomVal == "true"))
+      | none => pure none
     let H ← hs.getElems.mapM fun h => realizeGlobalConstNoOverloadWithInfo h
+    withOptions (fun o => match iffEq? with | some b => solve_by_sat.iffEq.set o b | none => o) <|
     liftMetaTactic fun g => do
       let g ← g.revertAll
       g.withContext do

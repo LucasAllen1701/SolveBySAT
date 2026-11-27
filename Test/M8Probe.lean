@@ -64,6 +64,9 @@ built-in `Iff.mpr` of the hypothesis are already in the class. -/
 
 axiom Q : Prop → Prop
 
+-- 9a-1: P3's and P4's exact guards are pinned to `iffEq` off (their setting in 8a). With `iffEq` on
+-- the compiler's own `propext` paths compete with the probe's rules (twins below, after P4).
+set_option solve_by_sat.iffEq false in
 theorem P3 (a b : Nat) : (¬ a ≤ b) = (b < a) := by solve_by_sat_probe [Nat.not_le] (nodes := 1)
 
 /-- info: theorem P3 : ∀ (a b : Nat), (¬a ≤ b) = (b < a) :=
@@ -76,6 +79,7 @@ fun a b => _probe.Nat.not_le.propext.root -/
 #guard_msgs in
 #check @«_probe».Nat.not_le.propext.root
 
+set_option solve_by_sat.iffEq false in
 theorem P4 (a b : Nat) : Q (¬ a ≤ b) → Q (b < a) := by solve_by_sat_probe [Nat.not_le] (nodes := 4)
 
 /-- info: theorem P4 : ∀ (a b : Nat), Q ¬a ≤ b → Q (b < a) :=
@@ -85,7 +89,22 @@ fun a b a_1 => _probe.Q.subst.«0» (b < a) (a ≤ b → False) (Eq.symm _probe.
 
 /-- error: solve_by_sat: no proof with at most 3 nodes exists in the class -/
 #guard_msgs (error, drop info) in
+set_option solve_by_sat.iffEq false in
 example (a b : Nat) : Q (¬ a ≤ b) → Q (b < a) := by solve_by_sat_probe [Nat.not_le] (nodes := 3)
+
+-- 9a-1 twins, with `iffEq` on (M9_PLAN 2.2): P3 is still proved at N = 1. P4's minimal N becomes 3:
+-- the path `Nat.not_le.propext_symm` gives `(b < a) = (¬ a ≤ b)` in one node, where 8a needed
+-- `Eq.symm` of the probe's equation (the saving of the three N = 2 goals of the 8a table).
+set_option solve_by_sat.iffEq true in
+example (a b : Nat) : (¬ a ≤ b) = (b < a) := by solve_by_sat_probe [Nat.not_le] (nodes := 1)
+
+set_option solve_by_sat.iffEq true in
+example (a b : Nat) : Q (¬ a ≤ b) → Q (b < a) := by solve_by_sat_probe [Nat.not_le] (nodes := 3)
+
+/-- error: solve_by_sat: no proof with at most 2 nodes exists in the class -/
+#guard_msgs (error, drop info) in
+set_option solve_by_sat.iffEq true in
+example (a b : Nat) : Q (¬ a ≤ b) → Q (b < a) := by solve_by_sat_probe [Nat.not_le] (nodes := 2)
 
 theorem P5 (A B C : Prop) (hA : A) (h : B ↔ C) (hC : C) : A ∧ B := by solve_by_sat [] (nodes := 4)
 

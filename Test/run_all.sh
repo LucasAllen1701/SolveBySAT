@@ -12,7 +12,7 @@ for t in test_m0 test_m1 test_m4 test_m5 test_countonly test_m8diag; do
   echo "== $t"
   ".lake/build/bin/$t" || status=1
 done
-for f in Test/M2.lean Test/M3.lean Test/M4Lean.lean Test/M5Lean.lean Test/M7Lean.lean Test/M8Probe.lean Test/M8C1Lean.lean; do
+for f in Test/M2.lean Test/M3.lean Test/M4Lean.lean Test/M5Lean.lean Test/M7Lean.lean Test/M8Probe.lean Test/M8C1Lean.lean Test/M9Lean.lean; do
   echo "== $f"
   lake env lean "$f" || status=1
 done
@@ -28,8 +28,12 @@ echo "== exactness comparison"
 # (pipefail: a failing self-test fails the pipeline)
 .lake/build/bin/eval_run exactness-selftest | grep -E "^FAIL|^exactness" || status=1
 python3 Test/eval_driver.py exactness-selftest | grep -E "^FAIL|^driver exactness" || status=1
-echo "== off-switch"
+# (9a-1, M9_PLAN 2.2: the same off-switch holds with every milestone 9 option off, their default)
+echo "== off-switch (milestone 8 flags and milestone 9 options off)"
 Test/m8c1_offswitch.sh || status=1
 echo "== Lean suite, three settings"
 Test/m8c1_lean.sh || status=1
+# 9a-1 (M9_PLAN 2.2): the Lean suite with iffEq off and on, with the model check
+echo "== Lean suite, iffEq off and on"
+Test/m9a1_lean.sh || status=1
 exit $status

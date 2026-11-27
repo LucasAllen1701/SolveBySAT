@@ -3440,3 +3440,120 @@ depth(α) ≥ d(g) and α + s(g) ≤ N, and a node with `cl(α, c)` has depth(α
   check, with the same proof node counts in each. No test needed a removed file. The code is `m8-data`'s, unchanged;
   the reports regenerate on `m8-data` (they were checked byte-identical at the end of each stage, and 8d's again by
   the owner).
+
+## Milestone 9: rewriting first, then cases and induction (M9_PLAN.md)
+
+### 9a-1: ↔ as equations (M9_PLAN 2; 27 November 2026)
+
+- **Start.** `main` at `c3086d1`, pulled; `lake build` succeeds; machine checks as at the end of milestone 8 (cgroup
+  memory controller delegated, `vm.overcommit_memory = 1`, `systemd-run --user` running, CaDiCaL 2.1.2, 7 GB RAM,
+  8 cores). Start record `eval/m9a1/run_all_start.log`: `Test/run_all.sh` exit 0 at `c3086d1` (140 min), nothing
+  edited or rebuilt in that tree while it ran. The 9a-1 work was done meanwhile in a separate worktree of `m9`.
+- **Branch and plan.** `m9` from `main`. `M9_PLAN.md` as given, md5 `6cf1b0bc3118…`, as required (`889ec1d`).
+- **Report guards** (milestone 8's hazard; `118c4cb`). Each `eval/m8*/report.py` now has a list `DATA_FILES` of the
+  data files it reads, and its `__main__` block calls `require_data()` before `main()`: if one is absent it prints
+  "the data for this report is on tag m8-data; see eval/README.md" and exits 1. `m8a`'s also checks its run
+  folder's `results.jsonl`, `sizes.jsonl` and `header.json` (the folder is an argument). Nothing else in the scripts
+  changed. The lists are exactly the files each script opened when run on `m8-data` (traced with a Python audit
+  hook on `open`).
+  - *On `m9`:* all five stop with the message, exit 1; the five reports' md5 sums are unchanged.
+  - *On an `m8-data` worktree with the guarded scripts copied in:* all five regenerate byte-identically:
+    PROBE.md `44a850dbd2b1…`, DIAG.md `97b344cade3d…`, SCALE.md `776ef317873b…`, R3SIM.md `f7b5871a9dc8…`,
+    EVAL8.md `55736ef45bf8…`, as required.
+  - `eval/README.md` and CLAUDE.md now describe the guard instead of the hazard.
+- **What is built** (M9_PLAN 2.1; `000fe68`). `SolveBySat/` changes: `Compile.lean`, `Decode.lean`, `Tactic.lean`.
+  - `CompileOptions` (new; `compile goal H (opts := {})`), with `iffEq` (default false) and the testing-only
+    `iffEqMutant`. Every existing call of `compile` passes no options, so it builds exactly the forest it built.
+  - `Split` gains `propEq` and `propEqSymm` (name suffixes `propext`, `propext_symm`). With `iffEq`, `splitPaths`
+    appends `[propEq]` and `[propEqSymm]` to the paths of every `↔` head, after its other paths, recursively, so
+    nested `↔` (in `∧` or `↔` heads, at any depth) get them too. Along such a path the head `A ↔ B` becomes
+    `@Eq.{1} Prop A B` (or `B = A`), compiled like any atom: its sides are term templates (SPEC 4.5), and each path
+    has fresh binders and its own premise goal positions (SPEC 4.2), as every split path has.
+  - `Step` gains `propEq` and `propEqSymm`: the decoder builds `@propext A B e` and
+    `@Eq.symm.{1} Prop A B (@propext A B e)`. Checked against 4.36: `propext : ∀ {a b : Prop}, (a ↔ b) → a = b`,
+    `Eq.symm : ∀ {α : Sort u_1} {a b : α}, a = b → b = a`. `Lean.levelOne`/`levelZero` are deprecated in 4.36;
+    `Level.one`/`Level.zero` are used.
+  - *Dropped paths.* An `iffEq` path of a constant of H, or of a local hypothesis of a non-root goal position, that
+    fails to compile is dropped with a note ("the ↔-as-equation path … is dropped"), restoring the compiler state, so
+    the constant's or hypothesis's other paths and its acceptance are unaffected. A root hypothesis's paths already
+    give a note each when they fail (milestone 3, amendment 2); the `iffEq` paths use that. In the 200 specs below no
+    path was dropped and no constant's acceptance changed; the only case found by hand is a root hypothesis whose
+    every path fails (tested in M9Lean).
+  - *Tactic.* Option `solve_by_sat.iffEq` (default from `CompileOptions`, false) and `(iffEq := true|false)` in the
+    call, after the optional `(nodes := N)` (fixed order; `(nodes := N)` is now `atomic`, so that `(iffEq := …)`
+    alone parses). The value parses as a node of kind `token.true`/`token.false`. Testing-only
+    `solve_by_sat.iffEqMutant`.
+  - *`verbose`* prints "iffEq: K propext paths added (G from constants of H, L from local hypotheses)" **only when
+    K > 0**. Decision: printed for every call, the line ("0 propext paths added") changed the guarded `verbose` output
+    of many existing tests whose goals have no `↔` (in M2, M3, M4Lean, M5Lean and M8C1Lean) under `-Dsolve_by_sat.iffEq=true`; with the
+    condition they pass unchanged.
+  - *Harness.* `iffEq` in `SOLVE_BY_SAT_EVAL_FLAGS` turns the compile option on for `eval_run run|sizes`, in every
+    `compile` call of a run (the goal alone, each constant alone, the whole); the harness's default stays off. A run
+    with it records `iffeq_paths` [from H, local]. New read-only `eval_run iffeq-count SPECS OUT`. The other
+    subcommands (`dimacs`, `diag`, …) compile with the options off.
+- **Tests** (M9_PLAN 2.2).
+  - *Off-switch.* `Test/m8c1_offswitch.sh` (in `run_all.sh`) builds the 54 encodings with the default options, so
+    with `iffEq` off: 54/54 byte-identical to `eval/m8b/dimacs_md5.txt` (start and end records). The Lean suite and
+    the differentials give the same answers as at `c3086d1` (below).
+  - *`Test/M9Lean.lean`* (new, in `run_all.sh` and in the three-setting suite of `Test/m8c1_lean.sh`): the six tests
+    of 2.2, each proved at N = 1 with `(iffEq := true)` and its one-node term guarded by `#print` (`propext
+    Nat.not_le`, `Eq.symm (propext Nat.not_le)`, `propext h`, `Eq.symm (propext h)`, `propext h.right`,
+    `propext (h 0)`); minimality: N = 1 is the least N, and N = 0 gives the no-proof message for each; with `iffEq`
+    off each fails with "no proof with at most 8 nodes" (the off tests set the option explicitly, so the file also
+    passes under `-Dsolve_by_sat.iffEq=true`); the option form; `(iffEq := false)` overriding the option; the default
+    is false; the `verbose` counts (6 = 2 from H + 4 local) and a root hypothesis whose paths are all dropped.
+  - *Mutation check* (`solve_by_sat.iffEqMutant`, the recipes swapped): each of the six fails with "decoder failed
+    on a satisfiable CNF (bug)", the decoder's "the head B = A of h.propext does not unify with the target A = B"
+    (and likewise for each); none produces a proof. The errors are guarded in M9Lean.
+  - *The Lean suite with `iffEq` on* (`Test/m9a1_lean.sh`, new, in `run_all.sh`): every file passes with
+    `iffEq` off and on, with the model check; decoded proofs per file the same in both (M2 6, M3 12, M4Lean 7,
+    M5Lean 8; the other files print none), with the same node counts.
+  - **A test that expects a failure now succeeds with `iffEq` on** (recorded, as asked): M8Probe's
+    "no proof with at most 3 nodes" for P4 (`Q (¬ a ≤ b) → Q (b < a)` with the probe's rules). With `iffEq` the path
+    `Nat.not_le.propext_symm` gives `(b < a) = (¬ a ≤ b)` in one node, so P4's minimal N is 3 instead of 4 (the
+    saving M9_PLAN 2.2 predicts for the N = 2 goals of 8a). P3's and P4's exact `#print` guards change too (P3's proof
+    becomes `propext Nat.not_le` instead of the probe's lemma). **The expectations are unchanged**: the three guards
+    are pinned to `iffEq` off (`set_option solve_by_sat.iffEq false in`, a no-op under the default), as 8c-1 pinned
+    exact guards to the flags off; the twins with `iffEq` on check P3 at N = 1 and P4 at N = 3, with N = 2 failing.
+    For the owner to confirm.
+  - *Differentials:* unaffected (their forests are generated directly); run in `run_all.sh`, 0 mismatches.
+- **The 8a checks** (M9_PLAN 2.2; data in `eval/m9a1/`, `eval/m9a1/CHECKS.md` from `python3 Test/m9a1_check.py
+  ../m8-data`). Inputs from an `m8-data` worktree (`Test/m9a1_setup.py`; md5 sums in `eval/m9a1/inputs.md5`;
+  milestone 7's specs from `eval/m8a/inputs/specs_full.jsonl`, checked against its `MD5SUMS`).
+  - *The count* (`eval_run iffeq-count`, milestone 7's H, `iffEq` on, `eval/m9a1/count.jsonl`): **158** `propext`
+    paths from constants of H over the 200 specs, exactly twice 8a's `probe_propext` (79), and equal to it for
+    **every** spec (0 differences); 56 specs, 77 constants. Paths from local hypotheses: **4**, all in
+    `main:B/List.find?_eq_some_iff_append/67`. No path dropped; no accepted H changed.
+  - *The 8 proofs* (`SOLVE_BY_SAT_EVAL_FLAGS=nodeBounds,exclusivePairs,iffEq python3 Test/eval_driver.py run
+    eval/m9a1/specs_8.jsonl eval/m9a1/runs8`: milestone 7's specs with the baselines off, milestone 7's limits and
+    cap, node bounds and exclusive pairs on): **all 8 proved at the expected N**, decoded and kernel-checked.
+
+    | goal | N in 8a | N expected | N | proof |
+    | --- | --- | --- | --- | --- |
+    | `B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/5` | 1 | 1 | 1 | `Std.DTreeMap.Raw.contains_eq_false_iff_not_mem.propext` |
+    | `B/BitVec.not_self_ne/2` | 1 | 1 | 1 | `ne_comm.propext` |
+    | `B/Std.TreeMap.inter_equiv_empty_comm/14` | 2 | 1 | 1 | `Bool.eq_iff_iff.propext_symm` |
+    | `B/Std.DHashMap.getKey?_eq_some_getKeyD/3` | 2 | 1 | 1 | `Std.DHashMap.contains_iff_mem.propext_symm` |
+    | `B/String.Slice.Pos.next_eq_iff/21` | 3 | 3 | 3 | `String.Slice.Pos.next_le_iff_lt.propext(fun a0@g9 => h(a0@g9))` |
+    | `B/UInt64.lt_add_one/7` | 1 | 1 | 1 | `UInt64.eq_iff_toBitVec_eq.propext` |
+    | `B/UInt64.toUInt8_le/11` | 1 | 1 | 1 | `UInt64.le_iff_toNat_le.propext` |
+    | `B/Std.TreeMap.inter_equiv_empty_comm/13` | 2 | 1 | 1 | `Bool.eq_iff_iff.propext_symm` |
+
+    The three N = 2 goals of 8a use the `R = L` path, as predicted.
+- **Surprising.**
+  - The count agrees per spec, not only in total, although 8a built its equations from the raw types with
+    `forallTelescope` (at most 6 split steps deep) and the compiler splits the preprocessed types without a depth
+    limit: no constant of these specs has an `↔` that preprocessing hides or exposes, or one deeper than 6 steps.
+  - Only one of the 200 goals has a local `↔` hypothesis.
+  - The `String.Slice` proof's `propext` path keeps its constant's premise (the `fun a0@g9 => h(a0@g9)` child): the
+    `propext` paths of a conditional `↔` lemma are conditional equations.
+- **Spec and plan.** M9_PLAN 2.1's "`(iffEq := true)` in the tactic call" needed new syntax: the tactic took only
+  `(nodes := N)`. The two arguments are in a fixed order. Nothing else in 2.1 or 2.2 was wrong for 4.36.
+- **`SolveBySat/` changes** are only those above; with `iffEq` off every forest, CNF and proof is milestone 8's.
+- **Regression (end of 9a-1):** `Test/run_all.sh` exit 0 at `4400e87` (`eval/m9a1/run_all_end.log`, 146 min; the
+  start record at `c3086d1` took 140 min): M0 902/902, M1 26/26, M4 7/7, M5 13/13, `countOnly` 44/44, M8 diagnostics
+  10/10, 41/41 and 91/91; M2, M3, M4Lean, M5Lean, M7Lean, M8Probe, M8C1Lean and M9Lean pass; the differentials with
+  `m8off`, `r1`, `r1r2` (M1 20/20, M5 10/10 each) have 0 mismatches; the exactness self-tests 13/13 and 10/10; the
+  off-switch gives 54/54 DIMACS identical to `eval/m8b/dimacs_md5.txt` with every milestone 9 option off; the Lean
+  suite (with M9Lean) passes in the three settings with the model check; the Lean suite passes with `iffEq` off and
+  on, with the model check and the same decoded proofs per file. The 8a checks pass (`eval/m9a1/CHECKS.md`).

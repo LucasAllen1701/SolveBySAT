@@ -5,7 +5,7 @@ reduction to SAT. The spec is `SPEC.md`; the Python prototype in `reference/` is
 authority for SPEC §5 and §6.1–6.8 where they disagree. `NOTES.md` records every
 deviation from the spec and every decision, milestone by milestone. Read its Milestone 7
 and Milestone 8 sections before touching the evaluation; `EVAL_PLAN.md` and `M8_PLAN.md` are
-those milestones' plans (both closed).
+those milestones' plans (both closed). `M9_PLAN.md` is milestone 9's.
 
 ## Standing rules (from the project owner)
 
@@ -50,6 +50,8 @@ lake build test_m8diag m8b_dimacs73  # 8b: diagnostics test and SPEC 7.3 DIMACS 
 Test/m8c1_offswitch.sh              # 8c-1: flags off give 8b's DIMACS (in run_all.sh)
 Test/m8c1_lean.sh                   # 8c-1: the Lean suite with the flags off, R1, R1 and R2 (in run_all.sh)
 python3 Test/m8d_run.py status eval/m8d/runs full   # 8d: eval/m8d/STATUS.md (needs m8-data's data)
+Test/m9a1_lean.sh                   # 9a-1: the Lean suite with iffEq off and on (in run_all.sh)
+python3 Test/m9a1_check.py ../m8-data   # 9a-1: the 8a checks → eval/m9a1/CHECKS.md (needs an m8-data worktree)
 ```
 
 ## Layout and where the data lives
@@ -110,14 +112,27 @@ machine's specs in NOTES.md before a full run.
     "11 node bounds"). Mutation-only options `boundsScope`, `boundsTight`, `exclusiveMutant`; testing-only tactic
     option `solve_by_sat.checkBounds` (the model check).
   - Not built: R3 (simulated, projected ratio 0.9925 > 0.8, 4.6), R4 (set aside), R5 (dropped) (4.5).
-- **Next: milestone 9** starts from `main`, after its design note is written and accepted in the claude.ai
-  project. Do not create its branch before then.
+- **Milestone 9 (`M9_PLAN.md`), on branch `m9`** (made from `main` at `c3086d1`): rewriting first (9a), then cases
+  and induction (9b–9d, planned after 9a-3). The design is `M9_DESIGN.md` in the claude.ai project. Every milestone 9
+  option is off by default (owner decision 4). At the end, code and reports go to `main` and the data to a tag.
+  - **9a-1 is done** (NOTES.md, "9a-1: ↔ as equations"): `CompileOptions.iffEq`, option `solve_by_sat.iffEq` or
+    `(iffEq := true)` in the call (after `(nodes := N)`): every `↔` head on any split path also gives the paths
+    `L = R` (recipe `propext`, suffix `.propext`) and `R = L` (`Eq.symm`, `.propext_symm`); a path that cannot be
+    compiled is dropped with a note. `verbose` prints the paths added when there are any. Testing-only option
+    `solve_by_sat.iffEqMutant` (the recipes swapped). Tests: `Test/M9Lean.lean`, `Test/m9a1_lean.sh` (the Lean
+    suite with `iffEq` off and on), both in `run_all.sh`. The 8a checks: `Test/m9a1_setup.py`, `eval_run iffeq-count`,
+    `Test/m9a1_check.py` → `eval/m9a1/CHECKS.md`.
+  - **Next: 9a-2** (equality rules made per use, M9_PLAN 3), only after the owner has checked 9a-1.
+- Milestone 9 rules: M9_PLAN section 1 ("Rules carried over from milestone 8") and milestone 8's. SPEC.md is revised
+  in the claude.ai project at the end of the milestone, not here.
 
-### Harness notes (milestones 7 and 8)
+### Harness notes (milestones 7 to 9)
 
 - **The harness's own default for the flags is off**, unlike the tactic's:
   `SOLVE_BY_SAT_EVAL_FLAGS=nodeBounds,exclusivePairs` sets them for `eval_run run|sizes` (unset: both off, so
-  milestone 7 and 8a runs rebuild their CNFs). The variable is process-wide: every goal of a run, crash records
+  milestone 7 and 8a runs rebuild their CNFs). Since 9a-1 the same variable carries the compiler options:
+  `iffEq` in it sets `CompileOptions.iffEq` for `eval_run run|sizes` (absent: off), and a run records
+  `iffeq_paths` [from H, local]. The variable is process-wide: every goal of a run, crash records
   included, gets it. `SOLVE_BY_SAT_EVAL_COMPARE=<results.jsonl>` applies 4.4's exactness stop rules (exit 9, in
   the shard and on crash records the driver writes; 6 in 8c-1). `eval_run exactness-selftest` and
   `python3 Test/eval_driver.py exactness-selftest` are in `run_all.sh`.

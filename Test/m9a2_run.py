@@ -209,12 +209,21 @@ def status():
 
 
 def publish(msg):
+    """Commit eval/m9a2 (only) and push m9; a busy index (another git command) is retried, and a failure is
+    reported, never fatal to the run."""
     status()
-    subprocess.run(["git", "add", "eval/m9a2"], cwd=ROOT, check=True)
-    if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=ROOT).returncode != 0:
-        subprocess.run(["git", "commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"],
-                       cwd=ROOT, check=True)
-        subprocess.run(["git", "push", "-q", "origin", "m9"], cwd=ROOT)
+    for attempt in range(10):
+        a = subprocess.run(["git", "add", "eval/m9a2"], cwd=ROOT, capture_output=True, text=True)
+        if a.returncode == 0:
+            if subprocess.run(["git", "diff", "--cached", "--quiet", "--", "eval/m9a2"], cwd=ROOT).returncode == 0:
+                return
+            c = subprocess.run(["git", "commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+                                "--", "eval/m9a2"], cwd=ROOT, capture_output=True, text=True)
+            if c.returncode == 0:
+                subprocess.run(["git", "push", "-q", "origin", "m9"], cwd=ROOT, capture_output=True)
+                return
+        time.sleep(30)
+    print(f"publish failed: {msg}", flush=True)
 
 
 def main(a):

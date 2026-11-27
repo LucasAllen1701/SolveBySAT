@@ -2,7 +2,7 @@
 
 Lucas Allen · 27 November 2026
 
-**Status: 9a-1 (`↔` as equations) has started. 9a-2 and 9a-3 are planned and pre-registered here; 9b to 9d are planned after 9a-3.** The design is `M9_DESIGN.md` in the claude.ai project, revised on 27 November 2026 after milestone 8; this plan follows it and records the owner's decisions on it.
+**Status: 9a-1 (`↔` as equations) is complete (section 2, amendment 6.1). 9a-2 (equality rules made per use) has started (section 3, with the clarifications of 6.1). 9a-3 is pre-registered (section 4); 9b to 9d are planned after 9a-3.** The design is `M9_DESIGN.md` in the claude.ai project, revised on 27 November 2026 after milestone 8; this plan follows it and records the owner's decisions on it.
 
 ## 1. Aims, stages and rules
 
@@ -184,4 +184,28 @@ It states facts.
 
 ## 6. Amendments
 
-None yet.
+### 6.1 After 9a-1 (28 November 2026)
+
+**9a-1 record.** NOTES.md ("9a-1: ↔ as equations") and `eval/m9a1/CHECKS.md` have the details. The stage was checked independently: M9_PLAN.md's md5 is as given, the count recomputes from `eval/m9a1/count.jsonl` against 8a's `rules.jsonl`, the 8 runs are proved at the expected N with `iffEq` on, and every milestone 8 `report.py` stops with the guard message on `m9`.
+
+- **The count.** 158 `propext` paths come from constants of H over the 200 specs. That is twice 8a's count for every spec, not only in total. 4 more come from local hypotheses, all in one goal. No path was dropped, and no constant's acceptance changed.
+- **The 8 proofs** are at the expected N. The three that 8a proved at N = 2 are proved at N = 1, through the `R = L` path.
+- **The off-switch** gives 54 of 54 identical encodings. The Lean suite passes with `iffEq` off and on, with the same decoded proofs per file.
+
+**Decisions.**
+
+1. **M8Probe's guards.** With `iffEq` on, P4's minimal N falls from 4 to 3, because the `R = L` path saves a node. P3's and P4's exact guards are pinned to `iffEq` off, their setting in 8a, and twins check them with `iffEq` on. This is accepted, as 8c-1's pinning was. No expectation was weakened.
+2. **Syntax.** The tactic takes `(nodes := N)` and then `(iffEq := b)`, in a fixed order. 9a-2's arguments follow them in the same way.
+
+**Clarifications for 9a-2.** These amend section 3.
+
+1. **The equality core is made per use.** The `rewrite` option's `Eq.refl`, `Eq.symm` and `Eq.trans` are not polymorphic built-ins. They are instantiated, like the other rules, at each type at which an equation occurs in the forest after rule generation:
+   - the heads of the sources;
+   - the `t = s` premises and congruence heads of the generated rules;
+   - the targets.
+
+   The type is fixed as it occurs (ground, the root's eigenvariables, or an H clause's variables). Constants that H already contains, such as a polymorphic `Eq.symm`, are left as they are.
+2. **Atoms with an eigenvariable head.** An atom such as `Q x`, whose head is an eigenvariable (symbol `app`, SPEC 4.5), takes substitution rules like any predicate. The head variable is part of the rule's context, so for a root eigenvariable the rule is local to the root.
+3. **Positions** are numbered as in 8a: every argument, from 0, as in `_probe.HAdd.hAdd.congr.«4»`. The check of the 11 proofs in 3.2 then compares like with like.
+4. **The selection mutation in 3.2.** Dropping selection only adds rules, so it can only add proofs. The check is that no proof found with selection is lost. A test whose expected failure becomes a proof is listed, not counted as a failure of the check. This replaces "must change no answer in the suite, only sizes".
+5. **The measurement of 3.3.** The settings with 8a's rules use 8c-1's recorded counts (`eval/m8c1/sizes_N5/` and `sizes_N10/`, on `m8-data`); they are not rerun. The setting without rules is recounted, and it must equal 8c-1's R1-and-R2 counts at every point, as a consistency check.

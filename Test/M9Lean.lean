@@ -477,7 +477,10 @@ set_option solve_by_sat.verbose true in
 example (P : Nat → Prop) (a : Nat) : P a := by
   solve_by_sat [] (nodes := 0) (rewrite := true)
 
--- H's polymorphic `Eq.symm` is left as it is: no `symm` rule is made
+-- H's polymorphic `Eq.symm` is left as it is: no `symm` rule is made. Its head `?y = ?x`, an `Eq`
+-- atom over H's variables, is a source, so the core also gets `refl` and `trans` in the H row
+-- (6.1, clarification 1: the type as it occurs); `a`, `b` are rigid sides, so `Eq` gets
+-- substitution rules for the target
 /--
 info: solve_by_sat: rewrite: 6 rules (subst: ground 2; refl: ground 1, H 1; trans: ground 1, H 1)
 rw.Eq.subst.1@ground#0: c:Eq(lvl:succ(lvl:zero), c:Nat, ?a#6, ?x0#8) ← c:Eq(lvl:succ(lvl:zero), c:Nat, ?a#6, ?b#7), c:Eq(lvl:succ(lvl:zero), c:Nat, ?b#7, ?x0#8)

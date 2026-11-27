@@ -9,9 +9,10 @@ For each file of the suite and each setting, each `#guard_msgs` that does not ma
   gained   an expected "no proof" error is gone and a proof is reported or nothing fails (an expected failure
            that became a proof: recorded, not a failure of the check);
   lost     a "no proof" (or other) error appears where none was expected (a proof lost: a FAIL);
+  bug      a decoder, internal or model-check error appears that the expected message does not have (a FAIL);
   message  the outcome is the same and only messages differ (the `verbose` lines that list the rules, CNF sizes);
 and every error outside a `#guard_msgs` (a tactic that was expected to succeed) is `unguarded` (a FAIL).
-Prints one line per difference and a summary; exit 1 if any `lost` or `unguarded`.
+Prints one line per difference and a summary; exit 1 if any `lost`, `bug` or `unguarded`.
 """
 import os, re, sys
 
@@ -38,10 +39,15 @@ def parse(path, fname):
     return guards, errors
 
 
+BUG = re.compile(r"decoder failed|solve_by_sat: internal|violates the node bounds")
+
+
 def classify(block):
     minus = "\n".join(l[2:] for l in block if l.startswith("- "))
     plus = "\n".join(l[2:] for l in block if l.startswith("+ "))
     ctx = "\n".join(l[2:] for l in block if l.startswith("  "))
+    if BUG.search(plus) and not BUG.search(minus + ctx):
+        return "bug"
     exp_err = ("error:" in minus) or ("error:" in ctx)
     got_err = ("error:" in plus) or ("error:" in ctx)
     if "error:" in minus and "error:" not in plus and "error:" not in ctx:
@@ -72,11 +78,24 @@ def main(a):
                 tally[(st, c)] = tally.get((st, c), 0) + 1
                 first = next((l[2:] for l in block if l.startswith("- ") or l.startswith("+ ")), "")[:150]
                 print(f"{st} {f}.lean:{g} {c}: {first}")
-                if c == "lost":
+                if c in ("lost", "bug"):
                     bad += 1
-            # an error not followed (within the command) by a guard mismatch is unguarded
+            # an error outside the command a `#guard_msgs` covers is unguarded (a guard covers the next
+            # command: any `set_option … in` lines, then the declaration and its indented lines)
+            src = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Test",
+                                    f + ".lean")).read().split("\n")
+            covered = []
+            for i, l in enumerate(src):
+                if l.startswith("#guard_msgs"):
+                    k = i + 1
+                    while k < len(src) and src[k].startswith("set_option") and src[k].rstrip().endswith(" in"):
+                        k += 1
+                    j = k + 1
+                    while j < len(src) and (src[j] == "" or src[j][0] in " \t"):
+                        j += 1
+                    covered.append((i + 1, j))   # 1-based lines i+1 .. j
             for (L, msg) in errors:
-                if any(g < L <= g + 25 for g in gl):
+                if any(a <= L <= b for a, b in covered):
                     continue
                 if msg.startswith("❌️"):
                     continue

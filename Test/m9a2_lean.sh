@@ -35,11 +35,9 @@ for s in off on liberal; do
         # every failing guard or tactic, with its first line
         echo "DIFFERS $s $f:"
         grep -E "^$f:[0-9]+:[0-9]+: error" "$log" | sed 's/^/    /' | cut -c1-220
-        # a test that expects a proof and fails is a lost proof: an error at a tactic line that no
-        # #guard_msgs covers. (A covered one shows up as a guard mismatch, listed above.)
-        if grep -qE "decoder failed|internal|violates the node bounds" "$log"; then
-          echo "FAIL $s $f: a decoder, internal or model-check error"; status=1
-        fi
+        # lost proofs, unguarded errors and new decoder, internal or model-check errors are found by
+        # Test/m9a2_classify.py on the kept logs (a guarded test may expect a decoder error: the
+        # context mutation of M9Lean)
       fi
     fi
     grep -o "proof with [0-9]* nodes" "$log" > "$tmp/$s.$b.nodes" || true

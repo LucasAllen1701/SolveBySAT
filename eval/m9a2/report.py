@@ -194,14 +194,14 @@ def ok(r):
     return r is not None and r.get("status") == "ok"
 
 
-def measurement():
+def measurement(ns=(5, 10)):
     L = ["## 3. The measurement (M9_PLAN 3.3, amendment 6.1 clarification 5)", "",
          "The 400 points of `eval/m8b/specs_points.jsonl`: the 200 goals of 8a, each with 8a's rules as lemmas and "
          "without rules (milestone 7's H). `countOnly` counts, R1 and R2 on. The settings: "
          + "; ".join(f"**{k}**: {v}" for k, v in SETS) + ". `rw` and `rwnt` are measured on each goal's point "
          "without rules. Every point without rules and with 8a's rules is recounted with `rewrite` off and compared "
          "with 8c-1's records.", ""]
-    for n in (5, 10):
+    for n in ns:
         S, group = sizes(n)
         tj = json.load(open(os.path.join(D, f"sizes_N{n}", "timing.json")))
         L += [f"### N = {n}", ""]
@@ -301,14 +301,18 @@ def measurement():
                     reason = re.sub(r"[#@]\S+", "", msg)[:90]
                     drops[reason] = drops.get(reason, 0) + 1
         if drops:
-            L += ["Rules dropped (`rw`), by message:", ""]
+            motive = sum(c for m, c in drops.items() if not m.startswith("solve_by_sat:"))
+            L += [f"Rules dropped (`rw`), by message: {sum(drops.values())} in all, {motive} by the static motive check "
+                  "(a type error) and the others because their statement could not be compiled (a message of the "
+                  "compiler, `solve_by_sat: …`):", ""]
             L += table(["message (start)", "rules"], sorted(([f"`{m}`", c] for m, c in drops.items()), key=lambda r: (-r[1], r[0]))) + [""]
         mem = sorted(f"{g} ({k})" for g, d in S.items() for k, _ in SETS if d.get(k, {}).get("status") in ("memout", "crash"))
         if mem:
             L += [f"Points that ran out of memory or crashed: {', '.join(mem)}.", ""]
         if n == 10:
             L += per_point(S, both)
-    L += level_share()
+    if 10 in ns:
+        L += level_share()
     return L
 
 

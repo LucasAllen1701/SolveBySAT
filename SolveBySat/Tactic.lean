@@ -75,6 +75,44 @@ register_option solve_by_sat.iffEqMutant : Bool := {
     the two `iffEq` paths swapped"
 }
 
+register_option solve_by_sat.rewrite : Bool := {
+  defValue := ({} : CompileOptions).rewrite
+  descr := "solve_by_sat: milestone 9a-2 (M9_PLAN 3.1), equality rules made per use: substitution and \
+    congruence at the term positions on rewriting paths, and `Eq.refl`, `Eq.symm`, `Eq.trans` at each \
+    type at which an equation occurs; also `(rewrite := true)` in the tactic call"
+}
+
+register_option solve_by_sat.eqTrans : Bool := {
+  defValue := ({} : CompileOptions).eqTrans
+  descr := "solve_by_sat: with solve_by_sat.rewrite, the equality core includes `Eq.trans` \
+    (M9_PLAN 3.1); also `(eqTrans := false)` in the tactic call"
+}
+
+register_option solve_by_sat.rewriteSymbols : String := {
+  defValue := ""
+  descr := "solve_by_sat: with solve_by_sat.rewrite, the source symbols (constants, separated by \
+    commas) in place of the automatic choice (M9_PLAN 3.1); empty: automatic; also \
+    `(rewriteSymbols := [c₁, …])` in the tactic call"
+}
+
+register_option solve_by_sat.rewriteIneligibleMutant : Bool := {
+  defValue := false
+  descr := "solve_by_sat (testing only): the mutation check of M9_PLAN 3.2, rules also at positions \
+    that are not term positions"
+}
+
+register_option solve_by_sat.rewriteContextMutant : Bool := {
+  defValue := false
+  descr := "solve_by_sat (testing only): the mutation check of M9_PLAN 3.2, each rule's proof taken \
+    from a rule of the same kind, symbol and position in another context"
+}
+
+register_option solve_by_sat.rewriteLiberal : Bool := {
+  defValue := false
+  descr := "solve_by_sat (testing only): the mutation check of M9_PLAN 3.2, selection dropped (every \
+    liberal candidate gets a rule)"
+}
+
 register_option solve_by_sat.checkBounds : Bool := {
   defValue := false
   descr := "solve_by_sat (testing only): check that every node of a decoded proof satisfies R1's \
@@ -86,7 +124,31 @@ def defaultNodes : Nat := 8
 
 /-- The compiler options from the `solve_by_sat.*` options. -/
 def compileOptionsOf (opts : Options) : CompileOptions :=
-  { iffEq := solve_by_sat.iffEq.get opts, iffEqMutant := solve_by_sat.iffEqMutant.get opts }
+  let syms := solve_by_sat.rewriteSymbols.get opts
+  { iffEq := solve_by_sat.iffEq.get opts, iffEqMutant := solve_by_sat.iffEqMutant.get opts,
+    rewrite := solve_by_sat.rewrite.get opts, eqTrans := solve_by_sat.eqTrans.get opts,
+    rewriteSymbols := if syms.trimAscii.isEmpty then none else
+      some ((syms.splitOn ",").toArray.map fun s => s.trimAscii.toString.toName),
+    rewriteIneligibleMutant := solve_by_sat.rewriteIneligibleMutant.get opts,
+    rewriteContextMutant := solve_by_sat.rewriteContextMutant.get opts,
+    rewriteLiberal := solve_by_sat.rewriteLiberal.get opts }
+
+/-- 9a-2: the rules by kind and row, `kind: row n, …` (kinds and rows with none left out). -/
+def Compiled.ruleSummary (C : Compiled) : String :=
+  let kinds := #[Rules.Kind.subst, .congr, .refl, .symm, .trans]
+  let rows := #[Rules.Row.ground, .root, .hvars]
+  let parts := kinds.filterMap fun k =>
+    let cs := rows.filterMap fun r =>
+      let n := (C.rules.filter fun R => R.key.kind == k && R.key.row == r).size
+      if n == 0 then none else some s!"{r.name} {n}"
+    if cs.isEmpty then none else some s!"{k.name}: {", ".intercalate cs.toList}"
+  "; ".intercalate parts.toList
+
+/-- 9a-2: a rule as its clause, `name: head ← premise, …`. -/
+def Compiled.ruleLine (C : Compiled) (R : RuleInfo) : String :=
+  let cl := C.forest.clauses[R.clause]!
+  let ps := cl.prems.toList.map fun g => toString C.forest.goals[g]!.tgt
+  s!"{R.name}: {cl.head}{if ps.isEmpty then "" else " ← " ++ ", ".intercalate ps}"
 
 /-- Prove the closed type `goal` from the constants `H` with at most `N` nodes. -/
 def solveCore (goal : Expr) (H : Array Name) (N : Nat) : MetaM Expr := do
@@ -98,6 +160,9 @@ def solveCore (goal : Expr) (H : Array Name) (N : Nat) : MetaM Expr := do
     let (g, l) := C.iffEqCounts
     if C.opts.iffEq && g + l > 0 then
       logInfo m!"solve_by_sat: iffEq: {g + l} propext paths added ({g} from constants of H, {l} from local hypotheses)"
+    -- 9a-2: likewise only when some rules were made
+    if C.opts.rewrite && !C.rules.isEmpty then
+      logInfo m!"solve_by_sat: rewrite: {C.rules.size} rules ({C.ruleSummary})\n{"\n".intercalate (C.rules.toList.map C.ruleLine)}"
   if N == 0 then
     throwError "solve_by_sat: no proof with at most {N} nodes exists in the class"
   let opts ← getOptions
@@ -135,27 +200,45 @@ def solveCore (goal : Expr) (H : Array Name) (N : Nat) : MetaM Expr := do
 
 syntax solveBySatNodes := "(" &"nodes" " := " num ")"
 syntax solveBySatIffEq := "(" &"iffEq" " := " (&"true" <|> &"false") ")"
+syntax solveBySatRewrite := "(" &"rewrite" " := " (&"true" <|> &"false") ")"
+syntax solveBySatEqTrans := "(" &"eqTrans" " := " (&"true" <|> &"false") ")"
+syntax solveBySatRewriteSymbols := "(" &"rewriteSymbols" " := " "[" ident,* "]" ")"
 
-/-- `solve_by_sat [h₁, …] (nodes := N) (iffEq := true)` searches for a backward-chaining proof
-of at most `N` nodes (SPEC §2) using the constants `hᵢ` and the local context, by reduction to
-SAT. Both arguments are optional, in this order. `(iffEq := b)` sets the option
-`solve_by_sat.iffEq` (M9_PLAN 2.1) for this call. -/
+/-- `solve_by_sat [h₁, …] (nodes := N) (iffEq := b) (rewrite := b) (eqTrans := b)
+(rewriteSymbols := [c₁, …])` searches for a backward-chaining proof of at most `N` nodes (SPEC §2)
+using the constants `hᵢ` and the local context, by reduction to SAT. Every argument is optional, and
+they come in this order. `(iffEq := b)` sets the option `solve_by_sat.iffEq` (M9_PLAN 2.1) for this
+call; `(rewrite := b)`, `(eqTrans := b)` and `(rewriteSymbols := […])` set `solve_by_sat.rewrite`,
+`solve_by_sat.eqTrans` and `solve_by_sat.rewriteSymbols` (M9_PLAN 3.1). -/
 syntax (name := solveBySat) "solve_by_sat" " [" ident,* "]" (ppSpace atomic(solveBySatNodes))?
-  (ppSpace solveBySatIffEq)? : tactic
+  (ppSpace atomic(solveBySatIffEq))? (ppSpace atomic(solveBySatRewrite))? (ppSpace atomic(solveBySatEqTrans))?
+  (ppSpace solveBySatRewriteSymbols)? : tactic
 
 elab_rules : tactic
-  | `(tactic| solve_by_sat [$hs,*] $[$cfg]? $[$ie]?) => do
+  | `(tactic| solve_by_sat [$hs,*] $[$cfg]? $[$ie]? $[$rw]? $[$et]? $[$rs]?) => do
     let N ← match cfg with
       | some c => match c with
         | `(solveBySatNodes| (nodes := $k)) => pure k.getNat
         | _ => throwUnsupportedSyntax
       | none => pure defaultNodes
-    let iffEq? : Option Bool ← match ie with
-      -- the value is `(&"true" <|> &"false")`: a node of kind `token.true` / `token.false`
-      | some s => pure (some (s.raw[3].getKind == `token.true || s.raw[3][0].getAtomVal == "true"))
+    -- a value `(&"true" <|> &"false")` is a node of kind `token.true` / `token.false`
+    let boolOf := fun (s : Syntax) => s[3].getKind == `token.true || s[3][0].getAtomVal == "true"
+    let iffEq? : Option Bool := ie.map (boolOf ·.raw)
+    let rewrite? : Option Bool := rw.map (boolOf ·.raw)
+    let eqTrans? : Option Bool := et.map (boolOf ·.raw)
+    let syms? : Option String ← match rs with
+      | some s => match s with
+        | `(solveBySatRewriteSymbols| (rewriteSymbols := [$cs,*])) => do
+          let ns ← cs.getElems.mapM fun c => realizeGlobalConstNoOverloadWithInfo c
+          pure (some (",".intercalate (ns.toList.map toString)))
+        | _ => throwUnsupportedSyntax
       | none => pure none
     let H ← hs.getElems.mapM fun h => realizeGlobalConstNoOverloadWithInfo h
-    withOptions (fun o => match iffEq? with | some b => solve_by_sat.iffEq.set o b | none => o) <|
+    withOptions (fun o =>
+      let o := match iffEq? with | some b => solve_by_sat.iffEq.set o b | none => o
+      let o := match rewrite? with | some b => solve_by_sat.rewrite.set o b | none => o
+      let o := match eqTrans? with | some b => solve_by_sat.eqTrans.set o b | none => o
+      match syms? with | some v => solve_by_sat.rewriteSymbols.set o v | none => o) <|
     liftMetaTactic fun g => do
       let g ← g.revertAll
       g.withContext do

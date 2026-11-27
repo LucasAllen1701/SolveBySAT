@@ -130,7 +130,32 @@ def withEvalFlags (fl : List String) (o : EncodeOptions) : EncodeOptions :=
 `iffEq` in `SOLVE_BY_SAT_EVAL_FLAGS` turns `CompileOptions.iffEq` on. Unset or absent: every
 compiler option off, the harness's own default, so earlier runs rebuild their forests. -/
 def evalCompileOptions (fl : List String) : CompileOptions :=
-  { iffEq := fl.contains "iffEq" }
+  { iffEq := fl.contains "iffEq", rewrite := fl.contains "rewrite", eqTrans := !fl.contains "noEqTrans" }
+
+/-- 9a-2 (M9_PLAN 3.1): counts by kind and row, `{kind: {row: n}}`, kinds and rows with none left out. -/
+def ruleCounts (keys : Array Rules.Key) : Json :=
+  let kinds := #[Rules.Kind.subst, .congr, .refl, .symm, .trans]
+  let rows := #[Rules.Row.ground, .root, .hvars]
+  Json.mkObj <| (kinds.filterMap fun k =>
+    let cs := rows.filterMap fun r =>
+      let n := (keys.filter fun key => key.kind == k && key.row == r).size
+      if n == 0 then none else some (r.name, toJson n)
+    if cs.isEmpty then none else some (k.name, Json.mkObj cs.toList)).toList
+
+/-- 9a-2: the records of the rules a compilation made (M9_PLAN 3.3, "Recorded per point"). -/
+def rulesJson (C : Compiled) : List (String × Json) :=
+  [("rules", ruleCounts (C.rules.map (·.key))), ("rules_total", toJson C.rules.size),
+   ("liberal_extra", ruleCounts C.ruleStats.liberalExtra), ("liberal_extra_total", toJson C.ruleStats.liberalExtra.size),
+   ("rules_dropped", toJson (C.ruleStats.dropped.map fun (n, m) => Json.arr #[Json.str n, Json.str (m.take 300).toString])),
+   ("rewrite_sources", toJson C.ruleStats.sources), ("rewrite_symbols", toJson C.ruleStats.symbols.size),
+   ("spines_broken", toJson C.ruleStats.broken), ("spine_nodes_no_row", toJson C.ruleStats.noRow)]
+
+/-- 9a-2: the rules a decoded proof uses (by name, in node order, with repeats), and their counts. -/
+def rulesUsedJson (C : Compiled) (sk : Array SkelNode) : List (String × Json) :=
+  let used := sk.filterMap fun n => match C.clauseInfo[n.clause]!.origin with
+    | .rule k => C.rules[k]?
+    | _ => none
+  [("rules_used", toJson (used.map (·.name))), ("rules_used_by", ruleCounts (used.map (·.key)))]
 
 /-- The closed goal type and its binder count (the Tier B context). -/
 def goalOf (s : Spec) : MetaM (Expr × Nat) := do
@@ -206,20 +231,28 @@ def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat 
     MetaM (Json × Bool) := do
   let t0 ← IO.monoMsNow
   let copts := evalCompileOptions (← evalFlags)
+  -- 9a-2: acceptance is decided without the rules (a rule that cannot be made is dropped, never a
+  -- reason to reject a constant); the whole is compiled with them
+  let accOpts := { copts with rewrite := false }
   -- 1. the goal
-  try discard <| compile goal #[] copts
+  try discard <| compile goal #[] accOpts
   catch e => return (Json.mkObj [("outcome", jStr "goal_rejected"), ("reason", jStr (← msgOf e))], false)
   -- 2. each H constant on its own
   let mut acc := #[]
   let mut rej := #[]
   for c in H do
-    try discard <| compile goal #[c] copts; acc := acc.push c
+    try discard <| compile goal #[c] accOpts; acc := acc.push c
     catch e => rej := rej.push (Json.arr #[c.toString, ← msgOf e])
   let base := [("H_accepted", Json.arr (acc.map (Json.str ·.toString))), ("H_rejected", Json.arr rej)]
   let C ← try compile goal acc copts
-    catch e => return (Json.mkObj (base ++ [("outcome", jStr "compile_error"), ("reason", jStr (← msgOf e))]), false)
+    catch e =>
+      -- an internal error of the rules' construction is a bug (M9_PLAN 3.1), not an outcome
+      let m ← msgOf e
+      return (Json.mkObj (base ++ [("outcome", jStr "compile_error"), ("reason", jStr m)]),
+              copts.rewrite && (m.splitOn "solve_by_sat: internal").length > 1)
   let C := if opts.contains "forgettypes" then { C with forest := C.forest.forgetTypes } else C
   let base := if copts.iffEq then base ++ [("iffeq_paths", toJson [C.iffEqCounts.1, C.iffEqCounts.2])] else base
+  let base := if copts.rewrite then base ++ rulesJson C ++ [("eqTrans", toJson copts.eqTrans)] else base
   let flags ← evalFlags
   let eopts : EncodeOptions := withEvalFlags flags { staticTyping := !opts.contains "nostatic" }
   let base := if flags.isEmpty then base else base ++ [("enc_flags", toJson flags)]
@@ -299,13 +332,17 @@ def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat 
           return (final "decoder_bug" [("reason", jStr "the decoded term does not have the goal type")], true)
         if let some err ← kernelCheck goal t then
           return (final "decoder_bug" [("reason", jStr s!"kernel: {err}")], true)
-        let sk := match readSkeleton C.forest E.vars model with
+        let skel := readSkeleton C.forest E.vars model
+        let sk := match skel with
           | .ok sk => renderSkeleton C.forest sk 0
           | .error e => s!"(skeleton: {e})"
+        let usedRules := match skel with
+          | .ok nodes => if copts.rewrite then rulesUsedJson C nodes else []
+          | .error _ => []
         -- 7c: which watched constants (the distractors of a 4.2 run) the proof uses
         let used := if watch.isEmpty then [] else
           [("distractors_used", toJson ((watch.filter t.getUsedConstants.contains).map (·.toString)))]
-        return (final "proved" ([("skeleton", jStr sk), ("decode_ms", toJson (decMs)), ("loop_ms", toJson (← msSince t0))] ++ used), false)
+        return (final "proved" ([("skeleton", jStr sk), ("decode_ms", toJson (decMs)), ("loop_ms", toJson (← msSince t0))] ++ used ++ usedRules), false)
   return (Json.mkObj (base ++ [("outcome", jStr "no_proof_le_Nmax"), ("N", toJson (nmax)), ("per_N", Json.arr log),
     ("loop_ms", toJson (← msSince t0))]), false)
 
@@ -651,16 +688,17 @@ unsafe def runProbeRules (specsPath results : System.FilePath) : IO UInt32 := do
 
 /-- The forest a spec's run builds: H as in `runSat` (probe rules when `probe`), each constant
 compiled on its own and the rejected ones left out. -/
-def specForest (s : Spec) : MetaM (Forest × Compiled) := do
+def specForest (s : Spec) (copts : CompileOptions := {}) : MetaM (Forest × Compiled) := do
   let (goal, _) ← goalOf s
   let H ← if s.probe then do
       let R ← M8.generate goal s.H
       pure (M8.probeH s.H R.rules)
     else pure s.H
   let mut acc := #[]
+  -- 9a-2: acceptance without the rules, as in `runSat`
   for c in H do
-    try discard <| compile goal #[c]; acc := acc.push c catch _ => pure ()
-  let C ← compile goal acc
+    try discard <| compile goal #[c] { copts with rewrite := false }; acc := acc.push c catch _ => pure ()
+  let C ← compile goal acc copts
   return (C.forest, C)
 
 unsafe def specsEnv (specsPath : System.FilePath) : IO (Environment × Array Spec) := do
@@ -702,6 +740,26 @@ unsafe def runIffEqCount (specsPath results : System.FilePath) : IO UInt32 := do
         ("iffeq_per_constant", Json.mkObj (perConst.toList.map fun (c, k) => (c, toJson k))),
         ("dropped", toJson dropped), ("H_accepted", toJson (acc.map (·.toString))),
         ("acceptance_unchanged", toJson (acc == accOff))]
+    appendLine results ((Json.mkObj [("key", jStr s.key)]).mergeObj r |>.mergeObj
+      (Json.mkObj [("ms", toJson (← msSince t0))])).compress
+  return 0
+
+/-- 9a-2 (M9_PLAN 3.2, "The 8a proofs' rules"): for each spec, the rules the compiler makes with H the
+spec's (accepted as `runSat` accepts it) and `iffEq` and `rewrite` on: the strict rules and every
+liberal candidate, each as (kind, symbol, 8a position, row), the source symbols, and the rules dropped.
+Nothing is encoded or solved. -/
+unsafe def runRules9a (specsPath results : System.FilePath) : IO UInt32 := do
+  let (env, specs) ← specsEnv specsPath
+  let done ← readKeys results
+  for s in specs.filter (!done.contains ·.key) do
+    let t0 ← IO.monoMsNow
+    let r ← runMeta env do
+      let (_, C) ← specForest s { iffEq := true, rewrite := true }
+      let st := C.ruleStats
+      let row := fun (k : Rules.Key) => Json.arr #[Json.str k.kind.name, Json.str k.symbol,
+        toJson (k.pos8a st.sigs), Json.str k.row.name]
+      return Json.mkObj ([("strict", Json.arr (C.rules.map fun R => Json.arr #[Json.str R.name, row R.key])),
+        ("liberal", Json.arr (st.liberal.map row)), ("source_symbols", toJson st.symbols)] ++ rulesJson C)
     appendLine results ((Json.mkObj [("key", jStr s.key)]).mergeObj r |>.mergeObj
       (Json.mkObj [("ms", toJson (← msSince t0))])).compress
   return 0
@@ -755,6 +813,61 @@ unsafe def runSizes8c (specsPath results started : System.FilePath) (N : Nat) (s
         ("encode_ms", toJson ms), ("forest_ms", toJson forestMs), ("hwm_mb", toJson hwm)]).compress
   return 0
 
+/-- 9a-2 (M9_PLAN 3.3, amendment 6.1 clarification 5): the compiler options of the measurement's
+settings. `none` is the forest of 8c-1 (no rules: for a probe point, with 8a's rules as lemmas);
+`rw` has `iffEq` and `rewrite`, `rwnt` the same with `eqTrans` off. Every setting encodes with R1
+and R2 on. -/
+def settings9a : String → Option CompileOptions
+  | "none" => some {}
+  | "rw" => some { iffEq := true, rewrite := true }
+  | "rwnt" => some { iffEq := true, rewrite := true, eqTrans := false }
+  | _ => none
+
+/-- 9a-2 (M9_PLAN 3.3): `countOnly` sizes per family at node bound `N`, R1 and R2 on, in each of
+`settings` (`settings9a`). A probe point (8a's rules as lemmas) is measured in `none` only, its
+8c-1 setting; the rule settings are measured on the points without rules (milestone 7's H). One
+line per (point, setting), keyed `<point>|<setting>`, with the rules made by kind and row, the
+liberal variant's extra rules, and the rules dropped; a marker goes to `started` before each. -/
+unsafe def runSizes9a (specsPath results started : System.FilePath) (N : Nat) (settings : List String) :
+    IO UInt32 := do
+  let (env, specs) ← specsEnv specsPath
+  let done ← readKeys results
+  let some opts := settingOpts "r1r2" | return 2
+  for s in specs do
+    let sts := if s.probe then settings.filter (· == "none") else settings
+    for st in sts.filter fun st => !done.contains s!"{s.key}|{st}" do
+      let some copts := settings9a st | IO.eprintln s!"unknown setting {st}"; return 2
+      appendLine started (Json.mkObj [("key", jStr s!"{s.key}|{st}")]).compress
+      let tf ← IO.monoMsNow
+      let r ← (runMeta env (specForest s copts)).toBaseIO
+      if let .error e := r then
+        let bug := ((toString e).splitOn "solve_by_sat: internal").length > 1
+        appendLine results (Json.mkObj [("key", jStr s!"{s.key}|{st}"), ("point", jStr s.key), ("setting", jStr st),
+          ("status", jStr (if bug then "internal_error" else "compile_error")), ("reason", jStr (toString e))]).compress
+        if bug then
+          IO.eprintln s!"STOP: internal error on {s.key}|{st}: {e}"
+          return 3
+        continue
+      let .ok (P, C) := r | return 4
+      let forestMs ← msSince tf
+      let t0 ← IO.monoMsNow
+      let E := encode P N opts
+      let n := E.cnf.numClauses
+      let ms ← msSince t0
+      let (_, hwm) ← memMB
+      let i := E.info
+      let ruleRec := if copts.rewrite then rulesJson C else []
+      appendLine results (Json.mkObj ([("key", jStr s!"{s.key}|{st}"), ("point", jStr s.key), ("setting", jStr st),
+        ("status", jStr "ok"), ("N", toJson N), ("vars", toJson E.cnf.nVars), ("clauses", toJson n),
+        ("families", Json.mkObj (E.cnf.familyCounts.toList.map fun (f, k) => (f, toJson k))),
+        ("early_exit", toJson i.earlyExit), ("root_size", toJson i.rootSize), ("gp_dead", toJson i.gpDead),
+        ("cl_dead", toJson i.clDead), ("exclusive_skipped", toJson i.exclusiveSkipped),
+        ("forest_goals", toJson P.goals.size), ("forest_clauses", toJson P.clauses.size),
+        ("W", toJson i.W), ("IB", toJson i.IB), ("RB", toJson i.RB), ("rigid", toJson i.rigid),
+        ("type_rigid", toJson i.typeRigid), ("full_pairs", toJson i.pairs),
+        ("encode_ms", toJson ms), ("forest_ms", toJson forestMs), ("hwm_mb", toJson hwm)] ++ ruleRec)).compress
+  return 0
+
 /-- M1 to M4 at node bound `N` with `countOnly`: one line per finished section, so a point that
 runs out of memory keeps the sections it completed. -/
 unsafe def runDiag (specsPath results started : System.FilePath) (N : Nat) (setting : String := "off") :
@@ -763,11 +876,18 @@ unsafe def runDiag (specsPath results started : System.FilePath) (N : Nat) (sett
   let done ← readKeys results
   -- 8c-2a (M8_PLAN 4.5): `r3` replays the encoder with R1 and R2 on (the defaults), R3 off and on
   let r3 := setting == "r3"
-  let some opts := settingOpts (if r3 then "r1r2" else setting) | IO.eprintln s!"unknown setting {setting}"; return 2
+  -- 9a-2 (M9_PLAN 3.3): `rw`, `rwnt` (`settings9a`) with R1 and R2 on, the decomposition count
+  -- split by whether a pair involves a rule's object; measured on the points without rules only
+  let rw := settings9a setting
+  let rw := if setting == "none" then none else rw
+  let some opts := settingOpts (if r3 || rw.isSome then "r1r2" else setting) | IO.eprintln s!"unknown setting {setting}"; return 2
   for s in specs.filter (!done.contains ·.key) do
+    if rw.isSome && s.probe then continue
     appendLine started (Json.mkObj [("key", jStr s.key)]).compress
     let t0 ← IO.monoMsNow
-    let (P, _) ← runMeta env (specForest s)
+    let (P, C) ← runMeta env (specForest s (rw.getD {}))
+    let parts : Option M8Diag.RuleParts := rw.map fun _ =>
+      M8Diag.RuleParts.ofForest P ((C.rules.map (·.clause)).foldl min P.clauses.size)
     let emit := fun (sec : String) (j : Json) => do
       let (_, hwm) ← memMB
       appendLine started (Json.mkObj [("key", jStr s.key), ("section", jStr sec), ("data", j),
@@ -780,7 +900,7 @@ unsafe def runDiag (specsPath results started : System.FilePath) (N : Nat) (sett
       let E := encode P N opts
       emit "encode" (Json.mkObj [("N", toJson N), ("vars", toJson E.cnf.nVars), ("clauses", toJson E.cnf.numClauses),
         ("goals", toJson P.goals.size), ("clauses_in_forest", toJson P.clauses.size)])
-      M8Diag.analyze P N opts E emit
+      M8Diag.analyze P N opts E emit parts
     let (_, hwm) ← memMB
     appendLine results (Json.mkObj [("key", jStr s.key), ("status", jStr "ok"), ("ms", toJson (← msSince t0)),
       ("hwm_mb", toJson hwm)]).compress
@@ -882,6 +1002,9 @@ unsafe def main (args : List String) : IO UInt32 := do
   match args with
   | ["diag", specs, results, started, n] => runDiag specs results started n.toNat!
   | ["diag", specs, results, started, n, setting] => runDiag specs results started n.toNat! setting
+  | ["rules9a", specs, results] => runRules9a specs results
+  | ["sizes9a", specs, results, started, n, settings] =>
+    runSizes9a specs results started n.toNat! (settings.splitOn ",")
   | ["sizes8c", specs, results, started, n, settings] =>
     runSizes8c specs results started n.toNat! (settings.splitOn ",")
   | ["diag-models", specs, results] => runDiagModels specs results

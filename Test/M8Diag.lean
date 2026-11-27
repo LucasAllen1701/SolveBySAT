@@ -491,9 +491,42 @@ def rigidlyMatched (P : Forest) (dataFilter : Bool) (c : Nat) (b : String) : Str
     | none => false
   return if ok then "rigidly matched" else "in head, not rigidly matched"
 
+/-- 9a-2 (M9_PLAN 3.3): the parts of a forest that the equality rules added: their clauses, the goal
+positions of their premises (and the clauses local to those, the built-in rules), and their
+variables. An object belongs to a rule if its template or slot is one of these. -/
+structure RuleParts where
+  clauses : Std.HashSet Nat := {}
+  goals : Std.HashSet Nat := {}
+  vars : Std.HashSet String := {}
+
+def RuleParts.owns (R : RuleParts) : Obj → Bool
+  | .ground _ => false
+  | .rigid _ side tid _ _ _ => if side == .clause then R.clauses.contains tid else R.goals.contains tid
+  | .slot _ _ name => R.vars.contains name
+  | .trigid _ owner _ _ _ => match owner with
+    | .var _ name => R.vars.contains name
+    | .pos side tid _ => if side == .clause then R.clauses.contains tid else R.goals.contains tid
+    | .val c _ => R.clauses.contains c
+  | .value _ c _ _ _ => R.clauses.contains c
+
+/-- The rule parts of a forest whose clauses from `first` on are rules (they are appended last). -/
+def RuleParts.ofForest (P : Forest) (first : Nat) : RuleParts := Id.run do
+  let mut R : RuleParts := {}
+  for c in [first:P.clauses.size] do
+    R := { R with clauses := R.clauses.insert c, vars := P.clauses[c]!.vars.foldl (·.insert ·) R.vars }
+    for g in P.clauses[c]!.prems do R := { R with goals := R.goals.insert g }
+  -- the clauses local to a rule's premise (built-in rules) and their variables
+  for c in [0:P.clauses.size] do
+    if let some g := P.clauses[c]!.localOf then
+      if R.goals.contains g && !R.clauses.contains c then
+        R := { R with clauses := R.clauses.insert c, vars := P.clauses[c]!.vars.foldl (·.insert ·) R.vars }
+  return R
+
 /-- M1 to M4 for one encoding. `emit` receives each section as it is finished, so a run that is
-killed keeps the sections it completed. -/
-def analyze (P : Forest) (N : Nat) (opts : EncodeOptions) (E : Encoding) (emit : String → Json → IO Unit) : IO Unit := do
+killed keeps the sections it completed. With `rules` (9a-2), the decomposition count is also
+split by whether a pair involves an object of an equality rule. -/
+def analyze (P : Forest) (N : Nat) (opts : EncodeOptions) (E : Encoding) (emit : String → Json → IO Unit)
+    (rules : Option RuleParts := none) : IO Unit := do
   let fam := fun (f : String) => (E.cnf.familyCounts.find? (·.1 == f)).map (·.2) |>.getD 0
   -- 8c-1: R1's own record (and the early exit, after which nothing else was encoded)
   let r1 := fun (extra : List (String × Json)) => Json.mkObj ([("early_exit", toJson E.info.earlyExit),
@@ -706,6 +739,10 @@ def analyze (P : Forest) (N : Nat) (opts : EncodeOptions) (E : Encoding) (emit :
           |>.add s!"node:{rel}|component:{comp}" n 0
           |>.add s!"kinds:{kk}|{lv}" n 0 |>.add s!"symclass:{lv}" n 0
           |>.add s!"kind:{kindOf o1}|{lv}" n 0 |>.add s!"kind:{kindOf o2}|{lv}" n 0
+        -- 9a-2: whether the pair involves an object of an equality rule
+        if let some R := rules then
+          let rr := if R.owns o1 || R.owns o2 then "yes" else "no"
+          d3 := (d3.add s!"rule:{rr}" n 0).add s!"rule:{rr}|{lv}" n 0
         perSym := perSym.insert s!"{sk.1}/{sk.2}" (perSym.getD s!"{sk.1}/{sk.2}" 0 + n)
         dTot := dTot + n
         if excludedLit a1 || excludedLit a2 then dDead := dDead + n

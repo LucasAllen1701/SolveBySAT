@@ -55,20 +55,9 @@ def symKind? (c : Name) : MetaM (Option SymKind) := do
     if ← isProp r then return none
     return some .fn
 
-/-- Is position `i` of the telescope `xs` eligible, and is it a `Prop` position? -/
-def eligible (xs : Array Expr) (i : Nat) : MetaM (Option Bool) := do
-  let x := xs[i]!
-  let d ← x.fvarId!.getDecl
-  unless d.binderInfo.isExplicit do return none
-  let t ← instantiateMVars d.type
-  let propPos := t.isProp
-  unless propPos do
-    if (← whnfR t).isSort then return none          -- a type
-    if (← isClass? t).isSome then return none       -- an instance
-    if ← isProp t then return none                  -- a proof
-  for y in xs[i+1:] do                              -- another argument's type depends on it
-    if (← inferType y).containsFVar x.fvarId! then return none
-  return some propPos
+/-- Is position `i` of the telescope `xs` eligible, and is it a `Prop` position? Since 9a-2 the code
+is `SolveBySat.rewriteEligible`, unchanged, so that the tactic's rules use the same eligibility. -/
+def eligible (xs : Array Expr) (i : Nat) : MetaM (Option Bool) := SolveBySat.rewriteEligible xs i
 
 /-- Amendment 4.1 decision 3: does the symbol's result type `r` depend on position `i`? -/
 def resultDepends (xs : Array Expr) (r : Expr) (i : Nat) : MetaM Bool := do

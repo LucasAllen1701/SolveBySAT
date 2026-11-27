@@ -80,3 +80,7 @@ supportInterpreter = true
 [[lean_exe]]
 name = "m8b_dimacs73"
 root = "Test.M8Dimacs73"
+
+[[lean_exe]]
+name = "test_m9diff"
+root = "Test.M9Diff"

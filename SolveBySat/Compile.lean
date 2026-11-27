@@ -8,6 +8,8 @@ Milestone 4: universe parameters of constants in `H` are level variables. Data c
 are milestone 5; until then they are rejected with a message naming the milestone.
 Milestone 9a-1 (M9_PLAN 2.1): with `CompileOptions.iffEq`, every `↔` head on any split path
 also gives the paths `L = R` (`propext`) and `R = L` (`Eq.symm` of it).
+Milestone 9a-2 (M9_PLAN 3.1, amendment 6.1): with `CompileOptions.rewrite`, equality rules made per
+use (substitution, congruence and the equality core) are added as clauses; see `addRules`.
 -/
 import Lean
 import SolveBySat.Forest
@@ -118,6 +120,19 @@ structure CompileOptions where
   /-- Mutation check of M9_PLAN 2.2 (testing only): the recipes of the two `iffEq` paths are
   swapped, so the decoder builds `L = R` for the path whose head is `R = L` and conversely. -/
   iffEqMutant : Bool := false
+  /-- M9_PLAN 3.1: equality rules made per use, selected on rewriting paths (`addRules`). -/
+  rewrite : Bool := false
+  /-- M9_PLAN 3.1: the equality core includes `Eq.trans` (only with `rewrite`). -/
+  eqTrans : Bool := true
+  /-- M9_PLAN 3.1: the source symbols, in place of the automatic choice (only with `rewrite`). -/
+  rewriteSymbols : Option (Array Name) := none
+  /-- Mutation checks of M9_PLAN 3.2 (testing only): rules also at positions that are not term
+  positions (`Ineligible`, for the static motive check); each rule's proof taken from a rule of the
+  same kind, symbol and position in another context (`Context`); every liberal candidate built
+  (`Liberal`, selection dropped). -/
+  rewriteIneligibleMutant : Bool := false
+  rewriteContextMutant : Bool := false
+  rewriteLiberal : Bool := false
   deriving Inhabited, Repr
 
 /-- How the decoder builds the proof of a clause's head from the proof of its statement. -/
@@ -145,6 +160,8 @@ inductive ClauseOrigin where
   | localHyp (goal : Nat) (idx : Nat)
   /-- A connective rule of the goal position the clause is local to. -/
   | builtin (k : Builtin)
+  /-- 9a-2: equality rule `k` of `Compiled.rules`. -/
+  | rule (k : Nat)
   deriving Inhabited, Repr
 
 structure GoalInfo where
@@ -160,6 +177,37 @@ structure ClauseInfo where
   isData : Bool := false
   deriving Inhabited, Repr
 
+/-- 9a-2: an equality rule as built (M9_PLAN 3.1). Its statement and proof are closed but for the
+universe parameters `levelParams`; for a rule local to the root, both are abstracted over the root's
+binders (all of them, in order), which the decoder applies to the root node's free variables. -/
+structure RuleInfo where
+  key : Rules.Key
+  name : String
+  clause : Nat
+  stmt : Expr
+  proof : Expr
+  levelParams : List Name := []
+  rootLocal : Bool := false
+  /-- 8a's position (substitution and congruence). -/
+  pos8a : Nat := 0
+  deriving Inhabited
+
+/-- 9a-2: what the selection found and what was built (M9_PLAN 3.3's records). -/
+structure RuleStats where
+  sources : Nat := 0
+  symbols : Array String := #[]
+  /-- Liberal candidates not in the strict selection (substitution and congruence keys). -/
+  liberalExtra : Array Rules.Key := #[]
+  broken : Nat := 0
+  noRow : Nat := 0
+  /-- Rules dropped: by the static motive check, or because their statement could not be compiled. -/
+  dropped : Array (String × String) := #[]
+  /-- The term positions of the forest's symbols (for 8a's numbering of the keys above). -/
+  sigs : Rules.Sigs := {}
+  /-- Every liberal candidate (substitution and congruence keys), strict ones included. -/
+  liberal : Array Rules.Key := #[]
+  deriving Inhabited
+
 structure Compiled where
   forest : Forest
   goalInfo : Array GoalInfo
@@ -172,6 +220,9 @@ structure Compiled where
   notes : Array MessageData := #[]
   /-- The options it was compiled with. -/
   opts : CompileOptions := {}
+  /-- 9a-2: the equality rules (clause origin `.rule k`). -/
+  rules : Array RuleInfo := #[]
+  ruleStats : RuleStats := {}
 
 /-- M9_PLAN 2.1: is a clause one of the `iffEq` paths (its last split is `propEq` or
 `propEqSymm`)? -/
@@ -185,7 +236,7 @@ def Compiled.iffEqCounts (C : Compiled) : Nat × Nat :=
     if !ci.isIffEq then (g, l) else match ci.origin with
       | .global _ => (g + 1, l)
       | .localHyp .. => (g, l + 1)
-      | .builtin _ => (g, l)
+      | _ => (g, l)
 
 /-! ## Compilation -/
 
@@ -221,6 +272,17 @@ structure CState where
   /-- Head symbols of the data clauses compiled so far. -/
   dataHeads : Array (String × Nat) := #[]
   opts : CompileOptions := {}
+  /-- 9a-2 (only with `rewrite`): the atom being compiled, every rigid node of every atom with its
+  local context (by atom and template path), the term positions of each symbol, and the root's
+  local context and binders. -/
+  curLoc : Option Rules.Loc := none
+  nodes : Std.HashMap (Rules.Loc × Array Nat) (Expr × LocalContext × LocalInstances) := {}
+  /-- The universe parameters' level variables at each recorded atom (a constant of H's). -/
+  atomLevels : Std.HashMap Rules.Loc (Std.HashMap Name String) := {}
+  sigs : Rules.Sigs := {}
+  rootCtx : Option (LocalContext × LocalInstances × Array Expr) := none
+  rules : Array RuleInfo := #[]
+  ruleStats : RuleStats := {}
 
 abbrev CompileM := StateRefT CState MetaM
 
@@ -297,6 +359,64 @@ def recordNode (t : Term) (e : Expr) (path : Array Nat) : CompileM Unit := do
     let ty ← compileType (← preprocess (← inferType e))
     modify fun s => { s with posTypes := s.posTypes.push (path, ty) }
 
+/-! ### 9a-2: term positions and occurrences -/
+
+/-- 8a's eligibility (M8_PLAN §2.3, amendment 4.1 decision 3; formerly `M8.eligible` in
+`Test/M8Rules.lean`, which now calls this): is position `i` of the telescope `xs` eligible (its binder
+is explicit, its value is a term: its type is not a sort other than `Prop`, not a class, not a
+proposition; no later binder's type mentions it), and is it a `Prop` position? -/
+def rewriteEligible (xs : Array Expr) (i : Nat) : MetaM (Option Bool) := do
+  let x := xs[i]!
+  let d ← x.fvarId!.getDecl
+  unless d.binderInfo.isExplicit do return none
+  let t ← instantiateMVars d.type
+  let propPos := t.isProp
+  unless propPos do
+    if (← whnfR t).isSort then return none          -- a type
+    if (← isClass? t).isSome then return none       -- an instance
+    if ← isProp t then return none                  -- a proof
+  for y in xs[i+1:] do                              -- another argument's type depends on it
+    if (← inferType y).containsFVar x.fvarId! then return none
+  return some propPos
+
+/-- The term positions of a rigid node `e` with `nPieces` template arguments (M9_PLAN 3.1): the
+positions of its symbol's type (read without reduction, as in 8a) that are eligible and that the
+result type does not mention. A symbol whose type ends in a sort other than `Prop`, or in a
+proposition (a proof), has none, as in 8a. -/
+def computeSig (e : Expr) (nPieces : Nat) : MetaM Rules.Sig := do
+  let f := e.getAppFn.consumeMData
+  let nargs := e.getAppNumArgs
+  let offset := nPieces - nargs
+  let ty ← match f with
+    | .const c _ => pure (← getConstInfo c).type
+    | _ => inferType f
+  forallTelescope ty fun xs r => do
+    let r ← instantiateMVars r
+    let kindOk ← if r.isProp then pure true else if r.isSort then pure false else pure !(← isProp r)
+    let mut mask := Array.replicate nPieces false
+    let mut mm := Array.replicate nPieces false
+    if kindOk then
+      for i in [0:min xs.size nargs] do
+        if (← rewriteEligible xs i).isSome && !r.containsFVar xs[i]!.fvarId! then
+          mask := mask.set! (offset + i) true
+        else
+          mm := mm.set! (offset + i) true
+    return { mask, offset, mutantMask := mm }
+
+/-- Record a rigid node of the atom being compiled (only with `rewrite`): its expression and local
+context, and its symbol's term positions. -/
+def recordOcc (t : Term) (e : Expr) (path : Array Nat) : CompileM Unit := do
+  let s ← get
+  unless s.opts.rewrite do return
+  let some loc := s.curLoc | return
+  let some k := Rules.sigKey t | return
+  let lctx ← getLCtx
+  let linst ← getLocalInstances
+  modify fun s => { s with nodes := s.nodes.insert (loc, path) (e, lctx, linst) }
+  unless (← get).sigs.contains k do
+    let sig ← try computeSig e t.args.size catch _ => pure { mask := Array.replicate t.args.size false, offset := 0 }
+    modify fun s => { s with sigs := s.sigs.insert k sig }
+
 /-- Compile an argument term of an atom (SPEC §4.4). Binders inside the term are opened
 as local declarations (so types can be inferred) and their variables become `bvar:i`. -/
 partial def compileTerm (e : Expr) (path : Array Nat) : CompileM Term := do
@@ -335,31 +455,44 @@ partial def compileTerm (e : Expr) (path : Array Nat) : CompileM Term := do
             | .expr x => compileTerm x (path.push i))
         pure (Term.app sym args)
   recordNode t e path
+  recordOcc t e path
   return t
 
 /-- Compile a proposition as an opaque atom (SPEC §2.1, and amendment 1 of milestone 3:
 every target and head, connective or not, is an atom with a constant or eigenvariable
 head). Returns the template and the type templates of its rigid positions. -/
-def compileAtom (R : Expr) (what : String) : CompileM (Term × Array (Array Nat × Option Term)) := do
+def compileAtom (R : Expr) (what : String) (loc : Option Rules.Loc := none) :
+    CompileM (Term × Array (Array Nat × Option Term)) := do
   let R := R.consumeMData
-  match R.getAppFn.consumeMData with
-  | .const .. => pure ()
-  | .fvar f =>
-    match ← kindOf f with
-    | some (.eig _) => pure ()
-    | some (.cvar n) => compileError m!"the {what} {R} has the clause variable {n} as its head symbol"
-    | _ => compileError m!"the {what} {R} is not an atom"
-  | _ => compileError m!"the {what} {R} is not an atom (its head is not a constant or an eigenvariable)"
-  modify fun s => { s with posTypes := #[] }
-  match decompose R (atom := true) with
-  | .error msg => compileError m!"the {what} {R} is not supported: {msg}"
-  | .ok (sym, pieces) =>
-    let mut args := #[]
-    for h : i in [0:pieces.size] do
-      args := args.push (← match pieces[i] with
-        | .level l => compileLevel l
-        | .expr x => compileTerm x #[i])
-    return (.app sym args, (← get).posTypes)
+  let savedLoc := (← get).curLoc
+  modify fun s => { s with curLoc := loc }
+  try compileAtomCore R what
+  finally modify fun s => { s with curLoc := savedLoc }
+where
+  compileAtomCore (R : Expr) (what : String) : CompileM (Term × Array (Array Nat × Option Term)) := do
+    match R.getAppFn.consumeMData with
+    | .const .. => pure ()
+    | .fvar f =>
+      match ← kindOf f with
+      | some (.eig _) => pure ()
+      | some (.cvar n) => compileError m!"the {what} {R} has the clause variable {n} as its head symbol"
+      | _ => compileError m!"the {what} {R} is not an atom"
+    | _ => compileError m!"the {what} {R} is not an atom (its head is not a constant or an eigenvariable)"
+    modify fun s => { s with posTypes := #[] }
+    match decompose R (atom := true) with
+    | .error msg => compileError m!"the {what} {R} is not supported: {msg}"
+    | .ok (sym, pieces) =>
+      let mut args := #[]
+      for h : i in [0:pieces.size] do
+        args := args.push (← match pieces[i] with
+          | .level l => compileLevel l
+          | .expr x => compileTerm x #[i])
+      let a := Term.app sym args
+      recordOcc a R #[]
+      if (← get).opts.rewrite then
+        if let some loc := (← get).curLoc then
+          modify fun s => { s with atomLevels := s.atomLevels.insert loc s.levelMap }
+      return (a, (← get).posTypes)
 
 /-- Open the leading `∀` binders of `e` as local declarations and run `k` on them
 (name, type, free variable) and the body. Only syntactic binders: no `whnf`. -/
@@ -545,7 +678,11 @@ partial def compileGoal (e : Expr) (env : Array String) (isRoot : Bool := false)
     for (i, n, d) in hypBinders do
       let hname := if n.hasMacroScopes then s!"{n.eraseMacroScopes}{i}@g{gid}" else s!"{n}"
       hyps := hyps ++ (← compileHyp d scope gid i hname isRoot)
-    let (tgt, tys) ← compileAtom body "target"
+    if isRoot then
+      let lctx ← getLCtx
+      let linst ← getLocalInstances
+      modify fun s => { s with rootCtx := some (lctx, linst, bs.map (·.2.2)) }
+    let (tgt, tys) ← compileAtom body "target" (some (.goal gid))
     modify fun s => { s with
       goals := s.goals.set! gid { tgt, eig := eigs, hyps, env := Forest.sortStrs env, tgtTypes := tys },
       goalInfo := s.goalInfo.set! gid { binders := uses } }
@@ -608,7 +745,7 @@ partial def compileClauseAlong (e : Expr) (env : Array String) (localOf : Option
       match path with
       | [] =>
         -- the head first, so a bare-variable head (e.g. `Or.elim`) is reported as such
-        let (head, tys) ← compileAtom body s!"head of {name}"
+        let (head, tys) ← compileAtom body s!"head of {name}" (some (.clause cid))
         let scope := env ++ vars
         let mut premIds := #[]
         for d in prems do premIds := premIds.push (← compileGoal d scope)
@@ -676,6 +813,242 @@ partial def compileBuiltins (gid : Nat) (R : Expr) (tgt : Term) (tys : Array (Ar
       mk "Exists.intro" .existsIntro #[nm] #[body] #[(nm, α)]
 end
 
+/-! ## 9a-2: equality rules made per use (M9_PLAN 3.1, amendment 6.1)
+
+`addRules` runs after the forest is compiled. `Rules.select` (pure, `SolveBySat/Forest.lean`) picks
+the occurrences; for each, the statement and proof are built here from the recorded expression, in
+its local context, and checked (the static motive check); the statement is compiled as a clause (a
+global clause, or one local to the root), and that clause must equal `Rules.mkRule`'s up to the
+names of its variables, or the compiler stops with an internal error. Then the equality core is
+selected on the forest with the rules (`Rules.selectCore`) and built the same way. No declaration
+is added: the decoder applies the stored proof. -/
+
+/-- The free variables of `es` and, recursively, of their types, in local-context order. -/
+def ctxClosure (es : Array Expr) : MetaM (Array Expr) := do
+  let mut seen : Std.HashSet FVarId := {}
+  let mut todo : Array FVarId := es.foldl (fun acc e => acc ++ (collectFVars {} e).fvarIds) #[]
+  while !todo.isEmpty do
+    let f := todo.back!
+    todo := todo.pop
+    if seen.contains f then continue
+    seen := seen.insert f
+    let ty ← instantiateMVars (← f.getType)
+    todo := todo ++ (collectFVars {} ty).fvarIds
+  let lctx ← getLCtx
+  return (lctx.sortFVarsByContextOrder seen.toArray).map mkFVar
+
+/-- Open local declarations `x_i : tys[i]` (default binders) and run `k` on them. -/
+partial def withLocals {α} (base : String) (tys : Array Expr) (k : Array Expr → CompileM α) : CompileM α :=
+  go 0 #[]
+where
+  go (i : Nat) (acc : Array Expr) : CompileM α := do
+    if h : i < tys.size then
+      withLocalDeclD (.mkSimple s!"{base}{i}") tys[i] fun x => go (i + 1) (acc.push x)
+    else k acc
+
+/-- The type of argument `j` of `f` applied to `args`, as `f`'s binder type there (preprocessed). -/
+def argBinderType (f : Expr) (args : Array Expr) (j : Nat) : MetaM Expr := do
+  let t ← instantiateForall (← inferType f) (args.extract 0 j)
+  match ← whnf t with
+  | .forallE _ d _ _ => preprocess d
+  | _ => throwError "argument {j} of {f} has no binder"
+
+/-- What a substitution or congruence rule is, before it is compiled: its statement, its proof,
+the context's free variables it is abstracted over (`hvars`), and the types for `Rules.mkRule`. -/
+structure BuiltRule where
+  stmt : Expr
+  proof : Expr
+  types : Rules.RuleTypes := { posLvl := default, posTy := default }
+
+/-- Build (in the occurrence's local context) the statement and proof of a substitution or
+congruence rule, and run the static motive check: the motive `fun y => f(…y…)`, with the other term
+positions as placeholders, and the proof are type-checked, and the proof's type must be the
+statement. Throws (the rule is dropped) on any failure. -/
+def buildSubstCongr (key : Rules.Key) (occ : Rules.Occ) : CompileM BuiltRule := do
+  let s ← get
+  let some (e, lctx, linst) := s.nodes[(occ.loc, occ.path)]? | throwError "internal: no recorded occurrence"
+  let atomT := Rules.atomAt { goals := s.goals, clauses := s.clauses } occ.loc
+  let some node := Rules.subtermAt atomT occ.path | throwError "internal: no node at the occurrence"
+  let some sig := (Rules.sigKey node) >>= (s.sigs[·]?) | throwError "internal: no signature"
+  withLCtx lctx linst do
+    let e := e.consumeMData
+    let f := e.getAppFn.consumeMData
+    let args := e.getAppArgs
+    let off := sig.offset
+    let k := key.pos - off
+    let J := (Array.range args.size).filter fun j => j != k && sig.mask[off + j]!
+    let τ ← argBinderType f args k
+    let u := (← getLevel τ).normalize
+    let tJ ← J.mapM fun j => (argBinderType f args j : MetaM Expr)
+    let ρ ← preprocess (← inferType e)
+    let uρ := (← getLevel ρ).normalize
+    -- the context: the head (an `app` node), the arguments at the other positions, and the types
+    let ctxArgs := (Array.range args.size).filter (fun j => j != k && !sig.mask[off + j]!) |>.map (args[·]!)
+    let ctx ← ctxClosure (#[f, τ, ρ] ++ ctxArgs ++ tJ)
+    for x in ctx do
+      if ← isProp (← inferType x) then throwError "the context mentions the hypothesis {x}"
+    let some (_, _, rootFVs) := s.rootCtx | throwError "internal: no root context"
+    match key.row with
+    | .ground => unless ctx.isEmpty do throwError "internal: a ground context with free variables {ctx}"
+    | .root => unless ctx.all rootFVs.contains do throwError "internal: a root context with other variables {ctx}"
+    | .hvars => pure ()
+    let abs := if key.row == .hvars then ctx else #[]
+    withLocalDeclD `a τ fun a => withLocalDeclD `b τ fun b => withLocals "x" tJ fun xs => do
+      let nodeWith (y : Expr) : Expr := Id.run do
+        let mut as := args.set! k y
+        for h : i in [0:J.size] do as := as.set! J[i] xs[i]!
+        return mkAppN f as
+      let hTy := mkApp3 (mkConst ``Eq [u]) τ a b
+      -- the static motive check
+      let motive ← withLocalDeclD `y τ fun y => mkLambdaFVars #[y] (nodeWith y)
+      Meta.check motive
+      withLocalDeclD `h hTy fun h => do
+        let (stmt, proof) ← if key.kind == .congr then do
+            let body := mkApp3 (mkConst ``Eq [uρ]) ρ (nodeWith a) (nodeWith b)
+            let pf := mkApp6 (mkConst ``congrArg [u, uρ]) τ ρ a b motive h
+            pure (← mkForallFVars (abs ++ #[a, b] ++ xs ++ #[h]) body, ← mkLambdaFVars (abs ++ #[a, b] ++ xs ++ #[h]) pf)
+          else
+            withLocalDeclD `hp (nodeWith b) fun hp => do
+              let cg := mkApp6 (mkConst ``congrArg [u, Level.one]) τ (mkSort Level.zero) a b motive h
+              let pf := mkApp4 (mkConst ``Eq.mpr [Level.zero]) (nodeWith a) (nodeWith b) cg hp
+              pure (← mkForallFVars (abs ++ #[a, b] ++ xs ++ #[h, hp]) (nodeWith a),
+                    ← mkLambdaFVars (abs ++ #[a, b] ++ xs ++ #[h, hp]) pf)
+        let stmt ← preprocess stmt
+        Meta.check proof
+        unless ← isDefEq (← inferType proof) stmt do
+          throwError "the proof's type {← inferType proof} is not the statement {stmt}"
+        -- the types for `Rules.mkRule`, compiled in the occurrence's context, with its universe
+        -- parameters' level variables (state restored)
+        let saved ← get
+        let types ← try
+            modify fun st => { st with levelMap := (saved.atomLevels.get? occ.loc).getD {} }
+            pure { posLvl := ← compileLevel u, posTy := ← compileTerm τ #[],
+                   resLvl := ← compileLevel uρ, resTy := ← compileTerm ρ #[] : Rules.RuleTypes }
+          finally set saved
+        return { stmt, proof, types }
+
+/-- Build a core rule (`refl`, `symm`, `trans`) at the type of the `Eq` atom at `occ.loc`. -/
+def buildCore (key : Rules.Key) (occ : Rules.Occ) : CompileM BuiltRule := do
+  let s ← get
+  let some ((e : Expr), lctx, linst) := s.nodes[(occ.loc, (#[] : Array Nat))]? | throwError "internal: no recorded Eq atom"
+  withLCtx lctx linst do
+    let e := e.consumeMData
+    let Expr.const _ [u] := e.getAppFn | throwError "internal: not an Eq atom: {e}"
+    let τ := e.getAppArgs[0]!
+    let ctx ← ctxClosure #[τ]
+    for x in ctx do
+      if ← isProp (← inferType x) then throwError "the type mentions the hypothesis {x}"
+    let abs := if key.row == .hvars then ctx else #[]
+    let eq := fun (a b : Expr) => mkApp3 (mkConst ``Eq [u]) τ a b
+    withLocalDeclD `x τ fun x => withLocalDeclD `y τ fun y => withLocalDeclD `z τ fun z => do
+      let (stmt, proof) ← match key.kind with
+        | .refl => pure (← mkForallFVars (abs ++ #[x]) (eq x x),
+                         ← mkLambdaFVars (abs ++ #[x]) (mkApp2 (mkConst ``Eq.refl [u]) τ x))
+        | .symm => withLocalDeclD `h (eq x y) fun h => do
+            pure (← mkForallFVars (abs ++ #[x, y, h]) (eq y x),
+                  ← mkLambdaFVars (abs ++ #[x, y, h]) (mkApp4 (mkConst ``Eq.symm [u]) τ x y h))
+        | _ => withLocalDeclD `h₁ (eq x y) fun h₁ => withLocalDeclD `h₂ (eq y z) fun h₂ => do
+            pure (← mkForallFVars (abs ++ #[x, y, z, h₁, h₂]) (eq x z),
+                  ← mkLambdaFVars (abs ++ #[x, y, z, h₁, h₂]) (mkApp6 (mkConst ``Eq.trans [u]) τ x y z h₁ h₂))
+      let stmt ← preprocess stmt
+      Meta.check proof
+      unless ← isDefEq (← inferType proof) stmt do
+        throwError "the proof's type {← inferType proof} is not the statement {stmt}"
+      return { stmt, proof }
+
+/-- Compile a built rule's statement as a clause (global, or local to the root), check its shape
+against the pure construction `pureC`, and record it. On a compile failure the rule is dropped with
+a note (state restored); a shape mismatch is an internal error. -/
+def installRule (key : Rules.Key) (name : String) (b : BuiltRule) (pureC : ClauseT × Option Nat)
+    (pos8a : Nat) : CompileM Unit := do
+  let s ← get
+  let some (rlctx, rlinst, rootFVs) := s.rootCtx | throwError "internal: no root context"
+  let k := s.rules.size
+  let lps := if key.row == .hvars then (collectLevelParams {} b.stmt).params.toList else []
+  let root := key.row == .root
+  let saved ← get
+  let cid? ← try
+      some <$> (if root then
+        withLCtx rlctx rlinst (compileClauseAlong b.stmt (s.goals[0]!.env ++ s.goals[0]!.eig) (some 0) (.rule k) name [] lps)
+      else compileClauseAlong b.stmt #[] none (.rule k) name [] lps)
+    catch ex =>
+      let msg ← ex.toMessageData.toString
+      set { saved with notes := saved.notes.push m!"solve_by_sat: rewrite: the rule {name} is dropped: {msg}",
+                       ruleStats := { saved.ruleStats with dropped := saved.ruleStats.dropped.push (name, msg) } }
+      pure none
+  let some cid := cid? | return
+  let st ← get
+  let cl := st.clauses[cid]!
+  let .mk _ ph _ pps := pureC.1
+  let mine := #[cl.head] ++ cl.prems.map (st.goals[·]!.tgt)
+  let theirs := #[ph] ++ (pps.map fun | .mk t _ _ => t).toArray
+  unless Rules.alphaEq mine theirs && cl.localOf == pureC.2 do
+    throwError "solve_by_sat: internal: the compiled rule {name} is {mine.toList} (local to {cl.localOf}), \
+      not the clause {theirs.toList} (local to {pureC.2}) of the selection (M9_PLAN 3.1)"
+  let (stmt, proof) ← if root then
+      withLCtx rlctx rlinst do pure (← mkForallFVars rootFVs b.stmt, ← mkLambdaFVars rootFVs b.proof)
+    else pure (b.stmt, b.proof)
+  modify fun s => { s with rules := s.rules.push { key, name, clause := cid, stmt, proof, levelParams := lps,
+                                                    rootLocal := root, pos8a } }
+
+/-- Add the equality rules (M9_PLAN 3.1) to the compiled forest. `H` decides which core kinds are
+left out (a polymorphic `Eq.refl`, `Eq.symm` or `Eq.trans` that H already has). -/
+def addRules (H : Array Name) : CompileM Unit := do
+  let s ← get
+  let opts := s.opts
+  let F0 : Forest := { goals := s.goals, clauses := s.clauses }
+  let syms := opts.rewriteSymbols.map (·.map fun n => s!"c:{n}")
+  let sel := Rules.select F0 s.sigs syms (liberal := opts.rewriteLiberal) (mutant := opts.rewriteIneligibleMutant)
+  let st0 : RuleStats := { sources := sel.sources.size, symbols := sel.symbols, liberalExtra := sel.liberalExtra,
+                           broken := sel.broken, noRow := sel.noRow, sigs := s.sigs,
+                           liberal := sel.liberal.map (·.1) }
+  modify fun s => { s with ruleStats := st0 }
+  let mut idx := 0
+  let mut congrIds : Array Nat := #[]
+  for (key, occ) in sel.rules do
+    let name := Rules.ruleName s.sigs key idx
+    idx := idx + 1
+    let saved ← get
+    let built ← try some <$> buildSubstCongr key occ
+      catch ex =>
+        let msg ← ex.toMessageData.toString
+        set { saved with notes := saved.notes.push m!"solve_by_sat: rewrite: the rule {name} is dropped by the static motive check: {msg}",
+                         ruleStats := { saved.ruleStats with dropped := saved.ruleStats.dropped.push (name, msg) } }
+        pure none
+    let some b := built | continue
+    -- the context mutation (testing only): the proof of a rule of the same kind, symbol and position
+    -- in another context
+    let b ← if !opts.rewriteContextMutant then pure b else do
+      let other := sel.liberal.find? fun (k', _) => k'.kind == key.kind && k'.symbol == key.symbol &&
+        k'.pos == key.pos && k' != key
+      match other with
+      | none => pure b
+      | some (k', o') =>
+        let saved ← get
+        let b' ← try some <$> buildSubstCongr k' o' catch _ => set saved; pure none
+        pure (match b' with | some b' => { b with proof := b'.proof } | none => b)
+    let pureC := Rules.mkRule F0 s.sigs key occ b.types name s!"{name}."
+    let before := (← get).clauses.size
+    installRule key name b pureC (key.pos8a s.sigs)
+    if key.kind == .congr && (← get).clauses.size > before then congrIds := congrIds.push before
+  -- the equality core, on the forest with the rules
+  let s ← get
+  let F1 : Forest := { goals := s.goals, clauses := s.clauses }
+  let skip := #[(``Eq.refl, Rules.Kind.refl), (``Eq.symm, .symm), (``Eq.trans, .trans)].filterMap fun (n, k) =>
+    if H.contains n then some k else none
+  for (key, occ) in Rules.selectCore F1 sel.sources congrIds skip opts.eqTrans do
+    let name := Rules.ruleName s.sigs key idx
+    idx := idx + 1
+    let saved ← get
+    let built ← try some <$> buildCore key occ
+      catch ex =>
+        let msg ← ex.toMessageData.toString
+        set { saved with notes := saved.notes.push m!"solve_by_sat: rewrite: the rule {name} is dropped by the static check: {msg}",
+                         ruleStats := { saved.ruleStats with dropped := saved.ruleStats.dropped.push (name, msg) } }
+        pure none
+    let some b := built | continue
+    installRule key name b (Rules.mkCore key name s!"{name}.") 0
+
 /-- Compile a closed goal and the constants `H` into a clause forest (SPEC §4). -/
 def compile (goal : Expr) (H : Array Name) (opts : CompileOptions := {}) : MetaM Compiled := do
   if goal.hasFVar then throwError "solve_by_sat: internal: the goal is not closed after revert"
@@ -705,6 +1078,8 @@ def compile (goal : Expr) (H : Array Name) (opts : CompileOptions := {}) : MetaM
   let s ← if s1.dataHeads.isEmpty then pure s1 else
     let keys := s1.dataHeads.foldl (fun h k => h.insert k) ({} : Std.HashSet (String × Nat))
     pure (← go.run { dataKeys := some keys, opts }).2
+  -- 9a-2: the equality rules, after everything else (with `rewrite` off, nothing changes)
+  let s ← if !opts.rewrite then pure s else pure (← (addRules H).run s).2
   let forest : Forest := { goals := s.goals, clauses := s.clauses, varTypes := s.varTypes,
                            groundTypes := s.groundOrder.map (fun t => (t, s.groundTypes[t]!)),
                            levelVars := s.levelVars }
@@ -712,6 +1087,6 @@ def compile (goal : Expr) (H : Array Name) (opts : CompileOptions := {}) : MetaM
   | .error e => throwError "solve_by_sat: internal: ill-formed forest: {e}"
   | .ok () => pure ()
   return { forest, goalInfo := s.goalInfo, clauseInfo := s.clauseInfo, groundExprs := s.groundExprs,
-           goalType, notes := s.notes, opts }
+           goalType, notes := s.notes, opts, rules := s.rules, ruleStats := s.ruleStats }
 
 end SolveBySat

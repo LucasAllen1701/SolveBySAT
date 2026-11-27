@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 log=$(mktemp)
-if ! lake build SolveBySat test_m0 test_m1 test_m4 test_m5 bench test_countonly test_m8diag eval_run m8b_dimacs73 Test.EvalNamed >"$log" 2>&1; then
+if ! lake build SolveBySat test_m0 test_m1 test_m4 test_m5 bench test_countonly test_m8diag eval_run m8b_dimacs73 Test.EvalNamed test_m9diff >"$log" 2>&1; then
   grep -v '^trace' "$log"; rm -f "$log"; exit 1
 fi
 grep -v '^trace' "$log" | tail -1; rm -f "$log"
@@ -36,4 +36,15 @@ Test/m8c1_lean.sh || status=1
 # 9a-1 (M9_PLAN 2.2): the Lean suite with iffEq off and on, with the model check
 echo "== Lean suite, iffEq off and on"
 Test/m9a1_lean.sh || status=1
+# 9a-2 (M9_PLAN 3.2): the differentials with rules made by the tactic's generation code (and the
+# selection mutation), and the Lean suite with rewrite off, on, and with selection dropped
+echo "== test_m9diff"
+.lake/build/bin/test_m9diff 600 4 || status=1
+echo "== Lean suite, rewrite off, on, and selection dropped"
+M9A2_KEEP=1 Test/m9a2_lean.sh > eval/.m9a2_lean_last.log 2>&1; r=$?
+cat eval/.m9a2_lean_last.log
+d=$(grep -o "logs kept in .*" eval/.m9a2_lean_last.log | sed 's/logs kept in //')
+python3 Test/m9a2_classify.py "$d" || r=1
+rm -rf "$d" eval/.m9a2_lean_last.log
+[ $r -eq 0 ] || status=1
 exit $status

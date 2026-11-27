@@ -139,14 +139,35 @@ def instantiateClause (C : Compiled) (n : SkelNode) : DecodeM (Expr × Expr × A
         modify fun s => { s with slotLevels := s.slotLevels.push ((a, v), u) }
       pure (mkConst c us)
     | .builtin _ => throwError "internal: a built-in rule has no head term"
+    | .rule _ => pure default
   -- the statement as compiled: a constant's type is preprocessed (levels normalised with
   -- its own parameter names) before its parameters become level metavariables
-  let mut T ← match cinfo.origin with
+  let (head, T₀) ← match cinfo.origin with
     | .global c => do
       let info ← getConstInfo c
       let .const _ us := head | throwError "internal: constant expected"
-      pure ((← preprocess info.type).instantiateLevelParams info.levelParams us)
-    | _ => do preprocess (← inferType head)
+      pure (head, (← preprocess info.type).instantiateLevelParams info.levelParams us)
+    | .rule k => do
+      -- 9a-2: the stored proof and statement, at fresh level metavariables, applied to the root's
+      -- free variables for a rule local to the root
+      let some R := C.rules[k]? | throwError "internal: no equality rule {k}"
+      let us ← R.levelParams.mapM fun _ => mkFreshLevelMVar
+      for (v, u) in cinfo.levelVars.zip us.toArray do
+        modify fun s => { s with slotLevels := s.slotLevels.push ((a, v), u) }
+      let mut pf := R.proof.instantiateLevelParams R.levelParams us
+      let mut st := R.stmt.instantiateLevelParams R.levelParams us
+      if R.rootLocal then
+        let some γ := n.intro | throwError "node {a} applies a rule local to the root but has no introducing node"
+        let some fs := (← get).nodeFVars[γ]? | throwError "introducing node {γ} of node {a} was not replayed"
+        pf := pf.beta fs
+        st ← instantiateForall st fs
+      -- the proof must prove the clause the encoder used (it does by construction, checked at
+      -- compile time; the context mutation of M9_PLAN 3.2 breaks it)
+      unless ← isDefEq (← inferType pf) st do
+        throwError "node {a}: the proof of the rule {R.name} does not prove its statement {st}"
+      pure (pf, st)
+    | _ => do pure (head, ← preprocess (← inferType head))
+  let mut T := T₀
   let mut e := head
   let mut prems : Array (Option Expr) := Array.replicate cl.prems.size none
   let mut vmap : Std.HashMap String Expr := {}
@@ -214,6 +235,22 @@ partial def replayChildren (C : Compiled) (sk : Array SkelNode) (a : Nat) (prems
     let some mv := vmap[b]? | throwError "node {a}: no metavariable for the built variable {b}"
     replayData C sk β mv
 
+/-- 9a-2: match a rule's head against the target syntactically, application by application,
+assigning the rule's metavariables to the subterms the template match gives; a pair that is not
+two applications of the same shape is left to `isDefEq`. Without it, `isDefEq` may solve
+`Nat.succ ?a =?= Nat.succ (a + 0)` by `?a := a` (Nat offset arithmetic), a defeq but different
+assignment that the children's heads, matched at the template level, no longer fit. -/
+partial def synMatch (p t : Expr) : MetaM Unit := do
+  let p ← instantiateMVars p
+  let t ← instantiateMVars t
+  if p.isMVar then discard <| isDefEq p t; return
+  match p, t with
+  | .app f a, .app g b =>
+    if p.getAppNumArgs == t.getAppNumArgs then
+      synMatch f g
+      synMatch a b
+  | _, _ => pure ()
+
 /-- Replay a proof node on the metavariable `m` of its goal. -/
 partial def replay (C : Compiled) (sk : Array SkelNode) (a : Nat) (m : MVarId) : DecodeM Unit := do
   let n := sk[a]!
@@ -236,6 +273,7 @@ partial def replay (C : Compiled) (sk : Array SkelNode) (a : Nat) (m : MVarId) :
         | none => m) {}
       return (prems, vmap)
     let (e, T, prems, vmap) ← instantiateClause C n
+    if cinfo.origin matches .rule _ then withTransparency .reducible (synMatch T tgt)
     unless ← withTransparency .reducible (isDefEq T tgt) do
       throwError "node {a}: the head {T} of {cl.name} does not unify with the target {tgt}"
     m'.assign e

@@ -71,3 +71,4 @@ crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.balanced_balanceL!
 crash(shard, oom) on main:A/Std.Rxi.LawfulHasSize.ofMap
 crash(shard, oom) on main:A/Array.toList_mkSlice_ric
 shard 6: done; 375 results; 8510 s
+shard 7: done; 400 results; 8555 s

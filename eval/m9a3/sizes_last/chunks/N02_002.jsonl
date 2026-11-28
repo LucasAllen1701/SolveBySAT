@@ -1,0 +1,1 @@
+{"H": ["Array.mk.injEq", "Eq.trans", "List.ne_nil_iff_length_pos", "List.toArray", "congrArg", "propext"], "H_main_size": 6, "baselines": false, "group": "control", "id": "B/List.max_eq_max_toArray/4", "key": "main:B/List.max_eq_max_toArray/4", "nctx": 4, "pos": 4, "run": "main", "thm": "List.max_eq_max_toArray", "tier": "B"}

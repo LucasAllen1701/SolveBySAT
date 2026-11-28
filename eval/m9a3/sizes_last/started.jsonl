@@ -189,3 +189,11 @@
 {"key":"main:B/List.foldl_push_eq_append/4|rw"}
 {"key":"main:B/String.skipSuffixWhile_toSlice/3|rw"}
 {"key":"main:B/UInt8.and_le_left/1|rw"}
+{"key":"main:A/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or|rw"}
+{"key":"main:A/Std.Iter.toListRev_dropWhile_of_finite|rw"}
+{"key":"main:A/Std.DHashMap.Raw.isEmpty_erase|rw"}
+{"key":"main:A/Array.getElem?_swap|rw"}
+{"key":"main:A/Std.DHashMap.Raw.getKeyD_diff|rw"}
+{"key":"main:A/Std.Rxi.LawfulHasSize.ofMap|rw"}
+{"key":"main:B/Std.DHashMap.Internal.Raw₀.getKey_insertMany_list_of_contains_eq_false/7|rw"}
+{"key":"main:A/Lean.Order.meet_join_le_right|rw"}

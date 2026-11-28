@@ -59,3 +59,15 @@ crash(shard, oom) on main:A/UInt64.toUInt8_le
 crash(shard, oom) on main:A/UInt16.lt_add_one
 crash(shard, oom) on main:A/Array.iter_equiv_iter_toList
 shard 5: done; 325 results; 7487 s
+crash(shard, oom) on main:A/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo
+crash(shard, oom) on main:A/Std.Iter.toListRev_dropWhile_of_finite
+crash(shard, oom) on main:A/String.Pos.eq_copy_sliceTo_append_get
+crash(shard, oom) on main:A/Std.DHashMap.Raw.isEmpty_erase
+crash(shard, oom) on main:A/Array.getElem?_swap
+crash(shard, oom) on main:A/BitVec.ushiftRight_xor_distrib
+crash(shard, oom) on main:A/Int64.add_eq_left
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_diff
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.balanced_balanceL!
+crash(shard, oom) on main:A/Std.Rxi.LawfulHasSize.ofMap
+crash(shard, oom) on main:A/Array.toList_mkSlice_ric
+shard 6: done; 375 results; 8510 s

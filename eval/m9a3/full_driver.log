@@ -39,3 +39,8 @@ shard 2: done; 175 results; 4248 s
 crash(shard, oom) on main:B/Int8.lt_of_le_of_ne/0
 crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv/8
 shard 3: done; 225 results; 4641 s
+crash(shard, oom) on main:B/Lean.Grind.CommRing.Stepwise.d_step1C/0
+crash(shard, oom) on main:B/Int.add_mul_bmod_self_left/4
+crash(shard, oom) on main:B/Nat.toArray_rco_eq_singleton_append_iff/18
+crash(shard, oom) on main:B/Array.eraseP_filter/5
+shard 4: done; 275 results; 5855 s

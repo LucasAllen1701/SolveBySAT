@@ -148,3 +148,13 @@
 {"hwm_mb":754,"key":"m8b:norules:main:A/Std.DTreeMap.Raw.contains_eq_false_iff_not_mem","ms":5165,"status":"ok"}
 {"hwm_mb":754,"key":"m8b:norules:main:A/Int.bdiv_add_bmod'","ms":378,"status":"ok"}
 {"hwm_mb":754,"key":"m8b:norules:main:A/Int32.toInt_inj","ms":720,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Array.getElem?_toList/1","ms":37,"status":"ok"}
+{"hwm_mb":723,"key":"m8b:norules:main:B/Std.DHashMap.Raw.getD_alter_self/2","ms":1054,"status":"ok"}
+{"hwm_mb":723,"key":"m8b:norules:main:B/UInt16.sizeOf/18","ms":117,"status":"ok"}
+{"hwm_mb":723,"key":"m8b:norules:main:A/Int64.ofIntLE_sub","ms":1046,"status":"ok"}
+{"hwm_mb":723,"key":"m8b:norules:main:B/Std.ExtDTreeMap.getKeyD_minKeyD/3","ms":26890,"status":"ok"}
+{"hwm_mb":723,"key":"m8b:norules:main:A/Std.Sat.CNF.Clause.sat_append_left","ms":1785,"status":"ok"}
+{"hwm_mb":723,"key":"m8b:norules:main:B/Std.HashMap.Raw.WF.union/3","ms":137,"status":"ok"}
+{"hwm_mb":723,"key":"m8b:norules:main:B/Std.DTreeMap.Raw.Equiv.constGetEntryGED_eq/1","ms":248,"status":"ok"}
+{"hwm_mb":723,"key":"m8b:norules:main:A/Int.neg_fmod_self","ms":1076,"status":"ok"}
+{"hwm_mb":723,"key":"m8b:norules:main:A/UInt16.toBitVec_inj","ms":514,"status":"ok"}

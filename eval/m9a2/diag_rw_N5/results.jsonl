@@ -118,3 +118,13 @@
 {"hwm_mb":735,"key":"m8b:norules:main:A/UInt64.ofFin_and","ms":2389,"status":"ok"}
 {"hwm_mb":735,"key":"m8b:norules:main:A/Nat.toArray_roc_eq_singleton_iff","ms":10022,"status":"ok"}
 {"hwm_mb":735,"key":"m8b:norules:main:A/Int.ediv_eq_iff_eq_mul_left","ms":816,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:A/String.back?_eq","ms":501,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:A/String.Slice.Pattern.Model.isLongestRevMatchAtChain_skipSuffixWhile","ms":1160,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem","ms":95230,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:A/Int8.ofNat_div","ms":4392,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:A/UInt8.toNat_shiftLeft","ms":4407,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:A/BitVec.getMsbD_rotateRightAux_of_lt","ms":12942,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:A/UInt64.ofNat_sub","ms":1588,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:A/USize.toUInt8_mul","ms":3581,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:A/ListSlice.size_mkSlice_rco","ms":32439,"status":"ok"}
+{"hwm_mb":729,"key":"m8b:norules:main:A/UInt16.sub_mul","ms":1601,"status":"ok"}

@@ -22,3 +22,4 @@ sizes N=10: 40 records, 969 s
 sizes N=10: 80 records, 263 s
 sizes N=10: 120 records, 257 s
 sizes N=10: 160 records, 315 s
+sizes N=10: 200 records, 4193 s

@@ -36,3 +36,6 @@ crash(shard, oom) on main:A/Std.DHashMap.isEmpty_iff_forall_not_mem
 crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_contains
 crash(shard, oom) on main:A/Std.DTreeMap.Raw.contains_eq_false_iff_not_mem
 shard 2: done; 175 results; 4248 s
+crash(shard, oom) on main:B/Int8.lt_of_le_of_ne/0
+crash(shard, oom) on main:B/Std.DHashMap.Internal.Raw₀.Const.get_eq_of_equiv/8
+shard 3: done; 225 results; 4641 s

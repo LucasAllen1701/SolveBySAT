@@ -117,3 +117,23 @@ sizes last N=8: 364 records, 29 s
 sizes last N=9: 368 records, 16 s
 sizes last N=10: 384 records, 22 s
 sizes last N=10: 400 records, 42 s
+rules: 20 records, 1 s
+rules: 40 records, 1 s
+rules: 60 records, 3 s
+rules: 80 records, 1 s
+rules: 100 records, 1 s
+rules: 120 records, 2 s
+rules: 140 records, 2 s
+rules: 160 records, 1 s
+rules: 180 records, 1 s
+rules: 200 records, 1 s
+rules: 220 records, 1 s
+rules: 240 records, 1 s
+rules: 260 records, 1 s
+rules: 280 records, 2 s
+rules: 300 records, 1 s
+rules: 320 records, 2 s
+rules: 340 records, 2 s
+rules: 360 records, 1 s
+rules: 380 records, 1 s
+rules: 400 records, 1 s

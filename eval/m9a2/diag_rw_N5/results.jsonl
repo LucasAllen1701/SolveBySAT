@@ -38,3 +38,13 @@
 {"hwm_mb":732,"key":"m8b:norules:main:B/Array.contains_filter/15","ms":4067,"status":"ok"}
 {"hwm_mb":732,"key":"m8b:norules:main:B/BitVec.getMsbD_rotateRight/33","ms":314,"status":"ok"}
 {"hwm_mb":732,"key":"m8b:norules:main:B/Nat.toArray_rco_eq_singleton_append_iff/10","ms":12099,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/List.find?_eq_some_iff_append/67","ms":188747,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Array.getElem_append_right'/24","ms":16342,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/UInt8.toUInt16_ofNat'/2","ms":457,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Std.TreeMap.inter_equiv_empty_comm/14","ms":3808,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Nat.toList_repr/0","ms":399,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Array.append_right_inj/0","ms":37296,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Std.Do.WP.pure/6","ms":12813,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/UInt32.toUInt16_sub/0","ms":2276,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Int32.xor_right_inj/1","ms":31229,"status":"ok"}
+{"hwm_mb":720,"key":"m8b:norules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13","ms":17151,"status":"ok"}

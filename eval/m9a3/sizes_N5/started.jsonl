@@ -23,3 +23,13 @@
 {"key":"main:B/List.getLast_eq_head_reverse/17|rw"}
 {"key":"main:A/Lean.Order.join_mono_left|rw"}
 {"key":"main:B/Bool.not_eq_true'/7|rw"}
+{"key":"main:B/BitVec.udiv_eq_of_mul_add_toNat/9|rw"}
+{"key":"main:B/Array.size_insertIdx/11|rw"}
+{"key":"main:B/Int.lcm_dvd_lcm_mul_left_left/2|rw"}
+{"key":"main:B/Option.choice_eq_some/9|rw"}
+{"key":"main:B/Rat.zpow_pos/1|rw"}
+{"key":"main:B/Lean.Sym.String.lt_eq_true/1|rw"}
+{"key":"main:B/Int16.toISize_mod/3|rw"}
+{"key":"main:B/UInt8.toUInt64_sub/7|rw"}
+{"key":"main:B/Array.size_insertIdx/8|rw"}
+{"key":"main:B/BitVec.not_self_ne/2|rw"}

@@ -362,3 +362,7 @@
 {"key":"main:B/Int.zero_lcm/2|rw"}
 {"key":"main:A/Int16.toInt_ofInt|rw"}
 {"key":"main:A/Std.DTreeMap.Internal.Impl.balanced_balanceL!|rw"}
+{"key":"main:A/Int8.ofNat_div|rw"}
+{"key":"main:A/BitVec.toInt_emod_two_pow|rw"}
+{"key":"main:B/Int.getD_toArray_roo/42|rw"}
+{"key":"main:A/ISize.ofNat_mul|rw"}

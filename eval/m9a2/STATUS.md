@@ -1,6 +1,6 @@
 # eval/m9a2: status of the measurement (M9_PLAN 3.3)
 
-Updated 2026-11-28 16:46:05.
+Updated 2026-11-28 16:50:57.
 
 - sizes N = 5: 800 of 800 (point, setting) records: none ok 400, rw ok 200, rwnt ok 200
   - consistency (none = 8c-1's r1r2 at every point): all pass
@@ -9,4 +9,4 @@ Updated 2026-11-28 16:46:05.
   - consistency (none = 8c-1's r1r2 at every point): all pass
   - wall time so far: 5.36 h
 - diag rw N = 5: 200 of 200 points: ok 200
-- diag rwnt N = 5: 100 of 200 points: ok 100
+- diag rwnt N = 5: 110 of 200 points: ok 110

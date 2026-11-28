@@ -98,3 +98,13 @@
 {"hwm_mb":733,"key":"m8b:norules:main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2","ms":82559,"status":"ok"}
 {"hwm_mb":733,"key":"m8b:norules:main:B/ByteArray.isSome_utf8Decode?_iff/4","ms":353,"status":"ok"}
 {"hwm_mb":733,"key":"m8b:norules:main:B/String.Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar?/151","ms":662,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:A/Lean.Grind.CommRing.Poly.denote_mul","ms":28978,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:A/List.append_right_le_iff_of_length_eq","ms":28861,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:A/Lean.Grind.Field.NormNum.sub_eq","ms":11537,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:A/Std.TreeSet.max?_eq_back?_toArray","ms":2181,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:A/Vector.getElem?_setIfInBounds_ne","ms":34380,"status":"ok"}
+{"hwm_mb":721,"key":"m8b:norules:main:A/Vector.right_distrib","ms":179199,"status":"ok"}
+{"hwm_mb":721,"key":"m8b:norules:main:A/List.any_toArray'","ms":1068,"status":"ok"}
+{"hwm_mb":721,"key":"m8b:norules:main:A/Int.le_of_add_le_add_left","ms":63,"status":"ok"}
+{"hwm_mb":721,"key":"m8b:norules:main:A/Int.tmod_def","ms":397,"status":"ok"}
+{"hwm_mb":721,"key":"m8b:norules:main:A/_private.Init.Data.Int.Linear.0.Int.Internal.Linear.eq_neg_addConst_add","ms":1823,"status":"ok"}

@@ -356,3 +356,9 @@
 {"key":"main:B/Array.size_insertIdx/16|rw"}
 {"key":"main:B/Array.contains_filter/21|rw"}
 {"key":"main:B/USize.eq_of_toBitVec_eq/3|rw"}
+{"key":"main:B/Int.sign_pos_iff/9|rw"}
+{"key":"main:B/UInt16.lt_iff_le_and_ne/0|rw"}
+{"key":"main:B/Int.mem_toNat?/1|rw"}
+{"key":"main:B/Int.zero_lcm/2|rw"}
+{"key":"main:A/Int16.toInt_ofInt|rw"}
+{"key":"main:A/Std.DTreeMap.Internal.Impl.balanced_balanceL!|rw"}

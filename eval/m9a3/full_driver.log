@@ -74,3 +74,4 @@ shard 6: done; 375 results; 8510 s
 shard 7: done; 400 results; 8555 s
 sizes N5 N=5: 35 records, 9 s
 sizes N5 N=5: 55 records, 25 s
+sizes N5 N=5: 75 records, 185 s

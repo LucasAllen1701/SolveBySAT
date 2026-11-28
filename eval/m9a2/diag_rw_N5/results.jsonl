@@ -178,3 +178,13 @@
 {"hwm_mb":737,"key":"m8b:norules:main:B/Nat.lcm_div/28","ms":499,"status":"ok"}
 {"hwm_mb":737,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left/19","ms":129,"status":"ok"}
 {"hwm_mb":737,"key":"m8b:norules:main:A/List.Perm.congr_left","ms":88,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:A/Lean.Grind.Order.eq_trans_false'","ms":129,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Equiv.getKeyLT?_eq/9","ms":1162,"status":"ok"}
+{"hwm_mb":725,"key":"m8b:norules:main:B/Std.DTreeMap.Const.mem_ofList/11","ms":607,"status":"ok"}
+{"hwm_mb":725,"key":"m8b:norules:main:B/Int.instNeZeroHShiftLeftNat/2","ms":397,"status":"ok"}
+{"hwm_mb":725,"key":"m8b:norules:main:B/Int32.toInt8_not/10","ms":308,"status":"ok"}
+{"hwm_mb":725,"key":"m8b:norules:main:B/Array.getElem?_toList/73","ms":2416,"status":"ok"}
+{"hwm_mb":725,"key":"m8b:norules:main:B/_private.Init.Grind.Ordered.Linarith.0.Lean.Grind.Linarith.Poly.denote'_go_eq_denote/5","ms":152,"status":"ok"}
+{"hwm_mb":725,"key":"m8b:norules:main:B/Array.ofFn_succ'/47","ms":1074,"status":"ok"}
+{"hwm_mb":725,"key":"m8b:norules:main:A/Std.Sat.CNF.entails_trans","ms":124,"status":"ok"}
+{"hwm_mb":725,"key":"m8b:norules:main:B/Std.Internal.List.length_insertListIfNewUnit_le/13","ms":1425,"status":"ok"}

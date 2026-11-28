@@ -1,0 +1,400 @@
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "g1_rewrite_B", "key": "main:B/String.Pos.startPos_lt_iff/6", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Nat.add_max_add_right/11", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Int.Internal.Linear.cooper_dvd_left_split_dvd2/37", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/0", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/List.mergeSort_pair/30", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Int.ediv_gcd_ne_zero_of_ne_zero_right/5", "lost_rule": false, "probe_extra_used": ["_probe.Nat.cast.congr.\u00ab2\u00bb"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.Internal.List.length_insertListIfNewUnit_le/7", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/9", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Std.DTreeMap.Raw.mem_of_mem_union_of_not_mem_left/5", "lost_rule": false, "probe_extra_used": ["_probe.Std.DTreeMap.Raw.contains_eq_false_iff_not_mem.propext.root"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "g1_rewrite_B", "key": "main:B/List.isEmpty_eq_false_iff/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/BitVec.udiv_eq_of_mul_add_toNat/9", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Array.size_insertIdx/11", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.lcm_dvd_lcm_mul_left_left/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Option.choice_eq_some/9", "lost_rule": false, "probe_extra_used": ["_probe.Option.some.congr.\u00ab1\u00bb"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Rat.zpow_pos/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Lean.Sym.String.lt_eq_true/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int16.toISize_mod/3", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/UInt8.toUInt64_sub/7", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Array.size_insertIdx/8", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/BitVec.not_self_ne/2", "lost_rule": false, "probe_extra_used": ["_probe.ne_comm.propext.root"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/String.Slice.utf8ByteSize_sliceFrom/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/BitVec.getMsbD_rotateRight/31", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/UInt16.sub_mul/5", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.DHashMap.Const.getKey_alter_self/16", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 4, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Nat.gcd_def/2", "lost_rule": false, "probe_extra_used": ["_probe.Eq.subst.\u00ab2\u00bb"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.ediv_eq_iff_eq_mul_left/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/List.take_reverse/120", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Rat.intCast_inj/14", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_mem/3", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Array.find?_map/12", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/6", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/UInt64.lt_add_one/5", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int8.lt_of_le_of_ne/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos/18", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.Internal.Linear.Poly.denote_combine/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.Internal.Linear.cooper_left_split_dvd/42", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int16.le_of_lt/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Array.contains_filter/15", "lost_rule": false, "probe_extra_used": ["Eq.refl"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/BitVec.getMsbD_rotateRight/33", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Nat.toArray_rco_eq_singleton_append_iff/10", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/List.find?_eq_some_iff_append/67", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Array.getElem_append_right'/24", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/UInt8.toUInt16_ofNat'/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Std.TreeMap.inter_equiv_empty_comm/14", "lost_rule": false, "probe_extra_used": ["_probe.Bool.eq_iff_iff.propext.root"]}
+{"earlier": "8c-1", "earlier_N": 4, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Nat.toList_repr/0", "lost_rule": false, "probe_extra_used": ["_probe.Eq.subst.\u00ab1\u00bb", "_probe.String.toList.congr.\u00ab0\u00bb"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Array.append_right_inj/0", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Std.Do.WP.pure/6", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/UInt32.toUInt16_sub/0", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Int32.xor_right_inj/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/UInt16.add_eq_left/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/12", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Std.DHashMap.getKey?_eq_some_getKeyD/3", "lost_rule": false, "probe_extra_used": ["_probe.Std.DHashMap.contains_iff_mem.propext.root"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int8.not_inj/3", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.lcm_eq_natAbs_left_iff_dvd/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/List.zipIdx_eq_nil_iff/5", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int16.toInt_mul/17", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/String.Slice.sliceTo_sliceTo/12", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.zero_lcm/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Lean.Grind.Linarith.zero_ne_one_of_field/11", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.DHashMap.Raw.Equiv.inter_congr/5", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.zero_eq_toNat_sub_iff/6", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int16.toISize_mod/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/176", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Array.toList_fst_unzip/4", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/BitVec.toNat_shiftConcat/3", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Array.eq_iff_flatten_eq/49", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/String.Slice.Pos.next_eq_iff/21", "lost_rule": false, "probe_extra_used": ["_probe.String.Slice.Pos.next_le_iff_lt.propext.root"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 5, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Int32.toInt_div_of_ne_left/24", "lost_rule": false, "probe_extra_used": ["Eq.trans", "_probe.Int.tdiv.congr.\u00ab0\u00bb", "_probe.Int.tdiv.congr.\u00ab1\u00bb"]}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/List.mkSlice_ric_eq_mkSlice_rio/0", "lost_rule": false, "probe_extra_used": ["Eq.refl"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Nat.getElem!_toArray_ric/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int64.toInt32_ofIntLE/5", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Std.DTreeMap.Internal.Impl.getD_union_of_contains_eq_false_left/10", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Nat.mul_div_cancel_left'/6", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.DTreeMap.Internal.Impl.Const.get!\u2098_eq_getValue!/0", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/UInt64.lt_add_one/7", "lost_rule": false, "probe_extra_used": ["_probe.UInt64.eq_iff_toBitVec_eq.propext.root"]}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/UInt64.toUInt8_le/11", "lost_rule": false, "probe_extra_used": ["_probe.UInt64.le_iff_toNat_le.propext.root"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int64.toInt32_ofIntLE/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 4, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Nat.le.intro/0", "lost_rule": false, "probe_extra_used": ["Eq.symm", "_probe.LE.le.subst.\u00ab3\u00bb"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/3", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.gcd_add_self_left/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Std.Sat.AIG.relabel_size_eq_size/0", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/List.nil_merge/1", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/BitVec.zero_udiv/4", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Fin.add_one_pos/81", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/USize.toUInt64_shiftLeft_of_lt/15", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Lean.Grind.CommRing.Stepwise.d_step1C/17", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int.sub_bmod_bmod/8", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/UInt64.toUInt8_le/7", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int16.toInt_mul/7", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "g1_rewrite_B", "key": "main:B/Int64.toBitVec32_toISize/6", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/UInt8.and_le_left/5", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/String.Slice.Pattern.Model.Char.isLongestRevMatchAtChain_iff/10", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_rewrite_B", "key": "main:B/Std.TreeMap.inter_equiv_empty_comm/13", "lost_rule": false, "probe_extra_used": ["_probe.Bool.eq_iff_iff.propext.root"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/Int64.xor_not/5", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_B", "key": "main:B/ByteArray.isSome_utf8Decode?_iff/4", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_B", "key": "main:B/String.Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar?/151", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Lean.Grind.CommRing.Poly.denote_mul", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/List.append_right_le_iff_of_length_eq", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Lean.Grind.Field.NormNum.sub_eq", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.TreeSet.max?_eq_back?_toArray", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Vector.getElem?_setIfInBounds_ne", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Vector.right_distrib", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/List.any_toArray'", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 8, "earlier_outcome": "proved", "group": "g1_rewrite_A", "key": "main:A/Int.le_of_add_le_add_left", "lost_rule": false, "probe_extra_used": ["Eq.symm", "_probe.LE.le.subst.\u00ab2\u00bb", "_probe.LE.le.subst.\u00ab3\u00bb"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/Int.tmod_def", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/_private.Init.Data.Int.Linear.0.Int.Internal.Linear.eq_neg_addConst_add", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/UInt32.sub_lt", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/Lean.Sym.String.lt_eq_true", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.DHashMap.Raw.getKeyD_eq_fallback", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/BitVec.allOnes_or", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/String.revSkip?_toSlice", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/List.any_wfParam", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/UInt64.ofFin_and", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Nat.toArray_roc_eq_singleton_iff", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Int.ediv_eq_iff_eq_mul_left", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 8, "earlier_outcome": "proved", "group": "g1_rewrite_A", "key": "main:A/String.back?_eq", "lost_rule": false, "probe_extra_used": ["_probe.Eq.subst.\u00ab1\u00bb", "_probe.List.getLast?.congr.\u00ab1\u00bb", "_probe.String.toList.congr.\u00ab0\u00bb"]}
+{"earlier": "8c-1", "earlier_N": 4, "earlier_outcome": "proved", "group": "g1_rewrite_A", "key": "main:A/String.Slice.Pattern.Model.isLongestRevMatchAtChain_skipSuffixWhile", "lost_rule": false, "probe_extra_used": ["_probe.String.Slice.Pattern.Model.IsLongestRevMatchAtChain.subst.\u00ab4\u00bb"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Int8.ofNat_div", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/UInt8.toNat_shiftLeft", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/BitVec.getMsbD_rotateRightAux_of_lt", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/UInt64.ofNat_sub", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/USize.toUInt8_mul", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/ListSlice.size_mkSlice_rco", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/UInt16.sub_mul", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.DHashMap.Internal.Raw\u2080.Const.get!_eq_default", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "g1_rewrite_A", "key": "main:A/Nat.gcd_eq_zero_iff", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.DHashMap.Raw.Const.get?_emptyWithCapacity", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.DTreeMap.Raw.Const.getD_inter_of_not_mem_right", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "g1_rewrite_A", "key": "main:A/String.Pos.prev_le", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/String.Slice.dropWhile_string_eq_dropWhile_toSlice", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.Internal.List.Const.getValue?_modifyKey_self", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 5, "earlier_outcome": "proved", "group": "g1_rewrite_A", "key": "main:A/Std.Tactic.BVDecide.Normalize.BitVec.signExtend_elim'", "lost_rule": false, "probe_extra_used": ["Eq.trans"]}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.Internal.List.getKey?_insertEntry_self", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/String.Pos.toSlice_le", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/_private.Std.Http.Data.URI.Encoding.0.Std.Http.URI.isHexDigit_isEncodedChar", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.DHashMap.isEmpty_iff_forall_not_mem", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/UInt64.toUSize_sub", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_contains", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "g1_rewrite_A", "key": "main:A/_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.verify\u2081_eq_isSome_assemble\u2081", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/BitVec.toInt_emod_two_pow", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "crash", "group": "g1_rewrite_A", "key": "main:A/Std.DTreeMap.Raw.contains_eq_false_iff_not_mem", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": null, "earlier_outcome": "timeout", "group": "g1_rewrite_A", "key": "main:A/Int.bdiv_add_bmod'", "lost_rule": false, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 5, "earlier_outcome": "proved", "group": "g1_rewrite_A", "key": "main:A/Int32.toInt_inj", "lost_rule": false, "probe_extra_used": ["_probe.Int32.toInt.congr.\u00ab0\u00bb"]}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Array.getElem?_toList/1", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 6, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DHashMap.Raw.getD_alter_self/2", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/UInt16.sizeOf/18", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 5, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/Int64.ofIntLE_sub", "lost_rule": false, "probe_extra_used": ["_probe.Eq.subst.\u00ab1\u00bb"]}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.ExtDTreeMap.getKeyD_minKeyD/3", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/Std.Sat.CNF.Clause.sat_append_left", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.HashMap.Raw.WF.union/3", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DTreeMap.Raw.Equiv.constGetEntryGED_eq/1", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/Int.neg_fmod_self", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 5, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/UInt16.toBitVec_inj", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DHashMap.Raw.get?_inter_of_not_mem_left/50", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/UInt8.toInt8_ofNat'/0", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 7, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/UInt8.lt_of_le_of_ne", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 6, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/Nat.le_sub_iff_add_le'", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 4, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.Do.SPred.imp_intro'/0", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DHashMap.Const.get_insertMany_list_of_contains_eq_false/2", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/10", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/UInt64.toNat_ofNatTruncate_of_le", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/String.Pos.ofSliceTo_startPos/7", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DHashMap.empty_equiv_iff_isEmpty/0", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 8, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Int8.lt_of_le_of_ne/0", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 4, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DHashMap.getKey?_eq_some_getKeyD/5", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/Int.gcd_eq_natAbs_right", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/Int.not_le_of_gt", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_contains_eq_false/37", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DHashMap.map_map_equiv/2", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 5, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/List.getLast_eq_head_reverse", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 5, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Nat.lcm_div/28", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 6, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left/19", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 8, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/List.Perm.congr_left", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 4, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/Lean.Grind.Order.eq_trans_false'", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DTreeMap.Internal.Impl.Equiv.getKeyLT?_eq/9", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DTreeMap.Const.mem_ofList/11", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Int.instNeZeroHShiftLeftNat/2", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Int32.toInt8_not/10", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Array.getElem?_toList/73", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/_private.Init.Grind.Ordered.Linarith.0.Lean.Grind.Linarith.Poly.denote'_go_eq_denote/5", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Array.ofFn_succ'/47", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 6, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/Std.Sat.CNF.entails_trans", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.Internal.List.length_insertListIfNewUnit_le/13", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Int32.toBitVec_neg/0", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 5, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.HashMap.Raw.getElem!_eq_getD_default/0", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/UInt8.toUInt16_ofNat'/11", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 5, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.DTreeMap.Internal.Impl.get_diff!/1", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Std.HashMap.Raw.contains_modify/1", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Nat.exists_testBit_of_ne_zero/1", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 2, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Array.mkSlice_rio_eq_mkSlice_rio_min/13", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 3, "earlier_outcome": "proved", "group": "g1_control", "key": "main:A/List.min_cons_cons_nil", "lost_rule": false, "probe_extra_used": ["_probe.Eq.subst.\u00ab1\u00bb"]}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/List.modify_id/6", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "8c-1", "earlier_N": 1, "earlier_outcome": "proved", "group": "g1_control", "key": "main:B/Option.all_attachWith/12", "lost_rule": true, "probe_extra_used": []}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int8.ofNat_bitVecToNat/4", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.size_toArray_roo/2", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/List.mergeSort_pair/12", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Pos.toSlice_le/7", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Array.size_eq_of_beq/11", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Std.DHashMap.Internal.Raw\u2080.Const.get_eq_of_equiv/8", "lost_rule": false, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/USize.toUInt64_shiftLeft_of_lt/11", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.skipSuffixWhile_toSlice/0", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.fromUTF8Lossy_eq_of_isValidUTF8/28", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo/1", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.lcm_eq_natAbs_left_iff_dvd/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Std.WP.Id.instLawfulWPMonadAttach/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/BitVec.zero_udiv/1", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int64.toNatClampNeg_ofNat_of_lt/19", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Std.DHashMap.Const.get!_insertIfNew/5", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Std.DHashMap.Const.get!_insertIfNew/6", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Lean.Grind.Order.eq_trans_false'/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Lean.Grind.AC.instReflBEqSeq/16", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Nat.add_max_add_right/25", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Slice.utf8ByteSize_sliceFrom/4", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Array.size_insertIdx/16", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int8.toInt32_ne_minValue/12", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/List.mergeSort_pair/49", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Lean.Grind.CommRing.Poly.denote_mul/7", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Std.DTreeMap.getKey?_diff_of_not_mem_right/0", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/BitVec.not_lt/4", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or/12", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/USize.neg_one_xor/27", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Nat.getElem_toList_roc/13", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/UInt16.add_eq_left/5", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Lean.Grind.CommRing.Stepwise.d_step1C/0", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Slice.all_slice_iff/5", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Array.size_eq_of_beq/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Array.getElem_swapIfInBounds/56", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/ISize.toInt_div_of_ne_left/24", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.add_mul_bmod_self_left/4", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/_private.Init.Data.Range.Polymorphic.SInt.0.Int64.instLawfulUpwardEnumerableLE/4", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Std.DHashMap.Const.mem_alter/14", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar?/38", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/2", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left/4", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Pos.Raw.isValidForSlice_stringSliceFrom/15", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int16.toInt_mul/19", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Slice.Pattern.Model.Char.instNoSuffixPatternModelChar/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Array.mkSlice_rio_eq_mkSlice_rio_min/2", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Array.contains_filter/21", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/USize.eq_of_toBitVec_eq/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/USize.toUInt8_shiftLeft/45", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Std.DTreeMap.Internal.Impl.Const.get!_diff_of_contains_eq_false_left/4", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/UInt64.not_not/8", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/_private.Init.Data.Range.Polymorphic.SInt.0.Int64.instRxiHasSize_eq/8", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Nat.lcm_lcm_self_left_right/5", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Slice.Pattern.Model.Char.instNoSuffixPatternModelChar/12", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Lean.Grind.AddCommGroup.add_left_inj/6", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/UInt8.toUInt64_sub/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Std.TreeMap.inter_equiv_empty_comm/9", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Nat.toArray_rco_eq_singleton_append_iff/18", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Std.DHashMap.Internal.Raw\u2080.Const.get!_diff_of_contains_right/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.sign_pos_iff/9", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int16.le_of_lt/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.gcd_pow_left_of_gcd_eq_one/6", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Array.eraseP_filter/5", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Lean.Grind.CommRing.le_norm_tight_expr/22", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Array.replicate_append_replicate/8", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.pow_nonneg_of_even/12", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Nat.lcm_lcm_self_left_right/6", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/BitVec.neg_mul_neg/1", "lost_rule": false, "m7_unsat": [1, 2, 3, 4]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Std.DTreeMap.inter_equiv_empty_comm/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/UInt8.and_le_left/0", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int8.not_inj/8", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/List.foldl_push_eq_append/4", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.skipSuffixWhile_toSlice/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Pos.Raw.isValidForSlice_stringSliceFrom/2", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/BitVec.udiv_eq_zero_iff_eq_zero_or_lt/13", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/UInt64.toUInt16_xor/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Std.ExtDTreeMap.Const.size_insertMany_list_le/5", "lost_rule": false, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Nat.zero_or/6", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/UInt16.lt_iff_le_and_ne/0", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int64.add_eq_left/11", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.mul_lt_mul_of_neg_right/7", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.isUTF8ContinuationByte_of_assemble\u2083_eq_some_right/22", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.Slice.Pos.ofSliceTo_lt_iff/13", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Lean.Sym.UInt64.lt_eq_true/5", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/BitVec.not_self_ne/1", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.mem_toNat?/1", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/String.fromUTF8Lossy_eq_of_isValidUTF8/7", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/UInt8.and_le_left/1", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int64.ofIntLE_sub/3", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Std.DHashMap.Internal.Raw\u2080.Const.size_alter/26", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Rat.num_inv/6", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.Internal.Linear.cooper_left_split_dvd/46", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Lean.Sym.or_eq_true_left/2", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/0", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.getD_toArray_roo/42", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/BitVec.signExtend_neg_of_ne_intMin/59", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Lean.Grind.CommRing.Poly.denoteS_concat/5", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.zero_lcm/2", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Int.mem_toNat?/10", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_B", "key": "main:B/BitVec.getMsbD_rotateRight/58", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_B", "key": "main:B/Lean.Sym.or_eq_true_left/6", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Array.elem_eq_contains", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Std.DTreeMap.Internal.Impl.Const.get!_insert!_self", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Vector.mem_singleton", "lost_rule": false, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/USize.toUInt64_shiftLeft_of_lt", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/BitVec.DivModState.umod_eq_of_lawful", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/BitVec.one_mul", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Std.DTreeMap.Const.get!_diff_of_not_mem_left", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/BitVec.neg_mul_neg", "lost_rule": false, "m7_unsat": [1, 2, 3, 4]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Std.Internal.List.getValue?_eq_some_getValueD", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/List.append_right_inj", "lost_rule": false, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/UInt16.neg_eq_neg_one_mul", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "timeout", "group": "rewrite_A", "key": "main:A/Nat.getElem_toList_roc", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/UInt64.toUInt8_le", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Lean.Grind.CommRing.instBEqPolyQ.beq_spec_1", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Std.Sat.AIG.BinaryInput_invert_rhs", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/UInt16.lt_add_one", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/UInt16.ofNatLT_or", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Int16.toInt_ofInt", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or", "lost_rule": false, "m7_unsat": [1, 2, 3, 4]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Array.iter_equiv_iter_toList", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "timeout", "group": "rewrite_A", "key": "main:A/Int16.or_not_self", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/String.Slice.Pattern.Model.isLongestRevMatch_iff_isLongestRevMatchAt_ofSliceTo", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Vector.toArray_iterFromIdx", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Std.Iter.toListRev_dropWhile_of_finite", "lost_rule": false, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/String.Pos.eq_copy_sliceTo_append_get", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Std.DHashMap.Raw.isEmpty_erase", "lost_rule": false, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/ISize.ofNat_mul", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/ByteArray.lt_size_of_validateUTF8At", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Int.lcm_dvd_lcm_mul_left_left", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/UInt8.toUInt16_toUSize", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Array.getElem?_swap", "lost_rule": false, "m7_unsat": [1, 2, 3, 4]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Int.lt_add_of_sub_left_lt", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Lean.Sym.Int32.le_eq_true", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Int.gcd_dvd_gcd_of_dvd_right", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/BitVec.ushiftRight_xor_distrib", "lost_rule": false, "m7_unsat": [1, 2, 3, 4]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Int64.add_eq_left", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/String.Pos.prevn_zero", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Std.DHashMap.Raw.getKeyD_diff", "lost_rule": false, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/String.Pos.le_ofSliceFrom", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Std.DTreeMap.Internal.Impl.balanced_balanceL!", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/UInt16.add_eq_left", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Std.Rxi.LawfulHasSize.ofMap", "lost_rule": false, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/UInt8.add_eq_left", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Subarray.mkSlice_roc_eq_mkSlice_rcc", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/BitVec.getLsbD_ushiftRight", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Std.WP.Assertion.NondetFun.evalsTo_apply_2", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "crash", "group": "rewrite_A", "key": "main:A/Array.toList_mkSlice_ric", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/Nat.add_right_comm", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/List.foldl_toArray'", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": null, "earlier_outcome": "no_proof_le_Nmax", "group": "rewrite_A", "key": "main:A/String.pos_eq_posGE", "lost_rule": false, "m7_unsat": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Or.resolve_left/2", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 4, "earlier_outcome": "proved", "group": "control", "key": "main:A/Nat.add_one_ne", "lost_rule": true, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": 4, "earlier_outcome": "proved", "group": "control", "key": "main:B/List.getLast_eq_head_reverse/17", "lost_rule": true, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": 3, "earlier_outcome": "proved", "group": "control", "key": "main:A/Lean.Order.join_mono_left", "lost_rule": true, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Bool.not_eq_true'/7", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/6", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 3, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.instAntisymmLtOfLawfulOrderLTOfLe/3", "lost_rule": true, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": 3, "earlier_outcome": "proved", "group": "control", "key": "main:B/gt_iff_lt/0", "lost_rule": true, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": 3, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.HashMap.isEmpty_toArray/0", "lost_rule": true, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DHashMap.Internal.Raw.Const.toArray_eq_toArray_map_toListModel/7", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/BitVec.zero_udiv/7", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Int32.shiftLeft_or/7", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Lean.Sym.or_eq_true_left/7", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/String.Slice.skipSuffix?_eq_backwardPatternSkipSuffix?/0", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/List.min_cons/5", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 5, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DTreeMap.Internal.Impl.head?_keys/6", "lost_rule": true, "m7_unsat": [1, 2, 3, 4]}
+{"earlier": "m7", "earlier_N": 6, "earlier_outcome": "proved", "group": "control", "key": "main:B/Nat.le_sub_iff_add_le'/0", "lost_rule": true, "m7_unsat": [1, 2, 3, 4, 5]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/String.Pos.Raw.byteIdx_zero_add_string/4", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/BitVec.not_self_ne/4", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 2, "earlier_outcome": "proved", "group": "control", "key": "main:B/UInt16.toFin_ofNatTruncate_of_le/0", "lost_rule": true, "m7_unsat": [1]}
+{"earlier": "m7", "earlier_N": 3, "earlier_outcome": "proved", "group": "control", "key": "main:A/Std.TreeMap.isSome_getKey?_eq_contains", "lost_rule": true, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DHashMap.getKey!_inter_of_not_mem_left/4", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 4, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DHashMap.Internal.Raw\u2080.getKey_insertMany_list_of_contains_eq_false/7", "lost_rule": true, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Lean.Grind.AC.instReflBEqSeq/24", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Option.length_toList_eq_zero_iff/7", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Option.isNone_pfilter_iff/96", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 7, "earlier_outcome": "proved", "group": "control", "key": "main:B/UInt8.lt_of_le_of_ne/0", "lost_rule": true, "m7_unsat": [1, 2, 3, 4, 5, 6]}
+{"earlier": "m7", "earlier_N": 3, "earlier_outcome": "proved", "group": "control", "key": "main:A/Lean.Omega.Int.le_lt_asymm", "lost_rule": true, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": 2, "earlier_outcome": "proved", "group": "control", "key": "main:B/Nat.gcd_def/7", "lost_rule": true, "m7_unsat": [1]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Array.setIfInBounds_eq_empty_iff/15", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Int8.toInt_ofNat'/12", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 3, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DTreeMap.get!_diff_of_not_mem_left/3", "lost_rule": true, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": 2, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DHashMap.toArray_toList/1", "lost_rule": true, "m7_unsat": [1]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.Do.SPred.and_symm/2", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 2, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DTreeMap.Raw.Const.get_diff/6", "lost_rule": true, "m7_unsat": [1]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.Sat.AIG.denote_mkOrCached/7", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Nat.le_of_mul_le_mul_right/6", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or/16", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 4, "earlier_outcome": "proved", "group": "control", "key": "main:A/Lean.Order.meet_join_le_right", "lost_rule": true, "m7_unsat": [1, 2, 3]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Array.mkSlice_rio_eq_mkSlice_rio_min/46", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DTreeMap.Internal.Impl.getD_insertMany_empty_list_of_contains_eq_false/2", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Lean.Sym.String.lt_eq_true/7", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 2, "earlier_outcome": "proved", "group": "control", "key": "main:B/List.IsInfix.le_count/1", "lost_rule": true, "m7_unsat": [1]}
+{"earlier": "m7", "earlier_N": 3, "earlier_outcome": "proved", "group": "control", "key": "main:B/Array.le_toList/0", "lost_rule": true, "m7_unsat": [1, 2]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:A/Std.Tactic.BVDecide.Normalize.BitVec.ite_else_not_ite'", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/String.foldl_eq_foldl_toList/9", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 2, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.DHashMap.Const.size_insertMany_list/1", "lost_rule": true, "m7_unsat": [1]}
+{"earlier": "m7", "earlier_N": 2, "earlier_outcome": "proved", "group": "control", "key": "main:B/List.max_eq_max_toArray/4", "lost_rule": true, "m7_unsat": [1]}
+{"earlier": "m7", "earlier_N": 1, "earlier_outcome": "proved", "group": "control", "key": "main:B/Std.Sat.AIG.RefVec.get_cast/2", "lost_rule": true, "m7_unsat": []}
+{"earlier": "m7", "earlier_N": 3, "earlier_outcome": "proved", "group": "control", "key": "main:A/Nat.le_lt_asymm", "lost_rule": true, "m7_unsat": [1, 2]}

@@ -1,0 +1,5 @@
+group populations: rewrite_B 846, rewrite_A 472, control 878
+sample.tsv md5 b311e0be3034d3e1f139135cebbb9c76
+group 1: 8c-1 proved 71, of which with an empty probe_extra_used 48
+specs.jsonl md5 df207d0b9b21800a8086d309db0f8a4a
+expect.jsonl md5 2fdeeb08f805ea3780140939f88b5d59

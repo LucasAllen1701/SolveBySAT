@@ -155,7 +155,13 @@ def rulesUsedJson (C : Compiled) (sk : Array SkelNode) : List (String × Json) :
   let used := sk.filterMap fun n => match C.clauseInfo[n.clause]!.origin with
     | .rule k => C.rules[k]?
     | _ => none
-  [("rules_used", toJson (used.map (·.name))), ("rules_used_by", ruleCounts (used.map (·.key)))]
+  -- 9a-3 (M9_PLAN 4.3, 4.4): the proof's nodes on an `iffEq` (`propext`) path, from a constant of H or a
+  -- local hypothesis (the exactness rule of 4.4 asks whether a proof uses a generated rule or such a path)
+  let pe := sk.filter fun n => C.clauseInfo[n.clause]!.isIffEq
+  let peG := pe.filter fun n => C.clauseInfo[n.clause]!.origin matches .global _
+  [("rules_used", toJson (used.map (·.name))), ("rules_used_by", ruleCounts (used.map (·.key))),
+   ("propext_used", toJson pe.size),
+   ("propext_used_by", Json.mkObj [("H", toJson peG.size), ("local", toJson (pe.size - peG.size))])]
 
 /-- The closed goal type and its binder count (the Tier B context). -/
 def goalOf (s : Spec) : MetaM (Expr × Nat) := do
@@ -337,7 +343,7 @@ def runSat (goal : Expr) (H : Array Name) (opts : Array String) (progress : Nat 
           | .ok sk => renderSkeleton C.forest sk 0
           | .error e => s!"(skeleton: {e})"
         let usedRules := match skel with
-          | .ok nodes => if copts.rewrite then rulesUsedJson C nodes else []
+          | .ok nodes => if copts.rewrite || copts.iffEq then rulesUsedJson C nodes else []
           | .error _ => []
         -- 7c: which watched constants (the distractors of a 4.2 run) the proof uses
         let used := if watch.isEmpty then [] else

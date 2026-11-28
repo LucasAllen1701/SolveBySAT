@@ -47,4 +47,7 @@ d=$(grep -o "logs kept in .*" eval/.m9a2_lean_last.log | sed 's/logs kept in //'
 python3 Test/m9a2_classify.py "$d" || r=1
 rm -rf "$d" eval/.m9a2_lean_last.log
 [ $r -eq 0 ] || status=1
+# 9a-3 (M9_PLAN 4.4): the driver's 9a-3 stop rules flag a hand-made case of each stop, and end to end
+echo "== 9a-3 stop rules"
+Test/m9a3_stopcheck.sh | grep -E "^FAIL|^PASS 9a-3|^driver 9a-3" || status=1
 exit $status

@@ -102,6 +102,93 @@ def exactness_selftest():
     return 1 if fails else 0
 
 
+M9A3_GROUPS_FRESH = ("rewrite_B", "rewrite_A", "control")
+
+
+def m9a3_stop(exp, r):
+    """9a-3 (M9_PLAN 4.4, amendment 6.2 decision 6): the stop rules for one result record `r` against its line
+    `exp` of eval/m9a3/expect.jsonl (None: the goal is not there).
+    - A decoder failure (the shard also exits 3 on it).
+    - A lost proof (`exp["lost_rule"]`: a group 1 goal whose 8c-1 proof used none of the probe's rules, or a group
+      3 goal): no proof at or below the earlier N `Ne`, certified: UNSAT or the early exit at some N >= Ne, the N
+      loop ending with no proof up to Nmax, a proof above Ne, or a crash record whose run passed Ne (last_N > Ne:
+      every N below last_N was UNSAT or exited early). A run that hits a limit before Ne is not a stop.
+    - Groups 2 and 3 (exactness): a proof that uses no generated rule (`rules_used`) and no `propext` path
+      (`propext_used`) at an N where milestone 7's answer was UNSAT (`m7_unsat`)."""
+    if exp is None:
+        return "the goal is not in the 9a-3 expectations"
+    out = r.get("outcome")
+    if out in ("decoder_bug", "solver_error"):
+        return f"a decoder failure (M9_PLAN 4.4): {out}: {str(r.get('reason', ''))[:200]}"
+    if exp.get("lost_rule"):
+        ne = exp["earlier_N"]
+        why = None
+        if out == "no_proof_le_Nmax":
+            why = f"no proof up to N = {r.get('N')}"
+        elif out == "proved" and r.get("N", 0) > ne:
+            why = f"a proof only at N = {r['N']}"
+        elif out == "crash" and (r.get("last_N") or 0) > ne:
+            why = f"a crash at N = {r['last_N']}, after passing N = {ne}"
+        else:
+            for x in r.get("per_N") or []:
+                if x.get("result") in ("unsat", "early_exit") and x.get("N", 0) >= ne:
+                    why = f"{x['result']} at N = {x['N']}"
+                    break
+        if why:
+            return f"a lost proof (M9_PLAN 4.4): {why}; the {exp['earlier']} proof is at N = {ne}"
+    if exp.get("group") in M9A3_GROUPS_FRESH and out == "proved":
+        n = r.get("N")
+        if n in (exp.get("m7_unsat") or []) and not r.get("rules_used") and not r.get("propext_used"):
+            return (f"exactness (M9_PLAN 4.4): a proof at N = {n} with no generated rule and no propext path, "
+                    f"where milestone 7 was UNSAT")
+    return None
+
+
+def m9a3_selftest():
+    """9a-3 (M9_PLAN 4.4): the driver's 9a-3 rule flags a hand-made case of each stop, and nothing else."""
+    row = lambda n, res: {"N": n, "result": res}
+    g1 = {"key": "k", "group": "g1_control", "earlier": "8c-1", "earlier_N": 3, "lost_rule": True}
+    g1p = dict(g1, group="g1_rewrite_B", lost_rule=False)
+    g3 = {"key": "k", "group": "control", "earlier": "m7", "earlier_N": 2, "lost_rule": True, "m7_unsat": [1]}
+    g2 = {"key": "k", "group": "rewrite_B", "earlier": "m7", "earlier_N": None, "lost_rule": False,
+          "m7_unsat": [1, 2, 3, 4]}
+    proved = lambda n, **kw: dict({"outcome": "proved", "N": n, "per_N": [row(i, "unsat") for i in range(1, n)] +
+                                   [row(n, "proved")], "rules_used": [], "propext_used": 0}, **kw)
+    cases = [
+        ("a decoder failure", g2, {"outcome": "decoder_bug", "reason": "kernel: type mismatch"}, True),
+        ("lost: group 1, no proof up to Nmax", g1, {"outcome": "no_proof_le_Nmax", "N": 10,
+                                                     "per_N": [row(i, "unsat") for i in range(1, 11)]}, True),
+        ("lost: group 1, a proof above 8c-1's N", g1, proved(4), True),
+        ("lost: group 1, UNSAT at 8c-1's N, then a timeout", g1,
+         {"outcome": "timeout", "per_N": [row(1, "unsat"), row(2, "unsat"), row(3, "unsat"), row(4, "timeout")]}, True),
+        ("lost: group 1, the early exit at 8c-1's N", g1, {"outcome": "timeout",
+                                                           "per_N": [row(3, "early_exit"), row(4, "timeout")]}, True),
+        ("lost: group 1, a crash after passing 8c-1's N", g1, {"outcome": "crash", "cause": "oom", "last_N": 4}, True),
+        ("lost: group 3, no proof up to Nmax", g3, {"outcome": "no_proof_le_Nmax", "N": 10, "per_N": []}, True),
+        ("exactness: group 2, a proof without rules where milestone 7 was UNSAT", g2, proved(3), True),
+        ("exactness: group 3, a proof without rules where milestone 7 was UNSAT", g3, proved(1), True),
+        ("not in the expectations", None, proved(1), True),
+        ("agree: group 1, proved at 8c-1's N", g1, proved(3), False),
+        ("agree: group 1, proved below 8c-1's N", g1, proved(2), False),
+        ("agree: group 1, a timeout before 8c-1's N", g1, {"outcome": "timeout", "per_N": [row(1, "unsat"), row(2, "timeout")]}, False),
+        ("agree: group 1, a crash at 8c-1's N", g1, {"outcome": "crash", "cause": "oom", "last_N": 3}, False),
+        ("agree: group 1 with the probe's rules, no proof (listed, not a stop)", g1p,
+         {"outcome": "no_proof_le_Nmax", "N": 10, "per_N": []}, False),
+        ("agree: group 2, a proof with a generated rule where milestone 7 was UNSAT", g2,
+         proved(3, rules_used=["rw.Eq.symm@ground#0"]), False),
+        ("agree: group 2, a proof with a propext path where milestone 7 was UNSAT", g2, proved(2, propext_used=1), False),
+        ("agree: group 2, a proof without rules above milestone 7's UNSAT N", g2, proved(5), False),
+        ("agree: group 3, proved at milestone 7's N without rules", g3, proved(2), False)]
+    fails = 0
+    for name, exp, r, want in cases:
+        got = m9a3_stop(exp, r)
+        ok = bool(got) == want
+        fails += not ok
+        print(f"{'PASS' if ok else 'FAIL'} {name}: {got or 'no stop'}")
+    print(f"driver 9a-3 stop rules (M9_PLAN 4.4): {len(cases) - fails} passed, {fails} failed")
+    return 1 if fails else 0
+
+
 def die_with_parent():
     """preexec_fn: the child gets SIGKILL when the driver dies, so no shard is orphaned
     (an orphaned shard plus a new run caused a global OOM on 18 November)."""
@@ -291,6 +378,24 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MI
     pending = [s for s in specs if s["key"] not in done]
     ref_path = os.environ.get("SOLVE_BY_SAT_EVAL_COMPARE") or None
     reference = load_reference(ref_path) if ref_path else None
+    # 9a-3 (M9_PLAN 4.4): the stop rules against eval/m9a3/expect.jsonl, checked on every new result (exit 10)
+    m9a3_path = os.environ.get("SOLVE_BY_SAT_EVAL_M9A3") or None
+    m9a3 = {e["key"]: e for e in load(m9a3_path)} if m9a3_path else None
+    m9a3_seen = set()
+
+    def m9a3_check():
+        if m9a3 is None:
+            return None
+        for r in load(results):
+            if r["key"] in m9a3_seen:
+                continue
+            m9a3_seen.add(r["key"])
+            m = m9a3_stop(m9a3.get(r["key"]), r)
+            if m:
+                append(os.path.join(outdir, "driver.jsonl"), {"stop": "m9a3", "key": r["key"], "reason": m,
+                                                              "time": time.strftime("%Y-%m-%d %H:%M:%S")})
+                return (r["key"], m)
+        return None
     print(f"{len(specs)} specs, {len(specs) - len(pending)} done, {len(pending)} to run", flush=True)
     # one driver at a time, machine-wide
     lock = open(os.path.join(ROOT, "eval", ".driver.lock"), "w")
@@ -333,8 +438,13 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MI
                                      cwd=ROOT, env=env, start_new_session=True,
                                      preexec_fn=die_with_parent)
                 cur, since, killed, lowmem = None, None, False, None
+                m9stop = None
                 while p.poll() is None:
                     time.sleep(0.5)
+                    if m9stop is None and (m9stop := m9a3_check()):
+                        os.killpg(p.pid, signal.SIGKILL)
+                        p.wait()
+                        break
                     st = load(started)
                     if len(st) > n_started0 and st[-1]["key"] != cur:
                         cur, since = st[-1]["key"], time.monotonic()
@@ -351,6 +461,12 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MI
                 rc = p.returncode
                 shutil.rmtree(tmpdir, ignore_errors=True)   # inputs left by a killed solver
                 os.makedirs(tmpdir, exist_ok=True)
+                fix_trailing(results)
+                if m9stop or (m9stop := m9a3_check()):
+                    for k in sorted({r["key"] for r in load(started)[n_started0:]} - {r["key"] for r in load(results)}):
+                        drop_markers(started, k)   # killed by the stop, not crashed: rerun on resume
+                    print(f"STOP: {m9stop[1]} on {m9stop[0]} (a 9a-3 stop rule, M9_PLAN 4.4)", flush=True)
+                    return 10
                 if lowmem is not None:
                     fix_trailing(results)
                     done = {r["key"] for r in load(results)}
@@ -411,6 +527,9 @@ def run(specs_path, outdir, shard_size, cap_mb, watchdog, hook=None, min_free=MI
                 if exact_stop:
                     print(f"STOP: {exact_stop[1]} on {exact_stop[0]} (an exactness stop rule, M8_PLAN 4.6)", flush=True)
                     return 9
+                if (m9stop := m9a3_check()):
+                    print(f"STOP: {m9stop[1]} on {m9stop[0]} (a 9a-3 stop rule, M9_PLAN 4.4)", flush=True)
+                    return 10
                 if cause not in ("oom", "watchdog"):
                     n_same = sum(1 for r in load(results) if r.get("outcome") == "crash" and r.get("cause") == cause)
                     if n_same >= 2:
@@ -437,6 +556,8 @@ def main():
         return 0
     if a == ["exactness-selftest"]:
         return exactness_selftest()
+    if a == ["m9a3-selftest"]:
+        return m9a3_selftest()
     if a[:1] == ["run"]:
         opts = dict(zip(a[3::2], a[4::2]))
         return run(a[1], a[2], int(opts.get("--shard-size", SHARD_SIZE)),

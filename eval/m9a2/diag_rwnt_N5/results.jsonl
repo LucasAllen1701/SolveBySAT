@@ -28,3 +28,13 @@
 {"hwm_mb":717,"key":"m8b:norules:main:B/Rat.intCast_inj/14","ms":469,"status":"ok"}
 {"hwm_mb":717,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_mem/3","ms":598,"status":"ok"}
 {"hwm_mb":717,"key":"m8b:norules:main:B/Array.find?_map/12","ms":3797,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Std.Internal.List.getValue?_filter_not_contains_of_contains_eq_false_right/6","ms":496,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/UInt64.lt_add_one/5","ms":1751,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Int8.lt_of_le_of_ne/2","ms":4759,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Int.ediv_le_ediv_iff_of_dvd_of_pos_of_pos/18","ms":64,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Int.Internal.Linear.Poly.denote_combine/2","ms":983,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Int.Internal.Linear.cooper_left_split_dvd/42","ms":160,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Int16.le_of_lt/2","ms":3160,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Array.contains_filter/15","ms":2513,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/BitVec.getMsbD_rotateRight/33","ms":258,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Nat.toArray_rco_eq_singleton_append_iff/10","ms":12037,"status":"ok"}

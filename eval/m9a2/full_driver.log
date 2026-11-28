@@ -51,3 +51,4 @@ diag rw N=5: 100 records, 125 s
 diag rw N=5: 110 records, 298 s
 diag rw N=5: 120 records, 98 s
 diag rw N=5: 130 records, 159 s
+diag rw N=5: 140 records, 103 s

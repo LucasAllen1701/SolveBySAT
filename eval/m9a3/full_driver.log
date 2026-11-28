@@ -1,0 +1,10 @@
+400 specs, 25 done, 375 to run
+crash(shard, oom) on main:B/List.find?_eq_some_iff_append/67
+crash(shard, oom) on main:B/Array.getElem_append_right'/24
+crash(shard, oom) on main:B/Array.append_right_inj/0
+crash(shard, oom) on main:B/Std.Do.WP.pure/6
+crash(shard, oom) on main:B/Int32.xor_right_inj/1
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13
+crash(shard, oom) on main:B/UInt16.add_eq_left/1
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3
+shard 0: done; 75 results; 1408 s

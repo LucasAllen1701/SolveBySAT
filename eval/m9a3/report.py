@@ -413,7 +413,7 @@ def main():
       "a substitution or congruence rule; whether the equality core has that kind (at any type), for `Eq.refl`, "
       "`Eq.symm`, `Eq.trans`; whether a `propext` path from H is compiled, for an `↔` rule. The class assigned: "
       "**selection** if a substitution or congruence rule is not made; else **equality core** if a core kind is "
-      "missing; else **limit** if 9a-3 ended at a limit (timeout, memout or crash); else **context** (each rule is "
+      "missing; else **propext path** if no `propext` path from H is compiled; else **limit** if 9a-3 ended at a limit (timeout, memout or crash); else **context** (each rule is "
       "made, in some context).")
     w("")
     rows = []
@@ -425,7 +425,7 @@ def main():
         rr = rules.get(k, {})
         strict = {tuple(x[1][:3]) for x in rr.get("strict", [])}
         kinds = {x[1][0] for x in rr.get("strict", [])}
-        marks, miss_sel, miss_core = [], False, False
+        marks, miss_sel, miss_core, miss_pe = [], False, False, False
         for u in e["probe_extra_used"]:
             p = probe_rule(u)
             if p[0] in ("subst", "congr"):
@@ -436,16 +436,19 @@ def main():
                 miss_core |= not ok
             elif p[0] == "propext":
                 ok = (r.get("iffeq_paths") or [0, 0])[0] > 0
+                miss_pe |= not ok
             else:
                 ok = False
             marks.append(f"`{u}` {'yes' if ok else '**no**'}")
         proved = r.get("outcome") == "proved"
         if proved:
-            cl = "proved"
+            cl = "proved (not listed)"
         elif miss_sel:
             cl = "selection"
         elif miss_core:
             cl = "equality core"
+        elif miss_pe:
+            cl = "propext path"
         elif r.get("outcome") in ("timeout", "memout", "crash"):
             cl = "limit"
         else:

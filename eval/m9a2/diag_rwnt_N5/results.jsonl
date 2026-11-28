@@ -58,3 +58,13 @@
 {"hwm_mb":719,"key":"m8b:norules:main:B/Int16.toInt_mul/17","ms":753,"status":"ok"}
 {"hwm_mb":719,"key":"m8b:norules:main:B/String.Slice.sliceTo_sliceTo/12","ms":17006,"status":"ok"}
 {"hwm_mb":719,"key":"m8b:norules:main:B/Int.zero_lcm/1","ms":604,"status":"ok"}
+{"hwm_mb":716,"key":"m8b:norules:main:B/Lean.Grind.Linarith.zero_ne_one_of_field/11","ms":4507,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/Std.DHashMap.Raw.Equiv.inter_congr/5","ms":23057,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/Int.zero_eq_toNat_sub_iff/6","ms":803,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/Int16.toISize_mod/2","ms":1359,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/176","ms":4511,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/Array.toList_fst_unzip/4","ms":33005,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/BitVec.toNat_shiftConcat/3","ms":1765,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/Array.eq_iff_flatten_eq/49","ms":12944,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/String.Slice.Pos.next_eq_iff/21","ms":2512,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self/8","ms":7097,"status":"ok"}

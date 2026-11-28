@@ -60,3 +60,16 @@
 {"key":"main:B/Std.DHashMap.getKey!_inter_of_not_mem_left/4|rw"}
 {"key":"main:B/Lean.Grind.AC.instReflBEqSeq/24|rw"}
 {"key":"main:B/Option.length_toList_eq_zero_iff/7|rw"}
+{"key":"main:B/Option.isNone_pfilter_iff/96|rw"}
+{"key":"main:B/Array.setIfInBounds_eq_empty_iff/15|rw"}
+{"key":"main:B/Int8.toInt_ofNat'/12|rw"}
+{"key":"main:B/Std.Do.SPred.and_symm/2|rw"}
+{"key":"main:B/Std.Sat.AIG.denote_mkOrCached/7|rw"}
+{"key":"main:B/Nat.le_of_mul_le_mul_right/6|rw"}
+{"key":"main:B/String.Slice.Pattern.Model.dropEndWhile_eq_self_iff_or/16|rw"}
+{"key":"main:B/Array.mkSlice_rio_eq_mkSlice_rio_min/46|rw"}
+{"key":"main:B/Std.DTreeMap.Internal.Impl.getD_insertMany_empty_list_of_contains_eq_false/2|rw"}
+{"key":"main:B/Lean.Sym.String.lt_eq_true/7|rw"}
+{"key":"main:A/Std.Tactic.BVDecide.Normalize.BitVec.ite_else_not_ite'|rw"}
+{"key":"main:B/String.foldl_eq_foldl_toList/9|rw"}
+{"key":"main:B/Std.Sat.AIG.RefVec.get_cast/2|rw"}

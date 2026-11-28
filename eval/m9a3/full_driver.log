@@ -94,3 +94,4 @@ sizes N5 N=5: 380 records, 20 s
 sizes N5 N=5: 400 records, 19 s
 sizes last N=1: 44 records, 1 s
 sizes last N=1: 62 records, 1 s
+sizes last N=1: 75 records, 1 s

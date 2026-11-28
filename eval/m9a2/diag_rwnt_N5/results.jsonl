@@ -168,3 +168,13 @@
 {"hwm_mb":732,"key":"m8b:norules:main:A/UInt64.toNat_ofNatTruncate_of_le","ms":61,"status":"ok"}
 {"hwm_mb":732,"key":"m8b:norules:main:B/String.Pos.ofSliceTo_startPos/7","ms":269,"status":"ok"}
 {"hwm_mb":732,"key":"m8b:norules:main:B/Std.DHashMap.empty_equiv_iff_isEmpty/0","ms":909,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Int8.lt_of_le_of_ne/0","ms":2808,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Std.DHashMap.getKey?_eq_some_getKeyD/5","ms":1878,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:A/Int.gcd_eq_natAbs_right","ms":380,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:A/Int.not_le_of_gt","ms":31,"status":"ok"}
+{"hwm_mb":731,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.get!_insertMany_list_of_contains_eq_false/37","ms":57,"status":"ok"}
+{"hwm_mb":738,"key":"m8b:norules:main:B/Std.DHashMap.map_map_equiv/2","ms":657,"status":"ok"}
+{"hwm_mb":737,"key":"m8b:norules:main:A/List.getLast_eq_head_reverse","ms":14942,"status":"ok"}
+{"hwm_mb":737,"key":"m8b:norules:main:B/Nat.lcm_div/28","ms":500,"status":"ok"}
+{"hwm_mb":737,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.getKey?_inter_of_contains_eq_false_left/19","ms":127,"status":"ok"}
+{"hwm_mb":737,"key":"m8b:norules:main:A/List.Perm.congr_left","ms":89,"status":"ok"}

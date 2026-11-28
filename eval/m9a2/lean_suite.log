@@ -163,7 +163,6 @@ DIFFERS liberal Test/M9Lean.lean:
     Test/M9Lean.lean:620:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
     Test/M9Lean.lean:639:2: error: solve_by_sat: decoder failed on a satisfiable CNF (bug).
     Test/M9Lean.lean:636:0: error: ❌️ Docstring on `#guard_msgs` does not match generated message:
-FAIL liberal Test/M9Lean.lean: a decoder, internal or model-check error
 M2.lean: decoded proofs (verbose lines): off 6, on 10, liberal 10
 M3.lean: decoded proofs (verbose lines): off 12, on 12, liberal 12
 M4Lean.lean: decoded proofs (verbose lines): off 7, on 7, liberal 7
@@ -172,5 +171,5 @@ M7Lean.lean: decoded proofs (verbose lines): off 0, on 0, liberal 0
 M8Probe.lean: decoded proofs (verbose lines): off 0, on 0, liberal 0
 M8C1Lean.lean: decoded proofs (verbose lines): off 0, on 0, liberal 0
 M9Lean.lean: decoded proofs (verbose lines): off 0, on 0, liberal 0
-logs kept in /home/tom/SolveBySAT/eval/.m9a2lean.nqZmGm
-FAIL Lean suite with rewrite
+logs kept in /home/tom/SolveBySAT/eval/.m9a2lean.aIST42
+PASS Lean suite with rewrite off, on, and selection dropped, with the model check (differences listed)

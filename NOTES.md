@@ -3803,3 +3803,165 @@ depth(α) ≥ d(g) and α + s(g) ≤ N, and a node with `cl(α, c)` has depth(α
   selection dropped loses no proof; the Lean suite with `rewrite` off passes and with `rewrite` on and selection dropped
   has 0 proofs lost, 0 new decoder or internal errors and 0 unguarded errors (4 and 6 expected failures became proofs,
   recorded above).
+
+### 9a-3: evaluation (M9_PLAN 4, amendment 6.2; 28 November 2026)
+
+#### Start
+
+- `git pull` on `m9` (nothing new); `lake build` and the harness executables rebuilt; the machine checks of CLAUDE.md
+  pass (cgroup v2 with the memory controller delegated, `vm.overcommit_memory = 1`, 7 GB RAM, 8 CPUs). No file of
+  `SolveBySat/`, `Test/` or `lakefile.toml` changed since 9a-2's end record (`eval/m9a2/run_all_end.log`, at `699e14b`),
+  which serves as the start record.
+- `M9_PLAN.md`: amendment 6.2 and the new status line, md5 `c201768016958081fabe570d1bf30e71` as given (`58f98f4`).
+- `M9_DESIGN.md` at the root, md5 `b5b51b883c318f4a955dda8f75a04dbf` as given (`5357a81`).
+
+#### M9_DESIGN.md against what 9a-1 and 9a-2 built
+
+Read in full. Beyond the deviations accepted in 6.2, decision 1, what is built differs from the note in two
+places (the code is unchanged, as instructed):
+
+1. **Who builds a rule's proof term** (6.2: "the decoder builds each proof term directly, with `congrArg`, `Eq.mpr`
+   and `propext`"). For a rule of 9a-2 the compiler (`addRules`) builds the proof once, with `congrArg` and `Eq.mpr`
+   (or `Eq.refl`/`Eq.symm`/`Eq.trans` for the core), checks it statically, and stores it with the rule
+   (`RuleInfo.proof`); the decoder applies the stored term to the node's arguments. The terms are those the note
+   describes, and no declaration is generated. The `propext` paths of 9a-1 are built by the decoder from their
+   recipes, as the note says.
+2. **`verbose` gives no reason per rule** (6.2: "`verbose` lists the rules generated and the reason for each"). It
+   lists every rule with its name (symbol, kind, 8a position, row) and its clause, and the counts by kind and row, but
+   not the source or spine that selected it.
+
+Also as built, consistent with the note but more specific than it: the equality core (6.4, "`Eq.refl`, `Eq.symm` and
+`Eq.trans` as built-in clauses") is made per use too, one per (level, type) of an `Eq` atom of a target, a source head
+or a congruence head, in the row of that occurrence.
+
+#### Inputs, sample and specs (M9_PLAN 4.1, 4.2)
+
+- `eval/m9a3/inputs/` holds byte copies of the inputs, one file per tag and path (`m8-data__m8a__specs.jsonl` is
+  `m8-data:eval/m8a/specs.jsonl`), with md5 sums in `eval/m9a3/inputs.md5`. The pinned ones match:
+  `population.jsonl` `69230cf4…`, milestone 7's `final/results.jsonl` `944cc58e…`. Added to the list of the prompt:
+  `m8-data:eval/m8c1/sizes_N5/results.jsonl` (`93f029f8…`), for group 1's sizes against 8c-1's.
+- `Test/m9a3_setup.py` writes `sample.tsv`, `specs.jsonl`, `expect.jsonl` and `setup.txt`, and stops (exit 5) on any
+  failed check. **The checks pass:**
+  - the group populations are 846, 472 and 878;
+  - `sample.tsv` has md5 `b311e0be3034d3e1f139135cebbb9c76`, and its first keys are as given.
+- Group 3's population: 976 main-run proofs in milestone 7, less 8a's 50 controls and 8d's 50 proved controls. Two
+  goals are in both control sets, so 878 remain, as the plan says.
+- **`specs.jsonl`** (md5 `df207d0b…`) has 400 specs: group 1 in 8a's spec order, then the sample. Each is milestone
+  7's spec of the goal (`m7-data:eval/specs_full.jsonl`) with `baselines` false and a `group` field, which the harness
+  ignores.
+- **Group 1's 8c-1 proofs:** 71, of which **48 have an empty `probe_extra_used`**, as your count says. These are 48 of
+  8a's 50 controls; no rewriting goal is among them. The other 23 used the probe's rules, and are the list of 4.4.
+
+#### Harness (9a-3)
+
+- **`eval_run`:** a proof's record also has `propext_used`, its nodes on an `iffEq` path, and `propext_used_by`
+  (`H` / `local`). Both are written when `rewrite` or `iffEq` is on. Nothing else in `eval_run` changed, and
+  `SolveBySat/` is unchanged.
+- **The stop rules of 4.4** are in `Test/eval_driver.py`, active when `SOLVE_BY_SAT_EVAL_M9A3=eval/m9a3/expect.jsonl`
+  is set:
+  - `m9a3_stop` checks every new result while the shard runs, and also the crash records the driver writes;
+  - on a stop it kills the shard, drops the unfinished marker (that goal reruns on resume), records the stop in
+    `driver.jsonl` and exits with **10**;
+  - a decoder failure also stops through the shard's exit 3.
+- **The lost-proof rule, as built,** is stricter than "the run ends within every limit without a proof at or below
+  its earlier N". It fires on any certificate that there is no proof at or below the earlier N `Ne`:
+  - UNSAT or the early exit at some N ≥ `Ne`, even if a timeout follows;
+  - no proof up to Nmax;
+  - a proof only above `Ne`;
+  - a crash record whose run passed `Ne` (`last_N > Ne`).
+
+  A run that hits a limit before `Ne` is not a stop. Adding clauses cannot remove a proof, so each of these cases
+  contradicts the earlier proof. A run that ends at a limit after `Ne` is treated as a stop, not as a limit.
+- **The exactness rule** (groups 2 and 3) is as written: a proof that has empty `rules_used` and `propext_used` = 0, at
+  an N in milestone 7's UNSAT set. That set is read as 8d's `reference_of` reads it: the UNSAT rows, plus every N below
+  `last_N` for a crash or a timeout without rows.
+- **The test** is `Test/m9a3_stopcheck.sh`, in `run_all.sh`:
+  - `eval_driver.py m9a3-selftest` runs 19 hand-made cases: a decoder failure; five lost-proof cases; two exactness
+    cases; a goal missing from the expectations; and ten agreements, including a group 1 goal with the probe's rules
+    that is not proved, which is listed and is not a stop;
+  - one real run through the driver, with a control goal proved at N = 2: it exits 0 with its true expectation, and
+    exits 10 with a hand-made expectation that says the earlier proof is at N = 1.
+- **`Test/m9a3_run.py`:**
+  - `runs pilot|full` calls the driver with `SOLVE_BY_SAT_EVAL_FLAGS=nodeBounds,exclusivePairs,iffEq,rewrite`
+    (`eqTrans` at its default, on), the expectations, and the driver's defaults, which are milestone 7's limits:
+    solver 20 s, N loop 120 s, watchdog 300 s, a 2.5 GB cap, shards of 50, one at a time, N from 1 to 10;
+  - `sizes` runs `eval_run sizes9a` in setting `rw`, at N = 5 and at each run's last N: the proof's N, 10 for no
+    proof, the last N attempted for a timeout or memout, and `last_N` for a crash. It runs after the runs, in its
+    own capped processes (chunks of 20 runs of the same N, one process at a time, as in 9a-2), and a killed process
+    is recorded as `memout` or `crash`;
+  - `rules` runs `eval_run rules9a` (the strict rules with kind, symbol, 8a position and row, plus the liberal keys)
+    for the explanations of 4.4;
+  - `Test/m9a3_full.sh` runs all of it detached and publishes `eval/m9a3` (`STATUS.md` included) after every shard
+    and chunk.
+
+#### Pilot and projection (M9_PLAN 4.5)
+
+- The pilot: the first 10 specs of group 1 and the top 5 of each fresh group, 25 runs in 552 s, then their sizes in
+  179 s. No stop. Outcomes: proved 10, timeout 6, crash (OOM) 5, no proof ≤ 10 4.
+- Projection (`eval/m9a3/pilot/PROJECTION.md`): 7.34 h of runs and 0.79 h of sizes, **8.1 h**, under the bound of about
+  24 h, so the full run started without a reduction (`setsid nohup Test/m9a3_full.sh`).
+- **The pilot's runs count.** Their header has code `1b92fad`, not dirty. Between the pilot and the full run only
+  `Test/m9a3_run.py` (the `rules` command) and `Test/m9a3_full.sh` changed; `eval_run` and `eval_driver.py` did not.
+  The full run resumed past the pilot's 25 runs.
+
+#### Results (`eval/m9a3/EVAL9A.md`)
+
+- **The full run**: 400 of 400 runs, 2.53 h of driver time over 2 sessions (pilot and full), then the sizes (N = 5:
+  1,527 s; last N: 1,245 s) and the rules (seconds). It finished at 21:37 on 28 November, with **no stop** and **no
+  decoder failure**. `report.py` writes `EVAL9A.md` byte-identically twice and under `PYTHONHASHSEED` 1 and 12345 (md5
+  `02bc53eb5781537e99568fb8ac339200`).
+- Outcomes over the 400: proved 193, timeout 111, crash 70 (all OOM in the SAT phase), no proof ≤ 10 26.
+- **Group 1** (8a's 200 specs, against 8c-1's rerun with the probe's rules as lemmas):
+  - Tier B 38 proved (8c-1: 16), Tier A 7 (8c-1: 5), controls 49 (8c-1: 50).
+  - Of 8c-1's 71 proofs, 68 are proved again: 64 at the same N and 3 at a lower N (from 2 to 1, all through a `propext`
+    path, which is part of a clause in 9a-1 and not a node of its own). One Tier B goal now times out, one Tier A goal
+    has no proof ≤ 10, and one control crashes (below).
+  - Clauses at N = 5, over the 200 goals: pooled 1.20 × 10⁹ in 8c-1 against 1.04 × 10⁹ in 9a-3 (ratio 0.867); per
+    goal the median ratio is 0.43 [0.20, 0.95], and 151 of 200 are smaller in 9a-3.
+- **Group 2** (fresh rewriting goals, all unproved in milestone 7): Tier B 41 of 100 proved (Wilson 95% [0.319,
+  0.508], applied to 846: 347 [270, 430]); Tier A 8 of 50 ([0.083, 0.285], applied to 472: 76 [39, 135]). Of the 49
+  proofs, 46 are of goals milestone 7 certified as "no proof ≤ 10", and 3 of goals it crashed on.
+- **Group 3** (fresh controls): 50 of 50 proved, each at milestone 7's N, none using a rule.
+- **Exactness**: 49 proofs (all in group 2) are at an N where milestone 7's answer was UNSAT; every one uses a
+  generated rule or a `propext` path.
+- **The rules in the 193 proofs** (nodes): congruence 93, substitution 24, `Eq.symm` 6, `Eq.trans` 5, `Eq.refl` 3;
+  row ground 107, root 13, H 11; and 19 nodes on a `propext` path from H (none from a local hypothesis). 97 proofs
+  use no rule (all controls); the most common kind sets are congruence alone (46) and `propext` alone (13).
+
+#### Surprising
+
+1. **The pilot overestimated the run by a factor of 3** (7.34 h projected, 2.53 h taken). The projection counted
+   a crash as the 300 s watchdog; the 70 crashes of the full run are all OOM kills by the cap, after 45.7 s on average
+   (at most 84.5 s). The other 330 runs took 17.6 s on average.
+2. **CNFs are smaller with rules made per use than with 8a's rules as lemmas** for 151 of 200 group 1 goals at N = 5,
+   although 9a-3 also has the `propext` paths and the equality core. The largest ratio is 8.1×, for a control
+   (`List.modify_id/6`, proved at N = 1 in both).
+3. **A control is lost to memory.** `main:B/Int8.lt_of_le_of_ne/0` (8a's control, proved at N = 8 in 8c-1) is killed
+   by the cap (OOM) in the SAT phase at N = 8 after 51 s. Its CNF at N = 8 has 13.8 × 10⁶ clauses (at N = 5, 2.61 ×
+   10⁶, 3.4× 8c-1's). This is not a stop: 4.4's lost-proof rule is for a run that "ends within every limit", and this
+   run ended at the cap before an answer at N = 8.
+4. Three goals are proved at a **lower N** than in 8c-1 (2 → 1), each through a `propext` path that 8c-1 needed as a
+   separate rule node.
+5. The rules that 9a-3 makes but no proof uses dominate: 3,358 strict rules over the 330 runs that compiled them
+   (median 10 per run), for 131 rule nodes in proofs.
+
+#### The list of 4.4: group 1 goals that 8c-1 proved with the probe's rules
+
+23 goals. 21 are proved again by 9a-3, 18 at 8c-1's N and 3 at a lower N. **Two are not proved, both for
+"selection"**: 9a-3 does not make a rule of the same kind, symbol and position that the 8c-1 proof used.
+
+- `main:B/Option.choice_eq_some/9` (Tier B; 8c-1 proved at N = 3; 9a-3 timeout): 8c-1's proof used
+  `_probe.Option.some.congr.«1»`, a congruence rule on argument 1 of `Option.some`. 9a-3 makes no `Option.some`
+  congruence rule for this goal (`eval/m9a3/rules.jsonl`). The reason is the one 9a-2 found ("The 11 proofs of
+  8a"): 8a used `Subsingleton.elim : a = b`, whose sides are both clause variables, so no source symbol occurs where
+  the rule is needed. It is a liberal candidate.
+- `main:A/Int.le_of_add_le_add_left` (Tier A; 8c-1 proved at N = 8; 9a-3 no proof ≤ 10): 8c-1's proof used
+  `_probe.LE.le.subst.«2»` and `_probe.LE.le.subst.«3»`, substitution into either side of `≤`. 9a-3 makes neither
+  (`eval/m9a3/rules.jsonl`); the `Eq.symm` the proof also used is made. The reason is the one 9a-2 found: 8a rewrote
+  `b` into `-a + (a + b)` with `Eq.symm (Int.neg_add_cancel_left)`, an equation with a variable on the side that
+  matches (`b`) and a symbol the target does not contain on the other. It is a liberal candidate.
+
+No goal falls in the other classes (equality core, `propext` path, limit, context).
+
+Regression: `Test/run_all.sh` exit 0 at `58a5d66` (milestones 0 to 9a-3, the 9a-3 stop rules included; 0 FAIL lines),
+228 min (21:40 to 01:28), `eval/m9a3/run_all_end.log`.

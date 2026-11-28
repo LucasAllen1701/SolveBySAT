@@ -5,7 +5,8 @@ reduction to SAT. The spec is `SPEC.md`; the Python prototype in `reference/` is
 authority for SPEC §5 and §6.1–6.8 where they disagree. `NOTES.md` records every
 deviation from the spec and every decision, milestone by milestone. Read its Milestone 7
 and Milestone 8 sections before touching the evaluation; `EVAL_PLAN.md` and `M8_PLAN.md` are
-those milestones' plans (both closed). `M9_PLAN.md` is milestone 9's.
+those milestones' plans (both closed). `M9_PLAN.md` is milestone 9's, and `M9_DESIGN.md` (at the root, identical
+to the claude.ai project's copy; never edit it here) is the design it follows.
 
 ## Standing rules (from the project owner)
 
@@ -58,6 +59,11 @@ python3 Test/m9a2_setup.py ../m8-data   # 9a-2: inputs of the 11 proofs and the 
 .lake/build/bin/eval_run rules9a eval/m9a2/specs_11.jsonl OUT   # 9a-2: the rules made per spec (strict and liberal)
 setsid nohup Test/m9a2_full.sh > eval/m9a2/full_driver.log 2>&1 &   # 9a-2: the measurement (about 10 h)
 python3 eval/m9a2/report.py              # 9a-2: eval/m9a2/RULES.md
+python3 Test/m9a3_setup.py               # 9a-3: sample, specs, expectations (from eval/m9a3/inputs/)
+python3 Test/m9a3_run.py runs|sizes pilot|full; … rules|project|status   # 9a-3: the steps of the run
+setsid nohup Test/m9a3_full.sh > eval/m9a3/full_driver.log 2>&1 &   # 9a-3: the full run (about 3 h)
+Test/m9a3_stopcheck.sh                    # 9a-3: the stop rules (in run_all.sh)
+python3 eval/m9a3/report.py              # 9a-3: eval/m9a3/EVAL9A.md
 ```
 
 ## Layout and where the data lives
@@ -67,7 +73,7 @@ python3 eval/m9a2/report.py              # 9a-2: eval/m9a2/RULES.md
   Python drivers and the `m8*_run.py` / `m8*_full.sh` scripts) and `Test/capped.sh`. `reference/` the Python
   prototype.
 - `SPEC.md` (milestones 7 and 8 folded in), `NOTES.md`, `EVAL_PLAN.md` (milestone 7, closed by §10.11),
-  `M8_PLAN.md` (milestone 8, closed by 4.7), `EVAL.md` (milestone 7's report).
+  `M8_PLAN.md` (milestone 8, closed by 4.7), `M9_PLAN.md` and `M9_DESIGN.md` (milestone 9), `EVAL.md` (milestone 7's report).
 - `eval/` on `main` holds only (`eval/README.md` has the list and why):
   - milestone 7's `report.py`, `merge.py`, `reviews/` and `README.md`;
   - in each of `eval/m8a/`, `m8b/`, `m8c1/`, `m8c2a/`, `m8d/`, its report (`PROBE.md`, `DIAG.md`, `SCALE.md`,
@@ -101,7 +107,7 @@ Requirements:
 Machine differences (CPU speed, RAM) change times and possibly which goals hit the cap. Record the
 machine's specs in NOTES.md before a full run.
 
-## Status (27 November 2026)
+## Status (28 November 2026)
 
 - **Milestone 7 (evaluation) is done** and merged into `main` (NOTES.md, "Milestone 7: summary" and "End
   of milestone 7: spec, archive tag and merge"; EVAL_PLAN §10.11). Bugs it found and fixed: two decoder bugs
@@ -119,7 +125,7 @@ machine's specs in NOTES.md before a full run.
     option `solve_by_sat.checkBounds` (the model check).
   - Not built: R3 (simulated, projected ratio 0.9925 > 0.8, 4.6), R4 (set aside), R5 (dropped) (4.5).
 - **Milestone 9 (`M9_PLAN.md`), on branch `m9`** (made from `main` at `c3086d1`): rewriting first (9a), then cases
-  and induction (9b–9d, planned after 9a-3). The design is `M9_DESIGN.md` in the claude.ai project. Every milestone 9
+  and induction (9b–9d, planned after 9a-3). The design is `M9_DESIGN.md` (at the root since 9a-3, identical to the claude.ai project's). Every milestone 9
   option is off by default (owner decision 4). At the end, code and reports go to `main` and the data to a tag.
   - **9a-1 is done** (NOTES.md, "9a-1: ↔ as equations"): `CompileOptions.iffEq`, option `solve_by_sat.iffEq` or
     `(iffEq := true)` in the call (after `(nodes := N)`): every `↔` head on any split path also gives the paths
@@ -137,7 +143,11 @@ machine's specs in NOTES.md before a full run.
     not). Origin `.rule k`, `Compiled.rules`, `Compiled.ruleStats`. Decoder: the stored proof, `synMatch` before
     `isDefEq` for rule nodes, and a check that the proof proves the clause. Testing-only options
     `rewriteIneligibleMutant`, `rewriteContextMutant`, `rewriteLiberal`. With `rewrite` off nothing changes (54/54).
-  - **Next: 9a-3** (M9_PLAN 4, pre-registered), only after the owner has checked 9a-2.
+  - **9a-3 is done** (NOTES.md, "9a-3: evaluation"; `eval/m9a3/EVAL9A.md`): M9_PLAN 4 with amendment 6.2, 400 runs
+    (group 1 8a's 200 specs, groups 2 and 3 the sample of `eval/m9a3/sample.tsv`) with
+    `nodeBounds,exclusivePairs,iffEq,rewrite`; no stop. The driver's 9a-3 stop rules (exit 10) are on when
+    `SOLVE_BY_SAT_EVAL_M9A3=eval/m9a3/expect.jsonl` is set; their test `Test/m9a3_stopcheck.sh` is in `run_all.sh`.
+  - **Next: 9b** (cases), only after the owner has checked 9a-3.
 - Milestone 9 rules: M9_PLAN section 1 ("Rules carried over from milestone 8") and milestone 8's. SPEC.md is revised
   in the claude.ai project at the end of the milestone, not here.
 

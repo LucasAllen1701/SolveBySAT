@@ -48,3 +48,13 @@
 {"hwm_mb":718,"key":"m8b:norules:main:B/UInt32.toUInt16_sub/0","ms":2331,"status":"ok"}
 {"hwm_mb":718,"key":"m8b:norules:main:B/Int32.xor_right_inj/1","ms":31368,"status":"ok"}
 {"hwm_mb":720,"key":"m8b:norules:main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13","ms":14857,"status":"ok"}
+{"hwm_mb":716,"key":"m8b:norules:main:B/UInt16.add_eq_left/1","ms":20485,"status":"ok"}
+{"hwm_mb":716,"key":"m8b:norules:main:B/Nat.Internal.Linear.Poly.denote_eq_cancelAux/12","ms":7856,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Std.DHashMap.getKey?_eq_some_getKeyD/3","ms":3750,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Int8.not_inj/3","ms":11852,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Int.lcm_eq_natAbs_left_iff_dvd/1","ms":1469,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3","ms":10806,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/List.zipIdx_eq_nil_iff/5","ms":3480,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Int16.toInt_mul/17","ms":753,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/String.Slice.sliceTo_sliceTo/12","ms":17006,"status":"ok"}
+{"hwm_mb":719,"key":"m8b:norules:main:B/Int.zero_lcm/1","ms":604,"status":"ok"}

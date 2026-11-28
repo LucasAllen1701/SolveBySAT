@@ -3,6 +3,7 @@
 
   python3 Test/m9a3_run.py runs pilot|full [--publish]   the N loop (Test/eval_driver.py) into eval/m9a3/runs/
   python3 Test/m9a3_run.py sizes pilot|full [--publish]  countOnly sizes at N = 5 and at each run's last N
+  python3 Test/m9a3_run.py rules [--publish]             the rules made per spec, strict and liberal (eval_run rules9a)
   python3 Test/m9a3_run.py project                       eval/m9a3/pilot/PROJECTION.md from the pilot's times
   python3 Test/m9a3_run.py status                        eval/m9a3/STATUS.md
   python3 Test/m9a3_run.py publish MESSAGE               status, commit eval/m9a3, push m9
@@ -18,6 +19,8 @@ The sizes are `eval_run sizes9a` in setting `rw` (iffEq and rewrite, eqTrans on,
 capped processes (Test/capped.sh, chunks of 20 runs, one process at a time, after the runs): at N = 5
 (eval/m9a3/sizes_N5/) and at each run's last N (eval/m9a3/sizes_last/: the N of a proof, Nmax for no proof, the
 last N attempted for a timeout, memout or crash). A killed process is recorded as `memout` or `crash` for its run.
+The rules made per spec (`eval_run rules9a`: the strict rules with kind, symbol, 8a position and row, and the
+liberal keys) go to eval/m9a3/rules.jsonl, in capped processes of 20 specs, for the report's explanations (4.4).
 Resumable: run the same command again.
 """
 import json, os, subprocess, sys, time
@@ -107,6 +110,29 @@ def sizes(which, pub):
     return rc
 
 
+def rules(pub):
+    out = os.path.join(OUT, "rules_chunks")
+    os.makedirs(out, exist_ok=True)
+    results = os.path.join(OUT, "rules.jsonl")
+    sp = load(os.path.join(OUT, "specs.jsonl"))
+    for i in range(0, len(sp), CHUNK):
+        part = sp[i:i + CHUNK]
+        want = [s["key"] for s in part]
+        if all(w in {r["key"] for r in load(results)} for w in want):
+            continue
+        cs = os.path.join(out, f"{i // CHUNK:03d}.jsonl")
+        with open(cs, "w") as f:
+            for s in part:
+                f.write(json.dumps(s, sort_keys=True) + "\n")
+        started = os.path.join(out, "started.jsonl")
+        rc, _ = capped_loop([EXE, "rules9a", cs, results], results, started, want, "rules")
+        if rc:
+            return rc
+    if pub:
+        publish(f"eval/m9a3: rules, {len(load(results))} specs")
+    return 0
+
+
 def project():
     pil = specs("pilot")
     res = {r["key"]: r for r in load(os.path.join(RUNS, "results.jsonl"))}
@@ -193,6 +219,8 @@ def main(a):
         return runs(a[1], pub)
     if a[:1] == ["sizes"]:
         return sizes(a[1], pub)
+    if a[:1] == ["rules"]:
+        return rules(pub)
     if a == ["project"]:
         return project()
     if a == ["status"]:

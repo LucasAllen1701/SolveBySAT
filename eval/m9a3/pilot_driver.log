@@ -1,0 +1,7 @@
+25 specs, 0 done, 25 to run
+crash(shard, oom) on main:B/List.mergeSort_pair/30
+crash(shard, oom) on main:B/List.isEmpty_eq_false_iff/2
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.get!_insert!_self
+crash(shard, oom) on main:A/Vector.mem_singleton
+crash(shard, oom) on main:A/BitVec.DivModState.umod_eq_of_lawful
+shard 0: done; 25 results; 552 s

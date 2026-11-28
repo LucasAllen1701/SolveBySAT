@@ -1,0 +1,2 @@
+{"H": ["Int.gcd_comm", "congrArg"], "H_main_size": 2, "baselines": false, "group": "g1_rewrite_B", "id": "B/Int.ediv_gcd_ne_zero_of_ne_zero_right/5", "key": "main:B/Int.ediv_gcd_ne_zero_of_ne_zero_right/5", "nctx": 3, "pos": 5, "run": "main", "thm": "Int.ediv_gcd_ne_zero_of_ne_zero_right", "tier": "B"}
+{"H": ["String.Pos.offset_toSlice", "congrArg"], "H_main_size": 2, "baselines": false, "group": "rewrite_B", "id": "B/String.Pos.toSlice_le/7", "key": "main:B/String.Pos.toSlice_le/7", "nctx": 3, "pos": 7, "run": "main", "thm": "String.Pos.toSlice_le", "tier": "B"}

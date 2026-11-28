@@ -1,6 +1,6 @@
 # eval/m9a3: status of the evaluation (M9_PLAN 4)
 
-Updated 2026-11-28 21:15:59.
+Updated 2026-11-28 21:17:04.
 
 - runs: 400 of 400 results
   - control: proved 50
@@ -9,5 +9,5 @@ Updated 2026-11-28 21:15:59.
   - g1_rewrite_B: crash 15, no_proof_le_Nmax 7, proved 38, timeout 40
   - rewrite_A: crash 20, no_proof_le_Nmax 6, proved 8, timeout 16
   - rewrite_B: crash 13, no_proof_le_Nmax 8, proved 41, timeout 38
-- sizes N5: 345 records: ok 345
+- sizes N5: 360 records: ok 360
 - sizes last: 25 records: ok 25

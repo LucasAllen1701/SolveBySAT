@@ -67,3 +67,4 @@ diag rwnt N=5: 60 records, 79 s
 diag rwnt N=5: 70 records, 92 s
 diag rwnt N=5: 80 records, 12 s
 diag rwnt N=5: 90 records, 55 s
+diag rwnt N=5: 100 records, 95 s

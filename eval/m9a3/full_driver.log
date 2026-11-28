@@ -44,3 +44,18 @@ crash(shard, oom) on main:B/Int.add_mul_bmod_self_left/4
 crash(shard, oom) on main:B/Nat.toArray_rco_eq_singleton_append_iff/18
 crash(shard, oom) on main:B/Array.eraseP_filter/5
 shard 4: done; 275 results; 5855 s
+crash(shard, oom) on main:B/BitVec.neg_mul_neg/1
+crash(shard, oom) on main:B/List.foldl_push_eq_append/4
+crash(shard, oom) on main:B/UInt64.toUInt16_xor/3
+crash(shard, oom) on main:B/Std.ExtDTreeMap.Const.size_insertMany_list_le/5
+crash(shard, oom) on main:B/Nat.zero_or/6
+crash(shard, oom) on main:B/UInt16.lt_iff_le_and_ne/0
+crash(shard, oom) on main:B/Int.mem_toNat?/1
+crash(shard, oom) on main:B/BitVec.getMsbD_rotateRight/58
+crash(shard, oom) on main:A/Std.DTreeMap.Const.get!_diff_of_not_mem_left
+crash(shard, oom) on main:A/BitVec.neg_mul_neg
+crash(shard, oom) on main:A/List.append_right_inj
+crash(shard, oom) on main:A/UInt64.toUInt8_le
+crash(shard, oom) on main:A/UInt16.lt_add_one
+crash(shard, oom) on main:A/Array.iter_equiv_iter_toList
+shard 5: done; 325 results; 7487 s

@@ -78,3 +78,13 @@
 {"hwm_mb":717,"key":"m8b:norules:main:B/UInt64.lt_add_one/7","ms":586,"status":"ok"}
 {"hwm_mb":717,"key":"m8b:norules:main:B/UInt64.toUInt8_le/11","ms":263,"status":"ok"}
 {"hwm_mb":717,"key":"m8b:norules:main:B/Int64.toInt32_ofIntLE/1","ms":740,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Nat.le.intro/0","ms":56,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Std.instLawfulBEqOrdOfLawfulOrderOrdOfLawfulOrderBEq/3","ms":7560,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Int.gcd_add_self_left/1","ms":364,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Std.Sat.AIG.relabel_size_eq_size/0","ms":1473,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/List.nil_merge/1","ms":2334,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/BitVec.zero_udiv/4","ms":11553,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Fin.add_one_pos/81","ms":21734,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/USize.toUInt64_shiftLeft_of_lt/15","ms":300,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Lean.Grind.CommRing.Stepwise.d_step1C/17","ms":8112,"status":"ok"}
+{"hwm_mb":717,"key":"m8b:norules:main:B/Int.sub_bmod_bmod/8","ms":926,"status":"ok"}

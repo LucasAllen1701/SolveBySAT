@@ -19,3 +19,4 @@ sizes N=5: 720 records, 43 s
 sizes N=5: 760 records, 37 s
 sizes N=5: 800 records, 57 s
 sizes N=10: 40 records, 969 s
+sizes N=10: 80 records, 263 s

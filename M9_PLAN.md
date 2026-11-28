@@ -2,7 +2,7 @@
 
 Lucas Allen · 27 November 2026
 
-**Status: 9a-1 (`↔` as equations) is complete (section 2, amendment 6.1). 9a-2 (equality rules made per use) has started (section 3, with the clarifications of 6.1). 9a-3 is pre-registered (section 4); 9b to 9d are planned after 9a-3.** The design is `M9_DESIGN.md` in the claude.ai project, revised on 27 November 2026 after milestone 8; this plan follows it and records the owner's decisions on it.
+**Status: 9a-1 and 9a-2 are complete (sections 2 and 3, amendments 6.1 and 6.2). 9a-3, the evaluation, has started, as pre-registered (section 4, amendment 6.2). 9b to 9d are planned after 9a-3.** The design is `M9_DESIGN.md` in the claude.ai project, revised on 27 November 2026 after milestone 8; this plan follows it and records the owner's decisions on it.
 
 ## 1. Aims, stages and rules
 
@@ -209,3 +209,39 @@ It states facts.
 3. **Positions** are numbered as in 8a: every argument, from 0, as in `_probe.HAdd.hAdd.congr.«4»`. The check of the 11 proofs in 3.2 then compares like with like.
 4. **The selection mutation in 3.2.** Dropping selection only adds rules, so it can only add proofs. The check is that no proof found with selection is lost. A test whose expected failure becomes a proof is listed, not counted as a failure of the check. This replaces "must change no answer in the suite, only sizes".
 5. **The measurement of 3.3.** The settings with 8a's rules use 8c-1's recorded counts (`eval/m8c1/sizes_N5/` and `sizes_N10/`, on `m8-data`); they are not rerun. The setting without rules is recounted, and it must equal 8c-1's R1-and-R2 counts at every point, as a consistency check.
+
+### 6.2 After 9a-2: 9a-3 runs as pre-registered (28 November 2026)
+
+**9a-2 record.** NOTES.md ("9a-2: equality rules made per use") and `eval/m9a2/RULES.md` have the details. The stage was checked independently: M9_PLAN.md's md5 is as given, RULES.md regenerates byte-identically, and the pooled sizes recompute from `eval/m9a2/sizes_N5/` and `sizes_N10/`.
+
+- **Exactness and the off-switch.**
+  - The recount without rules equals 8c-1's at all 400 points, at N = 5 and N = 10.
+  - The off-switch gives 54 of 54 identical encodings.
+  - The differentials with generated rules have 0 mismatches (3,000 comparisons, 430 proofs that use a rule), and dropping selection loses no proof.
+  - The Lean suite with `rewrite` on loses no proof, and 4 expected failures become proofs.
+- **Sizes**, pooled over 8a's 200 goals at N = 5:
+  - The rules made per use give 0.867 of the clauses of 8a's rules (per goal, a median of 0.43; 151 goals are smaller), and 4.46 times the clauses without rules.
+  - With `eqTrans` off, 0.759 of 8a's. N = 10 is similar.
+  - Groundness falls from 39% to 23% of the clauses, and decomposition grows from 58% to 74%. Level symbols are 18.6% of decomposition, against 38.3% with 8a's rules and 11.7% without.
+- **The rules.** 2,352 in all, a median of 11 per goal:
+  - substitution 410, congruence 537, and the equality core 1,405 (refl 553, symm 515, trans 337);
+  - by row: ground 1,499, root 344, H 509;
+  - 41 dropped because their statement could not be compiled, and none by the static motive check.
+- **8a's 11 proofs.** 14 of the 17 substitution and congruence rules they used are generated. The other 3, in 2 proofs, rewrite with an equation whose matching side is a variable, so only the liberal variant has them. 9 of the 11 are proved at 8a's N.
+
+**Decisions.**
+
+1. **The nine deviations of NOTES.md ("Deviations, and points for the owner") are accepted.** They go into SPEC.md at the end of the milestone. They are:
+   - the static motive check never fails on a natural rule, and is kept as a safety net;
+   - instance positions are sound, but excluded by eligibility;
+   - a wrong context is caught by the decoder's new check that a rule's proof proves its clause;
+   - eigenvariables count as source symbols;
+   - kinds by place, where a substitution rule of `Eq` acts as transitivity;
+   - the settings of the measurement, and the liberal count;
+   - the decoder's syntactic match for rule heads (`synMatch`);
+   - the expected failures that became proofs, with their expectations unchanged.
+2. **9a-3 runs exactly as pre-registered in section 4,** with `eqTrans` on and strict selection.
+3. **Trimming the rule set is decided after 9a-3,** from its record of the rules each proof uses, by kind and row. Candidates are the `H` row of the equality core, `symm` and `trans`.
+4. **A typed middle variant** between strict and liberal selection is left open for after 9a-3. In it, a variable side of a source would match only nodes of its own type.
+5. **`M9_DESIGN.md` is kept in the repository.** It sits at the root of `m9`, identical to the claude.ai project's copy, so that Claude Code can read the design the plan follows.
+6. **Clarification of 4.4 for group 1.** An 8c-1 proof "used none of the probe's rules" when its record's `probe_extra_used` is empty, so that it used milestone 7's H alone. A proof that used `Eq.refl`, `Eq.symm` or `Eq.trans` as added by the probe counts as using the probe's rules. Such a goal is listed, not a stop, because the equality core of `rewrite` is made per use and may not include that constant at that type.

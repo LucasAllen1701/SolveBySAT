@@ -3557,3 +3557,249 @@ depth(α) ≥ d(g) and α + s(g) ≤ N, and a node with `cl(α, c)` has depth(α
   off-switch gives 54/54 DIMACS identical to `eval/m8b/dimacs_md5.txt` with every milestone 9 option off; the Lean
   suite (with M9Lean) passes in the three settings with the model check; the Lean suite passes with `iffEq` off and
   on, with the model check and the same decoded proofs per file. The 8a checks pass (`eval/m9a1/CHECKS.md`).
+
+### 9a-2: equality rules made per use (M9_PLAN 3, amendment 6.1; 28 November 2026)
+
+- **Start.** `m9` at `ace4171`, pulled (up to date). `M9_PLAN.md` with amendment 6.1 and the new status line, md5
+  `94b611dae7e1…` as required (`aa3cec0`). `lake build` succeeds; machine checks as in 9a-1 (cgroup memory controller
+  delegated, `vm.overcommit_memory = 1`, `systemd-run --user`, CaDiCaL 2.1.2, 7.7 GB RAM, 8 cores). Nothing changed
+  since 9a-1's end record (`eval/m9a1/run_all_end.log`, at `4400e87`), which serves as the start record.
+- **M9_DESIGN.md** is in the claude.ai project, not on this machine: the build follows M9_PLAN 3 and 6.1, which
+  restate its 6.4 and 6.5. Where they leave something open, the choice made is recorded below.
+
+#### What is built (`998ae1e`)
+
+- **Options.** `CompileOptions.rewrite` (default false), `eqTrans` (default true, read only with `rewrite`),
+  `rewriteSymbols : Option (Array Name)` (default `none`: automatic). Tactic options `solve_by_sat.rewrite`,
+  `solve_by_sat.eqTrans`, `solve_by_sat.rewriteSymbols` (a comma list of constants; empty: automatic). Call
+  arguments after `(iffEq := b)`, in a fixed order: `(rewrite := b) (eqTrans := b) (rewriteSymbols := [c₁, …])`
+  (each `atomic`, as `(nodes := N)` is, so any subset parses; `(iffEq := b)` is now `atomic` too, which changes no
+  existing call). Testing-only options: `rewriteIneligibleMutant`, `rewriteContextMutant`, `rewriteLiberal`.
+- **Where the code is.** The pure part, the selection and the clause shapes, is `SolveBySat.Rules` at the end of
+  `Forest.lean` (with `Forest.extend`, which appends clauses to a flattened forest). The compiler's part is `addRules`
+  in `Compile.lean`; the decoder's is the `.rule k` origin in `Decode.lean`. No module was added (SPEC 3's layout).
+  8a's eligibility function moved from `Test/M8Rules.lean` to `SolveBySat.rewriteEligible`, unchanged; `M8.eligible`
+  calls it.
+- **Definitions as built.**
+  - *Term positions* of a rigid node (`Compile.computeSig`, per symbol and number of arguments; an `app` node per
+    head eigenvariable): the binders of the symbol's type, read without reduction as in 8a (`forallTelescope`), that
+    8a's `eligible` accepts and that the result type does not mention (amendment 4.1 decision 3). A symbol whose type
+    ends in a sort other than `Prop` or in a proposition has none (8a's `symKind?`). Positions past the type's
+    binders (an over-applied symbol) are not term positions. Numbered as in 8a (6.1, clarification 3): the template
+    index less the symbol's universe levels (constants) or less the head (`app`).
+  - *Context* of a node: every template argument that is not a term position (levels, types, instances, proofs,
+    arguments the result type mentions, an `app` node's head).
+  - *Rows*: a context with no variables is `ground`; one whose variables are all eigenvariables of the root is
+    `root` (the rule is a clause local to the root, `localOf = some 0`, usable at every node); one whose variables
+    all belong to one clause of H (clause and level variables) is `H` (the rule is global and polymorphic in fresh
+    copies of them, with the closure of their types). Any other context (an eigenvariable of another goal position,
+    a local hypothesis's clause variable, a mix) fits no row and gives no rule (counted, `spine_nodes_no_row`).
+  - *Per use* (M9_DESIGN 6.4): a rule's key is (kind, row, the node with its term positions blanked, position), the
+    `H` row's variables renamed in order of first occurrence; contexts are compared after `Level.normalize` (the
+    templates are built from preprocessed expressions).
+  - *Kinds*: at the root of a target atom, a **substitution** `a = b → P(…b…) → P(…a…)`; at every node below,
+    a **congruence** `a = b → f(…a…) = f(…b…)` (also for a `Prop`-valued node, such as an `Eq` or an `LE.le` inside
+    a term: an equation at `Prop`). The other term positions are quantified (`x_j`), the context fixed.
+  - *Strict selection* (M9_DESIGN 6.5). Sources: every clause that is not built in and not a data clause whose head
+    is an `Eq` atom (H, local hypotheses, `propext` paths). Source symbols: the symbols of the sources' rigid sides;
+    **an eigenvariable is rigid** (`eig:<name>`; it is fixed in the proof), a clause variable is not. (With
+    eigenvariables left out, the root test of 3.2, whose only source is `h : x = y`, gets no rule.) Terms of interest:
+    every target atom that is not a data position (from the atom itself) and each source's two sides. On each, the
+    path from its root down to every rigid occurrence of a source symbol (the occurrence itself excluded) is a spine;
+    every node on it gets a rule at the position leading down; a spine that passes a non-term position (a type, an
+    instance, a binder, a projection) gives none (counted, `spines_broken`). Rules are deduplicated by key, in order
+    of first occurrence. `rewriteSymbols` replaces the source symbols only.
+  - *The liberal variant* (counted): every term position of every node of every atom (non-data targets and the heads
+    of non-built-in, non-data clauses), as above. Its extra rules are the liberal keys that are not strict; only
+    substitution and congruence keys are counted (the core it would add follows from rules that are not built).
+  - *The equality core* (6.1, clarification 1): after the rules are compiled, one `refl`, `symm` and (with
+    `eqTrans`) `trans` per (level, type) of every `Eq` atom that is a target (rule premises included), a source's
+    head, or a congruence rule's head, keyed and rowed like the rules. A kind is left out if H has the constant
+    (`Eq.refl`, `Eq.symm`, `Eq.trans`). (So H's polymorphic `Eq.symm`, whose head is an `Eq` atom over H variables,
+    is a source and gives a `refl` and `trans` in the `H` row: tested in M9Lean.)
+  - *Names*: `rw.<symbol>.<kind>.<8a position>@<row>#<index>`, `rw.Eq.<kind>@<row>#<index>`.
+- **Construction** (`addRules`). The compiler records, with `rewrite` on, every rigid node of every atom with its
+  local context, and the term positions of each symbol (`CState.nodes`, `sigs`); nothing is recorded with it off.
+  After the forest is compiled, `Rules.select` runs on it, and for each selected rule:
+  - the statement `∀ ctx a b xs, a = b → …` and the proof (`congrArg`, and `Eq.mpr` of it for a substitution;
+    `Eq.refl`, `Eq.symm`, `Eq.trans` for the core; all checked against 4.36) are built in the occurrence's local
+    context; the position's type is the symbol's binder type there (`instantiateForall`, preprocessed);
+  - **the static motive check**: the motive `fun y => f(…y…)`, with the other term positions as placeholders, and
+    the proof are type-checked (`Meta.check`) and the proof's type must be the statement; on failure the rule is
+    dropped with a note ("dropped by the static motive check");
+  - the statement is compiled as a clause, global or local to the root (`compileClauseAlong`, origin `.rule k`); a
+    statement that cannot be compiled is dropped with a note;
+  - **the shape check**: the compiled clause's head and premise targets must equal `Rules.mkRule`'s (or
+    `mkCore`'s) up to a renaming of variables, with the same locality, or the compiler stops with an internal error
+    (a bug, not an outcome). It found one bug while building (below).
+  No declaration is added. With `rewrite` off the forest, CNF and proof are milestone 8's (54/54 below).
+- **Decoder.** A `.rule k` node applies the stored proof (at fresh level metavariables; for a rule local to the
+  root, applied to the root node's free variables) with the stored statement. Two additions, both for rule nodes
+  only: (1) before `isDefEq`, the head is matched against the target syntactically, application by application
+  (`synMatch`): `isDefEq` solved `Nat.succ ?a =?= Nat.succ (a + 0)` by `?a := a` (Nat offset arithmetic), a
+  defeq but different assignment, after which the child `Nat.add_zero` no longer fitted `a = a` (the first test of a
+  congruence failed with "decoder failed on a satisfiable CNF"); (2) the proof's type must be the clause's statement,
+  or the node fails (the context mutation's catch, below).
+- **`verbose`** prints "rewrite: K rules (subst: ground n, …; congr: …)" and one line per rule (its clause), only
+  when K > 0; dropped rules are reported among the notes.
+- **The harness.** `rewrite` and `noEqTrans` in `SOLVE_BY_SAT_EVAL_FLAGS` (the harness's default stays off).
+  Constants are accepted with `rewrite` off (a rule never rejects a constant; the whole is compiled with it). A run
+  records the rules made by kind and row (`rules`), the liberal extras, the rules dropped, the sources and symbols,
+  and, when proved, `rules_used` and `rules_used_by`. An internal error of the rules is a stop (exit 3). New:
+  `eval_run rules9a` (the rules per spec, strict and liberal) and `sizes9a` (3.3's counts); `eval_run diag` takes the
+  settings `rw` and `rwnt`, and M8Diag's M3 is split by whether a pair involves a rule's object (only when asked,
+  so milestone 8's outputs are unchanged).
+
+#### Tests (M9_PLAN 3.2, 6.1 clarification 4)
+
+- **Off-switch**: `Test/m8c1_offswitch.sh` with every milestone 9 option off: 54/54 DIMACS byte-identical
+  (`eval/m9a2/offswitch.log`).
+- **`Test/M9Lean.lean`** (9a-2 section): each test proved at its least N, N − 1 failing, `#print` guarding the term,
+  and failing with "no proof with at most 8 nodes" when `rewrite` is off:
+  - `Q (¬ a ≤ b) → Q (b < a)` with `iffEq` and `rewrite`: N = 3, `Eq.mpr (congrArg Q …)` of `Nat.not_le`'s `R = L`
+    path; the substitution is at an `app` atom (`Q` an eigenvariable, 6.1 clarification 2), local to the root;
+  - `Nat.succ (a + 0) = Nat.succ a` from `Nat.add_zero`: N = 2, `congrArg Nat.succ`;
+  - the chain `f a = f c` from `a = b`, `b = c` (`f : Nat → Int`): N = 4 with `Eq.trans` at `Nat`; with
+    `eqTrans := false` no proof at N = 4 (at N = 5 one exists: the substitution rule of `Eq` at `Int`, made for the
+    target, chains two congruences). **An `Eq` substitution rule at type τ is `Eq.trans` at τ**, so the chain that
+    needs `Eq.trans` must need it at a type where the target makes no `Eq` rule: hence `Nat → Int`;
+  - `∀ {α} [Add α] (x y : α), x = y → x + x = y + x`: N = 2, the congruence of `HAdd.hAdd` at position 4 over the
+    root's `α` and instance, a clause local to the root;
+  - `P a` from `a = b` and `P b` (an `app` atom, 6.1 clarification 2): N = 3;
+  - the option form, `(rewrite := false)` overriding the option, the defaults, the `verbose` report (and no line
+    when there is no rule), H's `Eq.symm` left as it is.
+- **The static check**. As built, a rule at a term position always has a type-correct motive: the positions whose
+  replacement breaks typing (a later binder or the result depends on them) are exactly those eligibility excludes.
+  So no natural input makes the motive check fail. The test of "a rule the static check drops" is a rule whose
+  statement cannot be compiled: the substitution at a position of `And` (its premise `b ∧ x0` has clause-variable
+  components, SPEC 4.5), dropped with a note. **For the owner** (below).
+- **Mutation checks** (M9_PLAN 3.2):
+  - *Ineligible positions* (`rewriteIneligibleMutant`; with `rewriteSymbols := [Nat]`, `Nat` occurs at type
+    positions): the rules at type positions (`Eq`'s 0, `HAdd.hAdd`'s 0, 1, 2, `instHAdd`'s 0, `OfNat.ofNat`'s 0) are
+    all dropped by the static motive check ("Application type mismatch"). The rule at `HAdd.hAdd`'s position 3 (the
+    instance) is **kept**: replacing an instance by another of the same type is type-correct; only eligibility
+    excludes instance positions. **For the owner** (below).
+  - *Wrong context* (`rewriteContextMutant`: a rule's proof taken from a rule of the same kind, symbol and position
+    in another context, after the static check): the congruence of `HAdd.hAdd` at `α` gets the proof made at `Nat`;
+    the decoder's check (2) stops it ("the proof of the rule … does not prove its statement"); no proof. Without that
+    check the mismatch reaches `Meta.check` / the kernel, after a long `isDefEq` (a heartbeat timeout in the first
+    version of the test).
+  - *Selection dropped* (`rewriteLiberal`): below, in the Lean suite and the differentials.
+- **Differentials** (`Test/M9Diff.lean`, `test_m9diff 600 4`, in `run_all.sh`): random forests with equation
+  sources (global and local), `g(κ, ·)`/`Q(κ, ·)` with κ a constant, a root eigenvariable or an H clause variable
+  (so all three rows occur), an `app` atom, and the rules made by `Rules.select`, `mkRule`, `selectCore`, `mkCore`
+  (a fixed typing oracle), appended with `Forest.extend`; encoder against `Reference` at N = 1 to 5: 600 forests
+  (593 with rules, 4,902 rules), 3,000 comparisons, 773 provable, **430 proofs use a generated rule, 0 mismatches**.
+  Selection dropped (200 forests): 1,000 comparisons, **0 proofs lost**, 12 gained, 0 mismatches
+  (`eval/m9a2/diff.log`). `Forest.extend` also lists a local clause in its goal position's `hyps`, which
+  `Reference` reads (the encoder reads `localOf`); the compiler does not, so skeletons render as before.
+- **The Lean suite** (`Test/m9a2_lean.sh`, in `run_all.sh`, with the model check): `off` (rewrite and iffEq off),
+  `on` (both on), `liberal` (both on, selection dropped); `Test/m9a2_classify.py` classifies each guard that
+  differs. `off`: all 8 files pass unchanged. `on`: 1 file unchanged, 7 differ, 16 guards differ in messages only (the `verbose` rule lines, CNF sizes), 4 expected failures became proofs, **0 proofs lost, 0 new decoder or internal errors, 0 unguarded errors**. `liberal`: 8 files differ, 52 guards in messages only, 6 expected failures became proofs, 0 lost, 0 bug, 0 unguarded. Decoded proofs per file are never fewer (M2: off 6, on 10, liberal 10; the others equal) (`eval/m9a2/lean_suite.log`, `lean_classify.log`).
+  - **Expected failures that became proofs** (recorded; expectations unchanged; for the owner): M2's two
+    `(1 : Nat) = 1` tests (lines 102 and 117: `rw.Eq.refl@ground` in one node, where the hypothesis gives no clause);
+    M7Lean's R2a and R2b at N = 3 (lines 126 and 134: `Nat.succ_ne_self x (Eq.symm a)` through the `symm` rule at
+    `Nat`, where milestone 7 needed `Ne.symm` and 4 nodes).
+
+#### The 11 proofs of 8a (M9_PLAN 3.2)
+
+- Milestone 7's spec of each (`eval/m9a2/specs_11.jsonl`, `Test/m9a2_setup.py`; 8a's rules checked against
+  `probe_extra_used`), `iffEq` and `rewrite` on (`eval_run rules9a` → `eval/m9a2/rules_11.jsonl`).
+- **14 of the 17 rules** (kind, symbol, 8a position) the 11 proofs used have a strict rule of the same kind, symbol and
+  position. The 3 that do not, in 2 proofs, have the same reason: **the equation used has a variable on the side that
+  matches**, so no source symbol occurs where the rule is needed:
+  - `A/Int.le_of_add_le_add_left` (`LE.le` substitution at 2 and 3): 8a rewrote `b ≤ c` with
+    `Eq.symm (Int.neg_add_cancel_left)`, i.e. `b` into `-a + (a + b)`; the equation's sides are `-a + (a + b)`
+    (symbol `HAdd.hAdd`, which the target does not contain) and the clause variable `b`;
+  - `B/Option.choice_eq_some/9` (`Option.some` congruence at 1): 8a used `Subsingleton.elim : a = b`, both sides
+    clause variables.
+  Both are liberal candidates.
+- **The runs** at 8a's N (`eval/m9a2/runs11/`, the N loop 1 to 8a's N, milestone 7's limits, R1 and R2 on):
+  **9 of 11 proved at 8a's N**, each using generated rules; the two above have no proof ≤ their 8a N.
+
+#### Deviations, and points for the owner
+
+1. **The static motive check never fails on a natural rule** (3.1, 3.2 "one where the static motive check drops a
+   rule"). With 8a's eligibility, a rule at a term position always has a type-correct motive. The positions where
+   replacing the argument breaks typing are those that a later binder or the result type mentions, and eligibility
+   excludes exactly those. The check is built and runs on every rule, and every corpus rule passes it (3.3 below).
+   The Lean test of a drop is therefore the closest one that exists: a rule whose *statement* cannot be compiled
+   (substitution at an `And` position), dropped with a note. The motive check itself is tested by the mutation.
+2. **Instance positions** (3.2, the ineligible-position mutation). The motive check catches rules at type positions
+   and dependent positions. It cannot catch a rule at an instance position: replacing an instance by another term of
+   the same class type is type-correct, so the rule is sound, and only eligibility excludes it. The test guards both
+   facts. The closest check to "must be caught by the static motive check" is "a rule at a position excluded for a
+   typing reason (a type, or a position another binder or the result mentions) must be caught", and that is what
+   passes.
+3. **The wrong-context mutation is caught by the decoder**, by its new check that a rule's proof proves the clause
+   it was compiled from. The plan names the kernel or a differential mismatch. The differentials cannot see a
+   context error, because their forests have no proofs. Without the new check, the mismatch reaches `Meta.check` and
+   the kernel only after a long `isDefEq`.
+4. **Eigenvariables count as source symbols.** They are rigid, so the root-row test of 3.2 can get a rule. This
+   makes the strict selection larger than one that takes constants only.
+5. **Kinds by place.** The plan says "substitution and congruence". As built, a target atom's own symbol gets
+   substitution and every node below it gets congruence, including `Prop`-valued nodes (an `Eq` or `LE.le` inside a
+   term gives an equation at `Prop`). A substitution rule of `Eq` at type τ is `Eq.trans` at τ, so `eqTrans := false`
+   removes transitivity only at types where no target makes an `Eq` rule. The chain test was chosen so that the
+   chain needs `Eq.trans` at such a type.
+6. **The measurement's settings** (3.3, 6.1 clarification 5). `none` recounts all 400 points (with 8a's rules as
+   lemmas, and without rules). `rw` and `rwnt` are measured on each goal's point without rules (milestone 7's H),
+   since 8a's rules and 9a-2's rules are alternatives. The comparison "against 8a's rules" pairs each goal's `rw` count
+   with 8c-1's count for the same goal with 8a's rules.
+7. **The liberal count** covers substitution and congruence keys only (3.3, "the number of rules the liberal variant
+   would generate"). The core it would add depends on rules that are not built.
+8. **The decoder's syntactic match for rule nodes** (`synMatch`) is new decoder behaviour. It applies only to `.rule`
+   nodes, so with `rewrite` off nothing changes.
+9. **The tests whose expected failure becomes a proof** (with `rewrite` on: M2 102 and 117, M7Lean 126 and 134; with
+   selection dropped also M9Lean 345 and 383). Their expectations are unchanged, as instructed.
+10. **M9_DESIGN.md** was not available here (point 4 and point 5 may differ from its wording).
+
+#### The measurement (M9_PLAN 3.3, 6.1 clarification 5; `eval/m9a2/RULES.md`)
+
+- Pilot and projection: `eval/m9a2/pilot/PROJECTION.md` (about 10 h, under the 24 h bound, so no reduction was
+  proposed). Run detached (`Test/m9a2_full.sh`, `eval/m9a2/full_driver.log`), `STATUS.md` pushed as it went. Wall time:
+  sizes N = 5 0.79 h, N = 10 5.36 h, then the diagnostics `rw` and `rwnt` at N = 5. No crash, memout or stop.
+- **Consistency:** the recount with `rewrite` off equals 8c-1's r1r2 counts (clauses, variables, every family, early
+  exit) at **400 of 400 points**, at N = 5 and at N = 10.
+- Pooled clauses over the 200 goals (N = 5 / N = 10): no rules 233 M / 1,886 M; 8a's rules as lemmas 1,199 M / 8,784 M;
+  `rw` 1,039 M / 7,757 M (0.867 / 0.883 of 8a's); `rwnt` 910 M / 6,775 M (0.759 / 0.771). Per goal, the median ratio to
+  8a's rules is 0.43 / 0.38 (`rw`) and 0.37 / 0.33 (`rwnt`); 151 / 153 (`rw`) and 155 / 157 (`rwnt`) of 200 goals are
+  smaller than with 8a's rules. Against no rules, `rw` is 4.46 / 4.11 times larger pooled (median per goal 4.62 / 4.80).
+- Families: with `rw`, groundness (8) falls from 39.4 % of the clauses (8a's rules) to 23.3 % at N = 5, and
+  decomposition (5) rises from 57.7 % to 73.6 %. Early exits: 13 points without rules, 1 with 8a's rules, 1 with `rw`.
+- Rules made (`rw`): 2,352 over 200 goals (median 11 per goal); substitution 410, congruence 537, refl 553, symm 515,
+  trans 337; rows ground 1,499, root 344, H 509. `rwnt` has 2,015 (no trans). The liberal variant would add 2,900
+  substitution and congruence rules (median 12 per goal). 41 rules dropped at 23 goals, **0 by the static motive
+  check**, 41 because the statement could not be compiled (a clause variable as head symbol: 40; not first order: 1).
+  265 spines pass a non-term position; 0 spine nodes have a context that fits no row.
+- Level-symbol share of decomposition (M3, N = 5, 187 goals): no rules 11.7 %, 8a's rules 38.3 %, `rw` 18.6 %, `rwnt`
+  16.6 %; pairs that involve a rule's object are 60.4 % (`rw`) and 55.5 % (`rwnt`) of the decomposition clauses, of
+  which level pairs 14.3 % and 11.8 %. The M3 recount equals the encoder in every setting.
+- `report.py` writes `RULES.md` from the data files only (it stops with a message naming the missing file if one is
+  absent); it regenerates byte-identically, twice and under `PYTHONHASHSEED` 1 and 12345 (md5 `3a647fe39ad7…`).
+
+#### Surprising
+
+- **`isDefEq` solves rule premises by offset arithmetic.** On `Nat.succ (a + 0) = Nat.succ a` the decoder's `isDefEq`
+  assigned the rule's metavariable through `Nat` literal/offset unification, so the instantiated proof did not match the
+  clause. Hence `synMatch` before `isDefEq` for rule nodes (deviation 8).
+- **The shape check found a compiler bug at once.** The rule statements were first compiled after the atom's level
+  map had been restored, so level parameters became constants; `Rules.mkRule` disagreed and M7Lean stopped with the
+  internal error. Fixed by recording each atom's level map with its location.
+- **A substitution rule of `Eq` is transitivity** at that type, so `eqTrans := false` removes fewer rules than
+  expected (deviation 5): `rwnt` has 337 fewer rules than `rw`, but its CNF is 12 % smaller than `rw`'s.
+- **Rules make the CNF larger than no rules, and smaller than 8a's rules**: 4.5 times the clauses of milestone 7's H
+  at N = 5, 0.87 times those of 8a's rules (pooled; median per goal 0.43). The growth is in decomposition, not in
+  groundness, unlike 8a's rules.
+- **The first context-mutation test hit a heartbeat timeout**, because its goal's CNF had 1.7 M clauses; the decoder
+  check that a rule's proof proves its clause now catches it at once (deviation 3).
+
+- **Regression (end of 9a-2):** `Test/run_all.sh` exit 0 at `699e14b` (`eval/m9a2/run_all_end.log`, 242 min; the start
+  record is 9a-1's end record at `4400e87`, 146 min; the difference is the new 9a-2 tests): M0 902/902, M1 26/26, M4 7/7,
+  M5 13/13, `countOnly` 44/44, M8 diagnostics 10/10, 41/41 and 91/91; the differentials with `m8off`, `r1`, `r1r2` (M1
+  20/20, M5 10/10 each) have 0 mismatches; the exactness self-tests 13/13 and 10/10; the off-switch gives 54/54 DIMACS
+  identical to `eval/m8b/dimacs_md5.txt`; the Lean suite passes in the three settings and with `iffEq` off and on, with
+  the model check; the differentials with rules have 0 mismatches (3,000 comparisons, 430 proofs using a rule) and
+  selection dropped loses no proof; the Lean suite with `rewrite` off passes and with `rewrite` on and selection dropped
+  has 0 proofs lost, 0 new decoder or internal errors and 0 unguarded errors (4 and 6 expected failures became proofs,
+  recorded above).

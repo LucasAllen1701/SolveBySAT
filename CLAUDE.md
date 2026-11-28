@@ -52,6 +52,12 @@ Test/m8c1_lean.sh                   # 8c-1: the Lean suite with the flags off, R
 python3 Test/m8d_run.py status eval/m8d/runs full   # 8d: eval/m8d/STATUS.md (needs m8-data's data)
 Test/m9a1_lean.sh                   # 9a-1: the Lean suite with iffEq off and on (in run_all.sh)
 python3 Test/m9a1_check.py ../m8-data   # 9a-1: the 8a checks → eval/m9a1/CHECKS.md (needs an m8-data worktree)
+lake build test_m9diff && .lake/build/bin/test_m9diff 600 4   # 9a-2: differentials with rules (in run_all.sh)
+M9A2_KEEP=1 Test/m9a2_lean.sh; python3 Test/m9a2_classify.py LOGDIR   # 9a-2: the Lean suite with rewrite off/on/liberal (in run_all.sh)
+python3 Test/m9a2_setup.py ../m8-data   # 9a-2: inputs of the 11 proofs and the 400 points (eval/m9a2/)
+.lake/build/bin/eval_run rules9a eval/m9a2/specs_11.jsonl OUT   # 9a-2: the rules made per spec (strict and liberal)
+setsid nohup Test/m9a2_full.sh > eval/m9a2/full_driver.log 2>&1 &   # 9a-2: the measurement (about 10 h)
+python3 eval/m9a2/report.py              # 9a-2: eval/m9a2/RULES.md
 ```
 
 ## Layout and where the data lives
@@ -122,7 +128,16 @@ machine's specs in NOTES.md before a full run.
     `solve_by_sat.iffEqMutant` (the recipes swapped). Tests: `Test/M9Lean.lean`, `Test/m9a1_lean.sh` (the Lean
     suite with `iffEq` off and on), both in `run_all.sh`. The 8a checks: `Test/m9a1_setup.py`, `eval_run iffeq-count`,
     `Test/m9a1_check.py` → `eval/m9a1/CHECKS.md`.
-  - **Next: 9a-2** (equality rules made per use, M9_PLAN 3), only after the owner has checked 9a-1.
+  - **9a-2 is done** (NOTES.md, "9a-2: equality rules made per use"; `eval/m9a2/RULES.md`): `CompileOptions.rewrite`
+    (option `solve_by_sat.rewrite`, or `(rewrite := true)` after `(iffEq := b)`), `eqTrans` (default true;
+    `(eqTrans := false)`), `rewriteSymbols` (option, comma list; `(rewriteSymbols := [c, …])`). The pure selection and
+    clause shapes are `SolveBySat.Rules` (end of `Forest.lean`), shared with `Test/M9Diff.lean`; the compiler's
+    `addRules` builds each rule's statement and proof, runs the static motive check, compiles the statement as a
+    clause (global, or local to the root) and checks its shape against `Rules.mkRule`/`mkCore` (an internal error if
+    not). Origin `.rule k`, `Compiled.rules`, `Compiled.ruleStats`. Decoder: the stored proof, `synMatch` before
+    `isDefEq` for rule nodes, and a check that the proof proves the clause. Testing-only options
+    `rewriteIneligibleMutant`, `rewriteContextMutant`, `rewriteLiberal`. With `rewrite` off nothing changes (54/54).
+  - **Next: 9a-3** (M9_PLAN 4, pre-registered), only after the owner has checked 9a-2.
 - Milestone 9 rules: M9_PLAN section 1 ("Rules carried over from milestone 8") and milestone 8's. SPEC.md is revised
   in the claude.ai project at the end of the milestone, not here.
 
@@ -133,7 +148,9 @@ machine's specs in NOTES.md before a full run.
   milestone 7 and 8a runs rebuild their CNFs). Since 9a-1 the same variable carries the compiler options:
   `iffEq` in it sets `CompileOptions.iffEq` for `eval_run run|sizes` (absent: off), and a run records
   `iffeq_paths` [from H, local]. The variable is process-wide: every goal of a run, crash records
-  included, gets it. `SOLVE_BY_SAT_EVAL_COMPARE=<results.jsonl>` applies 4.4's exactness stop rules (exit 9, in
+  included, gets it. Since 9a-2, `rewrite` and `noEqTrans` in it set `CompileOptions.rewrite` and `eqTrans := false`;
+  a run with `rewrite` records `rules`, `rules_total`, `liberal_extra`, `rules_dropped`, … and, when proved,
+  `rules_used` and `rules_used_by`; constants are accepted with `rewrite` off. `SOLVE_BY_SAT_EVAL_COMPARE=<results.jsonl>` applies 4.4's exactness stop rules (exit 9, in
   the shard and on crash records the driver writes; 6 in 8c-1). `eval_run exactness-selftest` and
   `python3 Test/eval_driver.py exactness-selftest` are in `run_all.sh`.
 - The 8b and milestone 7 tools (`dimacs`, `diag-models`, `m8b_dimacs73`, `eval_scaling`, `eval_numerals`, the 8b

@@ -19,3 +19,20 @@ crash(shard, oom) on main:A/Lean.Grind.Field.NormNum.sub_eq
 crash(shard, oom) on main:A/Vector.getElem?_setIfInBounds_ne
 crash(shard, oom) on main:A/Vector.right_distrib
 shard 1: done; 125 results; 2601 s
+crash(shard, oom) on main:A/Std.DHashMap.Raw.getKeyD_eq_fallback
+crash(shard, oom) on main:A/String.revSkip?_toSlice
+crash(shard, oom) on main:A/Nat.toArray_roc_eq_singleton_iff
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.find?_toList_eq_none_iff_not_mem
+crash(shard, oom) on main:A/Int8.ofNat_div
+crash(shard, oom) on main:A/ListSlice.size_mkSlice_rco
+crash(shard, oom) on main:A/Std.DHashMap.Internal.Raw₀.Const.get!_eq_default
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.get?_emptyWithCapacity
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.Const.getD_inter_of_not_mem_right
+crash(shard, oom) on main:A/Std.DTreeMap.Internal.Impl.Const.get!_erase!_self
+crash(shard, oom) on main:A/Std.Internal.List.Const.getValue?_modifyKey_self
+crash(shard, oom) on main:A/Std.Internal.List.getKey?_insertEntry_self
+crash(shard, oom) on main:A/String.Pos.toSlice_le
+crash(shard, oom) on main:A/Std.DHashMap.isEmpty_iff_forall_not_mem
+crash(shard, oom) on main:A/Std.DHashMap.Raw.Const.get?_eq_some_get!_of_contains
+crash(shard, oom) on main:A/Std.DTreeMap.Raw.contains_eq_false_iff_not_mem
+shard 2: done; 175 results; 4248 s

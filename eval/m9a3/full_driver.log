@@ -8,3 +8,14 @@ crash(shard, oom) on main:B/Std.DHashMap.Raw.Const.mem_iff_isSome_get?/13
 crash(shard, oom) on main:B/UInt16.add_eq_left/1
 crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Equiv.constGetEntryGE!_eq/3
 shard 0: done; 75 results; 1408 s
+crash(shard, oom) on main:B/Std.DHashMap.Raw.Equiv.inter_congr/5
+crash(shard, oom) on main:B/Array.toList_fst_unzip/4
+crash(shard, oom) on main:B/Std.DTreeMap.Internal.Impl.Const.get!ₘ_eq_getValue!/0
+crash(shard, oom) on main:B/Fin.add_one_pos/81
+crash(shard, oom) on main:B/Std.ExtTreeMap.eq_empty_iff_erase_eq_empty_and_not_mem/2
+crash(shard, oom) on main:A/Lean.Grind.CommRing.Poly.denote_mul
+crash(shard, oom) on main:A/List.append_right_le_iff_of_length_eq
+crash(shard, oom) on main:A/Lean.Grind.Field.NormNum.sub_eq
+crash(shard, oom) on main:A/Vector.getElem?_setIfInBounds_ne
+crash(shard, oom) on main:A/Vector.right_distrib
+shard 1: done; 125 results; 2601 s
